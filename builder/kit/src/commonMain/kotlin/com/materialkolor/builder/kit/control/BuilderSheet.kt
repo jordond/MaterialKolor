@@ -1,6 +1,7 @@
 package com.materialkolor.builder.kit.control
 
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -58,6 +59,10 @@ public enum class SheetPresentation {
  * @param[returnFocusTo] The trigger that opened the sheet.
  * @param[subtitle] A quieter line under the title, or null for none.
  * @param[footer] What sits along the bottom, such as the sheet's actions, or null for no footer.
+ * @param[header] The caller's own header in place of the title and [subtitle], such as a title with
+ * a field in it. It sits beside the close button, which it keeps at its top, over a hairline the way
+ * the footer sits under one. [title] still names the sheet to assistive technology, so what the
+ * header shows of it can stay out of the semantics. Null draws the title and [subtitle].
  * @param[content] The sheet's body, between the header and the footer.
  */
 @Composable
@@ -71,6 +76,7 @@ public fun BuilderSheet(
     returnFocusTo: FocusRequester? = null,
     subtitle: String? = null,
     footer: (@Composable () -> Unit)? = null,
+    header: (@Composable RowScope.() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     HeadlessDrawer(
@@ -89,6 +95,7 @@ public fun BuilderSheet(
         modifier = modifier,
         subtitle = subtitle,
         footer = footer,
+        header = header,
         content = content,
     )
 }

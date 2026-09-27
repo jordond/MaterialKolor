@@ -7,7 +7,9 @@ package com.materialkolor.builder.kit.icon
  * and a Lucide undo come out of the same call.
  *
  * [InfoOutline] is the info glyph drawn as an outline in every set, for a quiet button beside a
- * label. [Progress] says some work is under way, and a `BuilderIcon` turns it while motion is on.
+ * label. [FolderOutline] is the folder drawn the same way, for a folder in a list of files beside
+ * [File] and [Archive]. [Progress] says some work is under way, and a `BuilderIcon` turns it while
+ * motion is on. [Verified] says something passed a check, such as a compile check.
  */
 public enum class IconId {
     Undo,
@@ -56,4 +58,8 @@ public enum class IconId {
     Code,
     Sliders,
     Progress,
+    File,
+    FolderOutline,
+    Archive,
+    Verified,
 }

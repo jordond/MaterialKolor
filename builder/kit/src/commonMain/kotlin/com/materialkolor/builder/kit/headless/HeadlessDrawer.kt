@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,14 +31,17 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import com.materialkolor.builder.kit.control.BuilderIcon
+import com.materialkolor.builder.kit.control.BuilderIconButton
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
+import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
@@ -66,6 +70,8 @@ import com.materialkolor.builder.kit.token.LocalBuilderType
  * @param[subtitle] A quieter line under the title, or null for none.
  * @param[footer] What sits along the bottom under a hairline, such as the panel's actions, or null
  * for no footer.
+ * @param[header] The caller's own header in place of the title and [subtitle], beside the close
+ * button and over a hairline, or null for the title and [subtitle].
  * @param[content] The panel's body, between the header and the footer. It takes the height they
  * leave and stands [OverlayMetrics.panelPadding] in from the sides.
  */
@@ -83,6 +89,7 @@ internal fun HeadlessDrawer(
     modifier: Modifier = Modifier,
     subtitle: String? = null,
     footer: (@Composable () -> Unit)? = null,
+    header: (@Composable RowScope.() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     require(edge != PanelEdge.Bottom) { "A drawer pins to the start or the end, sheets own the bottom" }
@@ -105,7 +112,11 @@ internal fun HeadlessDrawer(
                     .keepTaps(),
             ) {
                 val padding = OverlayMetrics.panelPadding
-                HeadlessPanelHeader(title, closeLabel, onDismissRequest, style, subtitle)
+                if (header == null) {
+                    HeadlessPanelHeader(title, closeLabel, onDismissRequest, style, subtitle)
+                } else {
+                    CustomPanelHeader(closeLabel, onDismissRequest, style, header)
+                }
                 Column(
                     modifier = Modifier
                         .weight(1f)
@@ -173,6 +184,56 @@ internal fun HeadlessPanelHeader(
         if (subtitle != null) {
             BuilderText(text = subtitle, style = BuilderTextStyle.Body, color = style.muted)
         }
+    }
+}
+
+/**
+ * The caller's [header] with the close button at its top end, over a hairline in from the edges as
+ * far as the footer's. The close button is Material's tonal icon button in the Material skin, as
+ * a header with more in it than a title needs a close button that reads as one at a glance.
+ *
+ * The close button is still the first stop for the keyboard, as it is beside a plain title, so a
+ * field in the header never takes focus when the panel opens.
+ */
+@Composable
+private fun CustomPanelHeader(
+    closeLabel: String,
+    onClose: () -> Unit,
+    style: OverlayStyle,
+    header: @Composable RowScope.() -> Unit,
+) {
+    val tokens = LocalBuilderTokens.current
+    val padding = OverlayMetrics.panelPadding
+    val gap = tokens.spacing.large
+    Column(
+        Modifier.fillMaxWidth().padding(start = padding, end = padding, top = padding, bottom = tokens.spacing.large),
+    ) {
+        // Composed first so focus reaches it first, and placed at the end.
+        Layout(
+            contents = listOf(
+                {
+                    BuilderIconButton(
+                        onClick = onClose,
+                        icon = IconId.Close,
+                        contentDescription = closeLabel,
+                        emphasis = Emphasis.Secondary,
+                    )
+                },
+                { Row(verticalAlignment = Alignment.Top, content = header) },
+            ),
+            modifier = Modifier.fillMaxWidth().padding(bottom = tokens.spacing.large),
+        ) { (close, rest), constraints ->
+            val loose = constraints.copy(minWidth = 0, minHeight = 0)
+            val button = close.single().measure(loose)
+            val room = (constraints.maxWidth - button.width - gap.roundToPx()).coerceAtLeast(0)
+            val content = rest.single().measure(loose.copy(maxWidth = room))
+            val height = maxOf(button.height, content.height)
+            layout(constraints.maxWidth, height) {
+                content.placeRelative(0, 0)
+                button.placeRelative(constraints.maxWidth - button.width, 0)
+            }
+        }
+        Box(Modifier.fillMaxWidth().height(tokens.outlineWidth).background(style.divider))
     }
 }
 

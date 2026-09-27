@@ -17,6 +17,8 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.codegen.validate.ReservedNameClash
 import com.materialkolor.builder.codegen.validate.ReservedNames
@@ -34,6 +36,7 @@ import com.materialkolor.builder.generated.resources.export_package_invalid
 import com.materialkolor.builder.generated.resources.export_theme_name
 import com.materialkolor.builder.generated.resources.export_theme_name_invalid
 import com.materialkolor.builder.generated.resources.export_theme_name_taken
+import com.materialkolor.builder.kit.control.BuilderInlineField
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextField
 import com.materialkolor.builder.kit.control.Emphasis
@@ -65,7 +68,27 @@ internal class DraftProblems {
 }
 
 /**
- * The package and the theme name side by side, with one note under both on where each is kept.
+ * How a name field draws, boxed with its label over it, or inline in the header's line of text.
+ */
+internal sealed interface FieldLook {
+    /**
+     * The skin's text field, its label over it and what is wrong with a draft under it.
+     */
+    data object Boxed : FieldLook
+
+    /**
+     * Set in [style] and [color] inside a line of text, as the header draws the names. What is
+     * wrong with a draft shows in the notices over the files.
+     */
+    class Inline(
+        val style: TextStyle,
+        val color: Color = Color.Unspecified,
+    ) : FieldLook
+}
+
+/**
+ * The package and the theme name side by side, with one note under both on where each is kept, for
+ * the Options a phone folds them into. Wider sheets set them inline in the header instead.
  *
  * Both go out as they are typed, so the export is always built from what the fields show. A draft
  * that is not valid stays in its field, says what is wrong under it and lands in [drafts], which
@@ -85,25 +108,8 @@ internal fun ExportNames(
     val spacing = LocalBuilderTokens.current.spacing
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(spacing.small)) {
         NamePair(
-            first = { fieldModifier ->
-                // Each target keeps its own package, so a switch starts the field over on the new one's.
-                key(state.target) {
-                    PackageField(
-                        packageName = state.prefs.packageName,
-                        onChange = { name -> dispatcher.dispatch(ExportAction.SetPackageName(name)) },
-                        onProblem = { problem -> drafts.packageName = problem },
-                        modifier = fieldModifier,
-                    )
-                }
-            },
-            second = { fieldModifier ->
-                ThemeNameField(
-                    state = state,
-                    workspace = workspace,
-                    onProblem = { problem -> drafts.themeName = problem },
-                    modifier = fieldModifier,
-                )
-            },
+            first = { fieldModifier -> PackageField(state, dispatcher, drafts, FieldLook.Boxed, fieldModifier) },
+            second = { fieldModifier -> ThemeNameField(state, workspace, drafts, FieldLook.Boxed, fieldModifier) },
         )
         BuilderText(text = stringResource(Res.string.export_names_note), emphasis = Emphasis.Secondary)
     }
@@ -139,33 +145,48 @@ private fun NamePair(
  */
 private val NAME_PAIR_MIN_WIDTH = 480.dp
 
+/**
+ * The package the target's export goes in, which stays in this browser under the target.
+ *
+ * @param[drafts] Where the field says what is wrong with its draft.
+ */
 @Composable
-private fun PackageField(
-    packageName: String,
-    onChange: (String) -> Unit,
-    onProblem: (ExportProblem?) -> Unit,
+internal fun PackageField(
+    state: ExportModel.State,
+    dispatcher: Dispatcher<ExportAction>,
+    drafts: DraftProblems,
+    look: FieldLook,
     modifier: Modifier = Modifier,
 ) {
     val invalid = stringResource(Res.string.export_package_invalid)
-    LiveField(
-        value = packageName,
-        onChange = onChange,
-        onProblem = onProblem,
-        label = stringResource(Res.string.export_package),
-        problemOf = { draft -> if (validatePackageName(draft).isEmpty()) null else ExportProblem.PackageName(draft) },
-        errorOf = { invalid },
-        modifier = modifier,
-    )
+    // Each target keeps its own package, so a switch starts the field over on the new one's.
+    key(state.target) {
+        LiveField(
+            value = state.prefs.packageName,
+            onChange = { name -> dispatcher.dispatch(ExportAction.SetPackageName(name)) },
+            onProblem = { problem -> drafts.packageName = problem },
+            label = stringResource(Res.string.export_package),
+            problemOf = { draft ->
+                if (validatePackageName(draft).isEmpty()) null else ExportProblem.PackageName(draft)
+            },
+            errorOf = { invalid },
+            look = look,
+            modifier = modifier,
+        )
+    }
 }
 
 /**
  * The theme name, checked against Kotlin and against the names the target's export already uses.
+ *
+ * @param[drafts] Where the field says what is wrong with its draft.
  */
 @Composable
-private fun ThemeNameField(
+internal fun ThemeNameField(
     state: ExportModel.State,
     workspace: Dispatcher<WorkspaceAction>,
-    onProblem: (ExportProblem?) -> Unit,
+    drafts: DraftProblems,
+    look: FieldLook,
     modifier: Modifier = Modifier,
 ) {
     val invalid = stringResource(Res.string.export_theme_name_invalid)
@@ -176,7 +197,7 @@ private fun ThemeNameField(
         onChange = { name ->
             workspace.dispatch(WorkspaceAction.Edit(DocumentChange.SetThemeName(name), EditPhase.Discrete))
         },
-        onProblem = onProblem,
+        onProblem = { problem -> drafts.themeName = problem },
         label = stringResource(Res.string.export_theme_name),
         problemOf = { draft ->
             when {
@@ -186,6 +207,7 @@ private fun ThemeNameField(
             }
         },
         errorOf = { problem -> if (problem is ExportProblem.NameTaken) taken else invalid },
+        look = look,
         modifier = modifier,
     )
 }
@@ -215,6 +237,7 @@ private fun LiveField(
     label: String,
     problemOf: (String) -> ExportProblem?,
     errorOf: (ExportProblem) -> String,
+    look: FieldLook,
     modifier: Modifier = Modifier,
 ) {
     // The committed text the field keeps while its drafts are out, or null while it follows value.
@@ -233,25 +256,45 @@ private fun LiveField(
         // Left on a valid draft, the field has sent everything it holds, so it follows value again.
         if (held != null && !focused && !draftInvalid) held = null
     }
-    BuilderTextField(
-        value = held ?: value,
-        // The drafts went out as they were typed, so a commit only has to settle on the last one.
-        onCommit = { text ->
-            if (held == null) onChange(text) else held = text
-        },
-        label = label,
-        modifier = modifier.fillMaxWidth().onFocusChanged { state -> focused = state.hasFocus },
-        error = { draft -> problemOf(draft)?.let(errorOf) },
-        onDraftChange = { draft ->
-            val problem = problemOf(draft)
-            onProblem(problem)
-            draftInvalid = problem != null
-            if (problem == null) {
-                held = held ?: value
-                onChange(draft)
-            }
-        },
-    )
+    // The drafts went out as they were typed, so a commit only has to settle on the last one.
+    val onCommit = { text: String ->
+        if (held == null) onChange(text) else held = text
+    }
+    val error = { draft: String -> problemOf(draft)?.let(errorOf) }
+    val onDraftChange = { draft: String ->
+        val problem = problemOf(draft)
+        onProblem(problem)
+        draftInvalid = problem != null
+        if (problem == null) {
+            held = held ?: value
+            onChange(draft)
+        }
+    }
+    val tracked = modifier.onFocusChanged { state -> focused = state.hasFocus }
+    when (look) {
+        FieldLook.Boxed -> {
+            BuilderTextField(
+                value = held ?: value,
+                onCommit = onCommit,
+                label = label,
+                modifier = tracked.fillMaxWidth(),
+                error = error,
+                onDraftChange = onDraftChange,
+            )
+        }
+        is FieldLook.Inline -> {
+            BuilderInlineField(
+                value = held ?: value,
+                onCommit = onCommit,
+                label = label,
+                style = look.style,
+                modifier = tracked,
+                color = look.color,
+                error = error,
+                onDraftChange = onDraftChange,
+            )
+        }
+    }
 }
 
 /**

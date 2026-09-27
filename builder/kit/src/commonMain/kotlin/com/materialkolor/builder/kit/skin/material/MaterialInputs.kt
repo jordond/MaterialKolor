@@ -62,6 +62,7 @@ import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.ControlState
 import com.materialkolor.builder.kit.control.FoldedRole
 import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
+import com.materialkolor.builder.kit.control.SwitchLabel
 import com.materialkolor.builder.kit.control.foldState
 import com.materialkolor.builder.kit.control.stateName
 import com.materialkolor.builder.kit.control.stateWords
@@ -96,6 +97,7 @@ internal fun MaterialSwitch(
     label: String,
     modifier: Modifier,
     enabled: Boolean,
+    caption: String?,
 ) {
     val tokens = LocalBuilderTokens.current
     val interactions = remember { MutableInteractionSource() }
@@ -119,13 +121,13 @@ internal fun MaterialSwitch(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        BuilderText(
-            text = label,
+        SwitchLabel(
+            label = label,
+            caption = caption,
             modifier = Modifier
                 .weight(1f, fill = false)
                 .padding(end = tokens.spacing.medium)
                 .alpha(enabledAlpha(enabled)),
-            style = BuilderTextStyle.Label,
         )
         Switch(checked = checked, onCheckedChange = null, enabled = enabled)
     }

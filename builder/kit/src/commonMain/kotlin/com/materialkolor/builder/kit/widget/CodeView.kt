@@ -233,7 +233,7 @@ public fun CodeView(
                 ) {
                     LazyColumn(
                         modifier = listName
-                            .width(gutterWidth + tokens.spacing.medium * 2 + codeWidth + copyReserve)
+                            .width(lineWidth(gutterWidth, codeWidth) + copyReserve)
                             .fillMaxHeight(),
                         state = listState,
                         contentPadding = PaddingValues(vertical = tokens.spacing.medium),
@@ -299,6 +299,20 @@ private data class CodeLineLook(
     val swatchSize: Dp,
     val swatchShape: Shape,
 )
+
+/**
+ * How wide a line is with [codeWidth] of code after a gutter [gutterWidth] wide, the room either
+ * side of it and the gap between the two included, as [CodeLine] lays it out. A list any narrower
+ * cuts off the end of its longest line.
+ */
+@Composable
+private fun lineWidth(
+    gutterWidth: Dp,
+    codeWidth: Dp,
+): Dp {
+    val spacing = LocalBuilderTokens.current.spacing
+    return spacing.medium + gutterWidth + spacing.medium + codeWidth + spacing.medium
+}
 
 @Composable
 private fun CodeLine(

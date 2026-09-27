@@ -1,12 +1,17 @@
 package com.materialkolor.builder.feature.export
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import com.materialkolor.builder.domain.capability.Capabilities
 import com.materialkolor.builder.domain.capability.Control
 import com.materialkolor.builder.domain.capability.ControlState
@@ -33,6 +38,7 @@ import com.materialkolor.builder.generated.resources.export_library_custom_froze
 import com.materialkolor.builder.generated.resources.export_library_custom_note
 import com.materialkolor.builder.generated.resources.export_library_fluent_caption
 import com.materialkolor.builder.generated.resources.export_library_fluent_note
+import com.materialkolor.builder.generated.resources.export_library_m3
 import com.materialkolor.builder.generated.resources.export_library_m3_caption
 import com.materialkolor.builder.generated.resources.export_library_unstyled_caption
 import com.materialkolor.builder.generated.resources.export_library_unstyled_note
@@ -54,7 +60,6 @@ import com.materialkolor.builder.generated.resources.export_variants_all
 import com.materialkolor.builder.generated.resources.export_variants_standard
 import com.materialkolor.builder.generated.resources.export_version_catalog
 import com.materialkolor.builder.generated.resources.export_version_catalog_caption
-import com.materialkolor.builder.kit.control.BuilderChoiceChips
 import com.materialkolor.builder.kit.control.BuilderChoiceGroup
 import com.materialkolor.builder.kit.control.BuilderSegmented
 import com.materialkolor.builder.kit.control.BuilderSwitch
@@ -114,16 +119,16 @@ internal fun ExportOptionsForm(
 }
 
 /**
- * One section of the options under its label.
+ * One section of the options under its label, set in capitals as the poster sets its own.
  */
 @Composable
 private fun OptionsSection(
     label: StringResource,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(LocalBuilderTokens.current.spacing.medium)) {
+    Column(verticalArrangement = Arrangement.spacedBy(LocalBuilderTokens.current.spacing.small)) {
         BuilderText(
-            text = stringResource(label),
+            text = stringResource(label).uppercase(),
             style = BuilderTextStyle.SectionLabel,
             emphasis = Emphasis.Secondary,
         )
@@ -132,8 +137,8 @@ private fun OptionsSection(
 }
 
 /**
- * The four libraries as cards two a row, then the Expressive switch on Material 3 or a note on
- * where the others run.
+ * The four libraries as cards two a row, then the Expressive switch on a tinted row under Material
+ * 3, or a note on where the others run.
  *
  * The arrows only move the focus and Enter or Space picks, as on the top bar's switcher, since each
  * pick re-skins the app. The reveal grows from the press that picked, or from the middle of the
@@ -159,7 +164,7 @@ private fun LibraryOptions(
         columns = 2,
     ) { choice, isSelected, optionModifier ->
         OptionCard(
-            title = libraryName(choice),
+            title = libraryCardName(choice),
             caption = stringResource(libraryCaption(choice)),
             selected = isSelected,
             onClick = { pick(choice) },
@@ -169,24 +174,56 @@ private fun LibraryOptions(
     }
     when (selected) {
         LibraryChoice.M3 -> {
-            Column {
+            TintedRow {
                 ExpressiveSwitch(
                     checked = state.document.expressive,
                     onCheckedChange = { on, from ->
                         workspace.dispatch(WorkspaceAction.EditWithReveal(expressiveChange(on), from))
                     },
+                    modifier = Modifier.fillMaxWidth(),
+                    caption = stringResource(Res.string.export_expressive_caption),
                 )
-                BuilderText(text = stringResource(Res.string.export_expressive_caption), emphasis = Emphasis.Secondary)
             }
             if (state.expressiveOn2021) {
                 Notice(text = stringResource(Res.string.export_expressive_2021), icon = IconId.Warning)
             }
         }
         else -> {
-            BuilderText(text = stringResource(libraryNote(selected, state.prefs.mode)), emphasis = Emphasis.Secondary)
+            TintedRow {
+                BuilderText(
+                    text = stringResource(libraryNote(selected, state.prefs.mode)),
+                    emphasis = Emphasis.Secondary,
+                )
+            }
         }
     }
 }
+
+/**
+ * A row set on the panel's canvas tint, for what goes with the library picked.
+ */
+@Composable
+private fun TintedRow(content: @Composable () -> Unit) {
+    val tokens = LocalBuilderTokens.current
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(tokens.canvas, RoundedCornerShape(tokens.radius.medium))
+            .padding(
+                start = tokens.spacing.medium,
+                end = tokens.spacing.extraSmall,
+                top = tokens.spacing.small,
+                bottom = tokens.spacing.small,
+            ),
+    ) { content() }
+}
+
+/**
+ * What a library card calls [choice], Material 3 in full where the top bar has room for M3 only.
+ */
+@Composable
+private fun libraryCardName(choice: LibraryChoice): String =
+    if (choice == LibraryChoice.M3) stringResource(Res.string.export_library_m3) else libraryName(choice)
 
 /**
  * What a library card says under the library's name.
@@ -241,7 +278,7 @@ private fun modeShort(mode: ExportMode): StringResource =
     }
 
 /**
- * Live or fixed colors as two cards, then what goes with the one picked.
+ * Live or fixed colors as two cards with a radio each, then what goes with the one picked.
  */
 @Composable
 private fun ColorOptions(
@@ -263,6 +300,7 @@ private fun ColorOptions(
             selected = isSelected,
             onClick = { dispatcher.dispatch(ExportAction.SetMode(mode)) },
             modifier = optionModifier,
+            radio = true,
         )
     }
     val animation = capabilities[Control.ColorAnimation]
@@ -273,11 +311,18 @@ private fun ColorOptions(
             FrozenVariants.StandardOnly to stringResource(Res.string.export_variants_standard),
             FrozenVariants.AllContrasts to stringResource(Res.string.export_variants_all),
         )
+        // The group goes by the same name, so the label over it only shows.
+        BuilderText(
+            text = stringResource(Res.string.export_variants),
+            modifier = Modifier.clearAndSetSemantics {},
+            style = BuilderTextStyle.Label,
+        )
         BuilderSegmented(
             options = FrozenVariants.entries,
             selected = prefs.frozenVariants,
             onSelect = { chosen -> dispatcher.dispatch(ExportAction.SetFrozenVariants(chosen)) },
             label = stringResource(Res.string.export_variants),
+            modifier = Modifier.fillMaxWidth(),
             enabled = variants.usable,
             optionLabel = { chosen -> names.getValue(chosen) },
         )
@@ -285,7 +330,7 @@ private fun ColorOptions(
 }
 
 /**
- * Color animation, and how long it runs once it is on.
+ * Color animation, and how long it runs once it is on, the lengths sharing one row.
  */
 @Composable
 private fun AnimationOptions(
@@ -298,18 +343,21 @@ private fun AnimationOptions(
         checked = prefs.animate,
         onCheckedChange = { on -> dispatcher.dispatch(ExportAction.SetAnimate(on)) },
         label = stringResource(Res.string.export_animate),
+        modifier = Modifier.fillMaxWidth(),
         enabled = enabled,
     )
     if (!prefs.animate) return
 
     val durations = (DURATIONS_MS + prefs.animationDurationMs).distinct().sorted()
     val names = durations.associateWith { ms -> stringResource(Res.string.export_duration_ms, ms) }
-    BuilderChoiceChips(
+    BuilderSegmented(
         options = durations,
         selected = prefs.animationDurationMs,
         onSelect = { ms -> dispatcher.dispatch(ExportAction.SetAnimationDuration(ms)) },
         label = stringResource(Res.string.export_duration),
+        modifier = Modifier.fillMaxWidth(),
         enabled = enabled,
+        compact = true,
         optionLabel = { ms -> names.getValue(ms) },
     )
 }
@@ -338,31 +386,30 @@ private fun ProjectOptions(
                 dispatcher.dispatch(ExportAction.SetMultiplatform(chosen == ProjectKind.Multiplatform))
             },
             label = stringResource(Res.string.export_project),
+            modifier = Modifier.fillMaxWidth(),
             enabled = kind.usable,
             optionLabel = { chosen -> names.getValue(chosen) },
         )
     }
     val catalog = capabilities[Control.VersionCatalog]
     if (catalog.shown) {
-        Column {
-            BuilderSwitch(
-                checked = prefs.versionCatalog,
-                onCheckedChange = { on -> dispatcher.dispatch(ExportAction.SetVersionCatalog(on)) },
-                label = stringResource(Res.string.export_version_catalog),
-                enabled = catalog.usable,
-            )
-            BuilderText(text = stringResource(Res.string.export_version_catalog_caption), emphasis = Emphasis.Secondary)
-        }
+        BuilderSwitch(
+            checked = prefs.versionCatalog,
+            onCheckedChange = { on -> dispatcher.dispatch(ExportAction.SetVersionCatalog(on)) },
+            label = stringResource(Res.string.export_version_catalog),
+            modifier = Modifier.fillMaxWidth(),
+            enabled = catalog.usable,
+            caption = stringResource(Res.string.export_version_catalog_caption),
+        )
     }
     if (state.wallpaperShown) {
-        Column {
-            BuilderSwitch(
-                checked = prefs.androidDynamicColor,
-                onCheckedChange = { on -> dispatcher.dispatch(ExportAction.SetAndroidDynamicColor(on)) },
-                label = stringResource(Res.string.export_dynamic_color),
-            )
-            BuilderText(text = stringResource(Res.string.export_dynamic_color_note), emphasis = Emphasis.Secondary)
-        }
+        BuilderSwitch(
+            checked = prefs.androidDynamicColor,
+            onCheckedChange = { on -> dispatcher.dispatch(ExportAction.SetAndroidDynamicColor(on)) },
+            label = stringResource(Res.string.export_dynamic_color),
+            modifier = Modifier.fillMaxWidth(),
+            caption = stringResource(Res.string.export_dynamic_color_note),
+        )
     }
 }
 

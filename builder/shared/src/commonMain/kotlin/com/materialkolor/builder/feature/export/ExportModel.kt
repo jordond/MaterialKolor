@@ -2,6 +2,7 @@ package com.materialkolor.builder.feature.export
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.materialkolor.builder.codegen.ExportInput
@@ -75,7 +76,7 @@ internal const val ZIP_MIME = "application/zip"
 internal class ExportModel(
     session: ProjectSession,
     private val preferences: PreferencesRepository,
-    resolver: ThemeResolver,
+    private val resolver: ThemeResolver,
     private val versions: ExportVersions,
     private val generator: ExportGenerator,
     val clipboard: Clipboard,
@@ -92,6 +93,7 @@ internal class ExportModel(
     val materialKolorVersion: String
         get() = versions.materialKolor
     private var memo: Memo? = null
+    private var glyphMemo: Pair<ThemeDocument, SchemeGlyph>? = null
 
     init {
         session.document.mergeState { state, document -> state.copy(document = document) }
@@ -147,6 +149,24 @@ internal class ExportModel(
         val outcome = exportOf(state.document, state.projectName, state.prefs)
         memo = Memo(key, outcome)
         return outcome
+    }
+
+    /**
+     * The scheme glyph of [document] as its export target builds it, from the light scheme like a
+     * project's thumbnail. The same document gives back the same glyph without resolving again. Call
+     * it on the UI thread.
+     */
+    fun glyph(document: ThemeDocument): SchemeGlyph {
+        glyphMemo?.takeIf { (held, _) -> held == document }?.let { (_, glyph) -> return glyph }
+        val target = ExportTarget.of(document.library, document.expressive)
+        val scheme = resolver.resolve(document.forTarget(target)).light
+        val glyph = SchemeGlyph(
+            primary = Color(scheme.primary),
+            secondaryContainer = Color(scheme.secondaryContainer),
+            tertiaryContainer = Color(scheme.tertiaryContainer),
+        )
+        glyphMemo = document to glyph
+        return glyph
     }
 
     private fun exportOf(
