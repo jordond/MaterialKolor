@@ -16,6 +16,7 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.color.ContrastLevel
 import com.materialkolor.builder.domain.edit.DocumentChange
+import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.model.Accent
 import com.materialkolor.builder.domain.model.KeyColor
 import com.materialkolor.builder.domain.model.KeyColors
@@ -27,7 +28,6 @@ import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.feature.poster.PosterHarness
 import com.materialkolor.builder.feature.poster.showSection
-import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import io.kotest.matchers.shouldBe
@@ -227,7 +227,11 @@ class PresetPickerTest {
             openPresets()
             onNodeWithContentDescription(ink).assertIsSelected()
 
-            runOnUiThread { harness.dispatch(WorkspaceAction.Edit(DocumentChange.SetStyle(Style.Vibrant), EditPhase.Discrete)) }
+            runOnUiThread {
+                harness.dispatch(
+                    WorkspaceAction.Edit(DocumentChange.SetStyle(Style.Vibrant), EditPhase.Discrete),
+                )
+            }
             waitForIdle()
 
             onNodeWithContentDescription(ink).assert(!isSelected())

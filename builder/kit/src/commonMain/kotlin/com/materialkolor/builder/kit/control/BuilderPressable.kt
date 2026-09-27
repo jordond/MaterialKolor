@@ -81,8 +81,7 @@ public fun BuilderPressable(
             ).semantics {
                 contentDescription = name
                 if (selected) this.selected = true
-            }
-            .clearAndSetSemantics { }
+            }.clearAndSetSemantics { }
             .controlTouchTarget(LocalLayout.current.primaryTouchTarget)
             .controlPress(interactionSource)
             .alpha(enabledAlpha(enabled))

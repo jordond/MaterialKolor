@@ -226,7 +226,12 @@ internal fun StarterSwatch(
                     .fillMaxWidth()
                     .height(if (compact) CompactStarterTop else StarterTop)
                     .background(colors?.primary ?: tokens.border)
-                    .padding(start = spacing.medium, top = spacing.medium, end = spacing.small, bottom = spacing.medium),
+                    .padding(
+                        start = spacing.medium,
+                        top = spacing.medium,
+                        end = spacing.small,
+                        bottom = spacing.medium,
+                    ),
                 horizontalArrangement = Arrangement.spacedBy(spacing.small),
             ) {
                 BuilderText(

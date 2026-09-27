@@ -9,9 +9,9 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
-import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.DpRect
 import androidx.compose.ui.unit.dp
@@ -100,7 +100,8 @@ class DialogRoomTest {
         runDesktopComposeUiTest(width = PHONE_WIDTH, height = height) {
             showDialog(dialog)
             // B-548 The preset picker's Close is a glyph beside the title, named by its content description.
-            bounds = onNode(hasText(label) or hasContentDescription(label)).assertIsDisplayed().getUnclippedBoundsInRoot()
+            bounds =
+                onNode(hasText(label) or hasContentDescription(label)).assertIsDisplayed().getUnclippedBoundsInRoot()
         }
         return bounds
     }
