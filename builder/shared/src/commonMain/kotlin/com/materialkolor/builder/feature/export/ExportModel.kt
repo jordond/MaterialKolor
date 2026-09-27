@@ -40,6 +40,7 @@ import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.Provides
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 /**
@@ -58,7 +59,8 @@ internal const val ZIP_MIME = "application/zip"
  * The files come from [outcome], worked out on the thread that asks, which has to be the UI thread
  * since the resolver belongs to it. They are kept until the document, the project name, the options
  * or the versions change, so a sheet that recomposes, or opens again on the same theme, generates
- * nothing.
+ * nothing. The versions are the build's until the live ones arrive, and each outcome reads the ones
+ * current at the time.
  *
  * Every header and the README link back with the link Share gives, [shareLink], which carries the
  * project name. The package name stays out of it.
@@ -77,7 +79,7 @@ internal class ExportModel(
     session: ProjectSession,
     private val preferences: PreferencesRepository,
     private val resolver: ThemeResolver,
-    private val versions: ExportVersions,
+    private val versions: StateFlow<ExportVersions>,
     private val generator: ExportGenerator,
     val clipboard: Clipboard,
     val files: FileSaver,
@@ -91,7 +93,7 @@ internal class ExportModel(
      * The MaterialKolor version every export is built and checked against.
      */
     val materialKolorVersion: String
-        get() = versions.materialKolor
+        get() = versions.value.materialKolor
     private var memo: Memo? = null
     private var glyphMemo: Pair<ThemeDocument, SchemeGlyph>? = null
 
@@ -143,10 +145,11 @@ internal class ExportModel(
      * generating again. Call it on the UI thread.
      */
     fun outcome(state: State = this.state.value): ExportOutcome {
-        val key = Memo.Key(state.document, state.projectName, state.prefs, versions)
+        val current = versions.value
+        val key = Memo.Key(state.document, state.projectName, state.prefs, current)
         memo?.takeIf { held -> held.key == key }?.let { held -> return held.outcome }
 
-        val outcome = exportOf(state.document, state.projectName, state.prefs)
+        val outcome = exportOf(state.document, state.projectName, state.prefs, current)
         memo = Memo(key, outcome)
         return outcome
     }
@@ -173,6 +176,7 @@ internal class ExportModel(
         document: ThemeDocument,
         projectName: String,
         prefs: ExportPrefs,
+        versions: ExportVersions,
     ): ExportOutcome {
         val target = ExportTarget.of(document.library, document.expressive)
         val targeted = document.forTarget(target)

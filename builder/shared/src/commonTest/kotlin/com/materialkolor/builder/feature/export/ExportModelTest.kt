@@ -32,6 +32,8 @@ import io.kotest.matchers.string.shouldNotContain
 import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
@@ -149,6 +151,25 @@ class ExportModelTest : SessionTestBase() {
             model.outcome()
 
             generated shouldBe 2
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun outcome_afterTheLiveVersionsArrive_namesThemAndGeneratesAgain() =
+        runTest {
+            val (session, preferences) = session()
+            booted(session)
+            val versions = MutableStateFlow(VERSIONS)
+            val model = exportModel(session, preferences, versions = versions)
+
+            val baked = model.outcome().shouldBeInstanceOf<ExportOutcome.Ready>()
+            versions.value = VERSIONS.copy(materialKolor = "6.3.1")
+            val live = model.outcome().shouldBeInstanceOf<ExportOutcome.Ready>()
+
+            generated shouldBe 2
+            baked.allText shouldNotContain "6.3.1"
+            live.allText shouldContain "6.3.1"
+            model.materialKolorVersion shouldBe "6.3.1"
             harness.clearAndJoin()
         }
 
@@ -303,13 +324,14 @@ class ExportModelTest : SessionTestBase() {
         session: ProjectSession,
         preferences: PreferencesRepository,
         environment: FakeEnvironment = FakeEnvironment(),
+        versions: StateFlow<ExportVersions> = MutableStateFlow(VERSIONS),
     ): ExportModel =
         harness.own(
             ExportModel(
                 session = session,
                 preferences = preferences,
                 resolver = ThemeResolver(),
-                versions = VERSIONS,
+                versions = versions,
                 generator = counting,
                 clipboard = FakeClipboard(),
                 files = FakeFileSaver(),

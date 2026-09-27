@@ -4,6 +4,7 @@ import com.materialkolor.builder.core.platform.Clipboard
 import com.materialkolor.builder.core.platform.Environment
 import com.materialkolor.builder.core.platform.FileSaver
 import com.materialkolor.builder.core.platform.ImageInput
+import com.materialkolor.builder.core.platform.LibraryVersionSource
 import com.materialkolor.builder.core.platform.LinkCardSource
 import com.materialkolor.builder.core.platform.PasteInput
 import com.materialkolor.builder.core.platform.PlatformServices
@@ -13,6 +14,7 @@ import com.materialkolor.builder.web.platform.WebClipboard
 import com.materialkolor.builder.web.platform.WebEnvironment
 import com.materialkolor.builder.web.platform.WebFileSaver
 import com.materialkolor.builder.web.platform.WebImageInput
+import com.materialkolor.builder.web.platform.WebLibraryVersions
 import com.materialkolor.builder.web.platform.WebLinkCards
 import com.materialkolor.builder.web.platform.WebPasteInput
 import com.materialkolor.builder.web.platform.WebRouter
@@ -28,6 +30,7 @@ internal object BrowserPlatform : PlatformServices {
     override val pastes: PasteInput = WebPasteInput
     override val environment: Environment = WebEnvironment()
     override val linkCards: LinkCardSource = WebLinkCards
+    override val libraryVersions: LibraryVersionSource = WebLibraryVersions
 
     init {
         exposeBrowserApisToE2e()
