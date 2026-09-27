@@ -10,6 +10,7 @@ import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasurePolicy
 import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.MeasureScope
+import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.constrainWidth
@@ -25,16 +26,40 @@ import com.materialkolor.builder.kit.control.ControlFrameTop
  * switcher's frame, from the [ControlFrameTop] to the [ControlFrameBottom] the switcher reports, so
  * it lines up with an outlined dropdown whose label floats above the outline as well as with a
  * segmented row whose buttons stand inside a larger touch target.
+ *
+ * @param[probe] Whether this group is only measured for its width and never placed. A probe skips
+ *   the frame lines and stands the chip as tall as the switcher, which leaves its width as it was.
+ *   Reading a line that a control reports from deep inside, as Material's outlined dropdown does,
+ *   lays out that control's insides for the line. In a group that is never placed, Compose then
+ *   marks those insides as placed under parents it never placed, and the next measure after a
+ *   recomposition crashes the page on web with a LayoutNode that is not in the RectList.
  */
 @Composable
 internal fun SwitcherGroup(
     modifier: Modifier = Modifier,
+    probe: Boolean = false,
     content: @Composable () -> Unit,
 ) {
-    Layout(content = content, modifier = modifier, measurePolicy = SwitcherGroupPolicy)
+    Layout(
+        content = content,
+        modifier = modifier,
+        measurePolicy = if (probe) ProbeGroupPolicy else FramedGroupPolicy,
+    )
 }
 
-private object SwitcherGroupPolicy : MeasurePolicy {
+/**
+ * The policy for a group that shows, which stands the chip on the switcher's frame.
+ */
+private val FramedGroupPolicy: MeasurePolicy = SwitcherGroupPolicy(framed = true)
+
+/**
+ * The policy for a group that is only measured for its width, which never reads a frame line.
+ */
+private val ProbeGroupPolicy: MeasurePolicy = SwitcherGroupPolicy(framed = false)
+
+private class SwitcherGroupPolicy(
+    private val framed: Boolean,
+) : MeasurePolicy {
     override fun MeasureScope.measure(
         measurables: List<Measurable>,
         constraints: Constraints,
@@ -49,9 +74,8 @@ private object SwitcherGroupPolicy : MeasurePolicy {
             loose
         }
         val switcher = measurables.first().measure(switcherRoom)
-        val frameTop = switcher[ControlFrameTop].takeUnless { top -> top == AlignmentLine.Unspecified } ?: 0
-        val frameBottom = switcher[ControlFrameBottom].takeUnless { bottom -> bottom == AlignmentLine.Unspecified }
-            ?: switcher.height
+        val frameTop = if (framed) switcher.lineOrNull(ControlFrameTop) ?: 0 else 0
+        val frameBottom = if (framed) switcher.lineOrNull(ControlFrameBottom) ?: switcher.height else switcher.height
         val frameHeight = (frameBottom - frameTop).coerceAtLeast(0)
         val joined = chip?.measure(
             Constraints(minWidth = 0, maxWidth = chipWidth, minHeight = frameHeight, maxHeight = frameHeight),
@@ -85,3 +109,9 @@ private object SwitcherGroupPolicy : MeasurePolicy {
         width: Int,
     ): Int = measurables.firstOrNull()?.minIntrinsicHeight(width) ?: 0
 }
+
+/**
+ * Where this placeable reports [line], or null when it does not report it.
+ */
+private fun Placeable.lineOrNull(line: AlignmentLine): Int? =
+    get(line).takeUnless { position -> position == AlignmentLine.Unspecified }

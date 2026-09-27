@@ -172,6 +172,7 @@ private fun SubcomposeMeasureScope.naturalWidth(
             modifier = Modifier.clearAndSetSemantics {},
             segmented = false,
             expressiveShown = true,
+            probe = true,
         )
     }
     // Bounded, since a row gives a weighted label no room at all when its own room has no end.

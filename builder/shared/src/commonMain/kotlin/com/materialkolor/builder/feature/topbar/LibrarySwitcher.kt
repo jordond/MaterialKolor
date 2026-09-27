@@ -123,6 +123,8 @@ internal fun LibrarySwitcher(
  * @param[expressiveModifier] Applied to the Expressive chip.
  * @param[expressiveShown] Whether the Expressive chip shows, by default only on Material 3. The
  *   off screen measures pass true, so the switcher keeps its room whichever library is picked.
+ * @param[probe] Whether this is one of the off screen measures, which are never placed and only
+ *   ask for a width. See [SwitcherGroup] for why those skip the frame lines.
  */
 @Composable
 internal fun LibrarySwitcher(
@@ -135,6 +137,7 @@ internal fun LibrarySwitcher(
     expressiveModifier: Modifier = Modifier,
     segmented: Boolean = LocalLayout.current.windowClass == WindowClass.Expanded,
     expressiveShown: Boolean = selected == LibraryChoice.M3,
+    probe: Boolean = false,
 ) {
     val origin = remember { RevealOrigin() }
     val label = stringResource(Res.string.topbar_library)
@@ -142,7 +145,7 @@ internal fun LibrarySwitcher(
     val onSelect = { choice: LibraryChoice ->
         if (choice != selected) onSwitch(choice, origin.take())
     }
-    SwitcherGroup(modifier) {
+    SwitcherGroup(modifier, probe = probe) {
         val tracked = switcherModifier.trackRevealOrigin(origin)
         if (segmented) {
             BuilderSegmented(

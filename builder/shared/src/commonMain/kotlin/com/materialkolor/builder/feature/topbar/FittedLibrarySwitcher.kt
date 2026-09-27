@@ -180,6 +180,7 @@ private fun SubcomposeMeasureScope.segmentedWidth(
             modifier = Modifier.clearAndSetSemantics {},
             segmented = true,
             expressiveShown = true,
+            probe = true,
         )
     }
     val natural = probe.maxOfOrNull { measurable ->
