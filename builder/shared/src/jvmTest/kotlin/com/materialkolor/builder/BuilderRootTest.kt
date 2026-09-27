@@ -109,7 +109,11 @@ class BuilderRootTest {
             val graph = showRoot()
             val start = graph.session.document.value
 
-            onNodeWithText("M3 Expressive").requestFocus()
+            onNodeWithText("M3").requestFocus()
+            onNode(isFocused()).performKeyInput { pressKey(Key.DirectionRight) }
+            waitForIdle()
+            graph.session.document.value shouldBe start
+            onNodeWithText("M3 Expressive").assertIsFocused()
             onNode(isFocused()).performKeyInput { pressKey(Key.DirectionRight) }
             waitForIdle()
             graph.session.document.value shouldBe start
@@ -127,7 +131,8 @@ class BuilderRootTest {
 
     @Test
     fun m3Expressive_enterPicksItWithTheStyleAsOneUndoEntryAndKeepsFocus() =
-        runDesktopComposeUiTest(width = 1600, height = HEIGHT) {
+        // M3 Expressive's own skin needs more room for the segmented row than the others.
+        runDesktopComposeUiTest(width = 1760, height = HEIGHT) {
             val graph = showRoot()
             // On the 2021 spec the pick moves the spec to 2025 as well.
             runOnUiThread { workspace.edit(DocumentChange.SetSpec(SpecVersion.Spec2021), EditPhase.Discrete) }
@@ -135,7 +140,8 @@ class BuilderRootTest {
             val start = graph.session.document.value
             val expressive = hasText("M3 Expressive") and hasAnyAncestor(hasTestTag(TOP_BAR_TAG))
 
-            onNode(expressive).requestFocus()
+            onNode(hasText("M3") and hasAnyAncestor(hasTestTag(TOP_BAR_TAG))).requestFocus()
+            onNode(isFocused()).performKeyInput { pressKey(Key.DirectionRight) }
             onNode(isFocused()).performKeyInput { pressKey(Key.Enter) }
             waitForIdle()
             graph.session.document.value shouldBe
