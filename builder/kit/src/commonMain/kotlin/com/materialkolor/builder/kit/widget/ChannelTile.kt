@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,17 +20,15 @@ import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
-import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.text.BasicText
 import androidx.compose.ui.layout.FirstBaseline
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.constrainHeight
-import kotlin.math.max
+import androidx.compose.ui.unit.sp
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.kit.control.BuilderInlineField
 import com.materialkolor.builder.kit.control.BuilderText
@@ -44,6 +43,7 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderType
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import kotlin.math.max
 import kotlin.math.roundToInt
 
 /**
@@ -79,7 +79,8 @@ internal fun ChannelTile(
     val spacing = tokens.spacing
     val label = stringResource(channel.nameResource())
     val range = channel.range
-    val rangeMessage = stringResource(Res.string.picker_track_range, range.start.roundToInt(), range.endInclusive.roundToInt())
+    val rangeMessage =
+        stringResource(Res.string.picker_track_range, range.start.roundToInt(), range.endInclusive.roundToInt())
     val shown = picker.shownOf(channel)
     var draft by remember(shown) { mutableStateOf<String?>(null) }
     val error = { text: String ->
@@ -160,7 +161,10 @@ private fun TileHeading(
     val rangeStyle = remember(type, ink) {
         type.value.merge(TextStyle(color = ink, fontSize = HeadingRangeSize, lineHeight = HeadingLine))
     }
-    val headings = HctChannel.entries.map { entry -> stringResource(entry.nameResource()).uppercase() to entry.rangeText() }
+    val headings = HctChannel.entries.map { entry ->
+        stringResource(entry.nameResource()).uppercase() to
+            entry.rangeText()
+    }
     val measurer = rememberTextMeasurer()
     val gap = LocalBuilderTokens.current.spacing.extraSmall
     Layout(
@@ -199,8 +203,7 @@ private fun TileHeading(
 /**
  * The span a channel takes, "0–360".
  */
-private fun HctChannel.rangeText(): String =
-    "${range.start.roundToInt()}$RangeDash${range.endInclusive.roundToInt()}"
+private fun HctChannel.rangeText(): String = "${range.start.roundToInt()}$RangeDash${range.endInclusive.roundToInt()}"
 
 internal fun HctChannel.nameResource(): StringResource =
     when (this) {

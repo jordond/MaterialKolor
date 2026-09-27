@@ -260,8 +260,10 @@ private data class HeroMetrics(
     val compact: Boolean,
 )
 
-private val WideHero = HeroMetrics(height = 184.dp, hexSize = 80.sp, hexLine = 76.sp, wasWidth = 136.dp, compact = false)
-private val CompactHero = HeroMetrics(height = 172.dp, hexSize = 52.sp, hexLine = 52.sp, wasWidth = 92.dp, compact = true)
+private val WideHero =
+    HeroMetrics(height = 184.dp, hexSize = 80.sp, hexLine = 76.sp, wasWidth = 136.dp, compact = false)
+private val CompactHero =
+    HeroMetrics(height = 172.dp, hexSize = 52.sp, hexLine = 52.sp, wasWidth = 92.dp, compact = true)
 
 /**
  * The band's type, over the builder's own faces.
