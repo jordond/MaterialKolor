@@ -72,6 +72,9 @@ import com.materialkolor.builder.kit.token.LocalBuilderType
  * for no footer.
  * @param[header] The caller's own header in place of the title and [subtitle], beside the close
  * button and over a hairline, or null for the title and [subtitle].
+ * @param[hero] A band across the top in place of the whole header and its close button, edge to edge
+ * and clipped to the panel's shape, or null for the header. It wins over [header]. [title] still
+ * names the panel to assistive technology, and Esc and the veil still close it.
  * @param[content] The panel's body, between the header and the footer. It takes the height they
  * leave and stands [OverlayMetrics.panelPadding] in from the sides.
  */
@@ -90,6 +93,7 @@ internal fun HeadlessDrawer(
     subtitle: String? = null,
     footer: (@Composable () -> Unit)? = null,
     header: (@Composable RowScope.() -> Unit)? = null,
+    hero: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     require(edge != PanelEdge.Bottom) { "A drawer pins to the start or the end, sheets own the bottom" }
@@ -112,16 +116,18 @@ internal fun HeadlessDrawer(
                     .keepTaps(),
             ) {
                 val padding = OverlayMetrics.panelPadding
-                if (header == null) {
-                    HeadlessPanelHeader(title, closeLabel, onDismissRequest, style, subtitle)
-                } else {
-                    CustomPanelHeader(closeLabel, onDismissRequest, style, header)
+                when {
+                    hero != null -> Box(Modifier.fillMaxWidth()) { hero() }
+                    header != null -> CustomPanelHeader(closeLabel, onDismissRequest, style, header)
+                    else -> HeadlessPanelHeader(title, closeLabel, onDismissRequest, style, subtitle)
                 }
                 Column(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth()
                         .padding(horizontal = padding)
+                        // The header brings its own room under it, a hero does not.
+                        .padding(top = if (hero != null) padding else 0.dp)
                         .padding(bottom = if (footer == null) padding else 0.dp),
                     content = content,
                 )
