@@ -55,9 +55,8 @@ private const val REDO_EXPRESSIVE = "Redo library change to M3 Expressive"
 
 /**
  * A desktop window wide enough for the segmented switcher in every skin, beside the full actions.
- * M3 Expressive's own skin takes the most room.
  */
-private const val WIDTH = 1760
+private const val WIDTH = 1600
 private const val HEIGHT = 800
 
 /**

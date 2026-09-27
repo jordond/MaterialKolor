@@ -126,6 +126,8 @@ internal fun LibrarySwitcher(
             label = label,
             modifier = tracked,
             selectOnFocus = false,
+            // Each name keeps its own width, so M3 Expressive does not widen the four short ones.
+            equalWidths = false,
             optionLabel = { choice -> names.getValue(choice) },
         )
     } else {

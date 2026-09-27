@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CornerBasedShape
-import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.runtime.Composable
@@ -71,9 +69,9 @@ import com.materialkolor.builder.kit.token.LocalBuilderType
  * has, the skin's pill, a shape the others lack rather than a colour.
  * Material's own segmented button keeps room for a check whether it shows one or not, so here
  * Material draws the row as a track with the chosen option filled.
- * @param[connectedEnd] Whether a control carries on from the row's end edge, as one group. The
- * row's end corners go square or down to the skin's small radius to meet it. Only the library
- * switcher sets it, while the Expressive chip is joined to it.
+ * @param[equalWidths] Whether every option gets the widest one's width, or each keeps its own
+ * label's width, which lets a row of long and short names take less room. Material's classic row
+ * always shares its width evenly.
  * @param[optionLabel] The label of an option.
  */
 @Composable
@@ -88,7 +86,7 @@ public fun <T> BuilderSegmented(
     optionIcon: (T) -> IconId? = { null },
     selectOnFocus: Boolean = true,
     compact: Boolean = false,
-    connectedEnd: Boolean = false,
+    equalWidths: Boolean = true,
     optionLabel: (T) -> String,
 ) {
     when (LocalSkin.current.library) {
@@ -105,22 +103,16 @@ public fun <T> BuilderSegmented(
                 selectOnFocus,
                 optionLabel,
                 compact,
-                connectedEnd,
+                equalWidths,
             )
         }
         SkinLibrary.Custom -> {
-            val style = CustomActionStyles.segmented
-            val frame = style.shape
             HeadlessSegmented(
                 options,
                 selected,
                 onSelect,
                 label,
-                if (connectedEnd && frame is CornerBasedShape) {
-                    style.copy(shape = frame.copy(topEnd = CornerSize(0), bottomEnd = CornerSize(0)))
-                } else {
-                    style
-                },
+                CustomActionStyles.segmented,
                 modifier,
                 enabled,
                 optionEnabled,
@@ -128,6 +120,7 @@ public fun <T> BuilderSegmented(
                 selectOnFocus,
                 optionLabel,
                 compact,
+                equalWidths,
             )
         }
     }
@@ -150,6 +143,7 @@ internal fun <T> HeadlessSegmented(
     selectOnFocus: Boolean = true,
     optionLabel: (T) -> String,
     compact: Boolean = false,
+    equalWidths: Boolean = true,
 ) {
     val target = LocalLayout.current.primaryTouchTarget
     val spacing = LocalBuilderTokens.current.spacing
@@ -166,12 +160,12 @@ internal fun <T> HeadlessSegmented(
         enabled = enabled,
         optionEnabled = optionEnabled,
         selectOnFocus = selectOnFocus,
+        equalWidths = equalWidths,
     ) { value, isSelected, interactionSource ->
         val colors = option.colors(isSelected)
         val usable = enabled && optionEnabled(value)
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = (if (equalWidths) Modifier.fillMaxWidth() else Modifier)
                 // The group already fades as a whole while it is off, so only a lone option fades here.
                 .alpha(enabledAlpha(!enabled || usable))
                 .foldState(optionLabel(value), ControlState.Selected(isSelected), usable, role = FoldedRole.Radio)

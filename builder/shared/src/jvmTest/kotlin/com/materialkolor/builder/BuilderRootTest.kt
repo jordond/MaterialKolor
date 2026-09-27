@@ -131,8 +131,7 @@ class BuilderRootTest {
 
     @Test
     fun m3Expressive_enterPicksItWithTheStyleAsOneUndoEntryAndKeepsFocus() =
-        // M3 Expressive's own skin needs more room for the segmented row than the others.
-        runDesktopComposeUiTest(width = 1760, height = HEIGHT) {
+        runDesktopComposeUiTest(width = 1600, height = HEIGHT) {
             val graph = showRoot()
             // On the 2021 spec the pick moves the spec to 2025 as well.
             runOnUiThread { workspace.edit(DocumentChange.SetSpec(SpecVersion.Spec2021), EditPhase.Discrete) }
