@@ -187,7 +187,11 @@ internal fun PresetPicker(
         closeButton = true,
         maxWidth = PickerMaxWidth,
     ) {
-        BuilderText(text = line, emphasis = Emphasis.Secondary)
+        BuilderText(
+            text = line,
+            modifier = Modifier.padding(bottom = LocalBuilderTokens.current.spacing.large),
+            emphasis = Emphasis.Secondary,
+        )
         PresetBody(document, isDark, onChoose, compact = false)
     }
 }
@@ -210,7 +214,8 @@ private fun PresetBody(
     modifier: Modifier = Modifier,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
-    BuilderScrollArea(modifier.bleedSideways(SelectedRingRoom), tabStop = false) {
+    // In the dialog the area is only as tall as the groups, so no empty band sits under them.
+    BuilderScrollArea(modifier.bleedSideways(SelectedRingRoom), tabStop = false, fitContent = !compact) {
         BoxWithConstraints(Modifier.padding(SelectedRingRoom)) {
             val wide = !compact && maxWidth >= WideBody
             Column(verticalArrangement = Arrangement.spacedBy(spacing.section)) {

@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.engine.mapping.toColor
 import com.materialkolor.builder.feature.poster.ContrastStop
+import com.materialkolor.builder.feature.poster.styleDisplayName
 import com.materialkolor.builder.feature.poster.styleName
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.image_preset_card
@@ -257,7 +258,7 @@ internal fun StarterSwatch(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 BuilderText(
-                    text = stringResource(styleName(starter.style)),
+                    text = stringResource(styleDisplayName(starter.style)),
                     modifier = Modifier.weight(1f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -285,7 +286,8 @@ private fun starterName(starter: Preset.Starter): String {
 }
 
 /**
- * A starter's contrast as a small pill in its footer, such as "Medium".
+ * A starter's contrast as a small pill in its footer, such as "Medium", in the accent so it reads on any
+ * theme the chrome takes.
  */
 @Composable
 private fun ContrastPill(text: String) {
@@ -293,11 +295,11 @@ private fun ContrastPill(text: String) {
     Box(
         modifier = Modifier
             .height(PillHeight)
-            .background(tokens.border, CircleShape)
+            .background(tokens.accent, CircleShape)
             .padding(horizontal = tokens.spacing.small),
         contentAlignment = Alignment.Center,
     ) {
-        BuilderText(text = text, style = BuilderTextStyle.Label, maxLines = 1)
+        BuilderText(text = text, style = BuilderTextStyle.Label, color = tokens.onAccent, maxLines = 1)
     }
 }
 
