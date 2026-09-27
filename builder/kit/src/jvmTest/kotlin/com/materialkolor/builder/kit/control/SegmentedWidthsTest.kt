@@ -71,7 +71,12 @@ class SegmentedWidthsTest {
                         .fetchSemanticsNodes()
                         .sortedBy { node -> node.boundsInRoot.left }
                     options.size shouldBe Names.size
-                    check(options.map { node -> node.size.width.toFloat() }, options.map { node -> node.boundsInRoot.left })
+                    check(
+                        options.map { node ->
+                            node.size.width.toFloat()
+                        },
+                        options.map { node -> node.boundsInRoot.left },
+                    )
                 }
             }
         }
