@@ -23,10 +23,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -124,7 +126,13 @@ internal fun PickerHero(
                 if (onPickScreen != null) EyedropperButton(onPickScreen, ink)
             }
             Column(verticalArrangement = Arrangement.spacedBy(spacing.extraSmall)) {
-                BasicText(text = hex, style = styles.hex.copy(color = ink), maxLines = 1, softWrap = false)
+                BasicText(
+                    text = hex,
+                    modifier = Modifier.onLine(metrics.hexLine),
+                    style = styles.hex.copy(color = ink),
+                    maxLines = 1,
+                    softWrap = false,
+                )
                 BasicText(
                     text = name,
                     style = styles.name.copy(color = ink),
@@ -221,6 +229,18 @@ private fun WasButton(
         )
     }
 }
+
+/**
+ * Sets text on a line of [line], centred on it the way a browser sets a line height under the type
+ * size. The text engine keeps a single line at the face's own height whatever the style asks, which
+ * for the hex is a good deal taller than the canvas's line.
+ */
+private fun Modifier.onLine(line: TextUnit): Modifier =
+    layout { measurable, constraints ->
+        val text = measurable.measure(constraints.copy(minHeight = 0, maxHeight = Constraints.Infinity))
+        val height = line.roundToPx()
+        layout(text.width, height) { text.place(0, (height - text.height) / 2) }
+    }
 
 /**
  * How big the band is set, in a dialog or at the top of a phone's sheet.
