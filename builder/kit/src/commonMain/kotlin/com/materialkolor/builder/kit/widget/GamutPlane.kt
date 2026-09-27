@@ -391,7 +391,7 @@ private fun CacheDrawScope.planeDrawing(
  * as found the edge doubled back on itself under the plane's top corner. So each tone past the
  * widest keeps no more than its neighbour nearer the widest, and white and black keep none.
  */
-private fun smoothEdge(edges: DoubleArray): DoubleArray {
+internal fun smoothEdge(edges: DoubleArray): DoubleArray {
     val drawn = edges.copyOf()
     val widest = edges.indices.maxBy { tone -> edges[tone] }
     for (tone in widest + 1..ToneTop) drawn[tone] = min(drawn[tone], drawn[tone - 1])
