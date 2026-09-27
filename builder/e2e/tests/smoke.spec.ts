@@ -55,7 +55,8 @@ for (const [engine, route] of [
     const origin = new URL(site('/')).origin;
     const fetched = responses
       .map((response) => new URL(response.url))
-      .filter((url) => url.origin === origin)
+      // `/api/` answers come from the Worker, not the site, so the budget has no file for them.
+      .filter((url) => url.origin === origin && !url.pathname.startsWith('/api/'))
       .map((url) => (url.pathname === '/' ? 'index.html' : url.pathname.slice(1)));
     expect(fetched.filter((file) => !counted(file)), 'loaded at boot but not counted').toEqual([]);
     const root = process.env.MK_E2E_SITE_DIR;
