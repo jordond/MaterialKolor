@@ -77,7 +77,15 @@ internal fun ChannelTile(
     val rangeMessage = stringResource(Res.string.picker_track_range, low, high)
     val shown = picker.shownOf(channel)
     var draft by remember(shown) { mutableStateOf<String?>(null) }
-    val error = { text: String -> if (text.trim().toDoubleOrNull()?.let { it in range } == true) null else rangeMessage }
+    val error = { text: String ->
+        if (text.trim().toDoubleOrNull()?.let { it in range } ==
+            true
+        ) {
+            null
+        } else {
+            rangeMessage
+        }
+    }
     val problem = draft?.let(error)
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.extraSmall)) {
         Column(
@@ -91,8 +99,18 @@ internal fun ChannelTile(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                BuilderText(label.uppercase(), style = BuilderTextStyle.Value, emphasis = Emphasis.Secondary, maxLines = 1)
-                BuilderText("$low$RangeDash$high", style = BuilderTextStyle.Value, emphasis = Emphasis.Subtle, maxLines = 1)
+                BuilderText(
+                    label.uppercase(),
+                    style = BuilderTextStyle.Value,
+                    emphasis = Emphasis.Secondary,
+                    maxLines = 1,
+                )
+                BuilderText(
+                    "$low$RangeDash$high",
+                    style = BuilderTextStyle.Value,
+                    emphasis = Emphasis.Subtle,
+                    maxLines = 1,
+                )
             }
             BuilderInlineField(
                 value = shown.toString(),

@@ -73,13 +73,13 @@ import com.materialkolor.builder.kit.skin.headless.controlRing
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.hct.Hct
-import kotlin.coroutines.cancellation.CancellationException
-import kotlin.math.min
-import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
+import kotlin.coroutines.cancellation.CancellationException
+import kotlin.math.min
+import kotlin.math.roundToInt
 
 /**
  * Every chroma, across, and every tone, up, at the picker's current hue, with a puck on the color.
@@ -107,7 +107,8 @@ internal fun GamutPlane(
     val chroma = picker.shownOf(HctChannel.Chroma)
     val tone = picker.shownOf(HctChannel.Tone)
     val valueText = stringResource(Res.string.picker_plane_value, chroma, tone)
-    val name = stateName(stringResource(Res.string.picker_plane), ControlState.Value(valueText), role = FoldedRole.Slider)
+    val name =
+        stateName(stringResource(Res.string.picker_plane), ControlState.Value(valueText), role = FoldedRole.Slider)
     val asText = LocalFoldsStateIntoName.current
     val interactions = remember { MutableInteractionSource() }
     val shape = RoundedCornerShape(tokens.radius.medium)
@@ -125,7 +126,9 @@ internal fun GamutPlane(
                 stateDescription = valueText
                 progressBarRangeInfo = ProgressBarRangeInfo(
                     current = tone.toFloat(),
-                    range = HctChannel.Tone.range.start.toFloat()..HctChannel.Tone.range.endInclusive.toFloat(),
+                    range = HctChannel.Tone.range.start
+                        .toFloat()..HctChannel.Tone.range.endInclusive
+                        .toFloat(),
                 )
                 setProgress { target -> picker.set(HctChannel.Tone, target.toDouble(), EditPhase.Discrete) }
             }.pointerInput(picker, pictures, isRtl) { dragPlane(picker, pictures, isRtl) }
@@ -421,7 +424,13 @@ private fun DrawScope.drawPlane(
     val along = (picker.valueOf(HctChannel.Chroma) / span).toFloat().coerceIn(0f, 1f)
     val y = size.height * (1f - HctChannel.Tone.fractionOf(picker.tone))
     val center = Offset(size.width * (if (drawing.isRtl) 1f - along else along), y)
-    drawLine(tokens.panel, Offset(0f, y), Offset(size.width, y), drawing.guide.width, pathEffect = drawing.guide.pathEffect)
+    drawLine(
+        tokens.panel,
+        Offset(0f, y),
+        Offset(size.width, y),
+        drawing.guide.width,
+        pathEffect = drawing.guide.pathEffect,
+    )
     val radius = drawing.puckRadius
     drawCircle(tokens.textStrong, radius = radius + drawing.rim.width, center = center, style = drawing.outerRim)
     drawCircle(Color(picker.color.value), radius = radius, center = center)
