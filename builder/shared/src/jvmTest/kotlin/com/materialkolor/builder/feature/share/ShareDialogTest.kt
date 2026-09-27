@@ -16,6 +16,7 @@ import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
@@ -38,6 +39,7 @@ import com.materialkolor.builder.kit.skin.BuilderTheme
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.floats.shouldBeGreaterThan
+import io.kotest.matchers.floats.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.floats.shouldBeLessThanOrEqual
 import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
@@ -260,6 +262,22 @@ class ShareDialogTest : SessionTestBase() {
             }
         }
     }
+
+    // A failed card shrunk toward its floor keeps both of its lines inside its outline.
+    @Test
+    fun card_thatFailed_onAShortWindow_keepsItsWordsInsideItsBox() =
+        runDesktopComposeUiTest(width = STACKED_WIDTH, height = SHORT_HEIGHT) {
+            showDialog(card = CardState.Failed)
+            val box = onNodeWithTag(FailedCardTag).fetchSemanticsNode().boundsInWindow
+
+            for (line in listOf("The preview card didn’t load", "The link still works.")) {
+                withClue(line) {
+                    val bounds = onNodeWithText(line).assertIsDisplayed().fetchSemanticsNode().boundsInWindow
+                    bounds.top shouldBeGreaterThanOrEqual box.top
+                    bounds.bottom shouldBeLessThanOrEqual box.bottom
+                }
+            }
+        }
 
     @Test
     fun dialog_asItOpens_focusesCopyLink() =

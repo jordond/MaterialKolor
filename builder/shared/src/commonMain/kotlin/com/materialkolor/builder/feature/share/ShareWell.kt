@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,6 +32,7 @@ import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.node.LayoutModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
@@ -63,6 +65,16 @@ private const val CARD_ASPECT = 1200f / 630f
  * The shortest the card shrinks to when the well is short of height.
  */
 private val CardFloor: Dp = 120.dp
+
+/**
+ * The height a failed box needs for its glyph as well as both lines, below which the glyph goes.
+ */
+private val FailedGlyphRoom: Dp = 150.dp
+
+/**
+ * The failed card's box, for tests.
+ */
+internal const val FailedCardTag: String = "share-failed-card"
 
 /**
  * How much of the old card shows through while the new one is on its way.
@@ -183,30 +195,38 @@ private fun UpdatingChip(modifier: Modifier = Modifier) {
 }
 
 /**
- * A dashed box in the card's place, saying the card did not load and the link still works.
+ * A dashed box in the card's place, saying the card did not load and the link still works. The
+ * glyph over the words only decorates, so a box shrunk toward [CardFloor] drops it and keeps both
+ * lines inside the outline.
  */
 @Composable
 private fun FailedCard(modifier: Modifier = Modifier) {
     val tokens = LocalBuilderTokens.current
     val outline = tokens.borderStrong
-    Column(
+    BoxWithConstraints(
         modifier = modifier
-            .dashedOutline(outline, tokens.outlineWidth, tokens.radius.small)
-            .padding(tokens.spacing.large),
-        verticalArrangement = Arrangement.spacedBy(tokens.spacing.small, Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally,
+            .testTag(FailedCardTag)
+            .dashedOutline(outline, tokens.outlineWidth, tokens.radius.small),
+        contentAlignment = Alignment.Center,
     ) {
-        BuilderIcon(IconId.Image, contentDescription = null, emphasis = Emphasis.Secondary)
-        BuilderText(
-            text = stringResource(Res.string.share_card_failed),
-            style = BuilderTextStyle.Label,
-            textAlign = TextAlign.Center,
-        )
-        BuilderText(
-            text = stringResource(Res.string.share_card_failed_body),
-            emphasis = Emphasis.Secondary,
-            textAlign = TextAlign.Center,
-        )
+        val glyph = maxHeight >= FailedGlyphRoom
+        Column(
+            modifier = Modifier.padding(tokens.spacing.large),
+            verticalArrangement = Arrangement.spacedBy(tokens.spacing.small),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            if (glyph) BuilderIcon(IconId.Image, contentDescription = null, emphasis = Emphasis.Secondary)
+            BuilderText(
+                text = stringResource(Res.string.share_card_failed),
+                style = BuilderTextStyle.Label,
+                textAlign = TextAlign.Center,
+            )
+            BuilderText(
+                text = stringResource(Res.string.share_card_failed_body),
+                emphasis = Emphasis.Secondary,
+                textAlign = TextAlign.Center,
+            )
+        }
     }
 }
 
