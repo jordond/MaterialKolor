@@ -1,6 +1,8 @@
 package com.materialkolor.builder.kit.icon
 
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.composables.icons.lucide.Archive
+import com.composables.icons.lucide.BadgeCheck
 import com.composables.icons.lucide.Braces
 import com.composables.icons.lucide.Check
 import com.composables.icons.lucide.ChevronDown
@@ -17,6 +19,7 @@ import com.composables.icons.lucide.Download
 import com.composables.icons.lucide.Ellipsis
 import com.composables.icons.lucide.ExternalLink
 import com.composables.icons.lucide.Eye
+import com.composables.icons.lucide.File
 import com.composables.icons.lucide.Folder
 import com.composables.icons.lucide.Fullscreen
 import com.composables.icons.lucide.History
@@ -103,5 +106,9 @@ internal object LucideIcons : BuilderIcons {
             IconId.Code -> Lucide.Braces
             IconId.Sliders -> Lucide.SlidersHorizontal
             IconId.Progress -> Lucide.LoaderCircle
+            IconId.File -> Lucide.File
+            IconId.FolderOutline -> Lucide.Folder
+            IconId.Archive -> Lucide.Archive
+            IconId.Verified -> Lucide.BadgeCheck
         }
 }

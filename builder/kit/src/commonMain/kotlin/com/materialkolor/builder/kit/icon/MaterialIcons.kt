@@ -2,7 +2,9 @@
  * The path data below is copied from the Material Icons Rounded set, as shipped in the
  * androidx.compose.material:material-icons-core 1.7.6 and material-icons-extended 1.7.6 sources.
  * Share, Check, Close, Search, Lock, Info, Add, Delete and Warning come from the core set, every
- * other glyph from the extended set. The glyphs in MaterialStateGlyphs.kt come from the same sources.
+ * other glyph from the extended set. File, FolderOutline, Archive and Verified come from the
+ * Outlined set of the same extended sources. The glyphs in MaterialStateGlyphs.kt come from the
+ * same sources.
  *
  * Copyright 2024 The Android Open Source Project
  *
@@ -497,6 +499,42 @@ private fun glyph(id: IconId): MaterialGlyph =
             ),
         )
         IconId.Progress -> progressGlyph()
+        // Outlined.InsertDriveFile
+        IconId.File -> MaterialGlyph(
+            path(
+                "M14 2H6c-1.1 0 -1.99 0.9 -1.99 2L4 20c0 1.1 0.89 2 1.99 2H18c1.1 0 2 -0.9 2 -2V8l-6 -6Z",
+                "M6 20V4h7v5h5v11H6Z",
+            ),
+        )
+        // Outlined.Folder
+        IconId.FolderOutline -> MaterialGlyph(
+            path(
+                "M9.17 6l2 2H20v10H4V6h5.17M10 4H4c-1.1 0 -1.99 0.9 -1.99 2L2 18c0 1.1 0.9 2 2 2h16",
+                "c1.1 0 2 -0.9 2 -2V8c0 -1.1 -0.9 -2 -2 -2h-8l-2 -2Z",
+            ),
+        )
+        // Outlined.FolderZip
+        IconId.Archive -> MaterialGlyph(
+            path(
+                "M20 6h-8l-2 -2H4C2.9 4 2.01 4.9 2.01 6L2 18c0 1.1 0.9 2 2 2h16c1.1 0 2 -0.9 2 -2V8",
+                "C22 6.9 21.1 6 20 6ZM16 16h2v-2h-2v-2h2v-2h-2V8h4v10h-4V16ZM16 16h-2v2H4V6h5.17l2 2H14v2h2v2",
+                "h-2v2h2V16Z",
+            ),
+        )
+        // Outlined.Verified
+        IconId.Verified -> MaterialGlyph(
+            path(
+                "M23 11.99l-2.44 -2.79l0.34 -3.69l-3.61 -0.82L15.4 1.5L12 2.96L8.6 1.5L6.71 4.69L3.1 5.5",
+                "L3.44 9.2L1 11.99l2.44 2.79l-0.34 3.7l3.61 0.82L8.6 22.5l3.4 -1.47l3.4 1.46l1.89 -3.19",
+                "l3.61 -0.82l-0.34 -3.69L23 11.99ZM19.05 13.47l-0.56 0.65l0.08 0.85l0.18 1.95l-1.9 0.43",
+                "l-0.84 0.19l-0.44 0.74l-0.99 1.68l-1.78 -0.77L12 18.85l-0.79 0.34l-1.78 0.77l-0.99 -1.67",
+                "l-0.44 -0.74l-0.84 -0.19l-1.9 -0.43l0.18 -1.96l0.08 -0.85l-0.56 -0.65l-1.29 -1.47",
+                "l1.29 -1.48l0.56 -0.65L5.43 9.01L5.25 7.07l1.9 -0.43l0.84 -0.19l0.44 -0.74l0.99 -1.68",
+                "l1.78 0.77L12 5.14l0.79 -0.34l1.78 -0.77l0.99 1.68l0.44 0.74l0.84 0.19l1.9 0.43",
+                "l-0.18 1.95l-0.08 0.85l0.56 0.65l1.29 1.47L19.05 13.47Z",
+            ),
+            path("M10.09 13.75l-2.32 -2.33l-1.48 1.49l3.8 3.81l7.34 -7.36l-1.48 -1.49Z"),
+        )
         // Rounded.Tune
         IconId.Sliders -> MaterialGlyph(
             path(

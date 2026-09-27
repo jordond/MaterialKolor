@@ -31,6 +31,7 @@ import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.ControlState
 import com.materialkolor.builder.kit.control.FoldedRole
+import com.materialkolor.builder.kit.control.SwitchLabel
 import com.materialkolor.builder.kit.control.foldState
 import com.materialkolor.builder.kit.control.stateWords
 import com.materialkolor.builder.kit.icon.IconId
@@ -118,6 +119,7 @@ internal fun HeadlessSwitch(
     style: SwitchStyle,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    caption: String? = null,
 ) {
     val interactions = remember { MutableInteractionSource() }
     val motion = LocalBuilderMotion.current
@@ -143,10 +145,10 @@ internal fun HeadlessSwitch(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        BuilderText(
-            text = label,
+        SwitchLabel(
+            label = label,
+            caption = caption,
             modifier = Modifier.weight(1f, fill = false).padding(end = style.labelGap),
-            style = BuilderTextStyle.Label,
         )
         UnstyledSwitch(
             checked = checked,
