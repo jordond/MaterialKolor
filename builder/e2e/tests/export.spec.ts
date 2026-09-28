@@ -47,10 +47,8 @@ test('Download zip holds every file the sheet shows, its Kotlin as the golden ha
   for (const file of GOLDEN_FILES) {
     const entry = [...zip.keys()].find((name) => name.endsWith(file));
     expect(entry, file).toBeDefined();
-    expect(withoutLink(zip.get(entry!)!.toString('utf8')), file).toBe(withoutLink(readFileSync(path.join(GOLDEN, file), 'utf8')));
-    expect(linkLine(zip.get(entry!)!.toString('utf8')), file).toMatch(
-      new RegExp(`^// Open this theme in the builder at ${escape(new URL(site('/')).origin)}/t/[A-Za-z0-9_-]+$`),
-    );
+    const golden = readFileSync(path.join(GOLDEN, file), 'utf8');
+    expect(asGolden(zip.get(entry!)!.toString('utf8'), golden), file).toBe(golden);
   }
 });
 
@@ -104,15 +102,47 @@ async function textOf(page: Page, name: string): Promise<string> {
   return ((await textbox(page, name).first().textContent()) ?? '').trim();
 }
 
-/** [code] without its second line, the link back, which carries the page's origin and the project's name. */
-function withoutLink(code: string): string {
-  return code.split('\n').filter((_, index) => index !== 1).join('\n');
+/** The link back to the builder on a file's second line, its origin and its share code. */
+const LINK = /^(\/\/ Open this theme in the builder at )(https?:\/\/[^/]+)\/t\/([A-Za-z0-9_-]+)$/m;
+
+/**
+ * [code] as the golden [golden] would spell it. The page links back to its own origin, the test
+ * server's, and its code carries the project's name, which the golden's first theme has none of. So
+ * the origin becomes the golden's and the name leaves the code, and every other byte is compared as is.
+ */
+function asGolden(code: string, golden: string): string {
+  const goldenLink = LINK.exec(golden);
+  if (goldenLink === null) throw new Error('The golden has no link back');
+  return code.replace(LINK, (_, lead: string, origin: string, shareCode: string) => {
+    expect(origin).toBe(new URL(site('/')).origin);
+    return `${lead}${goldenLink[2]}/t/${withoutProjectName(shareCode)}`;
+  });
 }
 
-function linkLine(code: string): string {
-  return code.split('\n')[1];
+// The share code's layout, ShareCodec.kt in builder/domain.
+const SECTIONS_BYTE = 7;
+const SECTION_PROJECT_NAME = 0x10;
+
+/**
+ * [shareCode] with its project name taken out and the checksum written again. Only for a code whose
+ * one section is the name, as the default theme's is, since the name then runs to the checksum.
+ */
+function withoutProjectName(shareCode: string): string {
+  const bytes = Buffer.from(shareCode, 'base64url');
+  expect(bytes[SECTIONS_BYTE], 'only a project name after the header').toBe(SECTION_PROJECT_NAME);
+  const length = bytes[SECTIONS_BYTE + 1]!;
+  expect(SECTIONS_BYTE + 2 + length, 'the name runs to the checksum').toBe(bytes.length - 1);
+  const body = Buffer.from(bytes.subarray(0, SECTIONS_BYTE + 1));
+  body[SECTIONS_BYTE] = 0;
+  return Buffer.concat([body, Buffer.from([crc8(body)])]).toString('base64url');
 }
 
-function escape(text: string): string {
-  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+/** The CRC-8 a share code ends with, polynomial 0x07, from zero, nothing reflected. */
+function crc8(bytes: Uint8Array): number {
+  let crc = 0;
+  for (const byte of bytes) {
+    crc ^= byte;
+    for (let bit = 0; bit < 8; bit++) crc = crc & 0x80 ? ((crc << 1) ^ 0x07) & 0xff : (crc << 1) & 0xff;
+  }
+  return crc;
 }
