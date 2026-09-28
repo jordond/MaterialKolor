@@ -128,12 +128,33 @@ private class Catalog {
                 }
             }
         }
-        entries.forEach { (section, lines) ->
+        rename(entries).forEach { (section, lines) ->
             val merged = sections.getOrPut(section) { sortedMapOf() }
             lines.forEach { (key, value) ->
                 val previous = merged.putIfAbsent(key, value)
                 require(previous == null || previous == value) {
                     "The catalog of ${case.name} sets $section.$key to $value where another case has $previous"
+                }
+            }
+        }
+    }
+
+    /**
+     * Each export stands alone, so two cases can give one version key different versions, as the
+     * Material 3 of Compose Multiplatform and of Jetpack Compose both do. The shared catalog keys a
+     * version that one library refers to by that library's alias instead, which keeps them apart.
+     */
+    private fun rename(entries: Map<String, Map<String, String>>): Map<String, Map<String, String>> {
+        val libraries = entries["libraries"].orEmpty()
+        val renames = entries["versions"].orEmpty().keys.associateWith { key ->
+            libraries.filterValues { value -> "version.ref = \"$key\"" in value }.keys.singleOrNull() ?: key
+        }
+        return entries.mapValues { (section, lines) ->
+            if (section == "versions") {
+                lines.mapKeys { (key, _) -> renames.getValue(key) }
+            } else {
+                lines.mapValues { (_, value) ->
+                    VERSION_REF.replace(value) { match -> "version.ref = \"${renames.getValue(match.groupValues[1])}\"" }
                 }
             }
         }
