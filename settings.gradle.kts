@@ -42,14 +42,26 @@ include(
     ":material-kolor-fluent",
     ":material-color-utilities",
     ":mcu-upstream",
-    ":builder:shared",
-    ":builder:android",
+)
+
+include(
     ":samples:shared",
     ":samples:custom-theme",
     ":samples:fluent",
     ":samples:material3",
     ":samples:unstyled",
     ":samples:screenshots",
+)
+
+include(
+    ":builder:domain",
+    ":builder:codegen",
+    ":builder:engine",
+    ":builder:kit",
+    ":builder:preview",
+    ":builder:shared",
+    ":builder:apps:web",
+    ":builder:apps:desktop",
 )
 
 include(":mcu-source-transformer")

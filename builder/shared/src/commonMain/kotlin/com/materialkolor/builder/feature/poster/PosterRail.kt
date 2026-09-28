@@ -1,0 +1,93 @@
+package com.materialkolor.builder.feature.poster
+
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
+import com.materialkolor.builder.feature.workspace.Panel
+import com.materialkolor.builder.feature.workspace.WorkspaceAction
+import com.materialkolor.builder.generated.resources.Res
+import com.materialkolor.builder.generated.resources.poster_expand
+import com.materialkolor.builder.generated.resources.poster_projects
+import com.materialkolor.builder.generated.resources.poster_rail_seed
+import com.materialkolor.builder.kit.icon.IconId
+import com.materialkolor.builder.kit.token.LocalBuilderTokens
+import com.materialkolor.builder.kit.widget.BrandMark
+import com.materialkolor.builder.kit.widget.MarkColors
+import dev.stateholder.dispatcher.Dispatcher
+import org.jetbrains.compose.resources.stringResource
+
+/**
+ * The poster shrunk to its 72 dp strip, the mark, the seed swatch, Shuffle, Projects and the button
+ * that opens the poster again. The workspace remembers the choice in the browser's preferences.
+ *
+ * @param[focus] Where the projects drawer hands focus back once it closes.
+ */
+@Composable
+internal fun PosterRail(
+    context: PosterContext,
+    dispatcher: Dispatcher<WorkspaceAction>,
+    modifier: Modifier = Modifier,
+    focus: PosterFocus? = null,
+) {
+    val tokens = LocalBuilderTokens.current
+    val spacing = tokens.spacing
+    Column(
+        modifier = modifier.fillMaxSize().padding(vertical = spacing.medium),
+        verticalArrangement = Arrangement.spacedBy(spacing.small),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        BrandMark(
+            colors = MarkColors.inked(ink = tokens.textStrong, page = tokens.canvas),
+            modifier = Modifier.padding(bottom = spacing.extraSmall),
+            size = RailMarkSize,
+        )
+        SeedSwatch(description = stringResource(Res.string.poster_rail_seed, context.document.seed.toHex()))
+        ShuffleIconButton(context, dispatcher)
+        PosterIconButton(
+            icon = IconId.Folder,
+            description = stringResource(Res.string.poster_projects),
+            onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Projects)) },
+            buttonModifier = triggerFocus(focus?.projects),
+        )
+        PosterIconButton(
+            icon = IconId.Expand,
+            description = stringResource(Res.string.poster_expand),
+            onClick = { dispatcher.dispatch(WorkspaceAction.SetPosterCollapsed(collapsed = false)) },
+        )
+    }
+}
+
+/**
+ * The seed on the rail. The poster is already the seed, so the swatch is the page as a round dot,
+ * ringed in the poster's ink at the width a highlight takes so it reads as a swatch and not an empty
+ * box.
+ *
+ * @param[description] What it reads out, or null where the seed's hex already shows beside it.
+ * @param[modifier] Applied to the swatch.
+ */
+@Composable
+internal fun SeedSwatch(
+    description: String?,
+    modifier: Modifier = Modifier,
+) {
+    val tokens = LocalBuilderTokens.current
+    Box(
+        modifier = modifier
+            .size(tokens.iconSize + tokens.spacing.medium)
+            .border(tokens.highlightWidth, tokens.borderStrong, CircleShape)
+            .then(if (description == null) Modifier else Modifier.semantics { contentDescription = description }),
+    )
+}
+
+private val RailMarkSize = 28.dp

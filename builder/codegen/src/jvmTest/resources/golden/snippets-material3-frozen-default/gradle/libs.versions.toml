@@ -1,0 +1,5 @@
+[versions]
+compose-material3 = "1.12.0-alpha03"
+
+[libraries]
+compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose-material3" }

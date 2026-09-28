@@ -1,0 +1,274 @@
+package com.materialkolor.builder.kit.skin.material
+
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import com.materialkolor.builder.kit.control.BuilderIcon
+import com.materialkolor.builder.kit.control.BuilderMenuItem
+import com.materialkolor.builder.kit.control.BuilderToast
+import com.materialkolor.builder.kit.control.Emphasis
+import com.materialkolor.builder.kit.control.foldMenuRow
+import com.materialkolor.builder.kit.headless.HeadlessDropdown
+import com.materialkolor.builder.kit.headless.HeadlessTooltip
+import com.materialkolor.builder.kit.headless.LocalOverlaysInTree
+import com.materialkolor.builder.kit.icon.IconId
+import com.materialkolor.builder.kit.skin.headless.ActionColors
+import com.materialkolor.builder.kit.skin.headless.ListRowStyle
+import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
+import com.materialkolor.builder.kit.skin.headless.OverlayStyle
+import com.materialkolor.builder.kit.token.LocalBuilderTokens
+
+/**
+ * The Material3 style for the headless overlays.
+ *
+ * It styles the overlays Material has no component for, the side panel, the end sheet, the bottom
+ * sheet with three detents and the scroll area. It styles the headless tooltip that stands
+ * in for `PlainTooltip` too, and where overlays render in the page, through [materialMenuStyle],
+ * the menu and the select's list that stand in for `DropdownMenu`. The dialog there draws Material's
+ * own dialog container over the headless modal, whose veil reads `tokens.scrim` directly rather
+ * than anything from here.
+ *
+ * @param[surface] The container colour.
+ * @param[popoverShape] The shape of a popover, a tooltip and a toast.
+ * @param[shadow] The elevation shadow under a container.
+ */
+@Composable
+internal fun materialOverlayStyle(
+    surface: Color = MaterialTheme.colorScheme.surfaceContainerLow,
+    popoverShape: Shape = MaterialTheme.shapes.extraSmall,
+    shadow: Dp = 1.dp,
+): OverlayStyle {
+    val colors = MaterialTheme.colorScheme
+    val shapes = MaterialTheme.shapes
+    return OverlayStyle(
+        surface = surface,
+        content = colors.onSurface,
+        muted = colors.onSurfaceVariant,
+        border = null,
+        popoverShape = popoverShape,
+        dialogShape = shapes.extraLarge,
+        panelRadius = LocalBuilderTokens.current.radius.medium,
+        // Material's extra large corner, as its side sheet and its dialogs use it.
+        drawerRadius = LocalBuilderTokens.current.radius.large,
+        divider = colors.outlineVariant,
+        shadow = shadow,
+        scrim = LocalBuilderTokens.current.scrim,
+        itemShape = shapes.extraSmall,
+        highlight = colors.onSurface.copy(alpha = MaterialHoverAlpha),
+        selected = colors.secondaryContainer,
+        focus = colors.secondary,
+        field = colors.surfaceContainerLow,
+        fieldBorder = BorderStroke(LocalBuilderTokens.current.outlineWidth, colors.outline),
+        tooltip = colors.inverseSurface,
+        tooltipContent = colors.inverseOnSurface,
+        tooltipBorder = null,
+        thumb = colors.outline,
+        panelTitle = MaterialTheme.typography.headlineSmall,
+    )
+}
+
+/**
+ * Material's own hover state layer.
+ */
+private const val MaterialHoverAlpha = 0.08f
+
+/**
+ * Material's menu container style, for the menu and the select's list drawn in the page.
+ */
+@Composable
+internal fun materialMenuStyle(): OverlayStyle =
+    materialOverlayStyle(
+        surface = tonal(MenuDefaults.containerColor, MenuDefaults.TonalElevation),
+        popoverShape = MenuDefaults.shape,
+        shadow = MenuDefaults.ShadowElevation,
+    )
+
+/**
+ * The style of a popover that holds more than a menu, Material's container with its large corner.
+ */
+@Composable
+internal fun materialPopoverStyle(): OverlayStyle =
+    materialOverlayStyle(
+        surface = MaterialTheme.colorScheme.surfaceContainer,
+        popoverShape = MaterialTheme.shapes.large,
+        shadow = MenuDefaults.ShadowElevation,
+    )
+
+/**
+ * A dense list row in Material's colours, drawn the way Material draws a menu's rows, for a long list
+ * inside an overlay such as the command palette. The current row takes the secondary container, as a
+ * Material list row does.
+ */
+@Composable
+internal fun materialDenseRowStyle(): ListRowStyle {
+    val colors = MaterialTheme.colorScheme
+    val spacing = LocalBuilderTokens.current.spacing
+    return ListRowStyle(
+        shape = MaterialTheme.shapes.medium,
+        minHeight = OverlayMetrics.denseRowHeight,
+        horizontalPadding = spacing.medium,
+        verticalPadding = spacing.extraSmall,
+        gap = spacing.medium,
+        borderWidth = 0.dp,
+        idle = ActionColors(Color.Transparent, colors.onSurface, Color.Transparent),
+        selected = ActionColors(colors.secondaryContainer, colors.onSecondaryContainer, Color.Transparent),
+        supporting = colors.onSurfaceVariant,
+    )
+}
+
+/**
+ * [color] lifted by [elevation] the way a Material `Surface` tints the plain surface colour.
+ */
+@Composable
+private fun tonal(
+    color: Color,
+    elevation: Dp,
+): Color {
+    val colors = MaterialTheme.colorScheme
+    return if (color == colors.surface) colors.surfaceColorAtElevation(elevation) else color
+}
+
+/**
+ * Material's `DropdownMenu` under [anchor]. Where overlays render in the page the same rows
+ * sit in the headless dropdown in Material's menu container, since `DropdownMenu` always opens a
+ * popup.
+ */
+@Composable
+internal fun MaterialMenu(
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    items: List<BuilderMenuItem>,
+    modifier: Modifier,
+    anchor: @Composable () -> Unit,
+) {
+    if (LocalOverlaysInTree.current) {
+        val trigger = remember { FocusRequester() }
+        Box(modifier.focusRequester(trigger)) {
+            anchor()
+            HeadlessDropdown(expanded, onDismissRequest, materialMenuStyle(), returnFocusTo = trigger) { close ->
+                MaterialMenuRows(items, close)
+            }
+        }
+        return
+    }
+    Box(modifier) {
+        anchor()
+        DropdownMenu(expanded = expanded, onDismissRequest = onDismissRequest) {
+            MaterialMenuRows(items, onDismissRequest)
+        }
+    }
+}
+
+@Composable
+private fun MaterialMenuRows(
+    items: List<BuilderMenuItem>,
+    onDismissRequest: () -> Unit,
+) {
+    for (item in items) {
+        val icon = item.icon
+        val danger = item.emphasis == Emphasis.Danger
+        val error = MaterialTheme.colorScheme.error
+        val selected = item.selected
+        DropdownMenuItem(
+            text = { Text(item.label) },
+            onClick = {
+                onDismissRequest()
+                item.onClick()
+            },
+            modifier = Modifier
+                .semantics {
+                    role = if (selected == null) Role.Button else Role.RadioButton
+                    if (selected != null) this.selected = selected
+                }.foldMenuRow(item.label, selected, item.enabled),
+            leadingIcon = if (icon == null) {
+                null
+            } else {
+                {
+                    BuilderIcon(
+                        id = icon,
+                        contentDescription = null,
+                        emphasis = item.emphasis,
+                        tint = if (danger) error else Color.Unspecified,
+                    )
+                }
+            },
+            trailingIcon = if (selected == true) {
+                { BuilderIcon(IconId.Check, contentDescription = null) }
+            } else {
+                null
+            },
+            enabled = item.enabled,
+            colors = if (danger) {
+                MenuDefaults.itemColors(textColor = error, leadingIconColor = error, trailingIconColor = error)
+            } else {
+                MenuDefaults.itemColors()
+            },
+        )
+    }
+}
+
+/**
+ * Material's plain tooltip, drawn by the headless tooltip in Material's inverse colours.
+ *
+ * `TooltipBox` shows its label the moment the pointer lands and keeps a persistent one up after the
+ * pointer leaves. On desktop that label then rides a scroll under a resting pointer, and its popup
+ * takes the next wheel step from the page. The headless tooltip waits for a rest and drops the
+ * label at the first scroll, in a popup here and in the page on the web alike.
+ */
+@Composable
+internal fun MaterialTooltip(
+    text: String,
+    modifier: Modifier,
+    content: @Composable () -> Unit,
+) {
+    HeadlessTooltip(text, materialOverlayStyle(), modifier, content)
+}
+
+/**
+ * One toast as Material's `Snackbar`. The host stacks up to three of these itself, since a
+ * `SnackbarHost` shows one at a time.
+ */
+@Composable
+internal fun MaterialToast(
+    toast: BuilderToast,
+    onAction: () -> Unit,
+    modifier: Modifier,
+) {
+    val label = toast.actionLabel
+    Snackbar(
+        modifier = modifier,
+        action = if (label == null) {
+            null
+        } else {
+            {
+                TextButton(
+                    onClick = onAction,
+                    colors = ButtonDefaults.textButtonColors(contentColor = SnackbarDefaults.actionColor),
+                ) { Text(label) }
+            }
+        },
+    ) { Text(toast.message) }
+}

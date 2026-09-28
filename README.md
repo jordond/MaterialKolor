@@ -1,4 +1,7 @@
-<img width="500px" src="art/materialkolor-logo.png" alt="logo"/>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="art/materialkolor-logo-dark.svg">
+  <img width="500" src="art/materialkolor-logo.svg" alt="MaterialKolor">
+</picture>
 <br />
 
 ![Maven Central](https://img.shields.io/maven-central/v/com.materialkolor/material-kolor)
@@ -16,7 +19,8 @@ A Compose Multiplatform library for creating dynamic Material Design 3 color pal
 color.
 
 Check out [MaterialKolor Builder](https://materialkolor.com) to see MaterialKolor in action and
-generate your own color schemes. It can export to MaterialKolor code, or plain Material 3 code.
+generate your own color schemes. It exports code for Material 3, Compose Unstyled and Compose Fluent,
+or plain MaterialKolor.
 
 The KDoc is published at [docs.materialkolor.com](https://docs.materialkolor.com)
 

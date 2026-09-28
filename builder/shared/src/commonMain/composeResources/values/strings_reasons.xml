@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Why a control is off, left out or carries a note for the export target. Each name is the reason's key. -->
+    <string name="reason_fluent_one_ramp">Fluent builds one accent ramp from the primary palette. Secondary, tertiary, error and neutral colors never reach it, and its neutrals are fixed greys.</string>
+    <string name="reason_fluent_style_chroma">For Fluent, the style only changes the chroma of the accent ramp.</string>
+    <string name="reason_fluent_fixed_text">Fluent’s text colors are fixed and its ramps ignore contrast.</string>
+    <string name="reason_tone_slots_keep_tones">Contrast changes the slots that follow a role. Slots picked by tone keep their tones.</string>
+    <string name="reason_fluent_uses_no_roles">Pins set Material roles, which Fluent does not use.</string>
+    <string name="reason_unstyled_no_amoled">The Unstyled adapter has no AMOLED switch yet.</string>
+    <string name="reason_fluent_no_accents">Fluent has no place for extra colors yet.</string>
+    <string name="reason_platform_limits">Unstyled and Fluent need JVM 17 and have no macOS native target. Unstyled needs Android minSdk 23.</string>
+    <string name="reason_dim_roles_unexposed">The 2025 Dim roles stay hidden until a library module exposes them.</string>
+</resources>

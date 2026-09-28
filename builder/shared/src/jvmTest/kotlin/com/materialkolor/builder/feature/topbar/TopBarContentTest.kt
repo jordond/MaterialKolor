@@ -1,0 +1,247 @@
+package com.materialkolor.builder.feature.topbar
+
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.test.requestFocus
+import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.test.v2.runDesktopComposeUiTest
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import com.materialkolor.builder.BuilderRoot
+import com.materialkolor.builder.ShellExpressive
+import com.materialkolor.builder.core.session.HistoryState
+import com.materialkolor.builder.di.AppGraph
+import com.materialkolor.builder.domain.edit.ChangeKind
+import com.materialkolor.builder.domain.edit.ChangeLabel
+import com.materialkolor.builder.domain.edit.DocumentChange
+import com.materialkolor.builder.domain.edit.EditPhase
+import com.materialkolor.builder.domain.model.Library
+import com.materialkolor.builder.domain.model.SpecVersion
+import com.materialkolor.builder.domain.model.Style
+import com.materialkolor.builder.domain.model.ThemeDocument
+import com.materialkolor.builder.domain.persist.Appearance
+import com.materialkolor.builder.domain.persist.Preferences
+import com.materialkolor.builder.engine.resolve.ThemeResolver
+import com.materialkolor.builder.fakes.FakePlatform
+import com.materialkolor.builder.feature.workspace.WorkspaceAction
+import com.materialkolor.builder.feature.workspace.WorkspaceModel
+import com.materialkolor.builder.feature.workspace.workspaceStateOf
+import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
+import com.materialkolor.builder.kit.skin.BuilderTheme
+import dev.stateholder.dispatcher.rememberDispatcher
+import dev.zacsweers.metro.createGraphFactory
+import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
+import io.kotest.matchers.shouldBe
+import kotlin.test.Test
+
+private const val M3_EXPRESSIVE = "M3 Expressive"
+
+// The text the Expressive suggestion dialog showed before M3 Expressive took the style along itself.
+private const val EXPRESSIVE_MESSAGE = "Expressive themes usually use the Expressive style on the 2025 spec"
+private const val UNDO_EXPRESSIVE = "Undo library change to M3 Expressive"
+private const val REDO_EXPRESSIVE = "Redo library change to M3 Expressive"
+
+/**
+ * A desktop window wide enough for the segmented switcher in every skin, beside the full actions.
+ */
+private const val WIDTH = 1600
+private const val HEIGHT = 800
+
+/**
+ * The frames a reveal may take from the click to the change. The host records the old frame in the
+ * first and the change lands at the start of the next, with one to spare. The 100 ms capture
+ * timeout is six frames, so a change that skipped the reveal would miss this.
+ */
+private const val REVEAL_FRAMES = 3
+
+@OptIn(ExperimentalTestApi::class)
+class TopBarContentTest {
+    @Test
+    fun undoButton_afterAStyleChange_namesTheChangeInItsTooltipWithoutTheRawStyleName() =
+        runComposeUiTest {
+            val history = HistoryState(canUndo = true, undoLabel = ChangeLabel(ChangeKind.Style, detail = "Vibrant"))
+            val document = ThemeDocument.Default.copy(library = Library.Custom)
+            setContent {
+                val dispatcher = rememberDispatcher<WorkspaceAction> {}
+                BuilderTheme(
+                    expressive = false,
+                    result = ThemeResolver().resolve(document),
+                    isDark = false,
+                    reducedMotion = false,
+                ) {
+                    ProvideBuilderLayout(modifier = Modifier.fillMaxSize()) {
+                        TopBarContent(state = workspaceState(document, history), dispatcher = dispatcher)
+                    }
+                }
+            }
+
+            onNodeWithContentDescription("Undo style change").requestFocus()
+            waitForIdle()
+
+            onNodeWithText("Undo style change").assertExists()
+        }
+
+    @Test
+    fun m3Expressive_picked_landsThroughTheRevealWithItsStyleAsOneUndoEntry() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            val graph = showRoot()
+            val start = graph.session.document.value
+            mainClock.autoAdvance = false
+
+            onNodeWithText(M3_EXPRESSIVE).assertIsNotSelected().performClick()
+            mainClock.advanceTimeBy(0)
+            // A plain edit would have landed inside the click. The reveal holds it until it has drawn the old frame.
+            graph.session.document.value shouldBe start
+            var frames = 0
+            while (!graph.session.document.value.expressive && frames < REVEAL_FRAMES) {
+                mainClock.advanceTimeByFrame()
+                frames++
+            }
+            graph.session.document.value.expressive shouldBe true
+            graph.session.document.value.style shouldBe Style.Expressive
+
+            mainClock.autoAdvance = true
+            waitForIdle()
+            onNodeWithText(M3_EXPRESSIVE).assertIsSelected()
+            graph.session.history.value.undoLabel shouldBe ChangeLabel(ChangeKind.Library, detail = "Material3")
+            onNodeWithContentDescription(UNDO_EXPRESSIVE).performClick()
+            waitForIdle()
+
+            graph.session.document.value shouldBe start
+            graph.session.history.value.canUndo shouldBe false
+            onNodeWithText("M3").assertIsSelected()
+            onNodeWithContentDescription(REDO_EXPRESSIVE).assertExists()
+        }
+
+    @Test
+    fun m3Expressive_onThe2021Spec_movesStyleAndSpecWithNoDialog() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            val graph = showRoot()
+            moveOntoThe2021Spec(graph)
+
+            onNodeWithText(M3_EXPRESSIVE).performClick()
+            waitForIdle()
+
+            graph.session.document.value.expressive shouldBe true
+            graph.session.document.value.style shouldBe Style.Expressive
+            graph.session.document.value.spec shouldBe SpecVersion.Spec2025
+            onNodeWithText(EXPRESSIVE_MESSAGE).assertDoesNotExist()
+            onNodeWithText("Keep mine").assertDoesNotExist()
+        }
+
+    @Test
+    fun m3_afterM3Expressive_putsBackTheStyleAndSpecAsOneUndoEntry() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            val graph = showRoot()
+            moveOntoThe2021Spec(graph)
+            val start = graph.session.document.value
+            onNodeWithText(M3_EXPRESSIVE).performClick()
+            waitForIdle()
+            val entered = graph.session.document.value
+
+            onNodeWithText("M3").performClick()
+            waitForIdle()
+
+            graph.session.document.value shouldBe start
+            onNodeWithContentDescription("Undo library change to M3").performClick()
+            waitForIdle()
+            graph.session.document.value shouldBe entered
+        }
+
+    @Test
+    fun topBar_focusedButtonAcrossASwitchToFluent_keepsFocus() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            val graph = showRoot()
+            // A button without a tooltip, since a tooltip popup open across the switch trips the kit.
+            onNodeWithText("Export code").requestFocus()
+            waitForIdle()
+            onNodeWithText("Export code").assertIsFocused()
+
+            onNodeWithText("Fluent").performSemanticsAction(SemanticsActions.OnClick)
+            waitForIdle()
+
+            graph.session.document.value.library shouldBe Library.Fluent
+            onNodeWithText("Export code").assertIsFocused()
+        }
+
+    @Test
+    fun appearanceRows_inTheMoreMenu_onlyTheChosenOneIsSelected() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            val document = ThemeDocument.Default
+            val state = workspaceState(document, HistoryState())
+                .copy(preferences = Preferences(appearance = Appearance.Dark))
+            setContent {
+                val dispatcher = rememberDispatcher<WorkspaceAction> {}
+                BuilderTheme(
+                    expressive = ShellExpressive,
+                    result = ThemeResolver().resolve(document),
+                    isDark = false,
+                    reducedMotion = true,
+                ) {
+                    ProvideBuilderLayout(modifier = Modifier.fillMaxSize()) {
+                        TopBarContent(state = state, dispatcher = dispatcher)
+                    }
+                }
+            }
+
+            onNodeWithContentDescription("More options").performClick()
+            waitForIdle()
+
+            onNodeWithText("Use the dark appearance").assertIsSelected()
+            onNodeWithText("Use the light appearance").assertIsNotSelected()
+            onNodeWithText("Use the system appearance").assertIsNotSelected()
+        }
+
+    /**
+     * The whole builder on fakes, booted, with its graph so a test can read the session.
+     */
+    private fun ComposeUiTest.showRoot(): AppGraph {
+        val platform = FakePlatform()
+        val graph = createGraphFactory<AppGraph.Factory>().create(platform)
+        val owner = TestOwner()
+        setContent {
+            CompositionLocalProvider(
+                LocalViewModelStoreOwner provides owner,
+                LocalMetroViewModelFactory provides graph.metroViewModelFactory,
+            ) {
+                BuilderRoot(graph)
+            }
+        }
+        waitUntil { platform.environment.splashHidden }
+        waitForIdle()
+        return graph
+    }
+
+    /**
+     * Moves the theme onto the 2021 spec, which a pick of M3 Expressive moves to 2025.
+     */
+    private fun ComposeUiTest.moveOntoThe2021Spec(graph: AppGraph) {
+        runOnIdle {
+            val document = graph.session.document.value
+                .copy(spec = SpecVersion.Spec2021)
+            graph.session.edit(DocumentChange.Replace(document), EditPhase.Discrete)
+        }
+        waitForIdle()
+    }
+
+    private fun workspaceState(
+        document: ThemeDocument,
+        history: HistoryState,
+    ): WorkspaceModel.State = workspaceStateOf(document = document, history = history)
+
+    private class TestOwner : ViewModelStoreOwner {
+        override val viewModelStore: ViewModelStore = ViewModelStore()
+    }
+}

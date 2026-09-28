@@ -1,0 +1,484 @@
+package com.materialkolor.builder.core.session
+
+import com.materialkolor.builder.core.platform.BootSplash
+import com.materialkolor.builder.core.platform.StoreError
+import com.materialkolor.builder.domain.color.Argb
+import com.materialkolor.builder.domain.color.ColorNames
+import com.materialkolor.builder.domain.edit.DocumentChange
+import com.materialkolor.builder.domain.edit.EditPhase
+import com.materialkolor.builder.domain.link.Route
+import com.materialkolor.builder.domain.link.ShareCodec
+import com.materialkolor.builder.domain.model.DEFAULT_SEED
+import com.materialkolor.builder.domain.model.Library
+import com.materialkolor.builder.domain.model.STARTER_SEEDS
+import com.materialkolor.builder.domain.model.SeedSource
+import com.materialkolor.builder.domain.model.Style
+import com.materialkolor.builder.domain.model.ThemeDocument
+import com.materialkolor.builder.domain.persist.Appearance
+import com.materialkolor.builder.domain.persist.DeviceWidth
+import com.materialkolor.builder.domain.persist.ExportTarget
+import com.materialkolor.builder.domain.persist.PreviewMode
+import com.materialkolor.builder.domain.persist.PreviewTab
+import com.materialkolor.builder.domain.persist.StorageKeys
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
+import kotlin.test.Test
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class ProjectSessionTest : SessionTestBase() {
+    @Test
+    fun boot_firstVisit_createsTheDefaultProject() =
+        runTest {
+            val (session, preferences) = session()
+
+            session.boot(Route.Home) shouldBe null
+
+            val ref = session.project.value.shouldBeInstanceOf<ProjectRef.Persisted>()
+            val meta = projects.index
+                .first()
+                .projects
+                .single()
+            meta.name shouldBe ColorNames.nameOf(DEFAULT_SEED)
+            meta.library shouldBe Library.Material3
+            meta.expressive shouldBe false
+            session.document.value shouldBe ThemeDocument.Default
+            session.viewState.value.mode shouldBe PreviewMode.Split
+            preferences.current().lastProjectId shouldBe ref.id
+        }
+
+    @Test
+    fun newProject_blank_takesAFreeStarterNameAndThePlatformWidth() =
+        runTest {
+            environment.defaultDeviceWidth = DeviceWidth.Desktop
+            val (session) = session()
+            val first = booted(session)
+            session.document.value shouldBe ThemeDocument.Default
+            session.viewState.value.deviceWidth shouldBe DeviceWidth.Desktop
+
+            repeat(STARTER_SEEDS.size) { session.newProject(copyCurrent = false) }
+
+            val names = projects.index
+                .first()
+                .projects
+                .map { meta -> meta.name }
+            names.size shouldBe STARTER_SEEDS.size + 1
+            names.toSet() shouldBe (STARTER_SEEDS + DEFAULT_SEED).map(ColorNames::nameOf).toSet()
+            val id = session.project.value
+                .shouldBeInstanceOf<ProjectRef.Persisted>()
+                .id
+            projects.load(id).shouldNotBeNull().name shouldBe ColorNames.nameOf(session.document.value.seed)
+            projects.viewState(id).deviceWidth shouldBe DeviceWidth.Desktop
+            environment.defaultDeviceWidth = DeviceWidth.Phone
+            session.open(first)
+            session.viewState.value.deviceWidth shouldBe DeviceWidth.Desktop
+        }
+
+    @Test
+    fun boot_legacyLink_opensItWithDarkPreviewAndRemembersThePackage() =
+        runTest {
+            val (session, preferences) = session()
+
+            session.boot(Route.Legacy("color_seed=FF1565C0&dark_mode=true&package_name=com.ocean"))
+
+            session.project.value.shouldBeInstanceOf<ProjectRef.Transient>()
+            session.document.value.seed shouldBe OCEAN.seed
+            session.viewState.value.mode shouldBe PreviewMode.Dark
+            preferences.exportPrefs(ExportTarget.Material3).packageName shouldBe "com.ocean"
+        }
+
+    @Test
+    fun boot_badLink_startsANewProjectAndSaysTheLinkWasBad() =
+        runTest {
+            val (session) = session()
+
+            session.boot(Route.Theme("not-a-code")) shouldBe BootNotice.InvalidLink
+
+            session.project.value.shouldBeInstanceOf<ProjectRef.Persisted>()
+        }
+
+    @Test
+    fun openShared_sameLinkTwice_staysOneUnsavedProject() =
+        runTest {
+            val (session) = session()
+            val code = ShareCodec.encode(OCEAN, projectName = "Ocean")
+
+            session.openShared(code) shouldBe null
+            session.openShared(code) shouldBe null
+            advanceUntilIdle()
+
+            session.project.value shouldBe ProjectRef.Transient(code)
+            session.document.value shouldBe OCEAN
+            projects.index.first().projects shouldBe emptyList()
+        }
+
+    @Test
+    fun edit_onASharedTheme_savesItUnderTheLinksName() =
+        runTest {
+            val (session) = session()
+            session.openShared(ShareCodec.encode(OCEAN, projectName = "Ocean"))
+
+            session.edit(DocumentChange.SetAmoled(true), EditPhase.Discrete)
+            session.project.value.shouldBeInstanceOf<ProjectRef.Transient>()
+            settle()
+
+            val ref = session.project.value.shouldBeInstanceOf<ProjectRef.Persisted>()
+            val saved = projects.load(ref.id).shouldNotBeNull()
+            saved.name shouldBe "Ocean"
+            saved.document shouldBe OCEAN.copy(amoled = true)
+            projects.loadHistory(ref.id).entries.size shouldBe 1
+        }
+
+    @Test
+    fun edit_onASharedThemeWithoutAName_savesItAsSharedTheme() =
+        runTest {
+            val (session) = session()
+            session.openShared(ShareCodec.encode(OCEAN))
+
+            session.edit(DocumentChange.SetAmoled(true), EditPhase.Discrete)
+            settle()
+
+            projects.index
+                .first()
+                .projects
+                .single()
+                .name shouldBe SHARED_THEME
+        }
+
+    @Test
+    fun openShared_linkWhoseThemeWasSaved_opensTheSavedProject() =
+        runTest {
+            val (session) = session()
+            val code = ShareCodec.encode(OCEAN)
+            session.openShared(code)
+            session.edit(DocumentChange.SetAmoled(true), EditPhase.Discrete)
+            settle()
+            val saved = session.project.value
+            session.undo()
+            settle()
+            session.newProject(copyCurrent = false)
+
+            session.openShared(code) shouldBe null
+
+            session.project.value shouldBe saved
+            session.document.value shouldBe OCEAN
+        }
+
+    @Test
+    fun edit_twoChangesInABurst_savesOnceHalfASecondAfterTheLast() =
+        runTest {
+            val (session) = session()
+            val id = booted(session)
+
+            session.edit(DocumentChange.SetAmoled(true), EditPhase.Discrete)
+            advanceTimeBy(300)
+            session.edit(DocumentChange.SetStyle(Style.Vibrant), EditPhase.Discrete)
+            advanceTimeBy(AUTOSAVE_DELAY_MILLIS - 1)
+            runCurrent()
+            projects.load(id).shouldNotBeNull().revision shouldBe 1
+            session.saveStatus.value shouldBe SaveStatus.Pending
+
+            advanceTimeBy(1)
+            runCurrent()
+            val saved = projects.load(id).shouldNotBeNull()
+            saved.revision shouldBe 2
+            saved.document shouldBe ThemeDocument.Default.copy(amoled = true, style = Style.Vibrant)
+            session.saveStatus.value shouldBe SaveStatus.Idle
+            advanceUntilIdle()
+            projects.load(id).shouldNotBeNull().revision shouldBe 2
+        }
+
+    @Test
+    fun edit_whileDragging_savesOnceAfterTheRelease() =
+        runTest {
+            val (session) = session()
+            val id = booted(session)
+
+            listOf(0xFF102030, 0xFF203040, 0xFF304050).forEach { color ->
+                session.edit(DocumentChange.SetSeed(Argb(color.toInt()), SeedSource.Picked), EditPhase.Dragging)
+                advanceTimeBy(AUTOSAVE_DELAY_MILLIS * 2)
+            }
+            projects.load(id).shouldNotBeNull().revision shouldBe 1
+            environment.splashes.size shouldBe 1
+
+            session.edit(DocumentChange.SetSeed(OCEAN.seed, SeedSource.Picked), EditPhase.Released)
+            settle()
+
+            projects.load(id).shouldNotBeNull().revision shouldBe 2
+            projects.loadHistory(id).entries.size shouldBe 1
+            environment.splashes.last() shouldBe BootSplash(OCEAN.seed, DARK_SPLASH, OCEAN.seed, Appearance.System)
+        }
+
+    @Test
+    fun flush_withAnEditWaiting_writesItRightAway() =
+        runTest {
+            val (session) = session()
+            val id = booted(session)
+            session.edit(DocumentChange.SetAmoled(true), EditPhase.Discrete)
+
+            session.flush()
+
+            // No join and no scheduler step, so the write has to start before flush returns.
+            testScheduler.currentTime shouldBe 0
+            projects
+                .load(id)
+                .shouldNotBeNull()
+                .document.amoled shouldBe true
+        }
+
+    @Test
+    fun savedElsewhere_afterAQuietSpell_takesTheirsAndUndoBringsMineBack() =
+        runTest {
+            val (session) = session()
+            val id = booted(session)
+            session.edit(DocumentChange.SetAmoled(true), EditPhase.Discrete)
+            advanceTimeBy(CONFLICT_WINDOW_MILLIS + AUTOSAVE_DELAY_MILLIS)
+            runCurrent()
+            val mine = session.document.value
+
+            saveFromAnotherTab(id, FOREST)
+
+            session.conflict.value shouldBe null
+            session.document.value shouldBe FOREST
+            session.undo()
+            session.document.value shouldBe mine
+        }
+
+    @Test
+    fun savedElsewhere_rightAfterAnEdit_raisesAConflictAndKeepMineSavesMine() =
+        runTest {
+            val (session) = session()
+            val id = booted(session)
+            session.edit(DocumentChange.SetAmoled(true), EditPhase.Discrete)
+
+            val theirs = saveFromAnotherTab(id, FOREST)
+            settle()
+
+            session.conflict.value shouldBe Conflict(theirs)
+            projects.load(id).shouldNotBeNull().document shouldBe FOREST
+            session.resolveConflict(keepMine = true)
+            settle()
+            session.conflict.value shouldBe null
+            projects.load(id).shouldNotBeNull().document shouldBe ThemeDocument.Default.copy(amoled = true)
+        }
+
+    @Test
+    fun resolveConflict_loadTheirs_takesTheirsAsAnUndoStep() =
+        runTest {
+            val (session) = session()
+            val id = booted(session)
+            session.edit(DocumentChange.SetAmoled(true), EditPhase.Discrete)
+            saveFromAnotherTab(id, FOREST)
+
+            session.resolveConflict(keepMine = false)
+            settle()
+
+            session.document.value shouldBe FOREST
+            projects.load(id).shouldNotBeNull().document shouldBe FOREST
+            session.undo()
+            session.document.value.amoled shouldBe true
+        }
+
+    @Test
+    fun rename_openProjectWithASaveWaiting_keepsTheNewName() =
+        runTest {
+            val (session) = session()
+            val id = booted(session)
+            session.edit(DocumentChange.SetAmoled(true), EditPhase.Discrete)
+
+            session.rename(id, "Renamed") shouldBe null
+            settle()
+
+            val saved = projects.load(id).shouldNotBeNull()
+            saved.name shouldBe "Renamed"
+            saved.document.amoled shouldBe true
+            projects.index
+                .first()
+                .projects
+                .single()
+                .name shouldBe "Renamed"
+        }
+
+    @Test
+    fun saveStatus_storageRefusesTheSave_reportsTheFailure() =
+        runTest {
+            val (session) = session()
+            booted(session)
+            stores.failNextUpdates(count = 1, StoreError.Unavailable)
+
+            session.edit(DocumentChange.SetAmoled(true), EditPhase.Discrete)
+            settle()
+
+            session.saveStatus.value shouldBe SaveStatus.Failed(StoreError.Unavailable)
+            session.flush().join()
+            session.saveStatus.value shouldBe SaveStatus.Idle
+        }
+
+    @Test
+    fun updateView_twoChangesInABurst_savesTheViewOnce() =
+        runTest {
+            val (session) = session()
+            val id = booted(session)
+
+            session.updateView { view -> view.copy(tab = PreviewTab.Roles) }
+            session.updateView { view -> view.copy(mode = PreviewMode.Dark) }
+            settle()
+
+            val view = projects.viewState(id)
+            view.tab shouldBe PreviewTab.Roles
+            view.mode shouldBe PreviewMode.Dark
+        }
+
+    @Test
+    fun open_projectWithSavedHistory_canUndoRightAway() =
+        runTest {
+            val (session) = session()
+            val id = booted(session)
+            session.edit(DocumentChange.SetAmoled(true), EditPhase.Discrete)
+            settle()
+            session.newProject(copyCurrent = true)
+            session.history.value.canUndo shouldBe false
+
+            session.open(id) shouldBe true
+
+            session.history.value.canUndo shouldBe true
+            session.undo()
+            session.document.value shouldBe ThemeDocument.Default
+        }
+
+    @Test
+    fun boot_homeWithATabProject_reopensItOverTheLastProject() =
+        runTest {
+            val (session) = session()
+            val tabs = booted(session)
+            session.newProject(copyCurrent = false)
+            environment.tabProject = tabs
+            val (reloaded, preferences) = session()
+
+            reloaded.boot(Route.Home)
+
+            reloaded.project.value shouldBe ProjectRef.Persisted(tabs)
+            preferences.current().lastProjectId shouldBe tabs
+        }
+
+    @Test
+    fun boot_home_readsNoRecordItDoesNotOpen() =
+        runTest {
+            val (session) = session()
+            val broken = booted(session)
+            session.newProject(copyCurrent = false)
+            stores.seed(StorageKeys.project(broken), "not a record")
+            val (reloaded) = session()
+
+            reloaded.boot(Route.Home)
+
+            stores.textAt(StorageKeys.project(broken)) shouldBe "not a record"
+        }
+
+    @Test
+    fun open_anotherProject_remembersItAsTheTabsProject() =
+        runTest {
+            val (session) = session()
+            val first = booted(session)
+            environment.tabProject shouldBe first
+            session.newProject(copyCurrent = false)
+            val second = session.project.value
+                .shouldBeInstanceOf<ProjectRef.Persisted>()
+                .id
+            environment.tabProject shouldBe second
+
+            session.open(first)
+
+            environment.tabProject shouldBe first
+        }
+
+    @Test
+    fun edit_onASharedTheme_remembersTheNewIdAsTheTabsProject() =
+        runTest {
+            val (session) = session()
+            session.openShared(ShareCodec.encode(OCEAN))
+            environment.tabProject shouldBe null
+
+            session.edit(DocumentChange.SetAmoled(true), EditPhase.Discrete)
+            settle()
+
+            val ref = session.project.value.shouldBeInstanceOf<ProjectRef.Persisted>()
+            environment.tabProject shouldBe ref.id
+        }
+
+    @Test
+    fun saveStatus_editWhileTheSaveBeforeItIsWriting_staysPending() =
+        runTest {
+            val (session) = session()
+            val id = booted(session)
+            session.edit(DocumentChange.SetAmoled(true), EditPhase.Discrete)
+            stores.beforeNextUpdate(StorageKeys.project(id)) {
+                session.edit(DocumentChange.SetStyle(Style.Vibrant), EditPhase.Discrete)
+            }
+
+            session.flush().join()
+
+            session.saveStatus.value shouldBe SaveStatus.Pending
+            settle()
+            session.saveStatus.value shouldBe SaveStatus.Idle
+            projects
+                .load(id)
+                .shouldNotBeNull()
+                .document.style shouldBe Style.Vibrant
+        }
+
+    @Test
+    fun rename_storageRefusesIt_keepsTheOldNameForTheNextSave() =
+        runTest {
+            val (session) = session()
+            val id = booted(session)
+            val before = projects.load(id).shouldNotBeNull().name
+            stores.failNextUpdates(count = 1, StoreError.Unavailable)
+
+            session.rename(id, "Renamed") shouldBe StoreError.Unavailable
+            session.edit(DocumentChange.SetAmoled(true), EditPhase.Discrete)
+            settle()
+
+            val saved = projects.load(id).shouldNotBeNull()
+            saved.name shouldBe before
+            saved.document.amoled shouldBe true
+        }
+
+    @Test
+    fun open_twoProjects_neverPublishesADocumentWithTheOtherProjectsRefOrView() =
+        runTest {
+            val (session) = session()
+            val first = booted(session)
+            session.edit(DocumentChange.Replace(OCEAN), EditPhase.Discrete)
+            session.updateView { view -> view.copy(mode = PreviewMode.Dark) }
+            settle()
+            session.newProject(copyCurrent = false)
+            val second = session.project.value
+                .shouldBeInstanceOf<ProjectRef.Persisted>()
+                .id
+            session.edit(DocumentChange.Replace(FOREST), EditPhase.Discrete)
+            settle()
+            val seen = mutableListOf<SessionState>()
+            backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { session.state.toList(seen) }
+
+            session.open(first)
+            session.open(second)
+            runCurrent()
+
+            val expected = mapOf(
+                ProjectRef.Persisted(first) to (OCEAN to PreviewMode.Dark),
+                ProjectRef.Persisted(second) to (FOREST to PreviewMode.Split),
+            )
+            seen.map { state -> state.project }.toSet() shouldBe expected.keys
+            seen.forEach { state -> (state.document to state.view.mode) shouldBe expected[state.project] }
+        }
+}

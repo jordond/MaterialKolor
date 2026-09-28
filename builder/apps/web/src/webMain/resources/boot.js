@@ -1,0 +1,374 @@
+// Runs in the head, before the body is parsed and before anything paints. It picks the engine the
+// browser can run, wasm or JS, colors the splash, keeps a few shortcuts from the browser and loads
+// that engine's glue. It reads mk:splash and the address and never writes storage. Kept to plain
+// ES2015 so an old browser still reaches the unsupported page. It adds no preloads. WebKit fetches
+// an as=fetch preload with an Origin header and the real request without one, so each file would
+// download twice there, and the glue's tag goes in during this same task.
+(() => {
+  // What the default document writes to mk:splash, and its seed, for a first visit. The shell spec
+  // holds the two colors to what the app writes.
+  const DEFAULT_LIGHT = 0xfff8f6;
+  const DEFAULT_DARK = 0x130d0a;
+  const DEFAULT_SEED = 0xd9653b;
+
+  // The fan's seed for an older mk:splash that keeps none, a warm grey, so its tones still run light
+  // to dark in either scheme.
+  const NEUTRAL_SEED = 0x8c7d77;
+
+  // The tones on the splash fan, left to right around the seed, and the two the K mark draws with.
+  // Each is the seed mixed in OKLab toward white or black, and share is how much of the seed it
+  // keeps. The canvas drew them with color-mix in oklch, which gives the same colors.
+  const FAN_TONES = [
+    { name: 't95', toward: 'white', share: 0.14 },
+    { name: 't90', toward: 'white', share: 0.3 },
+    { name: 't80', toward: 'white', share: 0.54 },
+    { name: 't70', toward: 'white', share: 0.78 },
+    { name: 't40', toward: 'black', share: 0.78 },
+    { name: 't30', toward: 'black', share: 0.58 },
+    { name: 't20', toward: 'black', share: 0.4 },
+    { name: 't10', toward: 'black', share: 0.24 },
+  ];
+  const MARK_TONES = [
+    { name: 'deep', toward: 'black', share: 0.62 },
+    { name: 'pale', toward: 'white', share: 0.45 },
+  ];
+
+  // The text on a chip, the splash ink on a light one and white on a dark one.
+  const INK_ON_LIGHT = '#201a18';
+  const INK_ON_DARK = '#ffffff';
+
+  // The keys whose browser action, save page, open file and search, the builder takes over with Cmd
+  // or Ctrl. By name and by where they sit, so other layouts work too.
+  const BROWSER_KEYS = ['s', 'o', 'k'];
+  const BROWSER_CODES = ['KeyS', 'KeyO', 'KeyK'];
+
+  // An Apple system by its user agent, the markers the app's keymap reads to pick Cmd over Ctrl.
+  const APPLE = /Macintosh|Mac OS|iPhone|iPad|iPod|Darwin/;
+
+  // The smallest module that uses what Kotlin/Wasm needs. The struct type needs WasmGC, and the
+  // function body is a try with catch_all, the legacy exception handling Kotlin/Wasm emits.
+  const GATE_MODULE = new Uint8Array([
+    0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, // magic and version 1
+    0x01, 0x08, 0x02, 0x5f, 0x01, 0x78, 0x00, 0x60, 0x00, 0x00, // types, a struct of one i8 and a func with no params
+    0x03, 0x02, 0x01, 0x01, // one function of the func type
+    0x0a, 0x08, 0x01, 0x06, 0x00, 0x06, 0x40, 0x19, 0x0b, 0x0b, // its body, try catch_all end
+  ]);
+
+  // The same function with no GC types, what the JS engine needs. Skiko's wasm uses the legacy
+  // exception handling on both engines.
+  const JS_GATE_MODULE = new Uint8Array([
+    0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, // magic and version 1
+    0x01, 0x04, 0x01, 0x60, 0x00, 0x00, // types, a func with no params
+    0x03, 0x02, 0x01, 0x00, // one function of that type
+    0x0a, 0x08, 0x01, 0x06, 0x00, 0x06, 0x40, 0x19, 0x0b, 0x0b, // its body, try catch_all end
+  ]);
+
+  const root = document.documentElement;
+  const linkSeed = readLinkSeed();
+  const chosen = engine();
+
+  if (chosen === null) {
+    root.classList.add('mk-unsupported');
+    whenParsed(() => {
+      if (linkSeed === null) return;
+      document.querySelector('#unsupported-seed .mk-hex').textContent = hex(linkSeed);
+      document.getElementById('unsupported-seed').hidden = false;
+    });
+    return;
+  }
+
+  const assets = JSON.parse(document.getElementById('mk-assets').textContent)[chosen];
+  const report = catchErrors(assets.glue.split('/').pop(), chosen);
+  paintSplash();
+  window.addEventListener('keydown', keepBrowserShortcuts, true);
+
+  // One engine per visit. A glue that fails to load shows the overlay and never falls back to the
+  // other one.
+  const glue = document.createElement('script');
+  glue.src = assets.glue;
+  // A script that fails to load fires error on its own tag, which never reaches the window.
+  glue.addEventListener('error', () => report(null, 'Could not load ' + assets.glue));
+  document.head.appendChild(glue);
+
+  /**
+   * The engine this browser runs, 'wasm' or 'js', or null for none. Wasm needs WasmGC, legacy
+   * exception handling and WebGL 2. JS needs WebAssembly with legacy exception handling, for skiko,
+   * and WebGL 2. ?engine=js picks JS where it runs, and nothing keeps that choice past the visit.
+   */
+  function engine() {
+    try {
+      if (typeof WebAssembly !== 'object' || !validates(JS_GATE_MODULE) || !hasWebGl2()) return null;
+      if (new URLSearchParams(location.search).get('engine') === 'js') return 'js';
+      return validates(GATE_MODULE) ? 'wasm' : 'js';
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function validates(module) {
+    try {
+      return WebAssembly.validate(module);
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function hasWebGl2() {
+    const gl = document.createElement('canvas').getContext('webgl2');
+    if (!gl) return false;
+    const context = gl.getExtension('WEBGL_lose_context');
+    if (context) context.loseContext();
+    return true;
+  }
+
+  /**
+   * Keeps the browser from saving the page, opening a file or starting its own search on Cmd or Ctrl
+   * with S, O or K. Compose hears a key typed in a text field a frame late, too late to stop these
+   * itself, so this stops them first. It never stops the key going on, since Compose still runs the
+   * builder's own command for it. Cmd on an Apple system and Ctrl elsewhere, as the app's keymap.
+   */
+  function keepBrowserShortcuts(event) {
+    const primary = APPLE.test(navigator.userAgent) ? event.metaKey : event.ctrlKey;
+    if (!primary || event.shiftKey || event.altKey) return;
+    const key = typeof event.key === 'string' ? event.key.toLowerCase() : '';
+    if (BROWSER_KEYS.indexOf(key) >= 0 || BROWSER_CODES.indexOf(event.code) >= 0) event.preventDefault();
+  }
+
+  /**
+   * Colors the splash. The chrome comes from mk:splash, one color per scheme. The stylesheet picks
+   * between them by the system's scheme, unless mk:splash says the app is always light or always
+   * dark. The fan takes the seed of a theme link, else the seed mk:splash keeps, else a warm grey
+   * with no hex, and a root class says which of the two it was so the status line can say so. With no
+   * mk:splash at all the default document's colors and seed stand in. An older mk:splash without a
+   * seed or an appearance still paints its chrome. With ?motion=frozen the splash holds still, as it
+   * does under reduced motion.
+   */
+  function paintSplash() {
+    if (new URLSearchParams(location.search).get('motion') === 'frozen') root.classList.add('mk-motion-frozen');
+    const stored = readSplash();
+    const light = stored ? color(stored.light) : null;
+    const dark = stored ? color(stored.dark) : null;
+    const storedSeed = stored ? color(stored.seed) : DEFAULT_SEED;
+    const seed = linkSeed !== null ? linkSeed : storedSeed;
+    const forced = stored && (stored.appearance === 'light' || stored.appearance === 'dark') ? stored.appearance : null;
+    const lightHex = hex(light !== null ? light : DEFAULT_LIGHT);
+    const darkHex = hex(dark !== null ? dark : DEFAULT_DARK);
+    root.style.setProperty('--mk-light', lightHex);
+    root.style.setProperty('--mk-dark', darkHex);
+    if (forced) root.classList.add('mk-' + forced);
+    paintThemeColor(lightHex, darkHex, forced);
+    const painted = seed !== null ? seed : NEUTRAL_SEED;
+    root.style.setProperty('--mk-seed', hex(painted));
+    root.style.setProperty('--mk-seed-ink', inkOn(painted));
+    paintTones(painted);
+    if (seed === null) return;
+    if (linkSeed !== null) root.classList.add('mk-seed-link');
+    else if (stored) root.classList.add('mk-seed-stored');
+    root.style.setProperty('--mk-hex', JSON.stringify(hex(seed)));
+  }
+
+  /**
+   * Sets the fan's tones of the seed and the ink for each, and the two tones of the K mark. CSS
+   * could mix them, but it cannot pick a readable ink for a mixed color, and color-mix is newer than
+   * the oldest browsers the builder runs in.
+   */
+  function paintTones(seed) {
+    const lab = oklab(seed);
+    for (let i = 0; i < FAN_TONES.length; i++) {
+      const tone = mix(lab, FAN_TONES[i]);
+      root.style.setProperty('--mk-' + FAN_TONES[i].name, hex(tone));
+      root.style.setProperty('--mk-' + FAN_TONES[i].name + '-ink', inkOn(tone));
+    }
+    for (let i = 0; i < MARK_TONES.length; i++) {
+      root.style.setProperty('--mk-' + MARK_TONES[i].name, hex(mix(lab, MARK_TONES[i])));
+    }
+  }
+
+  /**
+   * The seed, as OKLab, mixed toward white or black. White is lightness 1 and black lightness 0,
+   * both with no chroma, so the mix scales the seed's a and b and keeps its hue.
+   */
+  function mix(lab, tone) {
+    const keep = tone.share;
+    const target = tone.toward === 'white' ? 1 : 0;
+    return fromOklab([lab[0] * keep + target * (1 - keep), lab[1] * keep, lab[2] * keep]);
+  }
+
+  /** An RGB color as OKLab, lightness then a and b. */
+  function oklab(rgb) {
+    const r = toLinear((rgb >> 16) & 0xff);
+    const g = toLinear((rgb >> 8) & 0xff);
+    const b = toLinear(rgb & 0xff);
+    const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+    const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+    const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+    return [
+      0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
+      1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
+      0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s,
+    ];
+  }
+
+  /** An OKLab color back as RGB, each channel clamped to what sRGB holds. */
+  function fromOklab(lab) {
+    const l = lab[0] + 0.3963377774 * lab[1] + 0.2158037573 * lab[2];
+    const m = lab[0] - 0.1055613458 * lab[1] - 0.0638541728 * lab[2];
+    const s = lab[0] - 0.0894841775 * lab[1] - 1.291485548 * lab[2];
+    const l3 = l * l * l;
+    const m3 = m * m * m;
+    const s3 = s * s * s;
+    const r = toGamma(4.0767416621 * l3 - 3.3077115913 * m3 + 0.2309699292 * s3);
+    const g = toGamma(-1.2684380046 * l3 + 2.6097574011 * m3 - 0.3413193965 * s3);
+    const b = toGamma(-0.0041960863 * l3 - 0.7034186147 * m3 + 1.707614701 * s3);
+    return (r << 16) | (g << 8) | b;
+  }
+
+  function toLinear(channel) {
+    const value = channel / 255;
+    return value <= 0.04045 ? value / 12.92 : Math.pow((value + 0.055) / 1.055, 2.4);
+  }
+
+  function toGamma(linear) {
+    const value = linear <= 0.0031308 ? linear * 12.92 : 1.055 * Math.pow(linear, 1 / 2.4) - 0.055;
+    return Math.max(0, Math.min(255, Math.round(value * 255)));
+  }
+
+  /** The ink that reads better on [rgb], by the luminance where black and white text tie. */
+  function inkOn(rgb) {
+    return luminance(rgb) > 0.179 ? INK_ON_LIGHT : INK_ON_DARK;
+  }
+
+  /**
+   * Tints the browser's own chrome to match the splash until the app sets it. Each theme-color tag
+   * gets the color of its scheme, or both get the forced one.
+   */
+  function paintThemeColor(light, dark, forced) {
+    const tags = document.querySelectorAll('meta[name="theme-color"]');
+    for (let i = 0; i < tags.length; i++) {
+      const isDark = forced ? forced === 'dark' : /dark/.test(tags[i].getAttribute('media') || '');
+      tags[i].setAttribute('content', isDark ? dark : light);
+    }
+  }
+
+  /** mk:splash as an object, an empty one when it holds something else, or null when it is not there. */
+  function readSplash() {
+    let text = null;
+    try {
+      text = localStorage.getItem('mk:splash');
+    } catch (error) {
+      return null;
+    }
+    if (text === null) return null;
+    try {
+      const value = JSON.parse(text);
+      return value !== null && typeof value === 'object' ? value : {};
+    } catch (error) {
+      return {};
+    }
+  }
+
+  /** The seed of a theme link, `/t/<code>`. The code is base64url and bytes 1 to 3 are the seed. */
+  function readLinkSeed() {
+    const match = /^\/t\/([A-Za-z0-9_-]{6,})/.exec(location.pathname);
+    if (!match) return null;
+    try {
+      const bytes = atob(match[1].slice(0, 8).replace(/-/g, '+').replace(/_/g, '/'));
+      return (bytes.charCodeAt(1) << 16) | (bytes.charCodeAt(2) << 8) | bytes.charCodeAt(3);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  /** The RGB of a signed 32 bit ARGB integer, or null for anything else. */
+  function color(value) {
+    return Number.isInteger(value) ? value & 0xffffff : null;
+  }
+
+  function hex(rgb) {
+    return '#' + ('00000' + rgb.toString(16).toUpperCase()).slice(-6);
+  }
+
+  /** WCAG relative luminance, so the text on a chip is dark or white, whichever reads better. */
+  function luminance(rgb) {
+    const channel = (shift) => {
+      const value = ((rgb >> shift) & 0xff) / 255;
+      return value <= 0.03928 ? value / 12.92 : Math.pow((value + 0.055) / 1.055, 2.4);
+    };
+    return 0.2126 * channel(16) + 0.7152 * channel(8) + 0.0722 * channel(0);
+  }
+
+  function whenParsed(run) {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
+    else run();
+  }
+
+  /**
+   * Shows the error overlay on the first uncaught error or rejection, and returns the function
+   * that shows it for an error the window never hears of. The details say what failed, where, in
+   * which browser, which build and which engine. They leave out the address, since a share code can
+   * carry a project name.
+   */
+  function catchErrors(build, engine) {
+    let shown = false;
+    const show = (error, fallback) => {
+      if (shown) return;
+      shown = true;
+      const details = describe(error, fallback, build, engine);
+      whenParsed(() => showOverlay(details));
+    };
+    window.addEventListener('error', (event) => {
+      // Chrome and Firefox report a ResizeObserver that settles over two frames. It is harmless.
+      if (/ResizeObserver loop/.test(event.message)) return;
+      // A script from another origin without CORS reports this and nothing else.
+      if (event.message === 'Script error.' && !event.error) return;
+      show(event.error, event.message);
+    });
+    window.addEventListener('unhandledrejection', (event) => show(event.reason, 'Unhandled rejection'));
+    return show;
+  }
+
+  function describe(error, fallback, build, engine) {
+    let message = fallback;
+    let stack = '';
+    try {
+      if (error instanceof Error) message = error.name + ': ' + error.message;
+      else if (error !== undefined && error !== null) message = String(error);
+      if (error && typeof error.stack === 'string') stack = error.stack;
+    } catch (ignored) {
+      // An object whose toString throws still gets the fallback.
+    }
+    return [
+      'MaterialKolor Builder error',
+      'Build: ' + build,
+      'Engine: ' + engine,
+      'User agent: ' + navigator.userAgent,
+      'Message: ' + message,
+      'Stack:',
+      stack,
+    ].join('\n');
+  }
+
+  function showOverlay(details) {
+    const overlay = document.getElementById('error-overlay');
+    const reload = document.getElementById('error-reload');
+    const status = document.getElementById('error-status');
+    const app = document.getElementById('app');
+    if (app) app.inert = true;
+    reload.addEventListener('click', () => location.reload());
+    document.getElementById('error-copy').addEventListener('click', () => {
+      const showDetails = () => {
+        const area = document.getElementById('error-details');
+        area.value = details;
+        area.hidden = false;
+        area.select();
+        status.textContent = 'Copy the details below.';
+      };
+      if (!navigator.clipboard) return showDetails();
+      navigator.clipboard.writeText(details).then(() => {
+        status.textContent = 'Details copied.';
+      }, showDetails);
+    });
+    overlay.hidden = false;
+    reload.focus();
+  }
+})();

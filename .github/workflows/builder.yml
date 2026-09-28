@@ -1,0 +1,519 @@
+name: Builder
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - next
+    # A builder/<version> tag deploys materialkolor.com. Tags skip the paths filter below.
+    tags:
+      - 'builder/*'
+    paths: &builder-paths
+      - 'builder/**'
+      - 'material-kolor-*/**'
+      - 'material-color-utilities/**'
+      - 'tools/**'
+      - 'gradle/**'
+      - 'build-logic/**'
+      - 'kotlin-js-store/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - '.editorconfig'
+      - '.github/workflows/builder.yml'
+  pull_request:
+    branches:
+      - main
+      - next
+    types: [ opened, synchronize, reopened, ready_for_review ]
+    paths: *builder-paths
+
+concurrency:
+  group: builder-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  GRADLE_OPTS: ${{ startsWith(github.ref, 'refs/tags/builder/') && '-Dorg.gradle.project.materialkolor.useLocal=false' || '' }}
+
+jobs:
+  test:
+    name: "Test"
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - &checkout
+        name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - &setup-java
+        name: setup-java
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          java-version: 25
+          distribution: temurin
+
+      - &setup-gradle
+        name: Setup Gradle
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/next' }}
+
+      - name: Tests
+        id: tests
+        run: >-
+          ./gradlew
+          :builder:domain:jvmTest :builder:domain:wasmJsNodeTest :builder:domain:jsNodeTest
+          :builder:codegen:jvmTest :builder:codegen:wasmJsNodeTest :builder:codegen:jsNodeTest
+          :builder:engine:jvmTest
+
+      - name: Lint
+        if: success() || steps.tests.outcome == 'failure'
+        run: >-
+          ./gradlew
+          :builder:domain:spotlessCheck :builder:codegen:spotlessCheck :builder:engine:spotlessCheck
+          :builder:kit:spotlessCheck :builder:preview:spotlessCheck :builder:shared:spotlessCheck
+          :builder:apps:web:spotlessCheck :builder:apps:desktop:spotlessCheck
+
+      - name: Upload the test reports
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: test-reports
+          path: builder/*/build/reports/tests
+          if-no-files-found: ignore
+          overwrite: true
+
+  compile-check:
+    name: "Compile check"
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - *checkout
+      - *setup-java
+      - *setup-gradle
+
+      - name: Write the fixtures
+        run: ./gradlew :builder:codegen:writeCompileFixtures
+
+      - name: Compile every case on JVM and Android
+        run: ./gradlew -p builder/codegen-check compileKotlinJvm compileAndroidMain
+
+      - name: Compile one case per target on wasm
+        run: ./gradlew -p builder/codegen-check compileKotlinWasmJs
+
+  site:
+    name: "Site"
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - *checkout
+      - *setup-java
+      - *setup-gradle
+
+      - name: Assemble the site and check its budget
+        run: ./gradlew :builder:apps:web:assembleSite :builder:apps:web:checkBudget
+
+      - name: Upload the site for the browser and Worker tests
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: site
+          path: builder/apps/web/build/site
+          if-no-files-found: error
+          retention-days: 1
+          overwrite: true
+
+  e2e:
+    name: "E2E (${{ matrix.shard }}/4)"
+    needs: site
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [ 1, 2, 3, 4 ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Download the site
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: site
+          path: builder/apps/web/build/site
+
+      - name: setup-node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            builder/e2e/package-lock.json
+            builder/worker/package-lock.json
+
+      - name: Install Playwright
+        working-directory: builder/e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          # boot.spec.ts boots a theme link from wrangler dev, the one server that writes its meta.
+          npm --prefix ../worker ci
+
+      - name: Browser tests
+        working-directory: builder/e2e
+        run: npm test -- --project chromium --shard ${{ matrix.shard }}/4
+
+      - name: Upload the Playwright report
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: playwright-report-${{ matrix.shard }}
+          path: builder/e2e/playwright-report
+          if-no-files-found: ignore
+          overwrite: true
+
+  worker:
+    name: "Worker"
+    needs: site
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Download the site
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: site
+          path: builder/apps/web/build/site
+
+      - name: setup-node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: builder/worker/package-lock.json
+
+      - name: Worker tests
+        working-directory: builder/worker
+        run: |
+          npm ci
+          npm run typecheck
+          npm test
+
+  perf:
+    name: "Perf"
+    needs: site
+    if: >-
+      github.event_name == 'workflow_dispatch'
+      || (github.event_name == 'push' && github.ref == 'refs/heads/next')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Download the site
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: site
+          path: builder/apps/web/build/site
+
+      - name: setup-node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: builder/e2e/package-lock.json
+
+      - name: Install Playwright
+        working-directory: builder/e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Perf run
+        working-directory: builder/e2e
+        run: npm run perf
+
+      - name: Summarize the report
+        if: ${{ !cancelled() }}
+        run: |
+          if [ -f builder/e2e/perf/report/summary.md ]; then
+            cat builder/e2e/perf/report/summary.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload the report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: perf-report
+          path: builder/e2e/perf/report
+          if-no-files-found: warn
+          overwrite: true
+
+  ui-tests:
+    name: "UI tests"
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - *checkout
+      - *setup-java
+      - *setup-gradle
+
+      - name: Kit, preview and shared tests
+        run: >-
+          ./gradlew :builder:kit:jvmTest :builder:preview:jvmTest :builder:shared:jvmTest
+          -Pbuilder.testTimeoutMinutes=20
+
+      - name: Upload the test reports
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ui-test-reports
+          path: builder/*/build/reports/tests/jvmTest
+          if-no-files-found: ignore
+          overwrite: true
+
+  preview:
+    name: "Preview"
+    needs: [ site, e2e, worker ]
+    if: >-
+      github.repository == 'jordond/MaterialKolor'
+      && github.event_name == 'pull_request'
+      && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - *checkout
+      - *setup-java
+      - *setup-gradle
+
+      - name: Assemble the staging site
+        run: ./gradlew :builder:apps:web:assembleSite -Psite.env=staging
+
+      - name: setup-node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            builder/e2e/package-lock.json
+            builder/worker/package-lock.json
+
+      - name: Screenshot the preview
+        id: screenshot
+        continue-on-error: true
+        working-directory: builder/e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          npm run pr-screenshot
+
+      - name: Upload a preview version
+        id: upload
+        working-directory: builder/worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          WRANGLER_OUTPUT_FILE_PATH: ${{ runner.temp }}/wrangler-output.json
+          PR: ${{ github.event.pull_request.number }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          npm ci
+          npx wrangler versions upload --env staging \
+            --preview-alias "pr-$PR" --tag "pr-$PR" --message "Pull request #$PR at ${SHA:0:7}"
+          version=$(jq -r 'select(.type == "version-upload") | .preview_url // ""' "$WRANGLER_OUTPUT_FILE_PATH")
+          alias=$(jq -r 'select(.type == "version-upload") | .preview_alias_url // ""' "$WRANGLER_OUTPUT_FILE_PATH")
+          if [ -z "$version" ]; then
+            echo "::error title=No preview URL::wrangler gave no preview URL. Preview URLs come on with the first staging deploy, so run the Builder workflow by hand on next once, and check that the account has a workers.dev subdomain."
+            exit 1
+          fi
+          # The alias always serves the latest push, the version URL stays on this commit.
+          echo "url=${alias:-$version}" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Comment the preview URL
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
+        with:
+          header: builder-preview
+          message: |
+            ### ✅ Builder preview deployed
+
+            | | |
+            | --- | --- |
+            | **URL** | ${{ steps.upload.outputs.url }} |
+            | **This commit** | ${{ steps.upload.outputs.version }} |
+            | **Commit** | ${{ github.event.pull_request.head.sha }} |
+
+            ${{ steps.screenshot.outcome == 'success' && format('![The builder at this commit]({0}/pr-screenshot.png)', steps.upload.outputs.version) || '_The screenshot failed, see the Screenshot the preview step in the logs._' }}
+
+            Built as the staging site, so its share links and link cards point at staging.materialkolor.com.
+
+            _Updates on every push to this pull request._
+
+      - name: Comment the preview failure
+        if: failure()
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
+        with:
+          header: builder-preview
+          message: |
+            ### ❌ Builder preview failed
+
+            | | |
+            | --- | --- |
+            | **Commit** | ${{ github.event.pull_request.head.sha }} |
+            | **Logs** | ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} |
+
+            The preview URL, if any, still points at an older commit.
+
+  staging:
+    name: "Staging"
+    needs: [ test, ui-tests, compile-check, site, e2e, worker ]
+    if: >-
+      github.repository == 'jordond/MaterialKolor'
+      && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+      && github.ref == 'refs/heads/next'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment:
+      name: staging
+      url: https://staging.materialkolor.com
+    concurrency:
+      group: builder-staging
+      cancel-in-progress: false
+    steps:
+      - *checkout
+      - *setup-java
+      - *setup-gradle
+
+      - name: Assemble the staging site
+        env:
+          CF_WEB_ANALYTICS_TOKEN: ${{ vars.CF_WEB_ANALYTICS_TOKEN }}
+        run: ./gradlew :builder:apps:web:assembleSite -Psite.env=staging
+
+      - name: setup-node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: builder/worker/package-lock.json
+
+      - name: Deploy staging
+        working-directory: builder/worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          REF: ${{ github.ref_name }}
+        run: |
+          npm ci
+          npx wrangler deploy --env staging --message "$REF at ${GITHUB_SHA:0:7}"
+
+      - name: Check the deployed headers
+        run: builder/worker/scripts/check-deploy.sh https://staging.materialkolor.com staging
+
+  release:
+    name: "Release check"
+    if: startsWith(github.ref, 'refs/tags/builder/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Check the tag and the exported version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          # Production deploys only what reached main or next.
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main \
+            && ! git merge-base --is-ancestor "$GITHUB_SHA" origin/next; then
+            echo "::error title=Tag is not on main or next::$TAG points at ${GITHUB_SHA:0:7}, which is on neither main nor next. Tag a commit on main or next."
+            exit 1
+          fi
+          catalog() { sed -nE "s/^$1 = \"([^\"]+)\"/\1/p" gradle/libs.versions.toml; }
+          builder=$(catalog builder-version)
+          exported=$(catalog materialKolorExport)
+          if [ "${TAG#builder/}" != "$builder" ]; then
+            echo "::error title=Tag does not match::$TAG does not match builder-version $builder in gradle/libs.versions.toml."
+            exit 1
+          fi
+          for module in core material3 palette unstyled fluent; do
+            pom="https://repo1.maven.org/maven2/com/materialkolor/material-kolor-$module/$exported/material-kolor-$module-$exported.pom"
+            if ! curl -sS --fail --retry 3 -I -o /dev/null "$pom"; then
+              echo "::error title=MaterialKolor $exported is not published::$pom is missing. Publish MaterialKolor $exported before the builder that uses it."
+              exit 1
+            fi
+          done
+
+  production:
+    name: "Production"
+    needs: [ release, test, ui-tests, compile-check, site, e2e, worker ]
+    if: github.repository == 'jordond/MaterialKolor' && startsWith(github.ref, 'refs/tags/builder/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment:
+      name: production
+      url: https://materialkolor.com
+    concurrency:
+      group: builder-production
+      cancel-in-progress: false
+    steps:
+      - *checkout
+      - *setup-java
+      - *setup-gradle
+
+      - name: Assemble the site
+        env:
+          CF_WEB_ANALYTICS_TOKEN: ${{ vars.CF_WEB_ANALYTICS_TOKEN }}
+        run: ./gradlew :builder:apps:web:assembleSite
+
+      - name: setup-node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: builder/worker/package-lock.json
+
+      - name: Deploy production
+        id: deploy
+        working-directory: builder/worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          npm ci
+          npx wrangler deploy --message "$TAG at ${GITHUB_SHA:0:7}"
+
+      - name: Check the deployed headers
+        run: builder/worker/scripts/check-deploy.sh https://materialkolor.com production
+
+      - name: Roll back production
+        if: failure() && steps.deploy.outcome == 'success'
+        working-directory: builder/worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          TAG: ${{ github.ref_name }}
+        run: npx wrangler rollback --yes --message "$TAG failed its header check"

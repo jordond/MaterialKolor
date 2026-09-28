@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Over the whole window while files are dragged over it. -->
+    <string name="image_drop">Drop to pull colors from this image</string>
+
+    <!-- The toast once an image has set the seed. The argument is the file name. -->
+    <string name="image_seeded_named">Seed taken from %1$s</string>
+    <!-- The same toast for an image with no file name, a pasted screenshot for example. -->
+    <string name="image_seeded">Seed taken from the image</string>
+    <string name="image_undo">Undo</string>
+    <!-- The toast for a file that is not an image, or one too big to read. -->
+    <string name="image_unsupported">That file couldn’t be read as an image, so the theme stays as it was</string>
+
+    <!-- The candidate row under the seed actions. -->
+    <string name="image_candidates">Colors from the image</string>
+    <!-- One candidate chip. The arguments are its hex and its color name. -->
+    <string name="image_chip">%1$s, %2$s</string>
+    <!-- Read out for the skeleton chips while an image is read. -->
+    <string name="image_reading">Pulling colors from the image</string>
+    <string name="image_mostly_gray">This image is mostly gray, so its colors are quiet</string>
+    <!-- After a reload the image itself is gone and only its colors are left. -->
+    <string name="image_add_again">Add the image again</string>
+
+    <!-- The menu the Image button opens. -->
+    <string name="image_menu_upload">Upload image</string>
+    <string name="image_menu_presets">Presets and starters</string>
+
+    <!-- The preset picker. The title, the line under it and the two groups in it. -->
+    <string name="image_presets_title">Presets and starters</string>
+    <string name="image_presets_line">Pick one to start from. Undo brings back what you had.</string>
+    <string name="image_presets_images">Pictures</string>
+    <string name="image_presets_images_line">Sets the seed to the picture’s main color. The others show up under the seed to try.</string>
+    <string name="image_presets_starters">Starters</string>
+    <string name="image_presets_starters_line">Sets the seed, the style and the contrast. Nothing else changes.</string>
+    <!-- One picture card. The argument is the picture's name. -->
+    <string name="image_preset_card">%1$s picture</string>
+    <!-- One starter card. The arguments are its name and its style. -->
+    <string name="image_starter_card">%1$s, %2$s</string>
+    <!-- One starter card whose contrast is not Standard. The arguments are its name, its style and its contrast. -->
+    <string name="image_starter_card_contrast">%1$s, %2$s, %3$s contrast</string>
+    <!-- The pictures, named for what they show, in the order of their ids res-0 to res-4. -->
+    <string name="image_preset_kelp">Kelp</string>
+    <string name="image_preset_frost">Frost</string>
+    <string name="image_preset_bubble">Bubble</string>
+    <string name="image_preset_coral">Coral</string>
+    <string name="image_preset_beads">Beads</string>
+    <string name="image_starter_baseline">Baseline</string>
+    <string name="image_starter_ocean">Ocean</string>
+    <string name="image_starter_forest">Forest</string>
+    <string name="image_starter_sunset">Sunset</string>
+    <string name="image_starter_blossom">Blossom</string>
+    <string name="image_starter_sand">Sand</string>
+    <string name="image_starter_ink">Ink</string>
+    <string name="image_starter_mono">Mono</string>
+
+    <!-- The image eyedropper, opened from the picture in the candidate row. -->
+    <string name="image_eyedropper_open">Pick a color from the image</string>
+    <string name="image_eyedropper_title">Pick a color from the image</string>
+    <string name="image_eyedropper_line">Pick any spot to make its exact color the seed. With a keyboard, the color chips under the image do the same.</string>
+    <string name="image_eyedropper_cancel">Cancel</string>
+</resources>

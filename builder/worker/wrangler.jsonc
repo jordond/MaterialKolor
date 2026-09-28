@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "materialkolor-builder",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-15",
+  "assets": {
+    // `./gradlew :builder:apps:web:assembleSite` writes it.
+    "directory": "../apps/web/build/site",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/t/*", "/og/*", "/api/*"]
+  },
+  "kv_namespaces": [{ "binding": "VERSIONS", "id": "d235a08a5a35422db4e6103d387cfa3d" }],
+  "rules": [{ "type": "Data", "globs": ["**/*.bin"], "fallthrough": false }],
+  "routes": [{ "pattern": "materialkolor.com", "custom_domain": true }],
+  "env": {
+    "staging": {
+      "routes": [{ "pattern": "staging.materialkolor.com", "custom_domain": true }],
+      "workers_dev": false,
+      "preview_urls": true,
+      "vars": { "ROBOTS_TAG": "noindex" },
+      "kv_namespaces": [{ "binding": "VERSIONS", "id": "d235a08a5a35422db4e6103d387cfa3d" }]
+    }
+  }
+}

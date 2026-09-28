@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The library switcher's name, read out before the choice. -->
+    <string name="topbar_library">Library</string>
+    <!-- The five library choices. They stay short to fit one segmented row. -->
+    <string name="topbar_library_m3">M3</string>
+    <!-- M3 with its expressive shapes and type, a choice of its own after M3. Undo, redo and History name it too. -->
+    <string name="topbar_library_m3_expressive">M3 Expressive</string>
+    <string name="topbar_library_unstyled">Unstyled</string>
+    <string name="topbar_library_fluent">Fluent</string>
+    <string name="topbar_library_custom">Custom</string>
+    <!-- The export sheet's switch under the M3 card, which moves between M3 and M3 Expressive. -->
+    <string name="topbar_expressive">Expressive</string>
+
+    <!-- The button that opens the command palette. -->
+    <string name="topbar_commands">Command palette</string>
+    <!-- The tooltip over the command palette button, with its shortcut, "Cmd+K" or "Ctrl+K". -->
+    <string name="topbar_commands_tooltip">Command palette (%1$s)</string>
+    <!-- The undo button once there is something to undo. The argument names the change, such as "style change to Vibrant". -->
+    <string name="topbar_undo_change">Undo %1$s</string>
+    <!-- The redo button once there is something to redo. The argument names the change. -->
+    <string name="topbar_redo_change">Redo %1$s</string>
+    <!-- A change and the value it landed on, such as "style change to Vibrant". -->
+    <string name="topbar_change_to">%1$s to %2$s</string>
+    <string name="topbar_share">Share</string>
+    <string name="topbar_export">Export code</string>
+    <!-- The overflow menu button. -->
+    <string name="topbar_more">More options</string>
+    <string name="topbar_appearance_system">Use the system appearance</string>
+    <string name="topbar_appearance_light">Use the light appearance</string>
+    <string name="topbar_appearance_dark">Use the dark appearance</string>
+    <string name="topbar_help">Help</string>
+    <string name="topbar_shortcuts">Keyboard shortcuts</string>
+    <string name="topbar_about">About</string>
+    <string name="topbar_github">GitHub</string>
+
+    <!-- What undo and redo name, one per sort of change. They follow "Undo" or "Redo". -->
+    <string name="topbar_change_seed">seed change</string>
+    <string name="topbar_change_preset">preset change</string>
+    <string name="topbar_change_key_color">key color change</string>
+    <string name="topbar_change_reset_key_colors">key color reset</string>
+    <string name="topbar_change_style">style change</string>
+    <string name="topbar_change_cmf_seed">tertiary seed change</string>
+    <string name="topbar_change_contrast">contrast change</string>
+    <string name="topbar_change_spec">spec change</string>
+    <string name="topbar_change_platform">platform change</string>
+    <string name="topbar_change_amoled">AMOLED change</string>
+    <string name="topbar_change_add_accent">new extra color</string>
+    <string name="topbar_change_update_accent">extra color change</string>
+    <string name="topbar_change_remove_accent">extra color removal</string>
+    <string name="topbar_change_pin">pin change</string>
+    <string name="topbar_change_clear_pins">pin reset</string>
+    <string name="topbar_change_library">library change</string>
+    <string name="topbar_change_motion_scheme">motion change</string>
+    <string name="topbar_change_theme_name">rename</string>
+    <string name="topbar_change_custom_tone">custom tone change</string>
+    <string name="topbar_change_replace">theme change</string>
+</resources>

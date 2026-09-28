@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The projects drawer's title. -->
+    <string name="projects_title">Projects</string>
+    <!-- The two ways to start a project, from the defaults or as a copy of the open one. -->
+    <string name="projects_new">New project</string>
+    <string name="projects_new_copy">Copy this one</string>
+    <!-- The search field, shown once there are more than eight projects. -->
+    <string name="projects_search">Search projects</string>
+    <!-- Shown in place of the list when the search matches nothing. -->
+    <string name="projects_search_empty">No projects match</string>
+    <!-- Shown in place of the list before anything is saved. -->
+    <string name="projects_empty">Nothing saved yet</string>
+    <!-- The menu on each row, read out with the project's name. -->
+    <string name="projects_more">More for %1$s</string>
+    <string name="projects_rename">Rename</string>
+    <string name="projects_duplicate">Duplicate</string>
+    <string name="projects_delete">Delete</string>
+    <!-- The inline rename field, and what it says about an empty name. -->
+    <string name="projects_name">Project name</string>
+    <string name="projects_name_empty">A project needs a name</string>
+    <string name="projects_name_long">That name is too long</string>
+    <!-- The name a duplicate gets. The argument is the name of the project it copies. -->
+    <string name="projects_copy_name">%1$s copy</string>
+    <!-- The toast after a delete, with its undo. The argument is the project's name. -->
+    <string name="projects_deleted">Deleted %1$s</string>
+    <string name="projects_undo">Undo</string>
+
+    <!-- The target badge on each row. -->
+    <string name="projects_target_m3">Material 3</string>
+    <string name="projects_target_expressive">Expressive</string>
+    <string name="projects_target_unstyled">Unstyled</string>
+    <string name="projects_target_fluent">Fluent</string>
+    <string name="projects_target_custom">Custom</string>
+
+    <!-- When each project was last saved. -->
+    <string name="projects_updated_now">Just now</string>
+    <plurals name="projects_updated_minutes">
+        <item quantity="one">%1$d minute ago</item>
+        <item quantity="other">%1$d minutes ago</item>
+    </plurals>
+    <plurals name="projects_updated_hours">
+        <item quantity="one">%1$d hour ago</item>
+        <item quantity="other">%1$d hours ago</item>
+    </plurals>
+    <plurals name="projects_updated_days">
+        <item quantity="one">Yesterday</item>
+        <item quantity="other">%1$d days ago</item>
+    </plurals>
+    <plurals name="projects_updated_weeks">
+        <item quantity="one">Last week</item>
+        <item quantity="other">%1$d weeks ago</item>
+    </plurals>
+    <plurals name="projects_updated_months">
+        <item quantity="one">Last month</item>
+        <item quantity="other">%1$d months ago</item>
+    </plurals>
+    <plurals name="projects_updated_years">
+        <item quantity="one">Last year</item>
+        <item quantity="other">%1$d years ago</item>
+    </plurals>
+
+    <!-- The banner when this browser keeps nothing, private browsing for example. -->
+    <string name="projects_storage_unavailable">This browser isn’t keeping anything, so your work won’t be saved here. Share a link to keep it.</string>
+    <string name="projects_storage_share">Get a link</string>
+
+    <!-- The banner when another tab saved the open project while this one was editing it. -->
+    <string name="projects_conflict">This project changed in another tab</string>
+    <string name="projects_conflict_load">Load latest</string>
+    <string name="projects_conflict_keep">Keep mine</string>
+
+    <!-- The banner when a newer version of the builder saved data this one leaves alone until a reload. -->
+    <string name="projects_newer_data">A newer version of the builder saved some of your work here. Reload the page to pick it up.</string>
+
+    <!-- Toasts when storage turns something down. -->
+    <string name="projects_problem_open">That project couldn’t be opened</string>
+    <string name="projects_problem_create">There’s no room to save another project</string>
+    <string name="projects_problem_duplicate">That project couldn’t be copied</string>
+    <string name="projects_problem_rename">The new name couldn’t be saved</string>
+    <string name="projects_problem_delete">That project couldn’t be deleted</string>
+    <string name="projects_problem_delete_newer">A newer version of the builder saved that project. Reload the page to delete it.</string>
+    <string name="projects_problem_restore">That project couldn’t be brought back</string>
+    <string name="projects_problem_set_aside">Some saved work couldn’t be read, so it was set aside</string>
+
+    <!-- The banner over a theme that isn't saved yet, one opened from a link or one storage turned down. -->
+    <string name="share_transient">This theme isn’t in your projects yet</string>
+    <string name="share_transient_save">Save to my projects</string>
+
+    <!-- The share dialog. -->
+    <string name="share_title">Share this theme</string>
+    <string name="share_card_heading">Link preview</string>
+    <string name="share_card_name">Link preview card</string>
+    <string name="share_card_loading">Loading the preview card</string>
+    <string name="share_card_updating">Updating card</string>
+    <string name="share_card_failed">The preview card didn’t load</string>
+    <string name="share_card_failed_body">The link still works.</string>
+    <!-- The project name field, which renames the project and the name the link carries. -->
+    <string name="share_name_label">Project name</string>
+    <string name="share_name_help">Renames the project.</string>
+    <string name="share_name_not_saved">That name didn’t save. Try again.</string>
+    <string name="share_name_transient">Save it to your projects to rename it.</string>
+    <!-- What the link carries, a label on the left and its value on the right. -->
+    <string name="share_detail_seed">Seed</string>
+    <string name="share_detail_style">Style</string>
+    <!-- The style's name, then the spec it runs, such as "TonalSpot, 2026 spec". -->
+    <string name="share_detail_style_value">%1$s, %2$s spec</string>
+    <string name="share_detail_for">For</string>
+    <string name="share_detail_extras">Extra colors</string>
+    <string name="share_detail_extras_none">None</string>
+    <!-- Joined with ", " when both show, such as "2 key colors, 3 accents". -->
+    <plurals name="share_detail_key_colors">
+        <item quantity="one">%1$d key color</item>
+        <item quantity="other">%1$d key colors</item>
+    </plurals>
+    <plurals name="share_detail_accents">
+        <item quantity="one">%1$d accent</item>
+        <item quantity="other">%1$d accents</item>
+    </plurals>
+    <string name="share_link_label">Link</string>
+    <!-- The name the link in the share dialog goes by, read out before it. -->
+    <string name="share_link_name">Share link</string>
+    <string name="share_copy">Copy link</string>
+    <string name="share_send">Share</string>
+    <string name="share_copied">Link copied</string>
+    <string name="share_manual">That didn’t work. Select the link above and copy it yourself.</string>
+    <!-- In its place on a touch screen, where a finger cannot select the wrapped link. The argument is the button to try, "Copy link" or "Share". -->
+    <string name="share_manual_touch_again">That didn’t work, and a finger can’t select the link here. Try %1$s again.</string>
+    <string name="share_manual_touch_instead">That didn’t work, and a finger can’t select the link here. Try %1$s instead.</string>
+    <string name="share_unavailable">This theme can’t be put in a link</string>
+
+    <!-- Notices when a pasted link can't be opened. -->
+    <string name="share_invalid">That link doesn’t open a theme</string>
+</resources>
