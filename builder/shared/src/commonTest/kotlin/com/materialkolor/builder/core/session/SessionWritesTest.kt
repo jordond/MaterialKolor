@@ -116,6 +116,23 @@ class SessionWritesTest : SessionTestBase() {
         }
 
     @Test
+    fun write_heldBackByAConflict_settlesWhenTheOtherTabSavesTheSameDocument() =
+        runTest {
+            val (session) = session()
+            val id = booted(session)
+            session.edit(DocumentChange.SetAmoled(true), EditPhase.Discrete)
+            saveFromAnotherTab(id, FOREST)
+            settle()
+            session.saveStatus.value shouldBe SaveStatus.Held
+
+            saveFromAnotherTab(id, session.document.value, revision = 11)
+            settle()
+
+            session.conflict.value shouldBe null
+            session.saveStatus.value shouldBe SaveStatus.Idle
+        }
+
+    @Test
     fun updateView_betweenThePreDeleteFlushAndTheDelete_leavesNothingOfTheProject() =
         runTest {
             val (session) = session()

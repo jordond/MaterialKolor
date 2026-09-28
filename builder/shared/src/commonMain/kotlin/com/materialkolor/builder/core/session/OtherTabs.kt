@@ -96,6 +96,7 @@ internal class OtherTabs(
             IncomingSave.Matches -> {
                 open.facts.update { facts -> facts.copy(name = incoming.name, held = incoming) }
                 setConflict(null)
+                if (shown.saveStatus == SaveStatus.Held) commit(shown.document)
             }
             IncomingSave.RaiseConflict -> {
                 open.facts.update { facts -> facts.copy(name = incoming.name) }
