@@ -154,7 +154,9 @@ private class Catalog {
                 lines.mapKeys { (key, _) -> renames.getValue(key) }
             } else {
                 lines.mapValues { (_, value) ->
-                    VERSION_REF.replace(value) { match -> "version.ref = \"${renames.getValue(match.groupValues[1])}\"" }
+                    VERSION_REF.replace(
+                        value,
+                    ) { match -> "version.ref = \"${renames.getValue(match.groupValues[1])}\"" }
                 }
             }
         }
