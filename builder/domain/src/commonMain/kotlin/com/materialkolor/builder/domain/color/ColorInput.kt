@@ -1,5 +1,6 @@
 package com.materialkolor.builder.domain.color
 
+import androidx.compose.runtime.Immutable
 import kotlin.math.PI
 import kotlin.math.roundToInt
 
@@ -39,6 +40,7 @@ public object ColorInput {
 /**
  * What [ColorInput.parse] made of some text.
  */
+@Immutable
 public sealed interface ParseResult {
     /**
      * The text is a color.
@@ -46,6 +48,7 @@ public sealed interface ParseResult {
      * @property[argb] The color, always opaque.
      * @property[notes] What had to change for the color to fit, empty when it was read exactly as written.
      */
+    @Immutable
     public data class Ok(
         public val argb: Argb,
         public val notes: Set<ParseNote> = emptySet(),
@@ -56,6 +59,7 @@ public sealed interface ParseResult {
      *
      * @property[reason] What went wrong, for the error under the field.
      */
+    @Immutable
     public data class Invalid(
         public val reason: InvalidReason,
     ) : ParseResult

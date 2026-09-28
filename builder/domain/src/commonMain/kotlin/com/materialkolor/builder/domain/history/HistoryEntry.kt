@@ -1,5 +1,6 @@
 package com.materialkolor.builder.domain.history
 
+import androidx.compose.runtime.Immutable
 import com.materialkolor.builder.domain.edit.ChangeLabel
 import com.materialkolor.builder.domain.model.ThemeDocument
 import kotlinx.serialization.SerialName
@@ -18,6 +19,7 @@ import kotlinx.serialization.Serializable
  * that took several edits, a drag or quick typing, carries its latest one. Steps saved before the
  * history kept times read back without one.
  */
+@Immutable
 @Serializable
 public data class HistoryEntry(
     @SerialName("before")

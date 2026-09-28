@@ -1,5 +1,6 @@
 package com.materialkolor.builder.domain.capability
 
+import androidx.compose.runtime.Immutable
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.Style
@@ -118,12 +119,14 @@ public enum class Control {
 /**
  * How a [Control] shows up for the current target.
  */
+@Immutable
 public sealed interface ControlState {
     /**
      * The control is there and works.
      *
      * @property[note] Something worth saying next to the control, or null when it speaks for itself.
      */
+    @Immutable
     public data class Enabled(
         public val note: Reason? = null,
     ) : ControlState
@@ -134,6 +137,7 @@ public sealed interface ControlState {
      * @property[reason] Why it is left out, for the places that explain an absence, or null when
      * the control has no meaning here.
      */
+    @Immutable
     public data class Hidden(
         public val reason: Reason? = null,
     ) : ControlState
@@ -143,6 +147,7 @@ public sealed interface ControlState {
      *
      * @property[reason] Why it cannot be used.
      */
+    @Immutable
     public data class Disabled(
         public val reason: Reason,
     ) : ControlState
@@ -155,6 +160,7 @@ public sealed interface ControlState {
  * whether it is expressive, the same way [ExportTarget.of] picks it, and the style and effective
  * spec settle the few rows that move with them.
  */
+@Immutable
 public class Capabilities private constructor(
     private val states: Map<Control, ControlState>,
 ) {

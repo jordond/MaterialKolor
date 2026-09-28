@@ -1,5 +1,6 @@
 package com.materialkolor.builder.domain.model
 
+import androidx.compose.runtime.Immutable
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -137,12 +138,14 @@ public enum class CustomSlot(
  * A slot either takes a role the scheme already solved, or cuts a tone off a ramp itself. Material
  * has no name for a pressed state, a surface step or a border step, so those are tones.
  */
+@Immutable
 public sealed interface SlotResolution {
     /**
      * The slot is a scheme role, the same color the Roles tab shows.
      *
      * @property[role] The role the slot takes.
      */
+    @Immutable
     public data class FromRole(
         public val role: Role,
     ) : SlotResolution
@@ -154,6 +157,7 @@ public sealed interface SlotResolution {
      * @property[light] The tone in light mode.
      * @property[dark] The tone in dark mode.
      */
+    @Immutable
     public data class FromRamp(
         public val ramp: TonalRamp,
         public val light: Int,
@@ -167,6 +171,7 @@ public sealed interface SlotResolution {
      * @property[light] The background tone in light mode.
      * @property[dark] The background tone in dark mode.
      */
+    @Immutable
     public data class OnRamp(
         public val ramp: TonalRamp,
         public val light: Int,
@@ -205,6 +210,7 @@ public enum class TonalRamp {
  * @property[light] The tone in light mode, or null to keep the slot's own.
  * @property[dark] The tone in dark mode, or null to keep the slot's own.
  */
+@Immutable
 @Serializable
 public data class CustomTone(
     @SerialName("light")

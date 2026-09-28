@@ -28,6 +28,7 @@ import com.materialkolor.builder.domain.model.ThemeDocument
  * A change only ever touches the fields it names. Picking a style leaves the spec where it was,
  * picking a spec leaves the style alone, and a library pick moves them only when it names them.
  */
+@Immutable
 public sealed interface DocumentChange {
     /**
      * Which edits this one folds into when they land close together.

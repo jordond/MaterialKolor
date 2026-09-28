@@ -1,5 +1,6 @@
 package com.materialkolor.builder.domain.link
 
+import androidx.compose.runtime.Immutable
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.color.ContrastLevel
 import com.materialkolor.builder.domain.model.KeyColor
@@ -26,6 +27,7 @@ public enum class LegacyPreviewMode {
  * @property[packageName] The package the old builder exported to, or null when the link had none.
  * It belongs to the exporting browser's preferences, never to the document.
  */
+@Immutable
 public data class LegacyImport(
     public val document: ThemeDocument,
     public val previewMode: LegacyPreviewMode?,

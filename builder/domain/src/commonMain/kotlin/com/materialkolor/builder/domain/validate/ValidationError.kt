@@ -1,5 +1,6 @@
 package com.materialkolor.builder.domain.validate
 
+import androidx.compose.runtime.Immutable
 import com.materialkolor.builder.domain.model.Role
 
 /**
@@ -9,6 +10,7 @@ import com.materialkolor.builder.domain.model.Role
  * Each error names the field it is about and carries the value that failed, so the UI can point at
  * the right control and say what is wrong with it.
  */
+@Immutable
 public sealed interface ValidationError {
     /**
      * A segment of the package name is not a lowercase Java package segment.
@@ -16,6 +18,7 @@ public sealed interface ValidationError {
      * @property[index] Where the segment sits in the package, counting from zero.
      * @property[segment] The segment as it was typed.
      */
+    @Immutable
     public data class PackageSegmentInvalid(
         public val index: Int,
         public val segment: String,
@@ -27,6 +30,7 @@ public sealed interface ValidationError {
      * @property[index] Where the segment sits in the package, counting from zero.
      * @property[segment] The keyword.
      */
+    @Immutable
     public data class PackageSegmentKeyword(
         public val index: Int,
         public val segment: String,
@@ -37,6 +41,7 @@ public sealed interface ValidationError {
      *
      * @property[name] The name as it was typed.
      */
+    @Immutable
     public data class ThemeNameInvalid(
         public val name: String,
     ) : ValidationError
@@ -46,6 +51,7 @@ public sealed interface ValidationError {
      *
      * @property[name] The keyword.
      */
+    @Immutable
     public data class ThemeNameKeyword(
         public val name: String,
     ) : ValidationError
@@ -55,6 +61,7 @@ public sealed interface ValidationError {
      *
      * @property[count] How many accents the theme has.
      */
+    @Immutable
     public data class TooManyAccents(
         public val count: Int,
     ) : ValidationError
@@ -65,6 +72,7 @@ public sealed interface ValidationError {
      * @property[index] Where the accent sits in the document's list.
      * @property[name] The name as it was typed.
      */
+    @Immutable
     public data class AccentNameInvalid(
         public val index: Int,
         public val name: String,
@@ -76,6 +84,7 @@ public sealed interface ValidationError {
      * @property[index] Where the accent sits in the document's list.
      * @property[name] The keyword.
      */
+    @Immutable
     public data class AccentNameKeyword(
         public val index: Int,
         public val name: String,
@@ -88,6 +97,7 @@ public sealed interface ValidationError {
      * @property[name] The name as it was typed.
      * @property[bytes] How long the name is in UTF-8.
      */
+    @Immutable
     public data class AccentNameTooLong(
         public val index: Int,
         public val name: String,
@@ -100,6 +110,7 @@ public sealed interface ValidationError {
      * @property[index] Where the later of the two sits in the document's list.
      * @property[name] The name they share.
      */
+    @Immutable
     public data class AccentNameDuplicate(
         public val index: Int,
         public val name: String,
@@ -111,6 +122,7 @@ public sealed interface ValidationError {
      * @property[name] The name as it was typed.
      * @property[bytes] How long the name is in UTF-8.
      */
+    @Immutable
     public data class ProjectNameTooLong(
         public val name: String,
         public val bytes: Int,
@@ -123,6 +135,7 @@ public sealed interface ValidationError {
      * @property[index] Where the later of the two sits in the document's list.
      * @property[name] The name as it was typed.
      */
+    @Immutable
     public data class AccentNameCaseClash(
         public val index: Int,
         public val name: String,
@@ -135,6 +148,7 @@ public sealed interface ValidationError {
      * @property[name] The name as it was typed.
      * @property[role] The role it would collide with.
      */
+    @Immutable
     public data class AccentNameRole(
         public val index: Int,
         public val name: String,

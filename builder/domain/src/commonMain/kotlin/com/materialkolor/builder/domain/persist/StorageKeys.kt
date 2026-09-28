@@ -1,5 +1,7 @@
 package com.materialkolor.builder.domain.persist
 
+import androidx.compose.runtime.Immutable
+
 /**
  * The names everything the builder saves is stored under.
  *
@@ -91,20 +93,24 @@ public object StorageKeys {
 /**
  * One of the builder's own records, as [StorageKeys.parse] reads it back off its key.
  */
+@Immutable
 public sealed interface StorageKey {
     /**
      * The [ProjectIndex] under [StorageKeys.INDEX].
      */
+    @Immutable
     public data object Index : StorageKey
 
     /**
      * The [Preferences] under [StorageKeys.PREFS].
      */
+    @Immutable
     public data object Prefs : StorageKey
 
     /**
      * The splash colors under [StorageKeys.SPLASH].
      */
+    @Immutable
     public data object Splash : StorageKey
 
     /**
@@ -112,6 +118,7 @@ public sealed interface StorageKey {
      *
      * @property[id] The project it belongs to.
      */
+    @Immutable
     public data class Project(
         public val id: String,
     ) : StorageKey
@@ -121,6 +128,7 @@ public sealed interface StorageKey {
      *
      * @property[id] The project it belongs to.
      */
+    @Immutable
     public data class History(
         public val id: String,
     ) : StorageKey
@@ -130,6 +138,7 @@ public sealed interface StorageKey {
      *
      * @property[id] The project it belongs to.
      */
+    @Immutable
     public data class View(
         public val id: String,
     ) : StorageKey

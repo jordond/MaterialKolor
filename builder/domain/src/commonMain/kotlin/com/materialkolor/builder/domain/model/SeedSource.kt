@@ -1,5 +1,6 @@
 package com.materialkolor.builder.domain.model
 
+import androidx.compose.runtime.Immutable
 import com.materialkolor.builder.domain.color.Argb
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -11,11 +12,13 @@ import kotlinx.serialization.Serializable
  * needs to show the right control, and what an image seed needs to offer its other candidates
  * again without asking for the picture a second time.
  */
+@Immutable
 @Serializable
 public sealed interface SeedSource {
     /**
      * Typed in as hex.
      */
+    @Immutable
     @Serializable
     @SerialName("Typed")
     public data object Typed : SeedSource
@@ -23,6 +26,7 @@ public sealed interface SeedSource {
     /**
      * Chosen in the color picker.
      */
+    @Immutable
     @Serializable
     @SerialName("Picked")
     public data object Picked : SeedSource
@@ -30,6 +34,7 @@ public sealed interface SeedSource {
     /**
      * Lifted off the screen with the eyedropper.
      */
+    @Immutable
     @Serializable
     @SerialName("Eyedropper")
     public data object Eyedropper : SeedSource
@@ -37,6 +42,7 @@ public sealed interface SeedSource {
     /**
      * Rolled at random.
      */
+    @Immutable
     @Serializable
     @SerialName("Shuffled")
     public data object Shuffled : SeedSource
@@ -46,6 +52,7 @@ public sealed interface SeedSource {
      *
      * @property[id] The preset that was picked.
      */
+    @Immutable
     @Serializable
     @SerialName("Preset")
     public data class Preset(
@@ -62,6 +69,7 @@ public sealed interface SeedSource {
      * @property[name] The file the colors were pulled from, shown beside the seed.
      * @property[candidates] The other colors the extractor offered, most likely first.
      */
+    @Immutable
     @Serializable
     @SerialName("Image")
     public data class Image(

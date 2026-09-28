@@ -1,5 +1,6 @@
 package com.materialkolor.builder.domain.audit
 
+import androidx.compose.runtime.Immutable
 import com.materialkolor.builder.domain.model.AccentPart
 import com.materialkolor.builder.domain.model.AccentSlot
 import com.materialkolor.builder.domain.model.CustomSlot
@@ -11,12 +12,14 @@ import com.materialkolor.builder.domain.model.SlotResolution
 /**
  * One color a contrast pair can name, resolved per mode by whoever runs the audit.
  */
+@Immutable
 public sealed interface ColorRef {
     /**
      * A role of the Material 3 scheme.
      *
      * @property[role] The role.
      */
+    @Immutable
     public data class OfRole(
         public val role: Role,
     ) : ColorRef
@@ -26,6 +29,7 @@ public sealed interface ColorRef {
      *
      * @property[slot] Which accent and which of its four colors.
      */
+    @Immutable
     public data class OfAccent(
         public val slot: AccentSlot,
     ) : ColorRef
@@ -35,6 +39,7 @@ public sealed interface ColorRef {
      *
      * @property[slot] The slot.
      */
+    @Immutable
     public data class OfSlot(
         public val slot: CustomSlot,
     ) : ColorRef
@@ -44,6 +49,7 @@ public sealed interface ColorRef {
      *
      * @property[text] The text color.
      */
+    @Immutable
     public data class OfFluentText(
         public val text: FluentText,
     ) : ColorRef
@@ -53,6 +59,7 @@ public sealed interface ColorRef {
      *
      * @property[shade] The shade.
      */
+    @Immutable
     public data class OfFluentShade(
         public val shade: FluentShade,
     ) : ColorRef
@@ -135,6 +142,7 @@ public enum class PairKind {
  * @property[background] The color it sits on.
  * @property[kind] Whether the foreground is text or a shape.
  */
+@Immutable
 public data class ContrastPair(
     public val foreground: ColorRef,
     public val background: ColorRef,

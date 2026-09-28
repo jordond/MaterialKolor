@@ -1,5 +1,6 @@
 package com.materialkolor.builder.domain.export
 
+import androidx.compose.runtime.Immutable
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.model.CustomSlot
 import com.materialkolor.builder.domain.model.Role
@@ -19,6 +20,7 @@ import com.materialkolor.builder.domain.model.Role
  * @property[fluentShades] The seven Fluent shades of each mode. The engine fills them whatever the
  * target, so they are only null when a caller leaves them out.
  */
+@Immutable
 public data class ResolvedExport(
     public val roles: Map<ContrastVariant, RoleTable>,
     public val accents: List<AccentFamilyValues> = emptyList(),
@@ -61,6 +63,7 @@ public enum class ContrastVariant {
  * @property[light] The roles in light mode.
  * @property[dark] The roles in dark mode.
  */
+@Immutable
 public data class RoleTable(
     public val light: Map<Role, Argb>,
     public val dark: Map<Role, Argb>,
@@ -78,6 +81,7 @@ public data class RoleTable(
  * @property[light] The family in light mode.
  * @property[dark] The family in dark mode.
  */
+@Immutable
 public data class AccentFamilyValues(
     public val name: String,
     public val light: AccentColors,
@@ -92,6 +96,7 @@ public data class AccentFamilyValues(
  * @property[container] The family's container.
  * @property[onContainer] The color that reads on [container].
  */
+@Immutable
 public data class AccentColors(
     public val color: Argb,
     public val onColor: Argb,
@@ -107,6 +112,7 @@ public data class AccentColors(
  * @property[light] The slots in light mode.
  * @property[dark] The slots in dark mode.
  */
+@Immutable
 public data class CustomSlotValues(
     public val light: Map<CustomSlot, Argb>,
     public val dark: Map<CustomSlot, Argb>,
@@ -131,6 +137,7 @@ public data class CustomSlotValues(
  * @property[light] The shades in light mode.
  * @property[dark] The shades in dark mode.
  */
+@Immutable
 public data class FluentShades(
     public val light: FluentShadeValues,
     public val dark: FluentShadeValues,
@@ -148,6 +155,7 @@ public data class FluentShades(
  * @property[light2] The second lightest shade.
  * @property[light3] The lightest shade.
  */
+@Immutable
 public data class FluentShadeValues(
     public val dark3: Argb,
     public val dark2: Argb,

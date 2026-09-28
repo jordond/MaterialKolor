@@ -1,5 +1,6 @@
 package com.materialkolor.builder.domain.persist
 
+import androidx.compose.runtime.Immutable
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.history.History
 import com.materialkolor.builder.domain.history.HistoryEntry
@@ -18,6 +19,7 @@ import kotlinx.serialization.Serializable
  * tab can tell another tab wrote since it last read.
  * @property[writerTab] The tab that saved it last.
  */
+@Immutable
 @Serializable
 public data class ProjectRecord(
     @SerialName("id")
@@ -48,6 +50,7 @@ public data class ProjectRecord(
  *
  * @property[projects] One entry per saved project.
  */
+@Immutable
 @Serializable
 public data class ProjectIndex(
     @SerialName("projects")
@@ -72,6 +75,7 @@ public data class ProjectIndex(
  * @property[expressive] Whether the project exports the expressive theme, for the target chip.
  * @property[previewColors] The four colors of the project's thumbnail, in the order it draws them.
  */
+@Immutable
 @Serializable
 public data class ProjectMeta(
     @SerialName("id")
@@ -109,6 +113,7 @@ public data class ProjectMeta(
  *
  * @property[entries] The steps that can be undone, oldest first, at most [History.PERSISTED].
  */
+@Immutable
 @Serializable
 public data class HistoryRecord(
     @SerialName("entries")
@@ -148,6 +153,7 @@ public data class HistoryRecord(
  * @property[deviceWidth] The width the preview was framed at.
  * @property[openFineTuneRows] The fine tune rows that were expanded.
  */
+@Immutable
 @Serializable
 public data class ProjectViewState(
     @SerialName("tab")

@@ -1,5 +1,6 @@
 package com.materialkolor.builder.domain.link
 
+import androidx.compose.runtime.Immutable
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.color.ContrastLevel
 import com.materialkolor.builder.domain.model.Accent
@@ -26,6 +27,7 @@ import com.materialkolor.builder.domain.validate.validateAccents
 /**
  * What reading a share code came to.
  */
+@Immutable
 public sealed interface DecodeResult {
     /**
      * The code read cleanly.
@@ -35,6 +37,7 @@ public sealed interface DecodeResult {
      * @property[projectName] The name of the project the theme was shared from, or null when the
      * code carries none.
      */
+    @Immutable
     public data class Ok(
         public val document: ThemeDocument,
         public val projectName: String?,
@@ -43,11 +46,13 @@ public sealed interface DecodeResult {
     /**
      * The code was written by a newer builder, in a format this one cannot read yet.
      */
+    @Immutable
     public data object UnknownVersion : DecodeResult
 
     /**
      * The code is damaged, cut short, or was never a share code.
      */
+    @Immutable
     public data object Corrupt : DecodeResult
 }
 

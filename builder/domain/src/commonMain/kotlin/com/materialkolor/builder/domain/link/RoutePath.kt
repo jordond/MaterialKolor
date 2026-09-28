@@ -1,15 +1,19 @@
 package com.materialkolor.builder.domain.link
 
+import androidx.compose.runtime.Immutable
+
 /**
  * Where a URL points inside the builder.
  *
  * Once a link has been read the app puts `/` back in the address bar, and the panels open as
  * history states on the same URL, so these few are every route there is.
  */
+@Immutable
 public sealed interface Route {
     /**
      * The builder itself, with nothing to import.
      */
+    @Immutable
     public data object Home : Route
 
     /**
@@ -17,6 +21,7 @@ public sealed interface Route {
      *
      * @property[code] The share code, still to be read by [ShareCodec.decode].
      */
+    @Immutable
     public data class Theme(
         public val code: String,
     ) : Route
@@ -26,6 +31,7 @@ public sealed interface Route {
      *
      * @property[query] The query without its leading `?`, still to be read by [LegacyQuery.parse].
      */
+    @Immutable
     public data class Legacy(
         public val query: String,
     ) : Route
@@ -35,6 +41,7 @@ public sealed interface Route {
      *
      * @property[path] The path as it was asked for.
      */
+    @Immutable
     public data class Unknown(
         public val path: String,
     ) : Route

@@ -1,5 +1,6 @@
 package com.materialkolor.builder.domain.persist
 
+import androidx.compose.runtime.Immutable
 import com.materialkolor.builder.domain.model.Library
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -25,6 +26,7 @@ import kotlinx.serialization.Serializable
  * @property[singleKeyShortcuts] Whether keys pressed on their own, such as Space to shuffle, run
  * shortcuts. With it off only Cmd or Ctrl shortcuts and Esc do (WCAG 2.1.4).
  */
+@Immutable
 @Serializable
 public data class Preferences(
     @SerialName("appearance")
@@ -192,6 +194,7 @@ public enum class ExportTarget {
  * @property[androidDynamicColor] Whether the generated theme uses the wallpaper colors on Android
  * 12 and up. Off unless asked for, since it hides the generated scheme on those devices.
  */
+@Immutable
 @Serializable
 public data class ExportPrefs(
     @SerialName("packageName")

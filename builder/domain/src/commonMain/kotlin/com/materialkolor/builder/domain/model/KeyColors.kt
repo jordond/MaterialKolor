@@ -1,5 +1,6 @@
 package com.materialkolor.builder.domain.model
 
+import androidx.compose.runtime.Immutable
 import com.materialkolor.builder.domain.color.Argb
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -48,6 +49,7 @@ public enum class KeyColor(
  * @property[neutral] Overrides the neutral palette.
  * @property[neutralVariant] Overrides the neutral variant palette.
  */
+@Immutable
 @Serializable
 public data class KeyColors(
     @SerialName("primary")

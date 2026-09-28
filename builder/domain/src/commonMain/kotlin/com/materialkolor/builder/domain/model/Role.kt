@@ -1,5 +1,6 @@
 package com.materialkolor.builder.domain.model
 
+import androidx.compose.runtime.Immutable
 import com.materialkolor.builder.domain.color.Argb
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -270,6 +271,7 @@ public enum class RoleGroup(
  * @property[light] The color the role takes in light mode, or null to keep deriving it.
  * @property[dark] The color the role takes in dark mode, or null to keep deriving it.
  */
+@Immutable
 @Serializable
 public data class RolePin(
     @SerialName("light")
