@@ -106,11 +106,11 @@ internal fun SeedHero(
         stringResource(Res.string.poster_seed_field),
         source,
     )
-    // b-522 The hex sets at 80 where it fits, and the field's own fit shrinks it where it does not.
+    // The hex sets at 80 where it fits, and the field's own fit shrinks it where it does not.
     val hero = remember(type) { type.copy(posterHero = type.posterHero.merge(HeroType)) }
     Column(modifier) {
         InfoLabel(label = stringResource(Res.string.poster_seed), topic = InfoTopic.Seed)
-        // b-522 No tooltip over the field. A tooltip opens on keyboard focus and takes the Esc that
+        // No tooltip over the field. A tooltip opens on keyboard focus and takes the Esc that
         // puts the seed back, so the source rides in the field's name alone.
         CompositionLocalProvider(LocalBuilderType provides hero) {
             BuilderHexField(
@@ -144,7 +144,7 @@ internal fun SeedHero(
                 buttonModifier = triggerFocus(copyHex),
             )
             PosterIconButton(
-                icon = IconId.Code, // b-524
+                icon = IconId.Code,
                 description = stringResource(Res.string.poster_copy_kotlin),
                 onClick = {
                     val copy = WorkspaceAction.CopyText(kotlinLiteralOf(seed), kotlinLabel, copyKotlin.requester)

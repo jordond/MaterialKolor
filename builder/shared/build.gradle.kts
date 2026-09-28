@@ -68,7 +68,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodel.compose)
             implementation(libs.kermit)
             implementation(libs.kotlinx.collections)
-            // B-547, reads the live library versions the site serves.
+            // Reads the live library versions the site serves.
             implementation(libs.kotlinx.serialization.json)
         }
 

@@ -111,7 +111,7 @@ class PosterLogicTest {
     @Test
     fun saveMarkOf_eachStatus_saysWhetherTheProjectIsSavedInWordsAndAGlyph() {
         saveMarkOf(SaveStatus.Idle) shouldBe SaveMark(Res.string.poster_projects_saved, IconId.Check)
-        // b-526 D68, a save under way ends the pill in the progress glyph.
+        // A save under way ends the pill in the progress glyph.
         saveMarkOf(SaveStatus.Pending) shouldBe SaveMark(Res.string.poster_projects_saving, IconId.Progress)
         saveMarkOf(SaveStatus.Failed(StoreError.QuotaExceeded)) shouldBe
             SaveMark(Res.string.poster_projects_not_saved, glyph = null)

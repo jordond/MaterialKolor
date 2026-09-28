@@ -163,13 +163,13 @@ internal fun StyleDetails(
     val spacing = LocalBuilderTokens.current.spacing
     val selected = context.document.style
     var open by rememberSaveable { mutableStateOf(false) }
-    // b-524 Only the 400 poster has room for the line and the toggle side by side. The 320 poster
+    // Only the 400 poster has room for the line and the toggle side by side. The 320 poster
     // and the phone sheet put the toggle under the line.
     val stacked = LocalLayout.current.posterMode != PosterMode.Docked400
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(spacing.small),
-            verticalAlignment = Alignment.CenterVertically, // b-523
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             BuilderText(
                 text = stringResource(
@@ -180,12 +180,12 @@ internal fun StyleDetails(
                 modifier = Modifier.weight(1f),
             )
             if (info) InfoButton(topic = InfoTopic.Style, expanded = open, onClick = { open = !open })
-            if (!stacked) KeepStyleToggle(context, dispatcher) // b-523
+            if (!stacked) KeepStyleToggle(context, dispatcher)
         }
         if (stacked) KeepStyleToggle(context, dispatcher)
         if (info && open) {
             InfoNote(InfoTopic.Style)
-            // b-527 Why the target treats the style differently opens with the explanation.
+            // Why the target treats the style differently opens with the explanation.
             context.capabilities[Control.Style].explanation?.let { reason -> ReasonLine(reason) }
         }
         if (selected == Style.Cmf) {
@@ -208,7 +208,7 @@ private fun StyleHeader(
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     val label = stringResource(Res.string.style_label)
-    // b-523 The spec note sits at the end of the label's line, and an open explanation goes under both.
+    // The spec note sits at the end of the label's line, and an open explanation goes under both.
     val note = forcedSpec(selected)?.let { spec ->
         stringResource(
             Res.string.style_spec_forced,
@@ -221,11 +221,10 @@ private fun StyleHeader(
             horizontalArrangement = Arrangement.spacedBy(spacing.small),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Eyebrow(label) // b-524
+            Eyebrow(label)
             if (note != null) SpecNote(note, Modifier.weight(1f))
         }
     } else {
-        // b-527
         ReasonInfoLabel(label = label, topic = InfoTopic.Style, reason = reason) {
             if (note != null) SpecNote(note, Modifier.weight(1f))
         }
@@ -267,7 +266,7 @@ private fun StyleChipRow(
     val spacing = LocalBuilderTokens.current.spacing
     // A row that scrolls gives each chip a cell of its own width, since it has no width to share.
     val cell = if (scrolling) Modifier.width(SchemeChipFootprint + spacing.small) else null
-    // b-527 The 320 poster's grid reaches into the poster's side room, so each cell is wide enough
+    // The 320 poster's grid reaches into the poster's side room, so each cell is wide enough
     // for the longest name, Monochrome, at the chip name's smallest size.
     val narrow = LocalLayout.current.posterMode == PosterMode.Docked320
     val grid = if (narrow) Modifier.sideBleed(spacing.medium) else Modifier
@@ -359,7 +358,6 @@ private fun StyleChip(
                 .onGloballyPositioned { coordinates -> bounds.rect = coordinates.boundsInRoot() },
             tooltip = stringResource(Res.string.style_chip_tooltip, shown, hint, stringResource(specSupport(style))),
         )
-        // b-527
         if (!named) return@Column
         SchemeChipName(name = shown, modifier = Modifier.fillMaxWidth())
         if (tag != null) {

@@ -99,7 +99,7 @@ class DialogRoomTest {
         var bounds = DpRect(0.dp, 0.dp, 0.dp, 0.dp)
         runDesktopComposeUiTest(width = PHONE_WIDTH, height = height) {
             showDialog(dialog)
-            // B-548 The preset picker's Close is a glyph beside the title, named by its content description.
+            // The preset picker's Close is a glyph beside the title, named by its content description.
             bounds =
                 onNode(hasText(label) or hasContentDescription(label)).assertIsDisplayed().getUnclippedBoundsInRoot()
         }

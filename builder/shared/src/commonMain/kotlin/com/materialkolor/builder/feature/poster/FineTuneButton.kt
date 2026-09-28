@@ -62,7 +62,6 @@ internal fun FineTuneButton(
     val title = stringResource(Res.string.finetune_title)
     val summary = fineTuneSummary(context.document)
     val name = stringResource(Res.string.finetune_button, title, summary)
-    // b-527
     val shape = RoundedCornerShape(percent = PILL_PERCENT)
     BuilderPressable(
         onClick = { dispatcher.dispatch(WorkspaceAction.OpenFineTune()) },

@@ -198,7 +198,7 @@ internal fun seedCommands(
             ShuffleLock.Style -> Shortcut.StyleLock
             ShuffleLock.Seed -> null
         }
-        val site = lockSite(lock) // b-524
+        val site = lockSite(lock)
         list.add("lock.${lock.name}", CommandCategory.Seed, name, site, shortcut = shortcut, selected = on) {
             dispatcher.dispatch(WorkspaceAction.SetLock(lock, !on))
         }
@@ -222,7 +222,6 @@ internal fun seedCommands(
  */
 @Composable
 private fun lockSite(lock: ShuffleLock): ControlSite {
-    // b-524
     val fineTune = stringResource(Res.string.finetune_title)
     return when (lock) {
         ShuffleLock.Hue -> ControlSite.Direct(
@@ -322,7 +321,7 @@ internal fun targetCommands(
     state: WorkspaceModel.State,
     dispatcher: Dispatcher<WorkspaceAction>,
 ) {
-    val extras = stringResource(Res.string.finetune_title) // b-524
+    val extras = stringResource(Res.string.finetune_title)
     val amoled = stringResource(Res.string.extras_amoled)
     val on = state.document.amoled
     list.add(

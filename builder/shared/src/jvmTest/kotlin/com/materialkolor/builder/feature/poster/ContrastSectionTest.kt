@@ -35,7 +35,7 @@ class ContrastSectionTest {
             }
 
             Levels.forEach { level -> onNodeWithText(level).assertIsNotEnabled() }
-            // b-527 The reason opens with the Contrast explanation.
+            // The reason opens with the Contrast explanation.
             onNodeWithText(FLUENT_FIXED).assertDoesNotExist()
             onNodeWithContentDescription(CONTRAST_INFO, substring = true).performClick()
             waitForIdle()

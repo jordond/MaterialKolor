@@ -256,7 +256,7 @@ internal fun actionRegistry(
     projectCommands(
         list = list,
         projectName = state.projectName,
-        saveStatus = state.saveStatus, // b-522
+        saveStatus = state.saveStatus,
         dispatcher = dispatcher,
         onSave = {
             projects.handle(ProjectsAction.SaveShared)

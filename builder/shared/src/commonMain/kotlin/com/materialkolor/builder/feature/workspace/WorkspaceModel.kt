@@ -177,10 +177,10 @@ internal class WorkspaceModel(
      * Open the Fine-tune sheet at [section], or at its top, the locks, when [section] is null.
      */
     fun openFineTune(section: FineTuneSection? = null) {
-        updateState { state -> state.copy(fineTune = section ?: FineTuneSection.Locks) } // b-521
+        updateState { state -> state.copy(fineTune = section ?: FineTuneSection.Locks) }
     }
 
-    fun closeFineTune() { // b-521
+    fun closeFineTune() {
         updateState { state -> state.copy(fineTune = null) }
     }
 
@@ -218,7 +218,7 @@ internal class WorkspaceModel(
                     panel = panel,
                     pickerTarget = null,
                     fullscreen = state.fullscreen && panel != Panel.History,
-                    // b-521 The Projects drawer covers the poster, so the Fine-tune sheet shuts under it.
+                    // The Projects drawer covers the poster, so the Fine-tune sheet shuts under it.
                     fineTune = state.fineTune.takeIf { panel != Panel.Projects },
                 ).withTimeline()
         }
@@ -253,7 +253,7 @@ internal class WorkspaceModel(
     }
 
     fun setPosterCollapsed(collapsed: Boolean) {
-        if (collapsed) closeFineTune() // b-521
+        if (collapsed) closeFineTune()
         updatePreferences { prefs -> prefs.copy(posterCollapsed = collapsed) }
     }
 
@@ -266,7 +266,7 @@ internal class WorkspaceModel(
         mode: PosterMode,
     ) {
         if (mode == PosterMode.Rail72) {
-            if (collapsed) closeFineTune() // b-521
+            if (collapsed) closeFineTune()
             updateState { state -> state.copy(posterOverCanvas = !collapsed) }
         } else {
             setPosterCollapsed(collapsed)
@@ -320,7 +320,7 @@ internal class WorkspaceModel(
         val next = copy(
             session = open,
             capabilities = if (open.document == document) capabilities else capabilitiesOf(open.document),
-            fineTune = fineTune.takeIf { open.generation == projectGeneration }, // b-521
+            fineTune = fineTune.takeIf { open.generation == projectGeneration },
         )
         val moved = open.document != document || open.generation != projectGeneration || open.history != history
         return if (moved) next.withTimeline() else next

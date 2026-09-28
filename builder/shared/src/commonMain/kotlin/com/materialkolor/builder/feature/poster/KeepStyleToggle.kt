@@ -25,7 +25,6 @@ internal fun KeepStyleToggle(
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
 ) {
-    // b-523
     val kept = context.preferences.isLocked(ShuffleLock.Style)
     BuilderToggleButton(
         checked = kept,
@@ -33,7 +32,7 @@ internal fun KeepStyleToggle(
         label = stringResource(Res.string.style_keep),
         modifier = modifier,
         icon = IconId.Lock,
-        // b-526 The kit carries the longer name, so the web reads it as it reads the kit's own toggles.
+        // The kit carries the longer name, so the web reads it as it reads the kit's own toggles.
         contentDescription = stringResource(Res.string.style_keep_spoken),
     )
 }

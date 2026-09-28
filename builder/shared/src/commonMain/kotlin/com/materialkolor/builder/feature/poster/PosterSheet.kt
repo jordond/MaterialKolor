@@ -28,12 +28,12 @@ internal enum class SheetSection(
     StyleChips(BottomSheetDetent.Peek),
     Contrast(BottomSheetDetent.Peek),
 
-    // b-527 The hint waits for the half detent, so the peek keeps its room for the chips and contrast.
+    // The hint waits for the half detent, so the peek keeps its room for the chips and contrast.
     FirstRunHint(BottomSheetDetent.Half),
     ContrastDetails(BottomSheetDetent.Half),
     StyleDetails(BottomSheetDetent.Half),
     Explainer(BottomSheetDetent.Half),
-    FineTune(BottomSheetDetent.Half), // b-524
+    FineTune(BottomSheetDetent.Half),
     Hero(BottomSheetDetent.Full),
     Header(BottomSheetDetent.Full),
 }

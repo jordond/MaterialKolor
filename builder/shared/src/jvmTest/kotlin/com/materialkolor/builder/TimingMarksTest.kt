@@ -97,7 +97,7 @@ class TimingMarksTest {
             CompositionLocalProvider(
                 LocalViewModelStoreOwner provides owner,
                 LocalMetroViewModelFactory provides graph.metroViewModelFactory,
-                // b-526 The saving glyph turns on the frame clock, which would hold waitForIdle through the save.
+                // The saving glyph turns on the frame clock, which would hold waitForIdle through the save.
                 LocalMotionFrozen provides true,
             ) {
                 workspace = metroViewModel()

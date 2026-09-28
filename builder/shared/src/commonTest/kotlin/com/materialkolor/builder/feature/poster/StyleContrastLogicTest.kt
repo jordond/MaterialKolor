@@ -41,7 +41,6 @@ class StyleContrastLogicTest {
 
     @Test
     fun specTag_eachTheme_tagsOnlyTheChipsThatMoveItToAnotherSpec() {
-        // B-535
         val classic = Style.entries.filter { style -> EffectiveSpec.forms(style) == setOf(SpecVersion.Spec2021) }
         val revised = Style.entries.filter { style -> SpecVersion.Spec2025 in EffectiveSpec.forms(style) }
 

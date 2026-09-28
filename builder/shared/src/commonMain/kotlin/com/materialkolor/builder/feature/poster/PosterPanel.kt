@@ -72,7 +72,7 @@ internal data class PosterContext(
     val saveStatus: SaveStatus,
     val openPanel: Panel? = null,
     val visibleModes: PreviewMode = PreviewMode.Split,
-    val fineTune: FineTuneSection? = null, // b-521
+    val fineTune: FineTuneSection? = null,
     val sessionDismissedHints: Set<String> = emptySet(),
 )
 
@@ -118,7 +118,7 @@ internal fun rememberPosterContext(state: WorkspaceModel.State): PosterContext {
         state.saveStatus,
         state.panel,
         state.view.mode,
-        state.fineTune, // b-521
+        state.fineTune,
         state.sessionDismissedHints,
     ) {
         PosterContext(
@@ -130,7 +130,7 @@ internal fun rememberPosterContext(state: WorkspaceModel.State): PosterContext {
             saveStatus = state.saveStatus,
             openPanel = state.panel,
             visibleModes = state.view.mode,
-            fineTune = state.fineTune, // b-521
+            fineTune = state.fineTune,
             sessionDismissedHints = state.sessionDismissedHints,
         )
     }
@@ -269,12 +269,11 @@ private fun PosterContent(
     val mode = LocalLayout.current.posterMode
     val sheet = mode == PosterMode.Sheet
     // The sheet's handle already stands above its content, so the sheet starts close under it.
-    // b-524 The docked poster starts 16 in, which leaves Fine-tune in view at 900 tall.
+    // The docked poster starts 16 in, which leaves Fine-tune in view at 900 tall.
     val top = if (sheet) spacing.extraSmall else spacing.large
     // 24 at 400 wide, a little under 28 so Shuffle, Pick and Image share a row with
     // Material's roomy buttons. The narrower poster and the sheet keep 20, so five chips a row fit.
     val side = if (mode == PosterMode.Docked400) spacing.extraLarge else spacing.large + spacing.extraSmall
-    // b-524
     BuilderInsetSheetHost(
         sheet = {
             if (!sheet) {
@@ -302,7 +301,7 @@ private fun PosterContent(
                         .heightIn(min = viewport)
                         .padding(start = side, top = top, end = side, bottom = spacing.extraLarge),
                     // A gap inside a group. Each group adds its own room on top, see PosterGroupGap.
-                    // b-524 The gap is tight, so the docked poster reaches down to Fine-tune at 900
+                    // The gap is tight, so the docked poster reaches down to Fine-tune at 900
                     // tall with the first run hint showing, and the sheet's peek still shows the
                     // contrast levels at rest.
                     verticalArrangement = Arrangement.spacedBy(spacing.small),
@@ -330,7 +329,6 @@ private fun ColumnScope.DockedSections(
     dispatcher: Dispatcher<WorkspaceAction>,
     focus: PosterFocus?,
 ) {
-    // b-524
     val group = Modifier.padding(top = PosterGroupGap)
     PosterHeader(context, dispatcher, focus = focus)
     SeedHero(context, dispatcher, modifier = group, focus = focus)

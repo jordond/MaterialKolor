@@ -134,7 +134,6 @@ internal fun KeyColorRow(
     val derived = remember(context.result, slot) { context.result.ramps[slot, false].keyColor }
     val shown = stored ?: derived
     val name = stringResource(keyColorName(slot))
-    // b-527
     var editing by remember(slot) { mutableStateOf(false) }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.extraSmall)) {
         Row(
@@ -155,7 +154,7 @@ internal fun KeyColorRow(
                     modifier = Modifier.weight(1f),
                 )
             } else {
-                // b-527 The name alone at the board's size. Whether the color comes from the seed is
+                // The name alone at the board's size. Whether the color comes from the seed is
                 // read out with the hex, and the Clear button shows the ones set by hand.
                 BuilderText(text = name, modifier = Modifier.weight(1f), maxLines = 1)
                 KeyColorHex(

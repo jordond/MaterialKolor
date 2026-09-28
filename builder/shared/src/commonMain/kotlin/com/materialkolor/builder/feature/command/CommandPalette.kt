@@ -554,7 +554,7 @@ private fun paletteEntries(
             onlyWhenAsked = true,
         ) {
             runner.dispatch(WorkspaceAction.SetPosterCollapsed(false))
-            section.fineTune?.let { fineTune -> runner.dispatch(WorkspaceAction.OpenFineTune(fineTune)) } // b-521
+            section.fineTune?.let { fineTune -> runner.dispatch(WorkspaceAction.OpenFineTune(fineTune)) }
         }
     }
     return rows + sections + roles
@@ -605,7 +605,7 @@ private fun wordList(text: String): List<String> =
 private enum class PosterSection(
     val title: StringResource,
     val words: StringResource? = null,
-    val fineTune: FineTuneSection? = null, // b-521
+    val fineTune: FineTuneSection? = null,
 ) {
     Seed(Res.string.poster_seed),
     Style(Res.string.style_label),

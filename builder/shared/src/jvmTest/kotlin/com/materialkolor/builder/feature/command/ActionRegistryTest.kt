@@ -140,7 +140,7 @@ class ActionRegistryTest {
             is ControlSite.Direct -> {
                 openIfClosed(site.opener, site.name)
                 val there = count(site.name) > 0
-                // b-524 The opener is the Fine-tune button, whose sheet takes the poster under it out of the tree.
+                // The opener is the Fine-tune button, whose sheet takes the poster under it out of the tree.
                 if (site.opener != null) {
                     runOnUiThread { harness.workspace.closeFineTune() }
                     waitForIdle()

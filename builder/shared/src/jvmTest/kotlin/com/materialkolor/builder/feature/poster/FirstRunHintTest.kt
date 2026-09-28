@@ -108,7 +108,7 @@ class FirstRunHintTest {
             showRoot()
             onNodeWithText(HINT).assertExists()
 
-            // b-524 The hint sits at the poster's foot, under the fold at 800 tall.
+            // The hint sits at the poster's foot, under the fold at 800 tall.
             onNodeWithContentDescription("Close the hint").performScrollTo().performClick()
             waitUntil { FIRST_RUN_HINT in workspace.state.value.preferences.dismissedHints }
             waitForIdle()
@@ -146,7 +146,7 @@ class FirstRunHintTest {
             showRoot()
             onNodeWithText(HINT).assertExists()
 
-            // b-524 The hint sits at the poster's foot, under the fold at 800 tall.
+            // The hint sits at the poster's foot, under the fold at 800 tall.
             onNodeWithContentDescription("Close the hint").performScrollTo().performClick()
             waitForIdle()
 

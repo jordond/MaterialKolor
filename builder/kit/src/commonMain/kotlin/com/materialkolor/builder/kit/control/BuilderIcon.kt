@@ -37,7 +37,7 @@ public fun BuilderIcon(
     Image(
         imageVector = LocalBuilderIcons.current[id],
         contentDescription = contentDescription,
-        // b-526 A progress glyph turns while motion is on.
+        // A progress glyph turns while motion is on.
         modifier = modifier.glyphMotion(id).size(size),
         colorFilter = ColorFilter.tint(ink),
     )

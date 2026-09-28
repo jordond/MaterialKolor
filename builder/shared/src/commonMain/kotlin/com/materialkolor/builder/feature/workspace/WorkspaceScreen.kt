@@ -162,7 +162,6 @@ internal fun WorkspaceScreen(
             is WorkspaceAction.SetPosterCollapsed -> {
                 model.setPosterCollapsed(action.collapsed, posterMode)
             }
-            // b-521
             is WorkspaceAction.OpenFineTune -> {
                 model.openFineTune(action.section)
             }
@@ -291,7 +290,7 @@ internal fun WorkspaceScreen(
             ExportHost(state, dispatcher, returnFocusTo = focus.requester(TopBarControl.Export))
             ProjectsHost(state, dispatcher, returnFocusTo = posterFocus.projects.returnFocusTo)
             ExplainerHost(state, dispatcher, returnFocusTo = posterFocus.why.returnFocusTo)
-            FineTuneHost(state, dispatcher, returnFocusTo = posterFocus.fineTune.returnFocusTo) // b-524
+            FineTuneHost(state, dispatcher, returnFocusTo = posterFocus.fineTune.returnFocusTo)
             val shareReturn = posterFocus.shareReturn(state.panel, focus.requester(TopBarControl.Share))
             ShareHost(state, dispatcher, returnFocusTo = shareReturn)
             // A Medium bar short of room moves Commands into the overflow as a phone does.

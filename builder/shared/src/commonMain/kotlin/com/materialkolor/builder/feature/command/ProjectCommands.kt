@@ -64,7 +64,7 @@ import org.jetbrains.compose.resources.stringResource
 internal fun projectCommands(
     list: CommandList,
     projectName: String,
-    // b-522 The Projects button reads its save state after the name.
+    // The Projects button reads its save state after the name.
     saveStatus: SaveStatus,
     dispatcher: Dispatcher<WorkspaceAction>,
     onSave: () -> Unit,
@@ -134,7 +134,7 @@ internal fun exportCommands(
             id = "export.mode.${mode.name}",
             category = CommandCategory.Export,
             label = stringResource(Res.string.command_choice, modeLabel, name),
-            site = ControlSite.InPanel(Panel.Export, name, opener = options), // b-538 folded into Options on a phone
+            site = ControlSite.InPanel(Panel.Export, name, opener = options), // Folded into Options on a phone
             control = if (mode == ExportMode.Frozen) caps[Control.FrozenExport] else null,
             selected = prefs.mode == mode,
         ) { export.handle(ExportAction.SetMode(mode)) }

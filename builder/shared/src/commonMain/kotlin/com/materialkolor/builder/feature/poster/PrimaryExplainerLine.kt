@@ -61,7 +61,7 @@ internal fun PrimaryExplainerLine(
         ExplainerText.take(HctReadout.of(seed), HctReadout.of(primary))
     }
     if (take == null) return
-    // b-522 The line and Why read as one sentence, so Why follows the words rather than the edge.
+    // The line and Why read as one sentence, so Why follows the words rather than the edge.
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(spacing.extraSmall),

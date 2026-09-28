@@ -119,9 +119,7 @@ private fun ContrastHeader(
     context: PosterContext,
     modifier: Modifier = Modifier,
 ) {
-    // b-523
     val row = rememberLowestPair(context)
-    // b-527
     ReasonInfoLabel(
         label = stringResource(Res.string.contrast_label),
         topic = InfoTopic.Contrast,
@@ -146,7 +144,6 @@ internal fun ReasonInfoLabel(
     modifier: Modifier = Modifier,
     end: @Composable RowScope.() -> Unit = {},
 ) {
-    // b-527
     if (reason == null) {
         InfoLabel(label = label, topic = topic, modifier = modifier, end = end)
         return
@@ -189,7 +186,6 @@ private fun LowestRatio(
     document: ThemeDocument,
     modifier: Modifier = Modifier,
 ) {
-    // b-523
     val spacing = LocalBuilderTokens.current.spacing
     val ratio = ratioText(row.ratio)
     val grade = stringResource(row.badge.label)

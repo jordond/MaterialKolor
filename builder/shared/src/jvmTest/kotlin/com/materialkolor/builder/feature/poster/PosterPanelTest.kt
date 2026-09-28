@@ -212,7 +212,7 @@ class PosterPanelTest {
         runComposeUiTest {
             var document by mutableStateOf(ThemeDocument(seed = Seed, seedSource = SeedSource.Typed))
             showPoster(document = { document })
-            // b-522 The source moved into the field's name, and only an image shows as text.
+            // The source moved into the field's name, and only an image shows as text.
             seedField().assert(hasContentDescription("Seed color, any format. Typed in"))
 
             document = document.copy(seedSource = SeedSource.Image("sunset.png"))
@@ -259,7 +259,7 @@ class PosterPanelTest {
         runComposeUiTest {
             showPoster(preferences = Preferences(styleLock = true, seedLock = true))
 
-            // b-522 The reason moved from a line under the buttons into Shuffle's tooltip and name.
+            // The reason moved from a line under the buttons into Shuffle's tooltip and name.
             onNodeWithContentDescription("The seed and the style are both locked", substring = true)
                 .assertIsNotEnabled()
             onNodeWithText("Shuffle").assertIsNotEnabled()
@@ -268,7 +268,7 @@ class PosterPanelTest {
     @Test
     fun fineTuneLocks_lockToggle_setsThatLock() =
         runComposeUiTest {
-            // b-524 The hue and seed locks live in Fine-tune, and the style's by the style.
+            // The hue and seed locks live in Fine-tune, and the style's by the style.
             val harness = PosterHarness(ThemeDocument(seed = Seed))
             harness.preferences = Preferences(hueLock = false, seedLock = true)
             showSection(harness) { context, dispatcher -> FineTuneContent(context, dispatcher) }
@@ -288,7 +288,7 @@ class PosterPanelTest {
         runComposeUiTest {
             showPoster()
 
-            // b-524 The test window gives the 320 poster, where Pick and Image go glyph only.
+            // The test window gives the 320 poster, where Pick and Image go glyph only.
             onNode(hasText("Pick") or hasContentDescription("Pick")).performClick()
             // Image opens a menu, and its Upload image row opens the image picker.
             onNode(hasText("Image") or hasContentDescription("Image")).performClick()
@@ -327,7 +327,7 @@ class PosterPanelTest {
         runComposeUiTest {
             var status: SaveStatus by mutableStateOf(SaveStatus.Pending)
             showPoster(projectName = "Ocean", saveStatus = { status })
-            // b-522 The save state moved from words under the hex into the Projects button.
+            // The save state moved from words under the hex into the Projects button.
             onNodeWithContentDescription("Projects, Ocean, saving").assertExists()
 
             status = SaveStatus.Failed(StoreError.QuotaExceeded)

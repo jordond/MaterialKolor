@@ -89,7 +89,7 @@ class KeyColorsTest {
                 .keyColor
 
             derived shouldNotBe Seed
-            // b-527 The hex shows as text until it is pressed, then as the field.
+            // The hex shows as text until it is pressed, then as the field.
             onAllNodes(hasSetTextAction()).fetchSemanticsNodes().shouldBeEmpty()
             onNodeWithContentDescription("Edit Tertiary, ${derived.toHex()}, from seed").performClick()
             waitForIdle()

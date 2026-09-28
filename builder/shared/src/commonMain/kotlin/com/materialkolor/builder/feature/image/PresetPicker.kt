@@ -84,7 +84,7 @@ internal fun ImageMenuButton(
     context: PosterContext,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
-    glyphOnly: Boolean = false, // b-524
+    glyphOnly: Boolean = false,
 ) {
     var menu by remember { mutableStateOf(false) }
     val close = { dispatcher.dispatch(WorkspaceAction.ClosePanel) }

@@ -64,7 +64,7 @@ internal fun InspectLayer(
             },
             onJumpToKeyColor = { _ ->
                 dispatcher.dispatch(WorkspaceAction.SetPosterCollapsed(collapsed = false))
-                dispatcher.dispatch(WorkspaceAction.OpenFineTune(FineTuneSection.KeyColors)) // b-521
+                dispatcher.dispatch(WorkspaceAction.OpenFineTune(FineTuneSection.KeyColors))
             },
             onLeave = { dispatcher.dispatch(WorkspaceAction.SetInspect(on = false)) },
         )

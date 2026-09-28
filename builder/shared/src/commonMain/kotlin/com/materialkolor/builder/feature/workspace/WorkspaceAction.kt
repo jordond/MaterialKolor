@@ -159,13 +159,13 @@ internal sealed interface WorkspaceAction {
      * this session only and nothing saves it.
      */
     data class OpenFineTune(
-        val section: FineTuneSection? = null, // b-521
+        val section: FineTuneSection? = null,
     ) : WorkspaceAction
 
     /**
      * Close the Fine-tune sheet.
      */
-    data object CloseFineTune : WorkspaceAction // b-521
+    data object CloseFineTune : WorkspaceAction
 
     /**
      * Open [panel] over the workspace.
@@ -318,7 +318,7 @@ internal enum class FineTuneSection {
     /**
      * What a shuffle keeps, the Hue and Seed locks.
      */
-    Locks, // b-521
+    Locks,
 
     /**
      * The key colors beside the seed.

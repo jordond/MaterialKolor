@@ -63,12 +63,12 @@ internal fun PosterHeader(
     val spacing = tokens.spacing
     val mode = LocalLayout.current.posterMode
     val collapsible = mode != PosterMode.Sheet
-    // b-526 The 320 dp poster keeps one row by dropping the wordmark, never the Projects button.
+    // The 320 dp poster keeps one row by dropping the wordmark, never the Projects button.
     val markOnly = mode == PosterMode.Docked320
     val wordmark = stringResource(Res.string.poster_wordmark)
     Row(
         modifier = modifier.fillMaxWidth(),
-        // b-522 A tight gap, so a name of about a dozen letters shows whole in the compact pill.
+        // A tight gap, so a name of about a dozen letters shows whole in the compact pill.
         horizontalArrangement = Arrangement.spacedBy(spacing.extraSmall),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -139,7 +139,7 @@ private fun ProjectsButton(
     val named = projectName.isNotBlank()
     val mark = saveMarkOf(saveStatus)
     val spoken = if (named) stringResource(mark.spoken, projectName) else null
-    // b-522 The button gives way first, so a long name never pushes the badge out of the row.
+    // The button gives way first, so a long name never pushes the badge out of the row.
     Row(
         horizontalArrangement = Arrangement.spacedBy(LocalBuilderTokens.current.spacing.extraSmall),
         verticalAlignment = Alignment.CenterVertically,
@@ -153,7 +153,7 @@ private fun ProjectsButton(
             icon = IconId.Folder,
             trailingIcon = mark.glyph.takeIf { named },
             size = ButtonSize.Compact,
-            // b-526 Board E fills the pill with a quiet tint of the seed.
+            // Board E fills the pill with a quiet tint of the seed.
             tonal = true,
         )
         if (named) SaveState(saveStatus)

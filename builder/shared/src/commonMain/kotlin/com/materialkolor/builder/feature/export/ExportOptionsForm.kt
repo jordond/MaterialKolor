@@ -148,7 +148,7 @@ private fun LibraryOptions(
     state: ExportModel.State,
     workspace: Dispatcher<WorkspaceAction>,
 ) {
-    // b-545 M3 Expressive shares the Material 3 card, its switch under the card picks between the two.
+    // M3 Expressive shares the Material 3 card, its switch under the card picks between the two.
     val current = LibraryChoice.of(state.document)
     val selected = if (current == LibraryChoice.M3Expressive) LibraryChoice.M3 else current
     val origin = remember { RevealOrigin() }

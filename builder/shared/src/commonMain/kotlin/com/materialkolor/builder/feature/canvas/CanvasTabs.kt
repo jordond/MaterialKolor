@@ -235,7 +235,7 @@ private fun PreviewWindow(
                 start = specs.light.label,
                 end = specs.dark.label,
             )
-            // b-538 A hairline in the chrome's own outline over the window's edge, past the panes'
+            // A hairline in the chrome's own outline over the window's edge, past the panes'
             // vision filter, so a near-white light pane still stands off the canvas round it.
             val edge = RoundedCornerShape(tokens.radius.large)
             PreviewWindowRegion(

@@ -97,7 +97,7 @@ internal fun FirstRunHint(
     // A mouse press would focus Close on its way to the click. While a press that starts elsewhere
     // is down, Close turns that focus away, so the click leaves focus where it was.
     var pressFromElsewhere by remember { mutableStateOf(false) }
-    // b-522 No card, just the line, so it sits quietly over Fine-tune.
+    // No card, just the line, so it sits quietly over Fine-tune.
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(spacing.small),

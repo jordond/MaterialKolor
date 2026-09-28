@@ -54,7 +54,7 @@ internal fun SeedActions(
     shuffle: Boolean = true,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
-    // b-524 Material's roomy buttons leave Image a row of its own at 320, so there the two go
+    // Material's roomy buttons leave Image a row of its own at 320, so there the two go
     // glyph only.
     val narrow = LocalLayout.current.posterMode == PosterMode.Docked320
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.small)) {

@@ -117,9 +117,9 @@ internal fun InfoLabel(
             horizontalArrangement = Arrangement.spacedBy(spacing.extraSmall),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Eyebrow(label) // b-524
+            Eyebrow(label)
             InfoButton(topic = topic, expanded = open, onClick = { open = !open })
-            end() // b-523
+            end()
         }
         if (open) {
             InfoNote(topic)
@@ -136,7 +136,6 @@ internal fun Eyebrow(
     label: String,
     modifier: Modifier = Modifier,
 ) {
-    // b-524
     BuilderText(
         text = label.uppercase(),
         modifier = modifier.clearAndSetSemantics { text = AnnotatedString(label) },
@@ -165,7 +164,6 @@ internal fun InfoButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // b-523
     val question = stringResource(topic.question)
     BuilderTooltip(text = question, modifier = modifier) {
         BuilderPressable(
@@ -174,7 +172,7 @@ internal fun InfoButton(
             modifier = Modifier.foldedExpandedName(question, expanded),
             shape = CircleShape,
         ) {
-            // b-526 The skin's own outlined info glyph, in the ink.
+            // The skin's own outlined info glyph, in the ink.
             BuilderIcon(
                 id = IconId.InfoOutline,
                 contentDescription = null,

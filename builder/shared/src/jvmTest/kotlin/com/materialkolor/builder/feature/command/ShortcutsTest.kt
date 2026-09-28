@@ -296,7 +296,7 @@ class ShortcutsTest {
             waitForIdle()
             val reason = "The seed and the style are both locked, so Shuffle has nothing to change"
             val hint = hasText(reason)
-            // b-522 The poster's Shuffle reads it out all along, once it has caught up with the locks.
+            // The poster's Shuffle reads it out all along, once it has caught up with the locks.
             val shuffleSaysWhy = hasContentDescription(reason, substring = true)
             waitUntil { onAllNodes(shuffleSaysWhy).fetchSemanticsNodes().isNotEmpty() }
             val before = onAllNodes(hint, useUnmergedTree = true).fetchSemanticsNodes().size
