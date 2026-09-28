@@ -83,7 +83,13 @@ public fun BuilderPressable(
     val hovered by interactionSource.collectIsHoveredAsState()
     val name = stateName(label, state = if (selected) ControlState.Selected(true) else null, enabled)
     val ring = if (selected) tokens.accent else Color.Unspecified
-    val wash = if (border != null && enabled && hovered) tokens.textStrong.copy(alpha = HoverWashAlpha) else Color.Transparent
+    val wash = if (border != null && enabled &&
+        hovered
+    ) {
+        tokens.textStrong.copy(alpha = HoverWashAlpha)
+    } else {
+        Color.Transparent
+    }
     Box(
         modifier = modifier
             .clickable(
