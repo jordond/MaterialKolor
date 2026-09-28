@@ -22,6 +22,7 @@ export interface Vector {
   readonly projectName: string | null;
   readonly document: {
     readonly expressive: boolean;
+    readonly contrast: number;
     readonly keyColors: Readonly<Record<string, string | null>>;
     readonly cmfTertiarySeed: string | null;
     readonly accents: readonly { readonly name: string; readonly seed: string }[];

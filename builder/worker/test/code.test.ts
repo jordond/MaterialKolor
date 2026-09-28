@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { decodeBase64Url, decodeShareCode, MAX_CODE_LENGTH, THEME_NAME_ALLOWANCE_BYTES, VERSION } from '../src/code';
+import {
+  decodeBase64Url,
+  decodeShareCode,
+  MAX_CODE_LENGTH,
+  nearestContrast,
+  THEME_NAME_ALLOWANCE_BYTES,
+  VERSION,
+} from '../src/code';
 import { BAD_CODES, codeOf, DEFAULT_CODE, longestCode, namedCode, spell, vector, vectors } from './support';
 
 // The Kotlin encoder writes these, so this is where the two sides are held to one format.
@@ -12,6 +19,8 @@ describe('share vectors', () => {
     expect(theme!.style).toBe(vector.style);
     expect(theme!.projectName).toBe(vector.projectName);
     expect(theme!.expressive).toBe(vector.document.expressive);
+    // The vector holds the level it was written with, the app opens it at the nearest named one.
+    expect(theme!.contrast).toBe(nearestContrast(vector.document.contrast));
     expect(theme!.keyColors).toEqual(Object.values(vector.document.keyColors).filter((color) => color !== null));
     expect(theme!.cmfTertiarySeed).toBe(vector.document.cmfTertiarySeed);
     expect(theme!.accents).toEqual(vector.document.accents.map(({ name, seed }) => ({ name, seed })));
@@ -29,10 +38,27 @@ describe('share vectors', () => {
     expect(everything).toBeDefined();
   });
 
+  it('open a level in between at the named level the app picks', () => {
+    expect(decodeShareCode(vector('contrast -37').code)!.contrast).toBe(0);
+    expect(decodeShareCode(vector('contrast 50').code)!.contrast).toBe(50);
+    expect(decodeShareCode(vector('contrast -100').code)!.contrast).toBe(-100);
+  });
+
   it('start with the default theme', () => {
     expect(vector('default').code).toBe(DEFAULT_CODE);
     // New themes ask for the newest spec, the 0x20 in the flags.
     expect(codeOf([VERSION, 0xd9, 0x65, 0x3b, 0x20, 0, 0, 0])).toBe(DEFAULT_CODE);
+  });
+});
+
+describe('nearestContrast', () => {
+  it('breaks a tie toward Standard, the way ContrastLevel.nearest does', () => {
+    expect(nearestContrast(25)).toBe(0);
+    expect(nearestContrast(-50)).toBe(0);
+    expect(nearestContrast(75)).toBe(50);
+    expect(nearestContrast(76)).toBe(100);
+    expect(nearestContrast(-51)).toBe(-100);
+    for (const level of [-100, 0, 50, 100]) expect(nearestContrast(level)).toBe(level);
   });
 });
 
