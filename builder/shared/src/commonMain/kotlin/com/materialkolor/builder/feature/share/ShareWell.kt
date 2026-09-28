@@ -39,7 +39,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.feature.poster.Eyebrow
 import com.materialkolor.builder.generated.resources.Res
-import com.materialkolor.builder.generated.resources.share_card_caption
 import com.materialkolor.builder.generated.resources.share_card_failed
 import com.materialkolor.builder.generated.resources.share_card_failed_body
 import com.materialkolor.builder.generated.resources.share_card_heading

@@ -153,7 +153,6 @@ private fun ProjectsButton(
             icon = IconId.Folder,
             trailingIcon = mark.glyph.takeIf { named },
             size = ButtonSize.Compact,
-            // Board E fills the pill with a quiet tint of the seed.
             tonal = true,
         )
         if (named) SaveState(saveStatus)

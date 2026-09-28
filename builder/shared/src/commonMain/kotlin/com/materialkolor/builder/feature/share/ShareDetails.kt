@@ -34,7 +34,6 @@ import com.materialkolor.builder.feature.projects.targetLabel
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.projects_name_empty
 import com.materialkolor.builder.generated.resources.projects_name_long
-import com.materialkolor.builder.generated.resources.share_body
 import com.materialkolor.builder.generated.resources.share_copy
 import com.materialkolor.builder.generated.resources.share_detail_accents
 import com.materialkolor.builder.generated.resources.share_detail_extras

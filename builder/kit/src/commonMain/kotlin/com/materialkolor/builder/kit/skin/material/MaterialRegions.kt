@@ -65,8 +65,13 @@ internal fun MaterialDockRegion(
         colors = FloatingToolbarDefaults.standardFloatingToolbarColors(
             toolbarContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
         ),
-        content = content,
-    )
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(LocalBuilderTokens.current.spacing.small),
+            verticalAlignment = Alignment.CenterVertically,
+            content = content,
+        )
+    }
 }
 
 /**
