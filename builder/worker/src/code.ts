@@ -31,6 +31,8 @@ export interface SharedTheme {
   readonly style: Style;
   readonly library: Library;
   readonly expressive: boolean;
+  /** The contrast in hundredths, snapped to the named level the app opens the code at. */
+  readonly contrast: number;
   /** The key color overrides in code order, primary first. */
   readonly keyColors: readonly string[];
   readonly cmfTertiarySeed: string | null;
@@ -69,6 +71,8 @@ const KEY_COLOR_COUNT = 6;
 const ROLE_COUNT = 48;
 const THRESHOLD_COUNT = 3;
 const DEFAULT_THRESHOLD = 0;
+// The named contrast levels in hundredths, ContrastLevel.Stops in the domain.
+const CONTRAST_STOPS: readonly number[] = [-100, 0, 50, 100];
 // Only Standard can be written, Expressive is the default and never travels.
 const MOTION_STANDARD = 0;
 const DEFAULT_THEME_NAME = 'AppTheme';
@@ -138,6 +142,20 @@ export function decodeShareCode(code: string): SharedTheme | null {
   const checksum = bytes.length - 1;
   if (crc8(bytes, checksum) !== bytes[checksum]) return null;
   return new Reader(bytes, checksum).theme();
+}
+
+/**
+ * The named contrast level nearest [hundredths], as ContrastLevel.nearest picks it. A level halfway
+ * between two goes to the one nearer Standard, so 25 and -50 open at Standard and 75 at Medium.
+ */
+export function nearestContrast(hundredths: number): number {
+  let nearest = CONTRAST_STOPS[0]!;
+  for (const stop of CONTRAST_STOPS) {
+    const distance = Math.abs(stop - hundredths);
+    const best = Math.abs(nearest - hundredths);
+    if (distance < best || (distance === best && Math.abs(stop) < Math.abs(nearest))) nearest = stop;
+  }
+  return nearest;
 }
 
 /** The CRC-8 a share code ends with, polynomial 0x07, from zero, nothing reflected. */
@@ -228,6 +246,7 @@ class Reader {
       style,
       library: LIBRARIES[target & 0x03]!,
       expressive: (target & EXPRESSIVE_FLAG) !== 0,
+      contrast: nearestContrast(signed),
       keyColors,
       cmfTertiarySeed,
       accents,

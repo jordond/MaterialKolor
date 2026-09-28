@@ -5,24 +5,34 @@ import { wantHooks } from './builder';
 import { startWorker, workerMissing, type Worker } from '../fixtures/worker';
 import { A11Y, BOOT_TIMEOUT_MS, labelled, openWorkspace, seedField, seedText, shareVectors } from '../fixtures/workspace';
 
-// Boot from a share code the builder's parts agree on (`builder/fixtures/share-codes.json`). It opens
-// with the code's seed and style, and the address bar goes back to `/`. The Worker's own theme
+// Boot from every share code the builder's parts agree on (`builder/fixtures/share-codes.json`). Each
+// opens with its seed and style, and the address bar goes back to `/`. The Worker's own theme
 // page is booted from `wrangler dev`, the one server that writes a link's meta.
+
+/** How many share codes one page boots in turn, few enough to stay well inside the test timeout. */
+const CODES_PER_PAGE = 3;
 
 test.beforeEach(async ({ context }) => {
   await wantHooks(context);
 });
 
 test.describe('share codes', () => {
-  // One code with every section set stands for the lot. The codec's own tests read each one.
-  for (const vector of shareVectors().filter((vector) => vector.label === 'every section at once')) {
-    test(`boots with the seed and style of ${vector.label}`, async ({ page }) => {
-      await openWorkspace(page, `/t/${vector.code}`);
+  // A code opens only at boot, so each one is a fresh load. One page boots a handful in turn, and the
+  // handfuls run side by side, which keeps the lot to a few boots' time on each worker.
+  const vectors = shareVectors();
+  for (let start = 0; start < vectors.length; start += CODES_PER_PAGE) {
+    const chunk = vectors.slice(start, start + CODES_PER_PAGE);
+    test(`boots with the seed and style of ${chunk.map((vector) => vector.label).join(', ')}`, async ({ page }) => {
+      for (const vector of chunk) {
+        await openWorkspace(page, `/t/${vector.code}`);
 
-      await expect.poll(() => seedText(page)).toBe(vector.seedHex);
-      await expect(selectedStyle(page, vector.style)).toHaveCount(1);
-      if (vector.projectName !== null) await expect(labelled(page, `Projects, ${vector.projectName}`).first()).toBeAttached();
-      expect(await page.evaluate(() => location.pathname + location.search)).toBe('/');
+        await expect.poll(() => seedText(page), { message: vector.label }).toBe(vector.seedHex);
+        await expect(selectedStyle(page, vector.style), vector.label).toHaveCount(1);
+        if (vector.projectName !== null) {
+          await expect(labelled(page, `Projects, ${vector.projectName}`).first(), vector.label).toBeAttached();
+        }
+        expect(await page.evaluate(() => location.pathname + location.search), vector.label).toBe('/');
+      }
     });
   }
 });
