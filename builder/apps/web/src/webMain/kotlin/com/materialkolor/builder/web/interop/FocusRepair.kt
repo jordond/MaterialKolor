@@ -24,7 +24,11 @@ import kotlin.js.ExperimentalWasmJsInterop
  * never reaches Compose. This focuses the canvas again, without scrolling.
  *
  * Two things notice the removal. Chromium fires `focusout` on the field as it goes, and WebKit and
- * Gecko fire nothing, so an observer on the field's container catches it there. Both look at the
+ * Gecko fire nothing, so an observer on the field's container catches it there. The observer starts
+ * on the first focus that comes into the canvas or a field from outside the viewport. A move from
+ * the canvas to a field stays inside the viewport's shadow root and never reaches a listener on the
+ * viewport, so waiting for the field alone would miss every field opened from the canvas, the
+ * palette's search field after Cmd or Ctrl+K among them. Both look at the
  * focus again once the current task is done, so a Tab from one text field straight to the next
  * leaves focus on the new field instead of passing it through the canvas. Whichever of the two runs
  * second finds focus already on the canvas and leaves it be.
@@ -48,15 +52,16 @@ internal object FocusRepair {
     }
 
     /**
-     * Starts watching the children of the element holding a backing field that just took focus.
-     * CMP builds its DOM once Skiko is ready, so a focused field is the first sure sign of where that
-     * element is. Observing the same element again only replaces its options.
+     * Starts watching the children of the element holding the canvas and its backing fields, once
+     * either takes focus. CMP builds its DOM once Skiko is ready, so a focused canvas or field is the
+     * first sure sign of where that element is. Observing the same element again only replaces its
+     * options.
      */
     private fun watchContainer(
         event: Event,
         removals: MutationObserver,
     ) {
-        val container = event.backingField()?.parentElement ?: return
+        val container = (event.backingField() ?: event.canvasOrigin())?.parentElement ?: return
         removals.observe(container, childChanges())
     }
 
@@ -96,6 +101,11 @@ internal object FocusRepair {
         val origin = composedPath()[0] as? Element ?: return null
         return origin.takeIf { element -> element.isBackingField() }
     }
+
+    /**
+     * The canvas the event started on, if it started on one.
+     */
+    private fun Event.canvasOrigin(): Element? = composedPath()[0] as? HTMLCanvasElement
 
     private fun Node.isBackingField(): Boolean = (this as? Element)?.classList?.contains(BACKING_FIELD_CLASS) == true
 

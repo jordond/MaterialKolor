@@ -110,6 +110,22 @@ class FocusRepairTest {
     }
 
     /**
+     * A field opened from the canvas takes focus inside the shadow root, where the viewport never
+     * hears it, so focus coming into the canvas is what starts the watch.
+     */
+    @Test
+    fun aRemovalAfterFocusCameIntoTheCanvasRefocusesTheCanvas(): Promise<JsAny?> {
+        canvas.dispatchFocusIn()
+
+        field.remove()
+
+        return afterRepair {
+            assertTrue(shadow.focused == canvas)
+            assertEquals(1, focusCallsOf(canvas))
+        }
+    }
+
+    /**
      * A Tab from one text field to the next, the way CMP does it within one task.
      */
     @Test

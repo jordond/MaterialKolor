@@ -44,10 +44,13 @@ test('with motion a library switch reveals from the switcher', async ({ page }) 
 test.describe('frozen motion', () => {
   test('a frozen switch to each library looks the same every time', async ({ page }, testInfo) => {
     // A screenshot differs by engine and system, so the baselines are kept for the ones they were
-    // made on, Chromium on macOS so far. `--update-snapshots` on another makes its own.
+    // made on, Chromium on macOS and on Linux, the Linux ones from the Playwright image CI's version
+    // matches. `--update-snapshots` on another engine or system makes its own, so only a plain run
+    // skips where there are none.
+    const updating = testInfo.config.updateSnapshots === 'all' || testInfo.config.updateSnapshots === 'changed';
     test.skip(
-      !existsSync(testInfo.snapshotPath('material3.png', { kind: 'screenshot' })),
-      'Follow-up: no frozen motion baselines for this engine and system yet',
+      !updating && !existsSync(testInfo.snapshotPath('material3.png', { kind: 'screenshot' })),
+      'No frozen motion baselines for this engine and system yet',
     );
     await openWorkspace(page, '/?motion=frozen');
     await expect(page).toHaveScreenshot('material3.png', { maxDiffPixelRatio: 0.02 });
