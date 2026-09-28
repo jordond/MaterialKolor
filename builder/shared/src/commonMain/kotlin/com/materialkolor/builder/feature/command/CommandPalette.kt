@@ -319,7 +319,7 @@ private fun GroupHeader(title: String) {
         modifier = Modifier
             .padding(start = spacing.medium, top = spacing.small, bottom = spacing.extraSmall)
             .semantics { heading() },
-        style = BuilderTextStyle.SectionLabel,
+        style = BuilderTextStyle.GroupLabel,
         emphasis = Emphasis.Secondary,
     )
 }

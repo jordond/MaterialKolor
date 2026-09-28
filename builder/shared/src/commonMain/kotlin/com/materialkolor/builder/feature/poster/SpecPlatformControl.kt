@@ -154,7 +154,7 @@ private fun PlatformChoice(
     val names = SchemePlatform.entries.associateWith { platform -> stringResource(platformName(platform)) }
     val platform = context.document.platform
     Column(verticalArrangement = Arrangement.spacedBy(spacing.small)) {
-        BuilderText(text = label, style = BuilderTextStyle.SectionLabel)
+        BuilderText(text = label, style = BuilderTextStyle.GroupLabel)
         BuilderSegmented(
             options = SchemePlatform.entries,
             selected = platform,

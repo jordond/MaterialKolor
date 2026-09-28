@@ -225,9 +225,13 @@ private fun StyleHeader(
             if (note != null) SpecNote(note, Modifier.weight(1f))
         }
     } else {
-        ReasonInfoLabel(label = label, topic = InfoTopic.Style, reason = reason) {
-            if (note != null) SpecNote(note, Modifier.weight(1f))
-        }
+        // B-552
+        InfoLabel(
+            label = label,
+            topic = InfoTopic.Style,
+            end = { if (note != null) SpecNote(note, Modifier.weight(1f)) },
+            detail = { if (reason != null) ReasonLine(reason) },
+        )
     }
 }
 

@@ -430,7 +430,7 @@ private fun ThresholdChoice(
     val groupLabel = stringResource(Res.string.accents_threshold_for, accent.name)
     val names = Thresholds.associateWith { threshold -> stringResource(thresholdName(threshold)) }
     Column(verticalArrangement = Arrangement.spacedBy(spacing.small)) {
-        BuilderText(text = label, style = BuilderTextStyle.SectionLabel)
+        BuilderText(text = label, style = BuilderTextStyle.GroupLabel)
         BuilderSegmented(
             options = Thresholds,
             selected = accent.threshold,

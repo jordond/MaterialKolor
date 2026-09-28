@@ -83,7 +83,7 @@ internal fun RampTitle(
         BuilderText(
             text = title,
             modifier = Modifier.weight(1f, fill = false).semantics { heading() },
-            style = BuilderTextStyle.SectionLabel,
+            style = BuilderTextStyle.GroupLabel,
         )
         TagChip(
             tag = ToneTag(tone, listOf(stringResource(Res.string.tabs_key_color))),

@@ -37,6 +37,8 @@ import com.materialkolor.builder.codegen.dsl.TokenKind
  *   rest. Focus rings and a skin's own border metrics keep their widths.
  * @property[highlightWidth] The width of an outline that picks something out, such as the picked
  *   ramp.
+ * @property[strongOutlineWidth] How thick an outline that stands for the whole control is, such as
+ *   the line round a card button with no fill, a little heavier than a hairline.
  */
 @Immutable
 public data class BuilderTokens(
@@ -61,6 +63,7 @@ public data class BuilderTokens(
     public val iconSize: Dp = 20.dp,
     public val outlineWidth: Dp = 1.dp,
     public val highlightWidth: Dp = 2.dp,
+    public val strongOutlineWidth: Dp = 1.5.dp,
 )
 
 /**
