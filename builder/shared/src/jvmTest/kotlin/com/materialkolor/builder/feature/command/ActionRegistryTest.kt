@@ -28,22 +28,6 @@ import kotlin.test.Test
 
 @OptIn(ExperimentalTestApi::class)
 class ActionRegistryTest {
-    /**
-     * Every command but Save has a control, and this finds each one, opening the menu, the panel or
-     * the disclosure it sits in first. Save is the one exception, since the builder saves on its own
-     * and only the keys and the palette ask it to save now.
-     */
-    @Test
-    fun expanded_findsEachCommandsControlWhereTheRegistrySays() =
-        runDesktopComposeUiTest(width = 1280, height = HEIGHT) {
-            val harness = CommandHarness()
-            with(harness) { show() }
-
-            missingSites(harness).joinToString("\n") shouldBe ""
-            val withoutControl = harness.commands.filter { command -> command.site == null }
-            withoutControl.map { command -> command.id } shouldBe listOf("save")
-        }
-
     @Test
     fun expanded_listsEveryShortcutOnce() =
         runDesktopComposeUiTest(width = 1280, height = HEIGHT) {

@@ -18,7 +18,7 @@ internal fun downloadBytes(
     name: String,
     mime: String,
     revokeAfterMillis: Int,
-): String? = startDownload(bytes, name, mime, revokeAfterMillis)?.toString()
+): String? = startDownload(bytes, name, mime, revokeAfterMillis)?.toKotlinString()
 
 private fun startDownload(
     bytes: Int8Array,

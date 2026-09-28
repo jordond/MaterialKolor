@@ -61,7 +61,7 @@ internal fun browserFile(
  * changing their mind rather than a failure, so it comes back as null too.
  */
 internal suspend fun shareBrowserFiles(files: List<File>): String? =
-    startShare(files.toJsArray()).await<JsString?>()?.toString()
+    startShare(files.toJsArray()).await<JsString?>()?.toKotlinString()
 
 private fun startShare(files: JsArray<File>): Promise<JsString?> =
     js(
@@ -108,7 +108,7 @@ internal fun pageCanShareLink(): Boolean =
 internal suspend fun shareBrowserLink(
     url: String,
     title: String,
-): String? = startLinkShare(url, title).await<JsString?>()?.toString()
+): String? = startLinkShare(url, title).await<JsString?>()?.toKotlinString()
 
 private fun startLinkShare(
     url: String,

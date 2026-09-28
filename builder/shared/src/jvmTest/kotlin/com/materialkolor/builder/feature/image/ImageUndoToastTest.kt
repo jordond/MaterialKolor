@@ -173,9 +173,7 @@ private class ToastWorkspace(
                 withdrawable += shown
                 action.onShown { shown.withdrawn = true }
             }
-            else -> {
-                Unit
-            }
+            else -> {}
         }
     }
 }

@@ -106,9 +106,7 @@ private class PasteWorkspaceFake(
                 toasts += action.toast
                 action.onShown { withdrawn++ }
             }
-            else -> {
-                Unit
-            }
+            else -> {}
         }
     }
 }

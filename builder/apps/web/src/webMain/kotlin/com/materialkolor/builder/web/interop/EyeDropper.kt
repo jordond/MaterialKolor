@@ -19,7 +19,7 @@ internal fun pageHasEyeDropper(): Boolean = js("typeof window.EyeDropper === 'fu
  * The eyedropper opens before the first suspension, so a caller that starts this undispatched from
  * a click opens it inside the click, which the browser insists on.
  */
-internal suspend fun pickColorOnScreen(): String? = openEyeDropper().await<JsString?>()?.toString()
+internal suspend fun pickColorOnScreen(): String? = openEyeDropper().await<JsString?>()?.toKotlinString()
 
 private fun openEyeDropper(): Promise<JsString?> =
     js(

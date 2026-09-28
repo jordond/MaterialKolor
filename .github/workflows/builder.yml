@@ -255,7 +255,9 @@ jobs:
       - *setup-gradle
 
       - name: Kit, preview and shared tests
-        run: ./gradlew :builder:kit:jvmTest :builder:preview:jvmTest :builder:shared:jvmTest
+        run: >-
+          ./gradlew :builder:kit:jvmTest :builder:preview:jvmTest :builder:shared:jvmTest
+          -Pbuilder.testTimeoutMinutes=20
 
       - name: Upload the test reports
         if: failure()

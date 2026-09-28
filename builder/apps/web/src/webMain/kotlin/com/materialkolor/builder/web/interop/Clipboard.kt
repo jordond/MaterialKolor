@@ -14,7 +14,7 @@ import kotlin.js.Promise
  * from a click makes the write inside the click, which Safari insists on.
  */
 internal suspend fun writeClipboardText(text: String): String? =
-    startClipboardWrite(text).await<JsString?>()?.toString()
+    startClipboardWrite(text).await<JsString?>()?.toKotlinString()
 
 // Without the async clipboard API (an insecure origin, say) the text goes through a hidden text
 // area and `execCommand('copy')`, which only works inside the click, so it runs right away.

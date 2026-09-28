@@ -4,6 +4,7 @@ import com.materialkolor.builder.codegen.ExportVersions
 import com.materialkolor.builder.core.platform.LibraryVersionSource
 import com.materialkolor.builder.fakes.FakeLibraryVersionSource
 import io.kotest.matchers.shouldBe
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -31,6 +32,7 @@ private const val LIVE_JSON =
     }
     """
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class LiveVersionsTest {
     @Test
     fun exportVersionsOf_everyLibraryListed_picksEachOnItsFloor() {

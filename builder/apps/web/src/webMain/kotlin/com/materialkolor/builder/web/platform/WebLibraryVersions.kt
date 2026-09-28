@@ -3,6 +3,7 @@
 package com.materialkolor.builder.web.platform
 
 import com.materialkolor.builder.core.platform.LibraryVersionSource
+import com.materialkolor.builder.web.interop.toKotlinString
 import kotlinx.coroutines.await
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.JsString
@@ -16,7 +17,7 @@ import kotlin.js.Promise
  * the export keeps the versions it was built with.
  */
 internal object WebLibraryVersions : LibraryVersionSource {
-    override suspend fun fetch(): String? = startVersionsFetch().await<JsString?>()?.toString()
+    override suspend fun fetch(): String? = startVersionsFetch().await<JsString?>()?.toKotlinString()
 }
 
 // Every way a fetch can go wrong, a thrown error included, resolves to null rather than rejecting.
