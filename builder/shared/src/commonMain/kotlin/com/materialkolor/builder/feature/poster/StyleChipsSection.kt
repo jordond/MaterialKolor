@@ -225,7 +225,6 @@ private fun StyleHeader(
             if (note != null) SpecNote(note, Modifier.weight(1f))
         }
     } else {
-        // B-552
         InfoLabel(
             label = label,
             topic = InfoTopic.Style,
