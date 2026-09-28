@@ -1,7 +1,7 @@
 # AppTheme
 
-Made with MaterialKolor Builder 2.0.0.
-The theme builds its colors from the seed at runtime with MaterialKolor 6.0.0, the version the dependency lines below pin.
+Made with MaterialKolor Builder 2.0.0: https://materialkolor.com/t/AdllOwAEAAC4
+The theme builds its colors from the seed at runtime with MaterialKolor 6.0.0
 
 ## Add the theme
 
@@ -20,7 +20,3 @@ dependencies {
     implementation(libs.androidx.compose.material3)
 }
 ```
-
-## Open it again
-
-To change the theme later, open it in the builder at <https://materialkolor.com/t/AdllOwAEAAC4>

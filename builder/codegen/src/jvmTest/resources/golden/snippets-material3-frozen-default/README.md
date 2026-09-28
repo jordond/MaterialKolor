@@ -1,7 +1,7 @@
 # AppTheme
 
-Made with MaterialKolor Builder 2.0.0.
-Every color is written out as it is, so the files need no MaterialKolor. The colors come from MaterialKolor 6.0.0.
+Made with MaterialKolor Builder 2.0.0: https://materialkolor.com/t/AdllOwAAAAAT
+The colors come from MaterialKolor 6.0.0.
 
 ## Add the theme
 
@@ -23,7 +23,3 @@ kotlin {
     }
 }
 ```
-
-## Open it again
-
-To change the theme later, open it in the builder at <https://materialkolor.com/t/AdllOwAAAAAT>

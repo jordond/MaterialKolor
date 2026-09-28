@@ -1,7 +1,7 @@
 # AppTheme
 
-Made with MaterialKolor Builder 2.0.0.
-Every color is written out as it is, so the files need no MaterialKolor. The colors come from MaterialKolor 6.0.0.
+Made with MaterialKolor Builder 2.0.0: https://materialkolor.com/t/AdllOwABAAB4
+The colors come from MaterialKolor 6.0.0.
 
 ## Add the theme
 
@@ -26,7 +26,3 @@ kotlin {
 ```
 
 Compose Unstyled needs JVM 17 and Android minSdk 23, and has no macOS native target.
-
-## Open it again
-
-To change the theme later, open it in the builder at <https://materialkolor.com/t/AdllOwABAAB4>
