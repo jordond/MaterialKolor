@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextOverflow
@@ -34,9 +35,11 @@ import com.materialkolor.builder.kit.skin.headless.controlPress
 import com.materialkolor.builder.kit.skin.headless.controlRing
 import com.materialkolor.builder.kit.skin.headless.controlTouchTarget
 import com.materialkolor.builder.kit.skin.headless.enabledAlpha
+import com.materialkolor.builder.kit.skin.headless.filledActionColors
 import com.materialkolor.builder.kit.skin.material.MaterialButton
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderType
+import com.materialkolor.builder.kit.token.readableInk
 
 /**
  * A labelled action in the surrounding skin.
@@ -58,6 +61,11 @@ import com.materialkolor.builder.kit.token.LocalBuilderType
  * the way Material's tonal button fills, so a quiet action still reads as a button on a coloured
  * page. The ink keeps its contrast, since the raised surface is cut to carry it. Primary and danger
  * buttons are filled already and draw the same either way.
+ * @param[fill] A colour of the caller's own to fill the button with, such as the colour a picker has
+ * picked. The button then draws as a primary button in that fill whatever [emphasis] says, with its
+ * label and glyphs in [readableInk] of it and a hairline of that ink round it, so a fill close to the
+ * panel still shows. It presses and takes focus the way a primary button does. Unspecified keeps the
+ * skin's own look.
  */
 @Composable
 public fun BuilderButton(
@@ -71,6 +79,7 @@ public fun BuilderButton(
     trailingIcon: IconId? = null,
     size: ButtonSize = ButtonSize.Regular,
     tonal: Boolean = false,
+    fill: Color = Color.Unspecified,
 ) {
     when (LocalSkin.current.library) {
         SkinLibrary.Material3 -> MaterialButton(
@@ -84,6 +93,7 @@ public fun BuilderButton(
             trailingIcon,
             size,
             tonal,
+            fill,
         )
         SkinLibrary.Custom -> HeadlessButton(
             onClick,
@@ -97,6 +107,7 @@ public fun BuilderButton(
             trailingIcon,
             size,
             tonal,
+            fill,
         )
     }
 }
@@ -138,7 +149,8 @@ internal val CompactButtonGap: Dp = 4.dp
 internal val CompactButtonIcon: Dp = 16.dp
 
 /**
- * A button drawn from [style] over plain foundation, for the skins without a button of their own.
+ * A button drawn from [style] over plain foundation, for the skins without a button of their own. A
+ * specified [fill] draws it in [filledActionColors] with a hairline outline.
  */
 @Composable
 internal fun HeadlessButton(
@@ -153,10 +165,14 @@ internal fun HeadlessButton(
     trailingIcon: IconId? = null,
     size: ButtonSize = ButtonSize.Regular,
     tonal: Boolean = false,
+    fill: Color = Color.Unspecified,
 ) {
     val compact = size == ButtonSize.Compact
-    val iconSize = if (compact) CompactButtonIcon else LocalBuilderTokens.current.iconSize
-    val colors = style.colors(emphasis, tonal)
+    val tokens = LocalBuilderTokens.current
+    val iconSize = if (compact) CompactButtonIcon else tokens.iconSize
+    val filled = fill.isSpecified
+    val colors = if (filled) filledActionColors(fill) else style.colors(emphasis, tonal)
+    val borderWidth = if (filled) tokens.outlineWidth else style.borderWidth
     val interactionSource = remember { MutableInteractionSource() }
     Row(
         modifier = modifier
@@ -171,7 +187,7 @@ internal fun HeadlessButton(
             .controlPress(interactionSource)
             .alpha(enabledAlpha(enabled))
             .controlRing(interactionSource, style.shape)
-            .actionSurface(colors, style.shape, style.borderWidth)
+            .actionSurface(colors, style.shape, borderWidth)
             .heightIn(min = if (compact) CompactButtonHeight else style.height)
             .padding(horizontal = if (compact) CompactButtonPadding else style.horizontalPadding),
         horizontalArrangement = Arrangement.spacedBy(

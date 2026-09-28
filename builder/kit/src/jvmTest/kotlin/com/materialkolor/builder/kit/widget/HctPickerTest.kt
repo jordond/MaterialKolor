@@ -1,6 +1,7 @@
 package com.materialkolor.builder.kit.widget
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -17,12 +18,16 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertHeightIsEqualTo
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.pressKey
@@ -62,7 +67,7 @@ import kotlin.test.assertEquals
 internal val PickerSeed: Argb = Argb(0x6750A4)
 
 /**
- * Wide enough for the tracks and their value fields side by side.
+ * Wide enough for the tiles side by side, narrow enough for the one column layout.
  */
 internal val PickerWidth: Dp = 440.dp
 
@@ -99,7 +104,7 @@ internal fun PickerHarness(
 }
 
 /**
- * The track named [name], told apart from its value field by the range it reports.
+ * The track or plane named [name], told apart from a tile's field by the range it reports.
  */
 internal fun pickerTrack(name: String): SemanticsMatcher =
     hasContentDescription(name) and SemanticsMatcher.keyIsDefined(SemanticsProperties.ProgressBarRangeInfo)
@@ -116,6 +121,25 @@ private fun ComposeUiTest.pickerTrackValue(name: String): Float =
     onNode(pickerTrack(name)).fetchSemanticsNode().config[SemanticsProperties.ProgressBarRangeInfo].current
 
 private val PickerSkin: Skin = Skin(SkinLibrary.Custom, expressive = false)
+
+private const val PickerPlane: String = "Chroma and tone"
+
+/**
+ * The plane, found by the range it reports whether its name is a description or folded into text.
+ */
+private val PickerPlaneNode: SemanticsMatcher =
+    (hasContentDescription(PickerPlane) or hasText(PickerPlane, substring = true)) and
+        SemanticsMatcher.keyIsDefined(SemanticsProperties.ProgressBarRangeInfo)
+
+/**
+ * The chroma and tone the plane reads out, from its value "Chroma 58, tone 56".
+ */
+@OptIn(ExperimentalTestApi::class)
+private fun ComposeUiTest.pickerPlaneValues(): Pair<Int, Int> {
+    val spoken = onNode(PickerPlaneNode).fetchSemanticsNode().config[SemanticsProperties.StateDescription]
+    val (chroma, tone) = Regex("""\d+""").findAll(spoken).map { match -> match.value.toInt() }.toList()
+    return chroma to tone
+}
 
 /**
  * The value a picker under test was handed last, and every phase it reported.
@@ -135,6 +159,7 @@ private fun pickerTrackText(name: String): SemanticsMatcher =
 
 /**
  * Shows a picker at [start], in Custom unless [skin] says otherwise, that is handed back every color it reports.
+ * [compositions], when given, counts how often the picker's body composes.
  */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.pickerShow(
@@ -142,6 +167,7 @@ private fun ComposeUiTest.pickerShow(
     direction: LayoutDirection = LayoutDirection.Ltr,
     foldsState: Boolean = false,
     skin: Skin = PickerSkin,
+    compositions: PickerCompositions? = null,
 ): PickerReports {
     val reports = PickerReports(start)
     setContent {
@@ -157,6 +183,7 @@ private fun ComposeUiTest.pickerShow(
                         reports.phases += phase
                     },
                     modifier = Modifier.width(PickerWidth),
+                    onBodyComposed = compositions?.let { counter -> { counter.count++ } },
                 )
             }
         }
@@ -169,59 +196,172 @@ private fun pickerChromaOf(color: Argb): Double = Hct.fromInt(color.value).chrom
 @OptIn(ExperimentalTestApi::class)
 class HctPickerTest {
     @Test
-    fun toneTrack_scriptedDrag_reportsDraggingThenOneReleasedWithoutRecomposingTheBody() =
+    fun plane_scriptedDrag_reportsDraggingThenOneReleasedWithoutRecomposingTheBody() =
         pickerForEachSkin { _, skin ->
-            var value by mutableStateOf(PickerSeed)
-            val phases = mutableListOf<EditPhase>()
             val compositions = PickerCompositions()
-            setContent {
-                PickerHarness(skin) {
-                    HctPicker(
-                        value = value,
-                        onChange = { argb, phase ->
-                            value = argb
-                            phases += phase
-                        },
-                        modifier = Modifier.width(PickerWidth),
-                        onBodyComposed = { compositions.count++ },
-                    )
-                }
-            }
+            val reports = pickerShow(skin = skin, compositions = compositions)
             waitForIdle()
             val composedBefore = compositions.count
 
-            onNode(pickerTrack("Tone")).performTouchInput {
+            onNode(pickerTrack(PickerPlane)).performTouchInput {
                 down(Offset(width * 0.2f, centerY))
-                for (step in 1..5) moveTo(Offset(width * (0.2f + step * 0.1f), centerY))
+                for (step in 1..5) moveTo(Offset(width * (0.2f + step * 0.1f), centerY - step * 4f))
                 up()
             }
             waitForIdle()
 
+            val phases = reports.phases
             phases.count { phase -> phase == EditPhase.Dragging } shouldBeGreaterThan 2
             phases.dropLast(1).all { phase -> phase == EditPhase.Dragging } shouldBe true
             phases.last() shouldBe EditPhase.Released
             phases.count { phase -> phase == EditPhase.Released } shouldBe 1
-            value shouldNotBe PickerSeed
+            reports.value shouldNotBe PickerSeed
             compositions.count shouldBe composedBefore
         }
 
     @Test
-    fun tracks_keys_stepByOneAndTenAndJumpToTheEnds() =
+    fun plane_keys_stepToneAndChromaByOneAndTen() =
         pickerForEachSkin { _, skin ->
-            var value by mutableStateOf(PickerSeed)
+            val reports = pickerShow(skin = skin)
+            val plane = onNode(pickerTrack(PickerPlane))
+            plane.requestFocus()
+            val (startChroma, startTone) = pickerPlaneValues()
+
+            plane.performKeyInput { pressKey(Key.DirectionUp) }
+            pickerPlaneValues().second shouldBe startTone + 1
+            plane.performKeyInput { withKeyDown(Key.ShiftLeft) { pressKey(Key.DirectionDown) } }
+            pickerPlaneValues().second shouldBe startTone - 9
+            plane.performKeyInput { withKeyDown(Key.ShiftLeft) { pressKey(Key.DirectionUp) } }
+            pickerPlaneValues().second shouldBe startTone + 1
+
+            plane.performKeyInput { withKeyDown(Key.ShiftLeft) { pressKey(Key.DirectionLeft) } }
+            assertEquals((startChroma - 10).toDouble(), pickerPlaneValues().first.toDouble(), absoluteTolerance = 1.0)
+            plane.performKeyInput { pressKey(Key.DirectionRight) }
+            assertEquals((startChroma - 9).toDouble(), pickerPlaneValues().first.toDouble(), absoluteTolerance = 1.0)
+            pickerPlaneValues().second shouldBe startTone + 1
+
+            reports.phases shouldBe List(5) { EditPhase.Discrete }
+        }
+
+    @Test
+    fun plane_home_turnsGrey() =
+        runComposeUiTest {
+            val reports = pickerShow()
+            val plane = onNode(pickerTrack(PickerPlane))
+            plane.requestFocus()
+
+            plane.performKeyInput { pressKey(Key.MoveHome) }
+            waitForIdle()
+
+            // A grey still has a little chroma in HCT, so the plane reads a small number rather than 0.
+            reports.value.green shouldBe reports.value.red
+            reports.value.blue shouldBe reports.value.red
+            reports.phases shouldBe listOf(EditPhase.Discrete)
+        }
+
+    @Test
+    fun plane_rtl_mirrorsTheSideArrowsButNotUpAndDown() =
+        runComposeUiTest {
+            val reports = pickerShow(direction = LayoutDirection.Rtl)
+            val plane = onNode(pickerTrack(PickerPlane))
+            plane.requestFocus()
+            val (startChroma, startTone) = pickerPlaneValues()
+
+            plane.performKeyInput { withKeyDown(Key.ShiftLeft) { pressKey(Key.DirectionRight) } }
+            assertEquals((startChroma - 10).toDouble(), pickerPlaneValues().first.toDouble(), absoluteTolerance = 1.0)
+            plane.performKeyInput { pressKey(Key.DirectionLeft) }
+            assertEquals((startChroma - 9).toDouble(), pickerPlaneValues().first.toDouble(), absoluteTolerance = 1.0)
+            plane.performKeyInput { pressKey(Key.DirectionUp) }
+            pickerPlaneValues().second shouldBe startTone + 1
+
+            reports.phases shouldBe List(3) { EditPhase.Discrete }
+        }
+
+    @Test
+    fun plane_shiftRightOnTheSrgbEdge_keepsTheChroma() =
+        runComposeUiTest {
+            val green = Argb(0x00FF00)
+            val reports = pickerShow(start = green)
+            val plane = onNode(pickerTrack(PickerPlane))
+            plane.requestFocus()
+
+            plane.performKeyInput { withKeyDown(Key.ShiftLeft) { pressKey(Key.DirectionRight) } }
+            waitForIdle()
+
+            pickerChromaOf(reports.value) shouldBeGreaterThan pickerChromaOf(green) - 0.5
+        }
+
+    @Test
+    fun plane_arrowRightAtAFractionalTone_keepsTheColorOffGrey() =
+        runComposeUiTest {
+            val navy = Argb(0x000011)
+            val reports = pickerShow(start = navy)
+            val plane = onNode(pickerTrack(PickerPlane))
+            plane.requestFocus()
+
+            plane.performKeyInput { pressKey(Key.DirectionRight) }
+            waitForIdle()
+
+            reports.value.blue shouldBeGreaterThan reports.value.red
+            pickerChromaOf(reports.value) shouldBeGreaterThan pickerChromaOf(navy) - 0.5
+        }
+
+    @Test
+    fun plane_pickerRemovedMidDrag_reportsNoRelease() =
+        runComposeUiTest {
+            var shown by mutableStateOf(true)
             val phases = mutableListOf<EditPhase>()
             setContent {
-                PickerHarness(skin) {
+                PickerHarness(PickerSkin) {
+                    if (shown) {
+                        HctPicker(
+                            value = PickerSeed,
+                            onChange = { _, phase -> phases += phase },
+                            modifier = Modifier.width(PickerWidth),
+                        )
+                    }
+                }
+            }
+
+            onNode(pickerTrack(PickerPlane)).performTouchInput {
+                down(Offset(width * 0.2f, centerY))
+                moveTo(Offset(width * 0.5f, centerY))
+            }
+            waitForIdle()
+            shown = false
+            waitForIdle()
+
+            phases shouldContain EditPhase.Dragging
+            phases shouldNotContain EditPhase.Released
+        }
+
+    @Test
+    fun body_heightTooShortForTheSmallestPlane_scrollsInsteadOfClipping() =
+        runComposeUiTest {
+            setContent {
+                PickerHarness(PickerSkin) {
                     HctPicker(
-                        value = value,
-                        onChange = { argb, phase ->
-                            value = argb
-                            phases += phase
-                        },
-                        modifier = Modifier.width(PickerWidth),
+                        value = PickerSeed,
+                        onChange = { _, _ -> },
+                        modifier = Modifier.width(PickerWidth).height(320.dp),
                     )
                 }
             }
+            waitForIdle()
+            val format = onNode(hasSetTextAction() and hasContentDescription("Color"))
+
+            onNode(pickerTrack(PickerPlane)).assertHeightIsEqualTo(200.dp)
+            format.assertIsNotDisplayed()
+            format.performScrollTo()
+            waitForIdle()
+
+            format.assertIsDisplayed()
+        }
+
+    @Test
+    fun hueTrack_keys_stepByOneAndTenAndJumpHome() =
+        pickerForEachSkin { _, skin ->
+            val reports = pickerShow(skin = skin)
             val hue = onNode(pickerTrack("Hue"))
             hue.requestFocus()
             val start = pickerTrackValue("Hue")
@@ -232,17 +372,10 @@ class HctPickerTest {
             assertEquals(start + 11f, pickerTrackValue("Hue"), absoluteTolerance = 1e-3f)
             hue.performKeyInput { withKeyDown(Key.ShiftLeft) { pressKey(Key.DirectionLeft) } }
             assertEquals(start + 1f, pickerTrackValue("Hue"), absoluteTolerance = 1e-3f)
+            hue.performKeyInput { pressKey(Key.MoveHome) }
+            assertEquals(0f, pickerTrackValue("Hue"))
 
-            val tone = onNode(pickerTrack("Tone"))
-            tone.requestFocus()
-            tone.performKeyInput { pressKey(Key.MoveEnd) }
-            assertEquals(100f, pickerTrackValue("Tone"))
-            value shouldBe Argb(0xFFFFFF)
-            tone.performKeyInput { pressKey(Key.MoveHome) }
-            assertEquals(0f, pickerTrackValue("Tone"))
-            value shouldBe Argb(0x000000)
-
-            phases shouldBe List(5) { EditPhase.Discrete }
+            reports.phases shouldBe List(4) { EditPhase.Discrete }
         }
 
     @Test
@@ -267,74 +400,26 @@ class HctPickerTest {
         }
 
     @Test
-    fun toneTrack_pageUpAndPageDown_stepByTen() =
+    fun hueTrack_pageUpAndPageDown_stepByTen() =
         runComposeUiTest {
             val reports = pickerShow()
-            val tone = onNode(pickerTrack("Tone"))
-            tone.requestFocus()
-            val start = pickerTrackValue("Tone")
+            val hue = onNode(pickerTrack("Hue"))
+            hue.requestFocus()
+            val start = pickerTrackValue("Hue")
 
-            tone.performKeyInput { pressKey(Key.PageUp) }
-            pickerTrackValue("Tone") shouldBe start + 10f
-            tone.performKeyInput {
+            hue.performKeyInput { pressKey(Key.PageUp) }
+            pickerTrackValue("Hue") shouldBe start + 10f
+            hue.performKeyInput {
                 pressKey(Key.PageDown)
                 pressKey(Key.PageDown)
             }
-            pickerTrackValue("Tone") shouldBe start - 10f
+            pickerTrackValue("Hue") shouldBe start - 10f
 
             reports.phases shouldBe List(3) { EditPhase.Discrete }
         }
 
     @Test
-    fun chromaTrack_keys_stepTheChromaAndHomeTurnsGrey() =
-        runComposeUiTest {
-            val reports = pickerShow()
-            val chroma = onNode(pickerTrack("Chroma"))
-            chroma.requestFocus()
-            val start = pickerTrackValue("Chroma")
-
-            chroma.performKeyInput { withKeyDown(Key.ShiftLeft) { pressKey(Key.DirectionDown) } }
-            assertEquals(start - 10f, pickerTrackValue("Chroma"), absoluteTolerance = 1f)
-            chroma.performKeyInput { pressKey(Key.MoveHome) }
-            waitForIdle()
-
-            // A grey still has a little chroma in HCT, so the track reads a small number rather than 0.
-            reports.value.green shouldBe reports.value.red
-            reports.value.blue shouldBe reports.value.red
-            reports.phases shouldBe List(2) { EditPhase.Discrete }
-        }
-
-    @Test
-    fun chromaTrack_endOnTheSrgbEdge_keepsTheChroma() =
-        runComposeUiTest {
-            val green = Argb(0x00FF00)
-            val reports = pickerShow(start = green)
-            val chroma = onNode(pickerTrack("Chroma"))
-            chroma.requestFocus()
-
-            chroma.performKeyInput { pressKey(Key.MoveEnd) }
-            waitForIdle()
-
-            pickerChromaOf(reports.value) shouldBeGreaterThan pickerChromaOf(green) - 0.5
-        }
-
-    @Test
-    fun chromaTrack_arrowUpAtAFractionalTone_keepsTheColorOffGrey() =
-        runComposeUiTest {
-            val navy = Argb(0x000011)
-            val reports = pickerShow(start = navy)
-            val chroma = onNode(pickerTrack("Chroma"))
-            chroma.requestFocus()
-
-            chroma.performKeyInput { pressKey(Key.DirectionUp) }
-            waitForIdle()
-
-            reports.value.blue shouldBeGreaterThan reports.value.red
-            pickerChromaOf(reports.value) shouldBeGreaterThan pickerChromaOf(navy) - 0.5
-        }
-
-    @Test
-    fun tracks_foldsStateIntoName_everySkin_carryTheirValueInTheirText() =
+    fun hueTrackAndPlane_foldsStateIntoName_everySkin_carryTheirValueInTheirText() =
         pickerForEachSkin { _, skin ->
             // The seed #6750A4 sits at hue 298.98.
             pickerShow(foldsState = true, skin = skin)
@@ -345,35 +430,49 @@ class HctPickerTest {
             hue.performKeyInput { pressKey(Key.DirectionRight) }
 
             onNode(pickerTrackText("Hue, slider, 300")).assertExists()
+            val (chroma, tone) = pickerPlaneValues()
+            val plane = onNode(pickerTrackText("$PickerPlane, slider, Chroma $chroma, tone $tone"))
+            plane.assert(SemanticsMatcher.keyNotDefined(SemanticsProperties.ContentDescription))
         }
 
     @Test
-    fun toneTrack_pickerRemovedMidDrag_reportsNoRelease() =
+    fun toneStops_tone90ThenTone40_keepTheHueAndTheAskedChroma() =
         runComposeUiTest {
-            var shown by mutableStateOf(true)
-            val phases = mutableListOf<EditPhase>()
-            setContent {
-                PickerHarness(PickerSkin) {
-                    if (shown) {
-                        HctPicker(
-                            value = PickerSeed,
-                            onChange = { _, phase -> phases += phase },
-                            modifier = Modifier.width(PickerWidth),
-                        )
-                    }
-                }
-            }
+            val reports = pickerShow()
+            val seed = Hct.fromInt(PickerSeed.value)
 
-            onNode(pickerTrack("Tone")).performTouchInput {
-                down(Offset(width * 0.2f, centerY))
-                moveTo(Offset(width * 0.5f, centerY))
-            }
+            onNode(hasContentDescription("Tone 90")).performClick()
             waitForIdle()
-            shown = false
+            val light = Hct.fromInt(reports.value.value)
+            onNode(hasContentDescription("Tone 40")).performClick()
             waitForIdle()
+            val back = Hct.fromInt(reports.value.value)
 
-            phases shouldContain EditPhase.Dragging
-            phases shouldNotContain EditPhase.Released
+            assertEquals(90.0, light.tone, absoluteTolerance = 0.5)
+            assertEquals(seed.hue, light.hue, absoluteTolerance = 2.0)
+            assertEquals(40.0, back.tone, absoluteTolerance = 0.5)
+            assertEquals(seed.hue, back.hue, absoluteTolerance = 1.0)
+            assertEquals(seed.chroma, back.chroma, absoluteTolerance = 1.0)
+            reports.phases shouldBe List(2) { EditPhase.Discrete }
+        }
+
+    @Test
+    fun channelTile_upAndDown_stepByOneAndTen() =
+        runComposeUiTest {
+            val reports = pickerShow()
+            val tone = onNode(hasSetTextAction() and hasContentDescription("Tone"))
+            tone.requestFocus()
+            val start = pickerPlaneValues().second
+
+            tone.performKeyInput { pressKey(Key.DirectionUp) }
+            waitForIdle()
+            tone.assert(hasText("${start + 1}"))
+            tone.performKeyInput { withKeyDown(Key.ShiftLeft) { pressKey(Key.DirectionDown) } }
+            waitForIdle()
+            tone.assert(hasText("${start - 9}"))
+            pickerPlaneValues().second shouldBe start - 9
+
+            reports.phases shouldBe List(2) { EditPhase.Discrete }
         }
 
     @Test
@@ -404,20 +503,7 @@ class HctPickerTest {
     @Test
     fun hueField_typedValue_movesTheTrackAsOneDiscreteEdit() =
         runComposeUiTest {
-            var value by mutableStateOf(PickerSeed)
-            val phases = mutableListOf<EditPhase>()
-            setContent {
-                PickerHarness(Skin(SkinLibrary.Custom, expressive = false)) {
-                    HctPicker(
-                        value = value,
-                        onChange = { argb, phase ->
-                            value = argb
-                            phases += phase
-                        },
-                        modifier = Modifier.width(PickerWidth),
-                    )
-                }
-            }
+            val reports = pickerShow()
             val field = onNode(hasSetTextAction() and hasContentDescription("Hue"))
 
             field.performTextReplacement("120")
@@ -425,26 +511,13 @@ class HctPickerTest {
             waitForIdle()
 
             pickerTrackValue("Hue") shouldBe 120f
-            phases shouldBe listOf(EditPhase.Discrete)
+            reports.phases shouldBe listOf(EditPhase.Discrete)
         }
 
     @Test
     fun formatSwitch_rgb_showsTheColorAsRgbAndTakesAnyTypedColor() =
         runComposeUiTest {
-            var value by mutableStateOf(PickerSeed)
-            val phases = mutableListOf<EditPhase>()
-            setContent {
-                PickerHarness(Skin(SkinLibrary.Custom, expressive = false)) {
-                    HctPicker(
-                        value = value,
-                        onChange = { argb, phase ->
-                            value = argb
-                            phases += phase
-                        },
-                        modifier = Modifier.width(PickerWidth),
-                    )
-                }
-            }
+            val reports = pickerShow()
 
             onNodeWithText("RGB").performClick()
             waitForIdle()
@@ -454,8 +527,9 @@ class HctPickerTest {
             field.performKeyInput { pressKey(Key.Enter) }
             waitForIdle()
 
+            val value = reports.value
             value shouldBe (ColorInput.parse("oklch(0.7 0.1 150)") as ParseResult.Ok).argb
-            phases shouldBe listOf(EditPhase.Discrete)
+            reports.phases shouldBe listOf(EditPhase.Discrete)
             onNode(hasSetTextAction() and hasText("rgb(${value.red} ${value.green} ${value.blue})")).assertExists()
         }
 }

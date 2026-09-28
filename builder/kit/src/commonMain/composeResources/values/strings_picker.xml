@@ -1,12 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- The color picker's three tracks, each also the label of the field that types its value. -->
+    <!-- The color picker's three channels, each the label of the tile that types its value. Hue also names the hue track. -->
     <string name="picker_hue">Hue</string>
     <string name="picker_chroma">Chroma</string>
     <string name="picker_tone">Tone</string>
 
-    <!-- Under a track's value field when the typed text is not a number in the track's range. -->
+    <!-- Under a tile when the typed text is not a number in the channel's range. -->
     <string name="picker_track_range">From %1$d to %2$d</string>
+
+    <!-- The plane of every chroma and tone at the current hue, its spoken value, and the label of how far its chroma runs. -->
+    <string name="picker_plane">Chroma and tone</string>
+    <string name="picker_plane_value">Chroma %1$d, tone %2$d</string>
+    <string name="picker_plane_span">Chroma to %1$d</string>
+
+    <!-- The row of tone stops, the chroma they are drawn at, and each stop. The stop also labels tone 100 and tone 0 on the plane. -->
+    <string name="picker_tones">Tones</string>
+    <string name="picker_tones_chroma">At chroma %1$d</string>
+    <string name="picker_tone_stop">Tone %1$d</string>
 
     <!-- The format switch and its options. -->
     <string name="picker_format">Format</string>

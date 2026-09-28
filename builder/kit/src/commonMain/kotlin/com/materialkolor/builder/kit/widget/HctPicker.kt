@@ -1,8 +1,10 @@
 package com.materialkolor.builder.kit.widget
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
@@ -14,20 +16,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.constrainHeight
+import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.edit.EditPhase
-import com.materialkolor.builder.kit.control.BuilderTextField
-import com.materialkolor.builder.kit.control.BuilderTextStyle
-import com.materialkolor.builder.kit.generated.resources.Res
-import com.materialkolor.builder.kit.generated.resources.picker_chroma
-import com.materialkolor.builder.kit.generated.resources.picker_hue
-import com.materialkolor.builder.kit.generated.resources.picker_tone
-import com.materialkolor.builder.kit.generated.resources.picker_track_range
+import com.materialkolor.builder.kit.control.BuilderScrollArea
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.hct.Hct
-import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -36,9 +35,10 @@ import kotlin.math.roundToInt
  * The HCT color picker behind the seed, the key colors, the pins, the accents and the second seed
  * of a Cmf theme.
  *
- * Three tracks set hue, chroma and tone, each drawn as the colors it reaches with what sRGB cannot
- * show shaded. Under them sits a format switch with a field that shows and takes the color as hex,
- * RGB, HSL or OKLCH.
+ * A plane of every chroma and tone at the current hue sets those two together, and a track under it
+ * sets the hue, each drawn as the colors it reaches with what sRGB cannot show hatched. Three tiles
+ * take the hue, chroma and tone typed, a row of tone stops jumps between tones, and a format switch
+ * with a field shows and takes the color as hex, RGB, HSL or OKLCH.
  *
  * A drag reports [EditPhase.Dragging] for every change and [EditPhase.Released] once when it lets
  * go, so the caller previews live and files one undo entry. Keys, a typed track value and a typed
@@ -163,9 +163,24 @@ internal class PickerState(
             HctChannel.Chroma -> chroma = min(next, GamutLimit.edge(hue, tone))
             HctChannel.Tone -> tone = next
         }
-        val made = Hct.from(hue, chroma, tone)
-        reachedChroma = made.chroma
-        return emit(Argb(made.toInt()), phase)
+        return make(phase)
+    }
+
+    /**
+     * Moves chroma and tone together, the way the plane does, each clamped into its range and chroma
+     * stopping at the most the hue reaches at the new tone. Reports the new color once with [phase]
+     * when it changed.
+     *
+     * @return Whether the color changed.
+     */
+    fun setChromaAndTone(
+        chroma: Double,
+        tone: Double,
+        phase: EditPhase,
+    ): Boolean {
+        this.tone = tone.coerceIn(HctChannel.Tone.range)
+        this.chroma = min(chroma.coerceIn(HctChannel.Chroma.range), GamutLimit.edge(hue, this.tone))
+        return make(phase)
     }
 
     /**
@@ -189,6 +204,12 @@ internal class PickerState(
         if (released) report.value(color, EditPhase.Released)
     }
 
+    private fun make(phase: EditPhase): Boolean {
+        val made = Hct.from(hue, chroma, tone)
+        reachedChroma = made.chroma
+        return emit(Argb(made.toInt()), phase)
+    }
+
     private fun emit(
         argb: Argb,
         phase: EditPhase,
@@ -210,8 +231,13 @@ internal class PickerState(
 }
 
 /**
- * The tracks and the format switch. Nothing here reads the color, so a drag leaves it alone and
- * only the tracks and fields below it recompose.
+ * The plane, the hue track, the tiles, the tone stops and the format switch. Nothing here reads the
+ * color, so a drag leaves it alone and only the parts below it recompose or redraw.
+ *
+ * From [TwoPaneWidth] of width it lays out in two panes, the plane over the hue track on the start
+ * side and the rest on the end side. Narrower, it is one column in that order. Under a bounded
+ * height the plane shrinks first when the height runs short, down to [PlaneMinHeight], and only a
+ * height too short for even that scrolls the body. Unbounded, the plane stays at its largest.
  */
 @Composable
 private fun PickerBody(
@@ -220,56 +246,104 @@ private fun PickerBody(
     onBodyComposed: (() -> Unit)?,
 ) {
     onBodyComposed?.invoke()
-    val spacing = LocalBuilderTokens.current.spacing
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
-        for (channel in HctChannel.entries) TrackRow(picker, channel)
-        PickerFormat(picker)
+    BoxWithConstraints(modifier) {
+        val twoPanes = maxWidth >= TwoPaneWidth
+        if (!constraints.hasBoundedHeight) {
+            PickerParts(picker, twoPanes, room = null)
+            return@BoxWithConstraints
+        }
+        val room = constraints.maxHeight
+        // Every part takes focus of its own, so the area stays out of the Tab order.
+        BuilderScrollArea(tabStop = false, fitContent = true, scrollbarInGutter = true) {
+            PickerParts(picker, twoPanes, room)
+        }
     }
 }
 
 /**
- * A track with its value beside it as a field, so the value can be typed as well as dragged.
+ * The picker's parts in one column or two panes, the plane sized to fit [room] pixels of height,
+ * or at its largest when [room] is null.
  */
 @Composable
-private fun TrackRow(
+private fun PickerParts(
     picker: PickerState,
-    channel: HctChannel,
+    twoPanes: Boolean,
+    room: Int?,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
-    val label = stringResource(channel.nameResource())
-    val range = channel.range
-    val rangeMessage = stringResource(
-        Res.string.picker_track_range,
-        range.start.roundToInt(),
-        range.endInclusive.roundToInt(),
-    )
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(spacing.medium),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        GamutTrack(picker, channel, label, Modifier.weight(1f))
-        BuilderTextField(
-            value = picker.shownOf(channel).toString(),
-            onCommit = { typed ->
-                val target = typed.trim().toDoubleOrNull()
-                if (target != null) picker.set(channel, target, EditPhase.Discrete)
-            },
-            label = label,
-            modifier = Modifier.width(spacing.section * TrackFieldWidthInSections),
-            error = { draft -> if (draft.trim().toDoubleOrNull()?.let { it in range } == true) null else rangeMessage },
-            style = BuilderTextStyle.Value,
-        )
+    val hueLabel = stringResource(HctChannel.Hue.nameResource())
+    if (twoPanes) {
+        Row(horizontalArrangement = Arrangement.spacedBy(spacing.extraLarge)) {
+            PlaneColumn(room, Modifier.width(PlaneMaxWidth)) {
+                GamutPlane(picker)
+                GamutTrack(picker, HctChannel.Hue, hueLabel)
+            }
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(spacing.extraLarge)) {
+                ChannelTiles(picker)
+                ToneStops(picker)
+                PickerFormat(picker)
+            }
+        }
+    } else {
+        PlaneColumn(room, Modifier.fillMaxWidth()) {
+            GamutPlane(picker)
+            GamutTrack(picker, HctChannel.Hue, hueLabel)
+            ChannelTiles(picker)
+            ToneStops(picker)
+            PickerFormat(picker)
+        }
     }
 }
 
-private fun HctChannel.nameResource(): StringResource =
-    when (this) {
-        HctChannel.Hue -> Res.string.picker_hue
-        HctChannel.Chroma -> Res.string.picker_chroma
-        HctChannel.Tone -> Res.string.picker_tone
+/**
+ * A column whose first child is the plane. The rest take the column's width at their own heights,
+ * and the plane takes what of [room] they leave, between [PlaneMinHeight] and [PlaneMaxHeight], with
+ * its width following at the plane's ratio and centred. With [room] null it takes its largest.
+ *
+ * The column is as tall as the plane and the rest together, even past [room], so a room too short
+ * for the smallest plane makes the body taller than its scroll area rather than clipping it.
+ */
+@Composable
+private fun PlaneColumn(
+    room: Int?,
+    modifier: Modifier,
+    content: @Composable () -> Unit,
+) {
+    val gap = LocalBuilderTokens.current.spacing.large
+    Layout(content, modifier) { measurables, constraints ->
+        val width = constraints.maxWidth
+        val gapPx = gap.roundToPx()
+        val loose = Constraints(minWidth = width, maxWidth = width)
+        val rest = measurables.drop(1).map { measurable -> measurable.measure(loose) }
+        val restHeight = rest.sumOf { placeable -> placeable.height } + gapPx * rest.size
+        val widest = minOf(width, PlaneMaxWidth.roundToPx())
+        val tallest = minOf(PlaneMaxHeight.roundToPx(), (widest / PlaneRatio).roundToInt())
+        val left = if (room != null) room - restHeight else tallest
+        val planeHeight = left.coerceIn(minOf(PlaneMinHeight.roundToPx(), tallest), tallest)
+        val planeWidth = if (planeHeight == tallest) widest else minOf(widest, (planeHeight * PlaneRatio).roundToInt())
+        val plane = measurables.first().measure(Constraints.fixed(planeWidth, planeHeight))
+        val height = constraints.constrainHeight(planeHeight + restHeight)
+        layout(width, height) {
+            plane.placeRelative((width - planeWidth) / 2, 0)
+            var y = planeHeight + gapPx
+            for (placeable in rest) {
+                placeable.placeRelative(0, y)
+                y += placeable.height + gapPx
+            }
+        }
     }
+}
 
 /**
- * A track's value field is three section gaps wide, room for "360" and the field's padding.
+ * The narrowest body that lays out in two panes.
  */
-private const val TrackFieldWidthInSections: Int = 3
+private val TwoPaneWidth: Dp = 780.dp
+
+/**
+ * The plane at its largest, and the least it shrinks to when the height runs short.
+ */
+private val PlaneMaxWidth: Dp = 452.dp
+private val PlaneMaxHeight: Dp = 296.dp
+private val PlaneMinHeight: Dp = 200.dp
+
+private const val PlaneRatio: Float = 452f / 296f

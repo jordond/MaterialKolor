@@ -115,6 +115,86 @@ class PickerSessionTest : SessionTestBase() {
         }
 
     @Test
+    fun goBackThenDone_endsWhereItBeganWithNoEntryForEachTarget() =
+        runTest {
+            val workspace = workspace()
+            workspace.startFrom(Stored)
+            val before = workspace.state.value
+
+            Targets.forEach { target ->
+                workspace.open(target)
+                workspace.send(picker.pick(Red))
+                workspace.send(picker.pick(Blue, fromScreen = true))
+                val back = requireNotNull(picker.goBack())
+                workspace.send(back)
+                workspace.sync()
+
+                back.change.apply(workspace.state.value.document) shouldBe before.document
+                workspace.state.value.document shouldBe before.document
+                workspace.state.value.history shouldBe before.history
+                workspace.state.value.panel shouldBe Panel.Picker
+                picker.target shouldBe target
+
+                picker.done() shouldBe listOf(WorkspaceAction.ClosePanel)
+                workspace.closePanel()
+                workspace.sync()
+                workspace.state.value.document shouldBe before.document
+                workspace.state.value.history shouldBe before.history
+            }
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun goBackThenCancel_leavesTheStoredValue() =
+        runTest {
+            val workspace = workspace()
+            workspace.startFrom(Stored.copy(seedSource = SeedSource.Preset(id = "plum")))
+            val before = workspace.state.value
+
+            workspace.open(PickerTarget.Seed)
+            workspace.send(picker.pick(Red))
+            workspace.send(picker.goBack())
+            workspace.send(picker.cancel())
+
+            workspace.state.value.document shouldBe before.document
+            workspace.state.value.history shouldBe before.history
+            workspace.state.value.panel shouldBe null
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun goBackThenPickThenDone_filesThePickAsOneEntry() =
+        runTest {
+            val workspace = workspace()
+            workspace.startFrom(Stored)
+            val before = workspace.state.value.document
+
+            workspace.open(PickerTarget.Seed)
+            workspace.send(picker.pick(Red))
+            workspace.send(picker.goBack())
+            workspace.send(picker.pick(Blue))
+            workspace.send(picker.done())
+
+            workspace.state.value.document.seed shouldBe Blue
+            workspace.state.value.document.seedSource shouldBe SeedSource.Picked
+            workspace.undo()
+            workspace.state.value.document shouldBe before
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun goBack_withNothingSent_sendsNoEdit() =
+        runTest {
+            val workspace = workspace()
+            workspace.startFrom(Stored)
+
+            workspace.open(PickerTarget.Seed)
+
+            picker.goBack() shouldBe null
+            harness.clearAndJoin()
+        }
+
+    @Test
     fun backAndAnotherPanel_restoreTheValue() =
         runTest {
             val workspace = workspace()

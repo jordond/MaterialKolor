@@ -1,5 +1,6 @@
 package com.materialkolor.builder.kit.skin.material
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -43,6 +44,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.role
@@ -78,6 +80,7 @@ import com.materialkolor.builder.kit.skin.headless.controlPress
 import com.materialkolor.builder.kit.skin.headless.controlRing
 import com.materialkolor.builder.kit.skin.headless.controlTouchTarget
 import com.materialkolor.builder.kit.skin.headless.enabledAlpha
+import com.materialkolor.builder.kit.skin.headless.filledActionColors
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
 /*
@@ -175,6 +178,7 @@ internal fun MaterialButton(
     trailingIcon: IconId? = null,
     size: ButtonSize = ButtonSize.Regular,
     tonal: Boolean = false,
+    fill: Color = Color.Unspecified,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val compact = size == ButtonSize.Compact
@@ -185,6 +189,24 @@ internal fun MaterialButton(
         .then(if (compact) Modifier.height(CompactButtonHeight) else Modifier)
     val content: @Composable RowScope.() -> Unit = { MaterialLabel(label, icon, hint, trailingIcon, size) }
     MaterialTarget {
+        if (fill.isSpecified) {
+            val colors = filledActionColors(fill)
+            Button(
+                onClick = onClick,
+                modifier = decorated,
+                enabled = enabled,
+                colors = ButtonDefaults.buttonColors(containerColor = colors.container, contentColor = colors.content),
+                border = BorderStroke(LocalBuilderTokens.current.outlineWidth, colors.border),
+                contentPadding = when {
+                    hint != null -> HintPadding
+                    compact -> CompactPadding
+                    else -> ButtonDefaults.ContentPadding
+                },
+                interactionSource = interactionSource,
+                content = content,
+            )
+            return@MaterialTarget
+        }
         if (takesTonalFill(emphasis, tonal)) {
             FilledTonalButton(
                 onClick,

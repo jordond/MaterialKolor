@@ -1,9 +1,11 @@
 package com.materialkolor.builder.kit.skin.material
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.AlertDialog
@@ -34,7 +36,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.materialkolor.builder.kit.control.DialogFrame
 import com.materialkolor.builder.kit.control.DialogStart
 import com.materialkolor.builder.kit.control.DialogTitleRow
-import com.materialkolor.builder.kit.control.StartPastCloseButton
+import com.materialkolor.builder.kit.control.StartPastTheTop
 import com.materialkolor.builder.kit.headless.HeadlessModal
 import com.materialkolor.builder.kit.headless.LocalOverlaysInTree
 import com.materialkolor.builder.kit.headless.ReturnFocusWhenGone
@@ -52,8 +54,9 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  * something inside has already taken it, a field that asks for it as it opens, and Esc closes it
  * even where the platform does not turn Esc into back.
  *
- * `AlertDialog` holds its panel to Material's widest dialog, so a dialog allowed wider than that
- * draws the panel of [MaterialPageDialog] in a plain dialog window instead. `AlertDialog` always
+ * `AlertDialog` holds its panel to Material's widest dialog and has no room for a hero, so a dialog
+ * allowed wider than that, or one with a hero, draws the panel of [MaterialPageDialog] in a plain
+ * dialog window instead. `AlertDialog` always
  * opens a window of its own, so where overlays render in the page it gives way to
  * [MaterialPageDialog].
  */
@@ -84,7 +87,7 @@ internal fun MaterialDialog(
             if (escape) onDismissRequest()
             escape
         }
-    if (frame.maxWidth > OverlayMetrics.dialogMaxWidth) {
+    if (frame.wide) {
         Dialog(
             onDismissRequest = onDismissRequest,
             properties = DialogProperties(
@@ -115,7 +118,7 @@ internal fun MaterialDialog(
                 )
             },
             modifier = modifier.then(pane),
-            title = if (frame.titleShown || frame.closeButton) {
+            title = if (frame.hasTitleRow) {
                 {
                     DialogTitleRow(frame, onDismissRequest) { titleModifier ->
                         Text(title, titleModifier.modalTitle())
@@ -129,7 +132,7 @@ internal fun MaterialDialog(
         )
     }
     // The wide panel only has a row for the requester when there are actions.
-    val hasRow = frame.actions != null || frame.maxWidth <= OverlayMetrics.dialogMaxWidth
+    val hasRow = frame.actions != null || !frame.wide
     LaunchedEffect(Unit) { if (!focusInside.value && hasRow) firstAction.requestFocus() }
 }
 
@@ -166,7 +169,7 @@ private fun MaterialPageDialog(
             actionsModifier = Modifier.focusRequester(start.actions),
             content = content,
         )
-        StartPastCloseButton(frame, start)
+        StartPastTheTop(frame, start)
     }
 }
 
@@ -175,7 +178,8 @@ private fun MaterialPageDialog(
  * draws in a window when it is wider than `AlertDialog` allows.
  *
  * It takes the container colour, shape and tonal elevation of `AlertDialogDefaults` and Material's
- * headline for the title.
+ * headline for the title. A hero takes the title row's place, edge to edge above the padded body
+ * and clipped to the panel's shape by the surface.
  */
 @Composable
 private fun MaterialDialogPanel(
@@ -187,39 +191,58 @@ private fun MaterialDialogPanel(
     bodyModifier: Modifier = Modifier,
     actionsModifier: Modifier = Modifier,
 ) {
-    val tokens = LocalBuilderTokens.current
-    val typography = MaterialTheme.typography
     Surface(
         modifier = modifier,
         shape = AlertDialogDefaults.shape,
         color = AlertDialogDefaults.containerColor,
         tonalElevation = AlertDialogDefaults.TonalElevation,
     ) {
-        Column(
-            modifier = Modifier.padding(tokens.spacing.extraLarge),
-            verticalArrangement = Arrangement.spacedBy(tokens.spacing.large),
-        ) {
-            DialogTitleRow(frame, onDismissRequest) { titleModifier ->
-                Text(
-                    text = title,
-                    modifier = titleModifier.modalTitle(),
-                    color = AlertDialogDefaults.titleContentColor,
-                    style = typography.headlineSmall,
-                )
-            }
-            CompositionLocalProvider(
-                LocalContentColor provides AlertDialogDefaults.textContentColor,
-                LocalTextStyle provides typography.bodyMedium,
-            ) { Column(Modifier.weight(1f, fill = false).then(bodyModifier), content = content) }
-            val actions = frame.actions
-            if (actions != null) {
-                Row(
-                    modifier = Modifier.align(Alignment.End).then(actionsModifier),
-                    horizontalArrangement = Arrangement.spacedBy(tokens.spacing.small),
-                    verticalAlignment = Alignment.CenterVertically,
-                    content = actions,
-                )
-            }
+        Column {
+            frame.hero?.let { hero -> Box(Modifier.fillMaxWidth()) { hero() } }
+            MaterialDialogColumn(title, onDismissRequest, frame, content, bodyModifier, actionsModifier)
+        }
+    }
+}
+
+/**
+ * The padded column of [MaterialDialogPanel] under its hero, the title row, the body and the
+ * actions. It takes the height the hero leaves, so the body still gives way before the actions do.
+ */
+@Composable
+private fun ColumnScope.MaterialDialogColumn(
+    title: String,
+    onDismissRequest: () -> Unit,
+    frame: DialogFrame,
+    content: @Composable ColumnScope.() -> Unit,
+    bodyModifier: Modifier,
+    actionsModifier: Modifier,
+) {
+    val tokens = LocalBuilderTokens.current
+    val typography = MaterialTheme.typography
+    Column(
+        modifier = Modifier.weight(1f, fill = false).padding(tokens.spacing.extraLarge),
+        verticalArrangement = Arrangement.spacedBy(tokens.spacing.large),
+    ) {
+        DialogTitleRow(frame, onDismissRequest) { titleModifier ->
+            Text(
+                text = title,
+                modifier = titleModifier.modalTitle(),
+                color = AlertDialogDefaults.titleContentColor,
+                style = typography.headlineSmall,
+            )
+        }
+        CompositionLocalProvider(
+            LocalContentColor provides AlertDialogDefaults.textContentColor,
+            LocalTextStyle provides typography.bodyMedium,
+        ) { Column(Modifier.weight(1f, fill = false).then(bodyModifier), content = content) }
+        val actions = frame.actions
+        if (actions != null) {
+            Row(
+                modifier = Modifier.align(Alignment.End).then(actionsModifier),
+                horizontalArrangement = Arrangement.spacedBy(tokens.spacing.small),
+                verticalAlignment = Alignment.CenterVertically,
+                content = actions,
+            )
         }
     }
 }
