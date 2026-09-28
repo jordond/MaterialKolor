@@ -30,7 +30,7 @@ const DEFAULT_SEED = 0xffd9653b | 0;
 
 test.describe('splash', () => {
   // An mk:splash from before the seed and the appearance were stored still paints.
-  test('paints an older mk:splash, chrome only, for each scheme with a neutral poster', async ({ page }) => {
+  test('paints an older mk:splash, chrome only, for each scheme with a neutral seed chip', async ({ page }) => {
     await storeSplash(page, { light: LIGHT, dark: DARK });
     await holdGlue(page);
     await page.emulateMedia({ colorScheme: 'light' });
@@ -38,21 +38,22 @@ test.describe('splash', () => {
 
     const light = await splash(page);
     expect(light.chrome).toBe(rgb(LIGHT));
-    expect(light.poster).toBe(light.canvas);
+    // No seed, so the fan is the tones of a warm grey, #8C7D77.
+    expect(light.seed).toBe('rgb(140, 125, 119)');
     expect(light.hex).not.toContain('#');
 
     await page.emulateMedia({ colorScheme: 'dark' });
     expect((await splash(page)).chrome).toBe(rgb(DARK));
   });
 
-  test('paints a stored seed on the poster, and a link seed over it', async ({ page }) => {
+  test('paints a stored seed on the seed chip, and a link seed over it', async ({ page }) => {
     await storeSplash(page, { light: LIGHT, dark: DARK, seed: BLUE });
     await holdGlue(page);
     await page.goto(site('/'), { waitUntil: 'domcontentloaded' });
-    expect(await splash(page)).toMatchObject({ poster: rgb(BLUE), hex: '"#1A73E8"' });
+    expect(await splash(page)).toMatchObject({ seed: rgb(BLUE), hex: '"#1A73E8"' });
 
     await page.goto(site(DEFAULT_LINK), { waitUntil: 'domcontentloaded' });
-    expect(await splash(page)).toMatchObject({ chrome: rgb(LIGHT), poster: 'rgb(217, 101, 59)', hex: '"#D9653B"' });
+    expect(await splash(page)).toMatchObject({ chrome: rgb(LIGHT), seed: 'rgb(217, 101, 59)', hex: '"#D9653B"' });
   });
 
   test('paints a forced appearance whatever the page scheme, with the stored seed', async ({ page }) => {
@@ -60,7 +61,7 @@ test.describe('splash', () => {
     await holdGlue(page);
     await page.emulateMedia({ colorScheme: 'light' });
     await page.goto(site('/'), { waitUntil: 'domcontentloaded' });
-    expect(await splash(page)).toMatchObject({ chrome: rgb(DARK), poster: rgb(BLUE), hex: '"#1A73E8"' });
+    expect(await splash(page)).toMatchObject({ chrome: rgb(DARK), seed: rgb(BLUE), hex: '"#1A73E8"' });
     expect(await themeColors(page)).toEqual([hex(DARK), hex(DARK)]);
 
     await storeSplash(page, { light: LIGHT, dark: DARK, seed: BLUE, appearance: 'light' });
@@ -88,13 +89,13 @@ test.describe('splash', () => {
   test('paints the default seed on a first visit', async ({ page }) => {
     await holdGlue(page);
     await page.goto(site('/'), { waitUntil: 'domcontentloaded' });
-    expect(await splash(page)).toMatchObject({ poster: 'rgb(217, 101, 59)', hex: '"#D9653B"' });
+    expect(await splash(page)).toMatchObject({ seed: 'rgb(217, 101, 59)', hex: '"#D9653B"' });
   });
 
   test('paints the seed of a theme link with no storage', async ({ page }) => {
     await holdGlue(page);
     await page.goto(site(DEFAULT_LINK), { waitUntil: 'domcontentloaded' });
-    expect(await splash(page)).toMatchObject({ poster: 'rgb(217, 101, 59)', hex: '"#D9653B"' });
+    expect(await splash(page)).toMatchObject({ seed: 'rgb(217, 101, 59)', hex: '"#D9653B"' });
   });
 
   test('with no storage paints the colors the app then writes, and leaves with the summary', async ({ page }) => {
@@ -104,7 +105,7 @@ test.describe('splash', () => {
     const light = (await splash(page)).chrome;
     await page.emulateMedia({ colorScheme: 'dark' });
     const dark = (await splash(page)).chrome;
-    // The Compose mirror lives in a shadow root, so the page's own h1 is the summary.
+    // The Compose mirror lives in a shadow root, so the page's own h1 is the splash wordmark.
     expect(await page.evaluate(() => document.querySelector('h1')?.textContent)).toBe('MaterialKolor Builder');
 
     release();
@@ -189,7 +190,7 @@ test.describe('unsupported browsers', () => {
         await expect(unsupported).toContainText(floor);
       }
       await expect(unsupported.getByRole('link', { name: 'MaterialKolor on GitHub' })).toBeVisible();
-      await expect(page.locator('.mk-skeleton')).toBeHidden();
+      await expect(page.locator('.mk-splash-body')).toBeHidden();
       await page.waitForLoadState('networkidle');
       expect(requests.filter((pathname) => pathname.startsWith('/assets/') || pathname.endsWith('.wasm'))).toEqual([]);
       expect(await page.locator('link[rel="preload"]').count()).toBe(0);
@@ -426,15 +427,14 @@ function hex(argb: number): string {
   return '#' + (argb & 0xffffff).toString(16).toUpperCase().padStart(6, '0');
 }
 
-/** What the splash shows, as computed colors and the poster's hex as a CSS string. */
-async function splash(page: Page): Promise<{ chrome: string; poster: string; canvas: string; hex: string }> {
+/** What the splash shows, as computed colors and the seed chip's hex as a CSS string. */
+async function splash(page: Page): Promise<{ chrome: string; seed: string; hex: string }> {
   return page.evaluate(() => {
     const style = (selector: string, pseudo?: string) => getComputedStyle(document.querySelector(selector)!, pseudo);
     return {
       chrome: style('#splash').backgroundColor,
-      poster: style('.mk-poster').backgroundColor,
-      canvas: style('.mk-canvas').backgroundColor,
-      hex: style('.mk-poster', '::after').content,
+      seed: style('.mk-seed .mk-face').backgroundColor,
+      hex: style('.mk-seed-hex', '::after').content,
     };
   });
 }

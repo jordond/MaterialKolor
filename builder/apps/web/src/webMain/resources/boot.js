@@ -11,6 +11,32 @@
   const DEFAULT_DARK = 0x130d0a;
   const DEFAULT_SEED = 0xd9653b;
 
+  // The fan's seed for an older mk:splash that keeps none, a warm grey, so its tones still run light
+  // to dark in either scheme.
+  const NEUTRAL_SEED = 0x8c7d77;
+
+  // The tones on the splash fan, left to right around the seed, and the two the K mark draws with.
+  // Each is the seed mixed in OKLab toward white or black, and share is how much of the seed it
+  // keeps. The canvas drew them with color-mix in oklch, which gives the same colors.
+  const FAN_TONES = [
+    { name: 't95', toward: 'white', share: 0.14 },
+    { name: 't90', toward: 'white', share: 0.3 },
+    { name: 't80', toward: 'white', share: 0.54 },
+    { name: 't70', toward: 'white', share: 0.78 },
+    { name: 't40', toward: 'black', share: 0.78 },
+    { name: 't30', toward: 'black', share: 0.58 },
+    { name: 't20', toward: 'black', share: 0.4 },
+    { name: 't10', toward: 'black', share: 0.24 },
+  ];
+  const MARK_TONES = [
+    { name: 'deep', toward: 'black', share: 0.62 },
+    { name: 'pale', toward: 'white', share: 0.45 },
+  ];
+
+  // The text on a chip, the splash ink on a light one and white on a dark one.
+  const INK_ON_LIGHT = '#201a18';
+  const INK_ON_DARK = '#ffffff';
+
   // The keys whose browser action, save page, open file and search, the builder takes over with Cmd
   // or Ctrl. By name and by where they sit, so other layouts work too.
   const BROWSER_KEYS = ['s', 'o', 'k'];
@@ -111,10 +137,11 @@
   /**
    * Colors the splash. The chrome comes from mk:splash, one color per scheme. The stylesheet picks
    * between them by the system's scheme, unless mk:splash says the app is always light or always
-   * dark. The poster takes the seed of a theme link, else the seed mk:splash keeps, else stays
-   * neutral. With no mk:splash at all the default document's colors stand in. An older mk:splash
-   * without a seed or an appearance still paints its chrome. With ?motion=frozen the splash holds
-   * still, as it does under reduced motion.
+   * dark. The fan takes the seed of a theme link, else the seed mk:splash keeps, else a warm grey
+   * with no hex, and a root class says which of the two it was so the status line can say so. With no
+   * mk:splash at all the default document's colors and seed stand in. An older mk:splash without a
+   * seed or an appearance still paints its chrome. With ?motion=frozen the splash holds still, as it
+   * does under reduced motion.
    */
   function paintSplash() {
     if (new URLSearchParams(location.search).get('motion') === 'frozen') root.classList.add('mk-motion-frozen');
@@ -130,10 +157,85 @@
     root.style.setProperty('--mk-dark', darkHex);
     if (forced) root.classList.add('mk-' + forced);
     paintThemeColor(lightHex, darkHex, forced);
+    const painted = seed !== null ? seed : NEUTRAL_SEED;
+    root.style.setProperty('--mk-seed', hex(painted));
+    root.style.setProperty('--mk-seed-ink', inkOn(painted));
+    paintTones(painted);
     if (seed === null) return;
-    root.style.setProperty('--mk-seed', hex(seed));
-    root.style.setProperty('--mk-seed-ink', luminance(seed) > 0.179 ? '#000' : '#fff');
+    if (linkSeed !== null) root.classList.add('mk-seed-link');
+    else if (stored) root.classList.add('mk-seed-stored');
     root.style.setProperty('--mk-hex', JSON.stringify(hex(seed)));
+  }
+
+  /**
+   * Sets the fan's tones of the seed and the ink for each, and the two tones of the K mark. CSS
+   * could mix them, but it cannot pick a readable ink for a mixed color, and color-mix is newer than
+   * the oldest browsers the builder runs in.
+   */
+  function paintTones(seed) {
+    const lab = oklab(seed);
+    for (let i = 0; i < FAN_TONES.length; i++) {
+      const tone = mix(lab, FAN_TONES[i]);
+      root.style.setProperty('--mk-' + FAN_TONES[i].name, hex(tone));
+      root.style.setProperty('--mk-' + FAN_TONES[i].name + '-ink', inkOn(tone));
+    }
+    for (let i = 0; i < MARK_TONES.length; i++) {
+      root.style.setProperty('--mk-' + MARK_TONES[i].name, hex(mix(lab, MARK_TONES[i])));
+    }
+  }
+
+  /**
+   * The seed, as OKLab, mixed toward white or black. White is lightness 1 and black lightness 0,
+   * both with no chroma, so the mix scales the seed's a and b and keeps its hue.
+   */
+  function mix(lab, tone) {
+    const keep = tone.share;
+    const target = tone.toward === 'white' ? 1 : 0;
+    return fromOklab([lab[0] * keep + target * (1 - keep), lab[1] * keep, lab[2] * keep]);
+  }
+
+  /** An RGB color as OKLab, lightness then a and b. */
+  function oklab(rgb) {
+    const r = toLinear((rgb >> 16) & 0xff);
+    const g = toLinear((rgb >> 8) & 0xff);
+    const b = toLinear(rgb & 0xff);
+    const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+    const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+    const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+    return [
+      0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
+      1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
+      0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s,
+    ];
+  }
+
+  /** An OKLab color back as RGB, each channel clamped to what sRGB holds. */
+  function fromOklab(lab) {
+    const l = lab[0] + 0.3963377774 * lab[1] + 0.2158037573 * lab[2];
+    const m = lab[0] - 0.1055613458 * lab[1] - 0.0638541728 * lab[2];
+    const s = lab[0] - 0.0894841775 * lab[1] - 1.291485548 * lab[2];
+    const l3 = l * l * l;
+    const m3 = m * m * m;
+    const s3 = s * s * s;
+    const r = toGamma(4.0767416621 * l3 - 3.3077115913 * m3 + 0.2309699292 * s3);
+    const g = toGamma(-1.2684380046 * l3 + 2.6097574011 * m3 - 0.3413193965 * s3);
+    const b = toGamma(-0.0041960863 * l3 - 0.7034186147 * m3 + 1.707614701 * s3);
+    return (r << 16) | (g << 8) | b;
+  }
+
+  function toLinear(channel) {
+    const value = channel / 255;
+    return value <= 0.04045 ? value / 12.92 : Math.pow((value + 0.055) / 1.055, 2.4);
+  }
+
+  function toGamma(linear) {
+    const value = linear <= 0.0031308 ? linear * 12.92 : 1.055 * Math.pow(linear, 1 / 2.4) - 0.055;
+    return Math.max(0, Math.min(255, Math.round(value * 255)));
+  }
+
+  /** The ink that reads better on [rgb], by the luminance where black and white text tie. */
+  function inkOn(rgb) {
+    return luminance(rgb) > 0.179 ? INK_ON_LIGHT : INK_ON_DARK;
   }
 
   /**
@@ -186,7 +288,7 @@
     return '#' + ('00000' + rgb.toString(16).toUpperCase()).slice(-6);
   }
 
-  /** WCAG relative luminance, so the hex on the poster is black or white, whichever reads better. */
+  /** WCAG relative luminance, so the text on a chip is dark or white, whichever reads better. */
   function luminance(rgb) {
     const channel = (shift) => {
       const value = ((rgb >> shift) & 0xff) / 255;

@@ -81,7 +81,18 @@
       #splash {
         --mk-chrome: var(--mk-light, #fff8f6);
         --mk-ink: #201a18;
-        --mk-block: color-mix(in srgb, var(--mk-ink) 8%, var(--mk-chrome));
+        --mk-muted: #6f5f59;
+        --mk-neutral: #8c7d77;
+        --mk-mark-a: var(--mk-deep, var(--mk-neutral));
+        --mk-mark-c: var(--mk-pale, var(--mk-neutral));
+        --mk-chip-ring: 0 0 0 1px rgba(32, 26, 24, 0.07);
+        --mk-chip-drop: 0 12px 28px -14px rgba(32, 26, 24, 0.3);
+        --mk-chip-width: 92px;
+        --mk-chip-height: 360px;
+        --mk-chip-radius: 18px;
+        --mk-spread: 11deg;
+        --mk-lift: -22px;
+        --mk-rivet: 22px;
         position: fixed;
         top: 0;
         right: 0;
@@ -89,157 +100,315 @@
         left: 0;
         z-index: 1;
         background: var(--mk-chrome);
-        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        color: var(--mk-ink);
+        font-family: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", sans-serif;
       }
 
       @media (prefers-color-scheme: dark) {
         html:not(.mk-light) #splash {
           --mk-chrome: var(--mk-dark, #130d0a);
           --mk-ink: #f1dfda;
+          --mk-muted: #b8a7a1;
+          --mk-mark-a: var(--mk-pale, var(--mk-neutral));
+          --mk-mark-c: var(--mk-deep, var(--mk-neutral));
+          --mk-chip-ring: 0 0 0 1px rgba(255, 255, 255, 0.08);
+          --mk-chip-drop: 0 14px 30px -12px rgba(0, 0, 0, 0.55);
         }
       }
 
       .mk-dark #splash {
         --mk-chrome: var(--mk-dark, #130d0a);
         --mk-ink: #f1dfda;
+        --mk-muted: #b8a7a1;
+        --mk-mark-a: var(--mk-pale, var(--mk-neutral));
+        --mk-mark-c: var(--mk-deep, var(--mk-neutral));
+        --mk-chip-ring: 0 0 0 1px rgba(255, 255, 255, 0.08);
+        --mk-chip-drop: 0 14px 30px -12px rgba(0, 0, 0, 0.55);
       }
 
-      .mk-skeleton {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        box-sizing: border-box;
-        height: 100%;
-        padding: 12px;
-      }
-
-      .mk-bar {
-        display: flex;
-        align-items: center;
-        flex: 0 0 48px;
-        padding: 0 16px;
-        color: var(--mk-ink);
-        font-size: 18px;
-        font-weight: 600;
-      }
-
-      .mk-work {
-        display: flex;
-        flex: 1;
-        gap: 12px;
-        min-height: 0;
-      }
-
-      .mk-poster {
-        display: flex;
-        align-items: flex-end;
-        flex: 0 0 min(320px, 40%);
-        box-sizing: border-box;
-        padding: 24px;
-        border-radius: 28px;
-        background: var(--mk-seed, var(--mk-block));
-        color: var(--mk-seed-ink, var(--mk-ink));
-        font-size: 24px;
-        font-weight: 600;
-      }
-
-      .mk-poster::after {
-        content: var(--mk-hex, "");
-      }
-
-      .mk-canvas {
-        --mk-tone: var(--mk-seed, color-mix(in srgb, var(--mk-ink) 40%, var(--mk-chrome)));
+      .mk-splash-body {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 20px;
-        flex: 1;
-        container-type: inline-size;
-        border-radius: 28px;
-        background: var(--mk-block);
+        gap: 40px;
+        box-sizing: border-box;
+        height: 100%;
+        padding-bottom: 48px;
       }
 
-      .mk-swatches {
+      .mk-fan {
+        position: relative;
+        flex: none;
+        width: 760px;
+        height: 430px;
+      }
+
+      /* Each chip turns on the rivet, half a chip width up from its bottom, by its place from the middle. */
+      .mk-chip {
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        z-index: calc(10 - var(--n));
+        width: var(--mk-chip-width);
+        height: var(--mk-chip-height);
+        margin-left: calc(var(--mk-chip-width) / -2);
+        transform-origin: 50% calc(100% - var(--mk-chip-width) / 2);
+        transform: rotate(calc(var(--i) * var(--mk-spread)));
+      }
+
+      .mk-face {
         display: flex;
-        gap: clamp(8px, 2.5cqi, 16px);
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        box-sizing: border-box;
+        height: 100%;
+        padding: 16px 0;
+        /* Round bottom ends centered on the pivot, so every chip meets the hub on one circle. */
+        border-radius: var(--mk-chip-radius) var(--mk-chip-radius) calc(var(--mk-chip-width) / 2)
+          calc(var(--mk-chip-width) / 2);
+        background: var(--mk-face);
+        box-shadow: var(--mk-chip-ring), var(--mk-chip-drop);
+        font-weight: 600;
       }
 
-      .mk-swatches span {
-        width: clamp(28px, 12cqi, 64px);
-        aspect-ratio: 1;
-        border-radius: 32%;
-        background: var(--mk-tone);
-      }
-
-      .mk-swatches span:nth-child(1) {
-        background: color-mix(in oklch, var(--mk-tone) 25%, white);
-      }
-
-      .mk-swatches span:nth-child(2) {
-        --mk-step: 1;
-        background: color-mix(in oklch, var(--mk-tone) 60%, white);
-      }
-
-      .mk-swatches span:nth-child(3) {
-        --mk-step: 2;
-      }
-
-      .mk-swatches span:nth-child(4) {
-        --mk-step: 3;
-        background: color-mix(in oklch, var(--mk-tone) 65%, black);
-      }
-
-      .mk-swatches span:nth-child(5) {
-        --mk-step: 4;
-        background: color-mix(in oklch, var(--mk-tone) 40%, black);
-      }
-
-      .mk-caption {
-        margin: 0;
-        color: var(--mk-ink);
-        opacity: 0.7;
+      .mk-tone,
+      .mk-seed-hex {
+        font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
         font-size: 14px;
       }
 
-      @media (max-width: 600px) {
-        .mk-work {
-          flex-direction: column;
+      /* A step toward the outer side, so the chip in front never covers a tone number. */
+      .mk-tone {
+        transform: translateX(calc(var(--i) / var(--n) * 6px));
+      }
+
+      .mk-seed-hex {
+        font-size: 15px;
+        letter-spacing: 0.02em;
+      }
+
+      .mk-seed-hex::after {
+        content: var(--mk-hex, "");
+      }
+
+      .mk-seed-label {
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      /* The tones boot.js sets, or one plain grey if it never ran. */
+      .mk-t95 {
+        --mk-face: var(--mk-t95, var(--mk-neutral));
+        color: var(--mk-t95-ink, var(--mk-ink));
+      }
+
+      .mk-t90 {
+        --mk-face: var(--mk-t90, var(--mk-neutral));
+        color: var(--mk-t90-ink, var(--mk-ink));
+      }
+
+      .mk-t80 {
+        --mk-face: var(--mk-t80, var(--mk-neutral));
+        color: var(--mk-t80-ink, var(--mk-ink));
+      }
+
+      .mk-t70 {
+        --mk-face: var(--mk-t70, var(--mk-neutral));
+        color: var(--mk-t70-ink, var(--mk-ink));
+      }
+
+      .mk-seed {
+        --mk-face: var(--mk-seed, var(--mk-neutral));
+        color: var(--mk-seed-ink, var(--mk-ink));
+      }
+
+      /* All nine drop shadows meet under the hub, so each is soft. The seed's ring is its own color and hides
+         the chips behind at the hub's edge. */
+      .mk-seed .mk-face {
+        box-shadow: 0 0 0 1px var(--mk-face), var(--mk-chip-drop);
+      }
+
+      .mk-t40 {
+        --mk-face: var(--mk-t40, var(--mk-neutral));
+        color: var(--mk-t40-ink, var(--mk-ink));
+      }
+
+      .mk-t30 {
+        --mk-face: var(--mk-t30, var(--mk-neutral));
+        color: var(--mk-t30-ink, var(--mk-ink));
+      }
+
+      .mk-t20 {
+        --mk-face: var(--mk-t20, var(--mk-neutral));
+        color: var(--mk-t20-ink, var(--mk-ink));
+      }
+
+      .mk-t10 {
+        --mk-face: var(--mk-t10, var(--mk-neutral));
+        color: var(--mk-t10-ink, var(--mk-ink));
+      }
+
+      .mk-rivet {
+        position: absolute;
+        bottom: calc((var(--mk-chip-width) - var(--mk-rivet)) / 2);
+        left: 50%;
+        z-index: 30;
+        box-sizing: border-box;
+        width: var(--mk-rivet);
+        height: var(--mk-rivet);
+        margin-left: calc(var(--mk-rivet) / -2);
+        border: 5px solid var(--mk-ink);
+        border-radius: 50%;
+        background: var(--mk-chrome);
+      }
+
+      .mk-brand {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .mk-wordmark {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .mk-wordmark svg {
+        width: 40px;
+        height: 40px;
+      }
+
+      /* The K mark, as the favicon draws it, in a deep tone, the seed and a pale tone. */
+      .mk-mark-a {
+        stroke: var(--mk-mark-a);
+      }
+
+      .mk-mark-b {
+        stroke: var(--mk-seed, var(--mk-neutral));
+      }
+
+      .mk-mark-c {
+        stroke: var(--mk-mark-c);
+      }
+
+      .mk-wordmark h1 {
+        margin: 0;
+        font-size: 34px;
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: -0.02em;
+      }
+
+      .mk-wordmark span,
+      .mk-status {
+        color: var(--mk-muted);
+        font-weight: 400;
+      }
+
+      .mk-status {
+        margin: 0;
+        font-size: 15px;
+      }
+
+      /* One status line, by where the seed came from. The others are gone, so a screen reader hears one. */
+      .mk-status span {
+        display: none;
+      }
+
+      html:not(.mk-seed-stored):not(.mk-seed-link) .mk-status-default,
+      .mk-seed-stored .mk-status-stored,
+      .mk-seed-link .mk-status-link {
+        display: inline;
+      }
+
+      @media (max-width: 600px), (max-height: 640px) {
+        #splash {
+          --mk-chip-width: 60px;
+          --mk-chip-height: 244px;
+          --mk-chip-radius: 13px;
+          --mk-spread: 10deg;
+          --mk-lift: -14px;
+          --mk-rivet: 16px;
         }
 
-        .mk-poster {
-          flex-basis: 160px;
+        .mk-splash-body {
+          gap: 28px;
+          padding: 0 16px 56px;
+        }
+
+        .mk-fan {
+          width: 358px;
+          height: 300px;
+        }
+
+        .mk-face {
+          gap: 4px;
+          padding: 11px 0;
+        }
+
+        .mk-tone {
+          font-size: 11px;
+        }
+
+        .mk-seed-hex {
+          font-size: 10px;
+          letter-spacing: 0;
+        }
+
+        .mk-seed-label {
+          font-size: 9px;
+          letter-spacing: 0.12em;
+        }
+
+        .mk-rivet {
+          border-width: 4px;
+        }
+
+        .mk-wordmark {
+          gap: 10px;
+        }
+
+        .mk-wordmark svg {
+          width: 30px;
+          height: 30px;
+        }
+
+        .mk-wordmark h1 {
+          font-size: 25px;
         }
       }
 
+      /* The fan opens from the middle out, then a lift walks across it while the app loads. */
       @media (prefers-reduced-motion: no-preference) {
-        html:not(.mk-motion-frozen) .mk-swatches span {
-          animation: mk-bloom 1.6s cubic-bezier(0.4, 0, 0.2, 1) calc(var(--mk-step, 0) * 90ms) infinite both;
+        html:not(.mk-motion-frozen) .mk-chip {
+          animation: mk-open 900ms cubic-bezier(0.34, 1.45, 0.5, 1) calc(var(--n) * 50ms) both;
         }
 
-        html:not(.mk-motion-frozen) .mk-poster::after {
-          animation: mk-settle 0.6s cubic-bezier(0.2, 0, 0, 1) 0.1s both;
+        html:not(.mk-motion-frozen) .mk-face {
+          animation: mk-walk 2.8s cubic-bezier(0.4, 0, 0.2, 1) calc(1s + (var(--i) + 4) * 170ms) infinite both;
         }
       }
 
-      @keyframes mk-bloom {
-        0%,
-        100% {
-          opacity: 0.4;
-          transform: translateY(25%) scale(0.6);
+      @keyframes mk-open {
+        from {
+          transform: rotate(0deg);
         }
+      }
 
-        40%,
-        65% {
-          opacity: 1;
+      @keyframes mk-walk {
+        0%,
+        18%,
+        100% {
           transform: none;
         }
-      }
 
-      @keyframes mk-settle {
-        from {
-          opacity: 0;
-          transform: translateY(8px);
+        8% {
+          transform: translateY(var(--mk-lift));
         }
       }
 
@@ -251,7 +420,7 @@
         display: block;
       }
 
-      .mk-unsupported .mk-skeleton {
+      .mk-unsupported .mk-splash-body {
         display: none;
       }
 
@@ -334,22 +503,58 @@
   <body>
     <div id="app"></div>
     <div id="splash">
-      <div class="mk-visually-hidden">
-        <h1>MaterialKolor Builder</h1>
-        <p>
+      <div class="mk-splash-body">
+        <div class="mk-fan" aria-hidden="true">
+          <div class="mk-chip mk-t95" style="--i: -4; --n: 4">
+            <div class="mk-face"><span class="mk-tone">95</span></div>
+          </div>
+          <div class="mk-chip mk-t90" style="--i: -3; --n: 3">
+            <div class="mk-face"><span class="mk-tone">90</span></div>
+          </div>
+          <div class="mk-chip mk-t80" style="--i: -2; --n: 2">
+            <div class="mk-face"><span class="mk-tone">80</span></div>
+          </div>
+          <div class="mk-chip mk-t70" style="--i: -1; --n: 1">
+            <div class="mk-face"><span class="mk-tone">70</span></div>
+          </div>
+          <div class="mk-chip mk-seed" style="--i: 0; --n: 0">
+            <div class="mk-face"><span class="mk-seed-hex"></span><span class="mk-seed-label">Seed</span></div>
+          </div>
+          <div class="mk-chip mk-t40" style="--i: 1; --n: 1">
+            <div class="mk-face"><span class="mk-tone">40</span></div>
+          </div>
+          <div class="mk-chip mk-t30" style="--i: 2; --n: 2">
+            <div class="mk-face"><span class="mk-tone">30</span></div>
+          </div>
+          <div class="mk-chip mk-t20" style="--i: 3; --n: 3">
+            <div class="mk-face"><span class="mk-tone">20</span></div>
+          </div>
+          <div class="mk-chip mk-t10" style="--i: 4; --n: 4">
+            <div class="mk-face"><span class="mk-tone">10</span></div>
+          </div>
+          <div class="mk-rivet"></div>
+        </div>
+        <div class="mk-brand">
+          <div class="mk-wordmark">
+            <svg viewBox="6 6 52 52" aria-hidden="true">
+              <g fill="none" stroke-width="12" stroke-linecap="round">
+                <path class="mk-mark-c" d="M24 32 46 52" />
+                <path class="mk-mark-b" d="M24 32 46 12" />
+                <path class="mk-mark-a" d="M18 12v40" />
+              </g>
+            </svg>
+            <h1>MaterialKolor <span>Builder</span></h1>
+          </div>
+          <p class="mk-status">
+            <span class="mk-status-default">Loading the builder</span>
+            <span class="mk-status-stored">Opening your last theme</span>
+            <span class="mk-status-link">Opening a shared theme</span>
+          </p>
+        </div>
+        <p class="mk-visually-hidden">
           MaterialKolor Builder creates a Material 3 color scheme from a single seed color, previews it in light and
           dark, and exports it for Android and Compose Multiplatform apps.
         </p>
-      </div>
-      <div class="mk-skeleton" aria-hidden="true">
-        <div class="mk-bar">MaterialKolor Builder</div>
-        <div class="mk-work">
-          <div class="mk-poster"></div>
-          <div class="mk-canvas">
-            <div class="mk-swatches"><span></span><span></span><span></span><span></span><span></span></div>
-            <p class="mk-caption">Loading the builder</p>
-          </div>
-        </div>
       </div>
     </div>
     <section id="unsupported" class="mk-page" aria-labelledby="unsupported-title">
