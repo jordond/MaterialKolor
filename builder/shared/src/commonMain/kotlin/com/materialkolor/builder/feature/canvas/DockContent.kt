@@ -68,11 +68,13 @@ internal fun DockContent(
     val inputModes = LocalInputModeManager.current
     val fullscreenButton = remember { FocusRequester() }
     val wasFullscreen = remember { mutableStateOf(state.fullscreen) }
+
     LaunchedEffect(state.fullscreen) {
         val ended = wasFullscreen.value && !state.fullscreen
         if (ended) inputModes.handFocusTo(fullscreenButton)
         wasFullscreen.value = state.fullscreen
     }
+
     val inspectToggle = remember { FocusRequester() }
     val wasInspecting = remember { mutableStateOf(state.inspect) }
     LaunchedEffect(state.inspect) {
@@ -80,10 +82,10 @@ internal fun DockContent(
         if (ended) inputModes.handFocusTo(inspectToggle)
         wasInspecting.value = state.inspect
     }
+
     DockRegion(modifier) {
         val inspect = stringResource(Res.string.canvas_inspect)
         if (compact) {
-            // A phone's dock is one row of glyphs, so Inspect shows its state by its fill.
             BuilderIconButton(
                 onClick = { dispatcher.dispatch(WorkspaceAction.SetInspect(!state.inspect)) },
                 icon = IconId.Inspect,
@@ -102,24 +104,25 @@ internal fun DockContent(
                 icon = IconId.Inspect,
             )
         }
+
         BuilderSegmented(
             options = PreviewMode.entries,
             selected = state.view.mode,
             onSelect = { mode -> dispatcher.dispatch(WorkspaceAction.SetPreviewMode(mode, origin = null)) },
             label = stringResource(Res.string.canvas_mode_label),
-            // As wide as its options, so a row that shares its width out evenly leaves room for the tools.
             modifier = Modifier.width(IntrinsicSize.Max),
             optionIcon = { mode -> if (compact) null else mode.icon },
-            // Arrowing along the modes should not slide the handle at every stop.
             selectOnFocus = false,
             optionLabel = { mode -> modes.getValue(mode) },
         )
+
         if (!compact) {
             DeviceWidthMenu(
                 width = state.view.deviceWidth,
                 onPick = { width -> dispatcher.dispatch(WorkspaceAction.SetDeviceWidth(width)) },
             )
         }
+
         VisionMenu(
             vision = state.vision,
             onPick = { vision -> dispatcher.dispatch(WorkspaceAction.SetVision(vision)) },
@@ -127,6 +130,7 @@ internal fun DockContent(
             onOpenChange = { open -> dispatcher.dispatch(WorkspaceAction.SetVisionMenuOpen(open)) },
             held = state.grayscaleHeld,
         )
+
         if (!state.fullscreen) {
             BuilderIconButton(
                 onClick = { dispatcher.dispatch(WorkspaceAction.ToggleFullscreen) },

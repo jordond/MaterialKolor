@@ -33,8 +33,6 @@ import com.materialkolor.builder.generated.resources.export_dynamic_color_note
 import com.materialkolor.builder.generated.resources.export_expressive_2021
 import com.materialkolor.builder.generated.resources.export_expressive_caption
 import com.materialkolor.builder.generated.resources.export_library_custom_caption
-import com.materialkolor.builder.generated.resources.export_library_custom_frozen_note
-import com.materialkolor.builder.generated.resources.export_library_custom_note
 import com.materialkolor.builder.generated.resources.export_library_fluent_caption
 import com.materialkolor.builder.generated.resources.export_library_fluent_note
 import com.materialkolor.builder.generated.resources.export_library_m3
@@ -107,7 +105,9 @@ internal fun ExportOptionsForm(
     val spacing = LocalBuilderTokens.current.spacing
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(spacing.extraLarge)) {
         OptionsSection(Res.string.export_section_library) { LibraryOptions(state, workspace) }
+
         OptionsSection(Res.string.export_section_colors) { ColorOptions(state, capabilities, dispatcher) }
+
         val project = capabilities[Control.KmpOrAndroid].shown ||
             capabilities[Control.VersionCatalog].shown ||
             state.wallpaperShown
@@ -148,7 +148,6 @@ private fun LibraryOptions(
     state: ExportModel.State,
     workspace: Dispatcher<WorkspaceAction>,
 ) {
-    // M3 Expressive shares the Material 3 card, its switch under the card picks between the two.
     val current = LibraryChoice.of(state.document)
     val selected = if (current == LibraryChoice.M3Expressive) LibraryChoice.M3 else current
     val origin = remember { RevealOrigin() }
@@ -191,11 +190,14 @@ private fun LibraryOptions(
             }
         }
         else -> {
-            TintedRow {
-                BuilderText(
-                    text = stringResource(libraryNote(selected, state.prefs.mode)),
-                    emphasis = Emphasis.Secondary,
-                )
+            val note = libraryNote(selected, state.prefs.mode)
+            if (note != null) {
+                TintedRow {
+                    BuilderText(
+                        text = stringResource(note),
+                        emphasis = Emphasis.Secondary,
+                    )
+                }
             }
         }
     }
@@ -249,12 +251,12 @@ private fun libraryCaption(choice: LibraryChoice): StringResource =
 private fun libraryNote(
     choice: LibraryChoice,
     mode: ExportMode,
-): StringResource =
+): StringResource? =
     when {
         choice == LibraryChoice.Unstyled -> Res.string.export_library_unstyled_note
         choice == LibraryChoice.Fluent -> Res.string.export_library_fluent_note
-        mode == ExportMode.Frozen -> Res.string.export_library_custom_frozen_note
-        else -> Res.string.export_library_custom_note
+        mode == ExportMode.Frozen -> null
+        else -> null
     }
 
 /**

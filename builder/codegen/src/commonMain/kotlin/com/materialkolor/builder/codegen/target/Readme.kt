@@ -33,18 +33,17 @@ internal object Readme {
         val text = buildList {
             add("# ${input.document.themeName}")
             add("")
-            add("Made with MaterialKolor Builder ${versions.builder}.")
+            add("Made with MaterialKolor Builder ${versions.builder}: ${input.shareUrl}")
             when (input.prefs.mode) {
                 ExportMode.Dynamic -> {
                     add(
                         "The theme builds its colors from the seed at runtime with MaterialKolor " +
-                            "${versions.materialKolor}, the version the dependency lines below pin.",
+                            versions.materialKolor,
                     )
                 }
                 ExportMode.Frozen -> {
                     add(
-                        "Every color is written out as it is, so the files need no MaterialKolor. " +
-                            "The colors come from MaterialKolor ${versions.materialKolor}.",
+                        "The colors come from MaterialKolor ${versions.materialKolor}.",
                     )
                 }
             }
@@ -79,10 +78,6 @@ internal object Readme {
                     add(note)
                 }
             }
-            add("")
-            add("## Open it again")
-            add("")
-            add("To change the theme later, open it in the builder at <${input.shareUrl}>")
         }
 
         return GeneratedFile(

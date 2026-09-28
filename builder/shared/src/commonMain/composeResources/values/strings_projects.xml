@@ -96,7 +96,7 @@
     <string name="share_card_failed_body">The link still works.</string>
     <!-- The project name field, which renames the project and the name the link carries. -->
     <string name="share_name_label">Project name</string>
-    <string name="share_name_help">Renames the project. The name travels with the link.</string>
+    <string name="share_name_help">Renames the project.</string>
     <string name="share_name_not_saved">That name didn’t save. Try again.</string>
     <string name="share_name_transient">Save it to your projects to rename it.</string>
     <!-- What the link carries, a label on the left and its value on the right. -->

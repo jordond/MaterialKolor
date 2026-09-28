@@ -43,10 +43,8 @@
     <string name="export_library_custom_caption">Your own slots</string>
     <string name="export_expressive_caption">Calls DynamicMaterialExpressiveTheme</string>
     <!-- The note under the libraries on the platforms each one runs on. -->
-    <string name="export_library_unstyled_note">Compose Unstyled needs JVM 17 and Android minSdk 23, and has no macOS native target.</string>
-    <string name="export_library_fluent_note">Compose Fluent needs JVM 17 and has no macOS native target.</string>
-    <string name="export_library_custom_note">Plain Compose that only needs MaterialKolor core.</string>
-    <string name="export_library_custom_frozen_note">Plain Compose that needs nothing extra.</string>
+    <string name="export_library_unstyled_note">Compose Unstyled needs JVM 17 and Android minSdk 23.</string>
+    <string name="export_library_fluent_note">Compose Fluent needs JVM 17.</string>
 
     <!-- What the file tree is called, read out for its files. -->
     <string name="export_tree">Files in the zip</string>
