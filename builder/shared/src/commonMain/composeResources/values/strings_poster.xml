@@ -10,6 +10,8 @@
     <string name="poster_projects_saving">Projects, %1$s, saving</string>
     <!-- What the Projects button reads out when the last save did not land. The argument is the project's name. -->
     <string name="poster_projects_not_saved">Projects, %1$s, not saved</string>
+    <!-- What the Projects button reads out while its save waits for a conflict with another tab to be settled. The argument is the project's name. -->
+    <string name="poster_projects_held">Projects, %1$s, waiting on the other tab</string>
     <!-- The badge beside the Projects button when the last save did not land. -->
     <string name="poster_save_failed">Not saved</string>
     <!-- The header button that shrinks the poster to its rail. -->

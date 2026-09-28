@@ -17,6 +17,7 @@ import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.poster_collapse
 import com.materialkolor.builder.generated.resources.poster_projects
+import com.materialkolor.builder.generated.resources.poster_projects_held
 import com.materialkolor.builder.generated.resources.poster_projects_not_saved
 import com.materialkolor.builder.generated.resources.poster_projects_saved
 import com.materialkolor.builder.generated.resources.poster_projects_saving
@@ -164,7 +165,8 @@ private fun ProjectsButton(
  *
  * @property[spoken] What the button reads out, Projects with the project's name and its save state.
  * @property[glyph] The glyph at the end of the button, a turning progress glyph while a save is under
- * way and a check once saved. None on a failed save, whose danger badge says it.
+ * way and a check once saved. None on a failed save, whose danger badge says it, or on one held back
+ * by a conflict with another tab, whose banner says it.
  */
 @Immutable
 internal data class SaveMark(
@@ -179,6 +181,8 @@ internal fun saveMarkOf(status: SaveStatus): SaveMark =
     when (status) {
         SaveStatus.Idle -> SaveMark(Res.string.poster_projects_saved, IconId.Check)
         SaveStatus.Pending -> SaveMark(Res.string.poster_projects_saving, IconId.Progress)
+        // The conflict banner says why, so the pill only stops turning.
+        SaveStatus.Held -> SaveMark(Res.string.poster_projects_held, glyph = null)
         is SaveStatus.Failed -> SaveMark(Res.string.poster_projects_not_saved, glyph = null)
     }
 

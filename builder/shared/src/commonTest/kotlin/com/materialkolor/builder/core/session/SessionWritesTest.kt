@@ -5,6 +5,7 @@ import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.link.ShareCodec
 import com.materialkolor.builder.domain.model.SeedSource
+import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.PreviewTab
 import com.materialkolor.builder.domain.persist.StorageKeys
@@ -91,6 +92,27 @@ class SessionWritesTest : SessionTestBase() {
             session.saveStatus.value shouldBe SaveStatus.Idle
             session.undo()
             session.document.value shouldBe ThemeDocument.Default
+        }
+
+    @Test
+    fun write_heldBackByAConflict_stopsReadingAsSavingUntilItSettles() =
+        runTest {
+            val (session) = session()
+            val id = booted(session)
+            session.edit(DocumentChange.SetAmoled(true), EditPhase.Discrete)
+            saveFromAnotherTab(id, FOREST)
+            settle()
+
+            session.conflict.value.shouldNotBeNull()
+            session.saveStatus.value shouldBe SaveStatus.Held
+            // An edit under the conflict is held straight away, so it never reads as saving.
+            session.edit(DocumentChange.SetStyle(Style.Vibrant), EditPhase.Discrete)
+            session.saveStatus.value shouldBe SaveStatus.Held
+
+            session.resolveConflict(keepMine = true)
+            session.saveStatus.value shouldBe SaveStatus.Pending
+            settle()
+            session.saveStatus.value shouldBe SaveStatus.Idle
         }
 
     @Test

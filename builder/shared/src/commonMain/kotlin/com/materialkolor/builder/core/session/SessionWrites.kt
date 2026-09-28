@@ -42,10 +42,11 @@ internal class SessionWrites(
     private var newestSave = 0L
 
     /**
-     * Mark a new save as waiting and hand back its number. Call it on the UI thread.
+     * Mark a new save as waiting, or as held while a conflict is up, and hand back its number. Call
+     * it on the UI thread.
      */
     fun nextSave(): Long {
-        setStatus(SaveStatus.Pending)
+        setStatus(if (conflicted()) SaveStatus.Held else SaveStatus.Pending)
         return ++newestSave
     }
 
@@ -57,12 +58,18 @@ internal class SessionWrites(
     }
 
     /**
-     * Write [save], or hold it back while a conflict is up for its project.
+     * Write [save], or hold it back while a conflict is up for its project. A held save stops
+     * reading as saving until the conflict is settled, which schedules a new save.
      */
     suspend fun write(save: PendingSave): Boolean {
-        if (conflicted() && showing() === save.project) return false
+        if (conflicted() && showing() === save.project) {
+            withContext(save.project.context) { report(save, SaveStatus.Held) }
+            return false
+        }
         val error = lock.withLock { persist(save) }
-        withContext(save.project.context) { report(save, error) }
+        withContext(save.project.context) {
+            report(save, if (error != null) SaveStatus.Failed(error) else SaveStatus.Idle)
+        }
         return error == null
     }
 
@@ -78,10 +85,10 @@ internal class SessionWrites(
      */
     private fun report(
         save: PendingSave,
-        error: StoreError?,
+        status: SaveStatus,
     ) {
         if (showing() !== save.project || save.sequence != newestSave) return
-        setStatus(if (error != null) SaveStatus.Failed(error) else SaveStatus.Idle)
+        setStatus(status)
     }
 
     private suspend fun persist(save: PendingSave): StoreError? {
