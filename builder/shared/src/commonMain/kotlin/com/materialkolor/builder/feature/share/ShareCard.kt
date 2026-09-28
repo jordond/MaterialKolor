@@ -1,5 +1,7 @@
 package com.materialkolor.builder.feature.share
 
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.ImageBitmap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -32,6 +34,7 @@ internal fun decodeCard(bytes: ByteArray): ImageBitmap? =
 /**
  * Where the share dialog's card is, as [ShareCardLoader] tells it.
  */
+@Stable
 internal sealed interface CardState {
     /**
      * No card has shown yet and one is on its way.

@@ -1,5 +1,11 @@
 package com.materialkolor.builder.feature.canvas
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -26,10 +32,12 @@ import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.LocalThemeResult
 import com.materialkolor.builder.domain.persist.DeviceWidth
 import com.materialkolor.builder.domain.persist.PreviewMode
@@ -49,6 +57,9 @@ import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.TabsVariant
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.layout.WindowClass
+import com.materialkolor.builder.kit.motion.BuilderMotion
+import com.materialkolor.builder.kit.motion.LocalBuilderMotion
+import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.shell.PreviewWindowRegion
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.kit.widget.screenWidth
@@ -148,6 +159,52 @@ internal fun CanvasTabs(
 internal fun canvasInset(compact: Boolean): Dp {
     val spacing = LocalBuilderTokens.current.spacing
     return if (compact) spacing.small else spacing.large
+}
+
+/**
+ * How far a tab body slides as it swaps for its neighbour.
+ */
+private val TabShift = 32.dp
+
+/**
+ * Swaps [content] for the [tab] it draws on a shared axis. The new body slides in from the side of
+ * the tab strip it was picked from while the old one slides out the other way, both fading. Under
+ * reduced motion the skin's motion only fades them, and under `LocalMotionFrozen` the body swaps at
+ * once with nothing kept over, so only the visible tab ever composes there.
+ */
+@Composable
+internal fun CanvasTabTransition(
+    tab: PreviewTab,
+    modifier: Modifier = Modifier,
+    content: @Composable (tab: PreviewTab) -> Unit,
+) {
+    if (LocalMotionFrozen.current) {
+        Box(modifier) { content(tab) }
+        return
+    }
+    val motion = LocalBuilderMotion.current
+    val shift = with(LocalDensity.current) { TabShift.roundToPx() }
+    AnimatedContent(
+        targetState = tab,
+        modifier = modifier,
+        transitionSpec = {
+            val forward = targetState.ordinal > initialState.ordinal
+            tabSwap(motion, if (forward) shift else -shift)
+        },
+        label = "canvas-tab",
+    ) { shown -> content(shown) }
+}
+
+/**
+ * The incoming body from [shift] pixels along the axis and the outgoing one to the opposite side.
+ */
+private fun tabSwap(
+    motion: BuilderMotion,
+    shift: Int,
+): ContentTransform {
+    val enter = slideInHorizontally(motion.spatial()) { shift } + fadeIn(motion.crossfade())
+    val exit = slideOutHorizontally(motion.spatial()) { -shift } + fadeOut(motion.effects())
+    return ContentTransform(enter, exit, targetContentZIndex = 1f, sizeTransform = null)
 }
 
 /**

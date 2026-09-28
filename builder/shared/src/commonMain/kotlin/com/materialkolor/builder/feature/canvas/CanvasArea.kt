@@ -81,18 +81,20 @@ internal fun CanvasArea(
             modifier = Modifier.padding(start = inset, end = inset, top = inset),
         )
         InspectLayer(state, preview, dispatcher, Modifier.weight(1f).fillMaxWidth().padding(contentPadding)) {
-            CanvasTabBody(
-                tab = state.view.tab,
-                mode = state.view.mode,
-                preview = preview,
-                specs = specs,
-                appState = appState,
-                componentsState = componentsState,
-                dispatcher = dispatcher,
-                rampHighlight = state.rampHighlight,
-                generation = state.projectGeneration,
-                deviceWidth = if (compact) DeviceWidth.Phone else state.view.deviceWidth,
-            )
+            CanvasTabTransition(state.view.tab, Modifier.fillMaxSize()) { tab ->
+                CanvasTabBody(
+                    tab = tab,
+                    mode = state.view.mode,
+                    preview = preview,
+                    specs = specs,
+                    appState = appState,
+                    componentsState = componentsState,
+                    dispatcher = dispatcher,
+                    rampHighlight = state.rampHighlight,
+                    generation = state.projectGeneration,
+                    deviceWidth = if (compact) DeviceWidth.Phone else state.view.deviceWidth,
+                )
+            }
         }
     }
 }
