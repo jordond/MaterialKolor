@@ -5,19 +5,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
-import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TooltipAnchorPosition
-import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.TooltipDefaults
-import androidx.compose.material3.rememberTooltipState
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -51,8 +45,8 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  * The Material3 style for the headless overlays.
  *
  * It styles the overlays Material has no component for, the side panel, the end sheet, the bottom
- * sheet with three detents and the scroll area. Where overlays render in the page it also
- * styles the headless tooltip that stands in for `PlainTooltip`, and through [materialMenuStyle]
+ * sheet with three detents and the scroll area. It styles the headless tooltip that stands
+ * in for `PlainTooltip` too, and where overlays render in the page, through [materialMenuStyle],
  * the menu and the select's list that stand in for `DropdownMenu`. The dialog there draws Material's
  * own dialog container over the headless modal, whose veil reads `tokens.scrim` directly rather
  * than anything from here.
@@ -237,35 +231,20 @@ private fun MaterialMenuRows(
 }
 
 /**
- * Material's plain tooltip. It is persistent, so a tooltip shown by keyboard focus stays until focus
- * leaves rather than timing out under the reader.
+ * Material's plain tooltip, drawn by the headless tooltip in Material's inverse colours.
  *
- * `TooltipBox` always opens a popup, so where overlays render in the page the headless
- * tooltip draws the label in Material's inverse colours, out of the semantics tree.
- *
- * `TooltipBox` puts the modifier it is given on the anchor inside a box of its own, where a
- * placement like `align` or `weight` never reaches the caller's layout. So [modifier] goes on a box
- * around it instead, which hands its minimum size on.
+ * `TooltipBox` shows its label the moment the pointer lands and keeps a persistent one up after the
+ * pointer leaves. On desktop that label then rides a scroll under a resting pointer, and its popup
+ * takes the next wheel step from the page. The headless tooltip waits for a rest and drops the
+ * label at the first scroll, in a popup here and in the page on the web alike.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun MaterialTooltip(
     text: String,
     modifier: Modifier,
     content: @Composable () -> Unit,
 ) {
-    if (LocalOverlaysInTree.current) {
-        HeadlessTooltip(text, materialOverlayStyle(), modifier, content)
-        return
-    }
-    Box(modifier, propagateMinConstraints = true) {
-        TooltipBox(
-            positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-            tooltip = { PlainTooltip { Text(text) } },
-            state = rememberTooltipState(isPersistent = true),
-            content = content,
-        )
-    }
+    HeadlessTooltip(text, materialOverlayStyle(), modifier, content)
 }
 
 /**
