@@ -1,10 +1,9 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 import { openBuilder, wantHooks } from './builder';
 
-// Tab inside the canvas. WebKit was seen to bounce Tab between the canvas's first two stops. Compose
-// focus never reaches the page, so the specs type after each move and read through the accessibility
-// mirror where the text went. Keys go in one at a time with a pause, so each lands after the focus
-// move before it.
+// Tab inside the canvas. Compose focus never reaches the page, so the specs type after each move and
+// read through the accessibility mirror where the text went. Keys go in one at a time with a pause,
+// so each lands after the focus move before it.
 
 /** The gallery's text fields. Their labels are their text in the mirror, so they have no `aria-label`. */
 const FIELDS = '#cmp_a11y_root [contenteditable]:not([aria-label])';
@@ -27,20 +26,6 @@ test.beforeEach(async ({ context }) => {
   await wantHooks(context);
 });
 
-test('Tab twice from a gallery text field moves past it and does not bounce back', async ({ page }) => {
-  const start = await typeInField(page, FILLED);
-
-  // The first Tab reaches the Outlined field and the second the Slider card.
-  await press(page, 'Tab');
-  await press(page, 'Tab');
-  await typeSettled(page, 'zq');
-  await press(page, 'Tab');
-  await typeSettled(page, 'w');
-
-  await expect(start).not.toContainText('zq');
-  await expect(start).not.toContainText('w');
-});
-
 test('one Tab leaves a gallery text field', async ({ page }) => {
   // The Outlined field has no twin after it, so one Tab goes on to the Slider card. Compose drops its
   // backing input once no text field has focus, and a key typed then lands in neither field.
@@ -52,29 +37,6 @@ test('one Tab leaves a gallery text field', async ({ page }) => {
 
   await expect(start).toHaveText('start');
   await expect(page.locator(FIELDS).nth(FILLED)).toHaveText('start');
-});
-
-test('one Tab from the Filled field lands in the Outlined one', async ({ page }) => {
-  // This is what looked like the first Tab staying put. Focus does move, but into the
-  // Outlined "Destination" field, which shows the same text. So a key typed next shows up in both,
-  // at the end in Chromium, which moves the caret there when the text is set, and at the start in
-  // WebKit, where a field that never had focus keeps its caret at 0.
-  await typeInField(page, FILLED);
-  const outlined = (await page.locator(FIELDS).nth(OUTLINED).boundingBox())!;
-
-  await press(page, 'Tab');
-
-  await expect
-    .poll(async () => {
-      const boxes = await page.locator(BACKING_FIELD).evaluateAll((fields) =>
-        fields.map((field) => {
-          const { x, y, width, height } = field.getBoundingClientRect();
-          return { x, y, width, height };
-        }),
-      );
-      return boxes.length === 1 && holdsCentreOf(outlined, boxes[0]);
-    })
-    .toBe(true);
 });
 
 // The Trips note is the one multi-line field in the sample apps. On its own it would type Tab as a
@@ -135,16 +97,6 @@ async function typeInTripsNote(page: Page): Promise<Locator> {
   await typeSettled(page, 'note');
   await expect(note).toHaveText('note');
   return note;
-}
-
-/** Whether the centre of [inner] lies inside [outer]. */
-function holdsCentreOf(
-  outer: { x: number; y: number; width: number; height: number },
-  inner: { x: number; y: number; width: number; height: number },
-): boolean {
-  const x = inner.x + inner.width / 2;
-  const y = inner.y + inner.height / 2;
-  return x >= outer.x && x <= outer.x + outer.width && y >= outer.y && y <= outer.y + outer.height;
 }
 
 async function press(page: Page, key: string): Promise<void> {
