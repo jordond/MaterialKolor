@@ -109,6 +109,12 @@ internal sealed interface SaveStatus {
     data object Pending : SaveStatus
 
     /**
+     * The latest changes wait for a conflict with another tab to be settled, and nothing is being
+     * written until then.
+     */
+    data object Held : SaveStatus
+
+    /**
      * The last save did not land, even after the repository made room and tried again.
      */
     data class Failed(

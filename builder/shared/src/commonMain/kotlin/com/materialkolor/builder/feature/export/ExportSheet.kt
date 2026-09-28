@@ -41,12 +41,9 @@ import com.materialkolor.builder.generated.resources.export_copy_all
 import com.materialkolor.builder.generated.resources.export_copy_file
 import com.materialkolor.builder.generated.resources.export_download
 import com.materialkolor.builder.generated.resources.export_options
-import com.materialkolor.builder.generated.resources.export_save_failed
 import com.materialkolor.builder.generated.resources.export_share
-import com.materialkolor.builder.generated.resources.export_share_failed
 import com.materialkolor.builder.generated.resources.export_title
 import com.materialkolor.builder.kit.a11y.LocalAnnouncer
-import com.materialkolor.builder.kit.control.BuilderButton
 import com.materialkolor.builder.kit.control.BuilderDisclosure
 import com.materialkolor.builder.kit.control.BuilderScrollArea
 import com.materialkolor.builder.kit.control.BuilderSheet
@@ -57,7 +54,6 @@ import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import dev.stateholder.dispatcher.Dispatcher
 import kotlinx.coroutines.delay
-import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -83,7 +79,8 @@ private enum class CopyKind {
  * the code instead. Narrow, the header only names the theme, and everything else is one scrolling
  * column, with the names and the options folded into a disclosure over the file tabs and the code.
  * Copy file sits at the end of the path over the code, and in the footer on the narrow layout,
- * where the path bar has no room for it. Switching the library is the same edit the top bar makes,
+ * where the path bar has no room for it. There it shares the last row with the zip button, each
+ * taking half, under Copy all across the width. Switching the library is the same edit the top bar makes,
  * so the previews re-theme behind the sheet.
  *
  * Every copy, download and share starts inside the click, with the platform call as its first
@@ -161,7 +158,11 @@ internal fun ExportSheet(
     val keysShown = !LocalLayout.current.coarsePointer
     val copyFileLabel = stringResource(Res.string.export_copy_file)
     val copiedLabel = stringResource(Res.string.export_copied)
-    val copyFile: @Composable (picked: GeneratedFile?, onCode: Boolean) -> Unit = { picked, onCode ->
+    val copyFile: @Composable (
+        picked: GeneratedFile?,
+        onCode: Boolean,
+        place: Modifier,
+    ) -> Unit = { picked, onCode, place ->
         val copied = sheet.copied == CopyKind.File
         val onClick = { if (picked != null) copy(CopyKind.File, picked.text) }
         if (onCode) {
@@ -173,7 +174,13 @@ internal fun ExportSheet(
                 onClick = onClick,
             )
         } else {
-            CopyButton(copied = copied, label = copyFileLabel, enabled = picked != null, onClick = onClick)
+            CopyButton(
+                copied = copied,
+                label = copyFileLabel,
+                enabled = picked != null,
+                onClick = onClick,
+                modifier = place,
+            )
         }
     }
     val layout = BodyLayout.ofSheet(LocalLayout.current.widthDp)
@@ -192,17 +199,28 @@ internal fun ExportSheet(
         footer = {
             val export = sheetExport(state, outcomeOf, sheet.drafts)
             val ready = export.ready
-            ExportFooter(materialKolorVersion, ready) {
-                if (narrow) copyFile(export.picked, false)
+            val copyAll: @Composable (place: Modifier) -> Unit = { place ->
                 CopyButton(
                     copied = sheet.copied == CopyKind.All,
                     label = stringResource(Res.string.export_copy_all),
                     enabled = ready != null,
+                    onClick = { if (ready != null) copy(CopyKind.All, ready.allText) },
+                    modifier = place,
                     tonal = true,
                     hint = if (keysShown) Shortcut.CopyAll.text(apple = false) else null,
-                    onClick = { if (ready != null) copy(CopyKind.All, ready.allText) },
                 )
-                ZipButton(ready, files, dispatcher, workspace)
+            }
+            ExportFooter(materialKolorVersion, ready) {
+                if (narrow) {
+                    NarrowFooterButtons(
+                        copyAll = copyAll,
+                        copyFile = { place -> copyFile(export.picked, false, place) },
+                        zip = { place -> ZipButton(ready, files, dispatcher, workspace, place) },
+                    )
+                } else {
+                    copyAll(Modifier)
+                    ZipButton(ready, files, dispatcher, workspace)
+                }
             }
         },
     ) {
@@ -245,7 +263,7 @@ internal fun ExportSheet(
                 NarrowBody(export, parts, optionsSummary(state), viewport = constraints.maxHeight)
             } else {
                 SplitBody(export, parts, tree = layout == BodyLayout.Wide, optionsWidth) {
-                    copyFile(picked, true)
+                    copyFile(picked, true, Modifier)
                 }
             }
         }
@@ -405,77 +423,6 @@ private class SheetCopies {
     var copies: Int by mutableIntStateOf(0)
     var manualText: String by mutableStateOf("")
     var manualOpen: Boolean by mutableStateOf(false)
-}
-
-/**
- * A copy button that shows Copied, with a check, while [copied].
- *
- * @param[tonal] Whether it carries its own fill.
- * @param[hint] The key that does the same, drawn as a keycap, or null for none.
- */
-@Composable
-private fun CopyButton(
-    copied: Boolean,
-    label: String,
-    enabled: Boolean,
-    onClick: () -> Unit,
-    tonal: Boolean = false,
-    hint: String? = null,
-) {
-    BuilderButton(
-        onClick = onClick,
-        label = if (copied) stringResource(Res.string.export_copied) else label,
-        icon = if (copied) IconId.Check else IconId.Copy,
-        enabled = enabled,
-        hint = hint,
-        tonal = tonal,
-    )
-}
-
-/**
- * Download zip, or Share files on a touch screen whose share sheet takes the zip. Which one is
- * settled before the click, so the click never falls back to a download once the share is spent.
- */
-@Composable
-private fun ZipButton(
-    ready: ExportOutcome.Ready?,
-    files: FileSaver,
-    dispatcher: Dispatcher<ExportAction>,
-    workspace: Dispatcher<WorkspaceAction>,
-) {
-    val scope = rememberCoroutineScope()
-    val share = zipShares(ready, files)
-    BuilderButton(
-        onClick = {
-            if (ready == null) return@BuilderButton
-            scope.launchZip(files, ready.zip, share) { result ->
-                if (result.isSuccess) {
-                    dispatcher.dispatch(ExportAction.Exported)
-                } else {
-                    val failed = if (share) Res.string.export_share_failed else Res.string.export_save_failed
-                    workspace.dispatch(WorkspaceAction.ShowToast(getString(failed)))
-                }
-            }
-        },
-        label = stringResource(if (share) Res.string.export_share else Res.string.export_download),
-        emphasis = Emphasis.Primary,
-        icon = if (share) IconId.Share else IconId.Download,
-        enabled = ready != null,
-    )
-}
-
-/**
- * Whether the zip goes to the share sheet rather than a download, as on a touch screen whose sheet
- * takes it. Settled before any click, and read by both the zip button and the manual copy hint.
- */
-@Composable
-private fun zipShares(
-    ready: ExportOutcome.Ready?,
-    files: FileSaver,
-): Boolean {
-    val coarse = LocalLayout.current.coarsePointer
-    val shareable = remember(ready, files) { ready != null && files.canShare(listOf(ready.zip)) }
-    return coarse && shareable
 }
 
 @Composable

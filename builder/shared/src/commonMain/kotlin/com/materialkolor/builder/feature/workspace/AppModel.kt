@@ -190,7 +190,7 @@ internal class AppModel(
 }
 
 /**
- * Whether storage is full after [status], given it was [full] before. A save that is waiting says
+ * Whether storage is full after [status], given it was [full] before. A save that is waiting or held says
  * nothing yet, so the banner stays up through it.
  */
 private fun storageFullAfter(
@@ -200,6 +200,7 @@ private fun storageFullAfter(
     when (status) {
         SaveStatus.Idle -> false
         SaveStatus.Pending -> full
+        SaveStatus.Held -> full
         is SaveStatus.Failed -> status.error == StoreError.QuotaExceeded
     }
 
