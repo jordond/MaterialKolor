@@ -98,32 +98,41 @@ internal fun ExportFooter(
     buttons: @Composable () -> Unit,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
-    val note: @Composable (Modifier) -> Unit = { noteModifier ->
+    val note: @Composable (Modifier, Boolean) -> Unit = { noteModifier, stacked ->
         Row(
             modifier = noteModifier,
             horizontalArrangement = Arrangement.spacedBy(spacing.small),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             BuilderIcon(id = IconId.Verified, contentDescription = null, emphasis = Emphasis.Secondary)
-            // The count follows the note, or goes under it where the two do not fit a line.
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(spacing.small),
-                itemVerticalAlignment = Alignment.CenterVertically,
-            ) {
-                BuilderText(
-                    text = if (materialKolorVersion == null) {
-                        stringResource(Res.string.export_checked_any)
-                    } else {
-                        stringResource(Res.string.export_checked, materialKolorVersion)
-                    },
-                )
-                if (ready != null) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(spacing.small),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Dot()
+            val checked = if (materialKolorVersion == null) {
+                stringResource(Res.string.export_checked_any)
+            } else {
+                stringResource(Res.string.export_checked, materialKolorVersion)
+            }
+            if (stacked) {
+                // A narrow footer puts the count on its own line, with no dot to lead it.
+                Column {
+                    BuilderText(text = checked)
+                    if (ready != null) {
                         BuilderText(text = filesAndLines(ready), emphasis = Emphasis.Secondary)
+                    }
+                }
+            } else {
+                // The count follows the note, or goes under it where the two do not fit a line.
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(spacing.small),
+                    itemVerticalAlignment = Alignment.CenterVertically,
+                ) {
+                    BuilderText(text = checked)
+                    if (ready != null) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(spacing.small),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Dot()
+                            BuilderText(text = filesAndLines(ready), emphasis = Emphasis.Secondary)
+                        }
                     }
                 }
             }
@@ -135,12 +144,12 @@ internal fun ExportFooter(
                 horizontalArrangement = Arrangement.spacedBy(spacing.small),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                note(Modifier.weight(1f))
+                note(Modifier.weight(1f), false)
                 buttons()
             }
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
-                note(Modifier)
+                note(Modifier, true)
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(spacing.small, Alignment.End),
