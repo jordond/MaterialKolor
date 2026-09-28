@@ -84,7 +84,7 @@ private fun MotionOption(
     val names = MotionSchemeChoice.entries.associateWith { choice -> stringResource(motionName(choice)) }
     val current = context.document.motionScheme
     Column(verticalArrangement = Arrangement.spacedBy(spacing.small)) {
-        BuilderText(text = label, style = BuilderTextStyle.SectionLabel)
+        BuilderText(text = label, style = BuilderTextStyle.GroupLabel)
         BuilderSegmented(
             options = MotionSchemeChoice.entries,
             selected = current,

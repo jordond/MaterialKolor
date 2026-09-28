@@ -1,6 +1,6 @@
 package com.materialkolor.builder.feature.poster
 
-import androidx.compose.foundation.border
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,7 +14,6 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.capability.EffectiveSpec
 import com.materialkolor.builder.domain.model.KeyColor
 import com.materialkolor.builder.domain.model.ThemeDocument
@@ -73,11 +72,11 @@ internal fun FineTuneButton(
             // shows itself, the way a card button does.
             .semantics { this[SemanticsProperties.Text] = listOf(AnnotatedString(title), AnnotatedString(summary)) },
         shape = shape,
+        border = BorderStroke(tokens.strongOutlineWidth, tokens.textStrong),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .border(FineTuneOutline, tokens.textStrong, shape)
                 .padding(horizontal = spacing.large, vertical = spacing.medium),
             horizontalArrangement = Arrangement.spacedBy(spacing.medium),
             verticalAlignment = Alignment.CenterVertically,
@@ -92,11 +91,6 @@ internal fun FineTuneButton(
         }
     }
 }
-
-/**
- * How thick the button's outline is drawn, board E's line, a little heavier than a field's.
- */
-private val FineTuneOutline = 1.5.dp
 
 /**
  * The corner of a pill, half its height.

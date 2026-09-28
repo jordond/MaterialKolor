@@ -24,7 +24,8 @@ import org.jetbrains.compose.resources.Font
  * @property[posterHero] The seed hex on the poster, the largest thing on screen.
  * @property[wordmark] The MaterialKolor wordmark in the top bar.
  * @property[title] Panel and dialog titles.
- * @property[sectionLabel] The small label above a group of controls.
+ * @property[sectionLabel] The small eyebrow above a section, set in capitals and tracked wide.
+ * @property[groupLabel] The small label above a group of controls when it reads in its own case.
  * @property[body] Explainers and descriptions.
  * @property[label] Control labels and buttons.
  * @property[value] A hex, a tone or a contrast ratio shown beside a control.
@@ -36,6 +37,7 @@ public data class BuilderType(
     public val wordmark: TextStyle,
     public val title: TextStyle,
     public val sectionLabel: TextStyle,
+    public val groupLabel: TextStyle,
     public val body: TextStyle,
     public val label: TextStyle,
     public val value: TextStyle,
@@ -119,6 +121,13 @@ internal fun builderType(
             fontSize = 12.sp,
             lineHeight = 16.sp,
             letterSpacing = 1.4.sp,
+        ),
+        groupLabel = TextStyle(
+            fontFamily = brand,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 12.sp,
+            lineHeight = 16.sp,
+            letterSpacing = 0.2.sp,
         ),
         body = TextStyle(
             fontFamily = brand,

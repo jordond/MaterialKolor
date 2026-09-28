@@ -90,7 +90,7 @@ private fun DurationChoice(
     val durations = (AnimationDurationsMs + current).distinct().sorted()
     val names = durations.associateWith { ms -> stringResource(Res.string.export_duration_ms, ms) }
     Column(verticalArrangement = Arrangement.spacedBy(spacing.small)) {
-        BuilderText(text = label, style = BuilderTextStyle.SectionLabel)
+        BuilderText(text = label, style = BuilderTextStyle.GroupLabel)
         BuilderSegmented(
             options = durations,
             selected = current,

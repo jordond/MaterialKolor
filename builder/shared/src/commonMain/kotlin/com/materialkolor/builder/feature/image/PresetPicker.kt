@@ -255,7 +255,7 @@ private fun PresetGroup(
     Column(verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
         if (inline) {
             Row(horizontalArrangement = Arrangement.spacedBy(spacing.medium)) {
-                BuilderText(text = title, modifier = Modifier.alignByBaseline(), style = BuilderTextStyle.SectionLabel)
+                BuilderText(text = title, modifier = Modifier.alignByBaseline(), style = BuilderTextStyle.GroupLabel)
                 BuilderText(
                     text = line,
                     modifier = Modifier.weight(1f).alignByBaseline(),
@@ -264,7 +264,7 @@ private fun PresetGroup(
             }
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(spacing.extraSmall)) {
-                BuilderText(text = title, style = BuilderTextStyle.SectionLabel)
+                BuilderText(text = title, style = BuilderTextStyle.GroupLabel)
                 BuilderText(text = line, emphasis = Emphasis.Secondary)
             }
         }

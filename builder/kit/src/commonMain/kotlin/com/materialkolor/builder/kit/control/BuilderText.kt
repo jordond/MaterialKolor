@@ -34,9 +34,16 @@ public enum class BuilderTextStyle {
     Title,
 
     /**
-     * The small label above a group of controls.
+     * The small eyebrow above a section, set in capitals and tracked wide.
      */
     SectionLabel,
+
+    /**
+     * The small label above a group of controls when it reads in its own case, such as
+     * "Animation length". It keeps the eyebrow's size with tighter tracking, so mixed case does
+     * not look loose.
+     */
+    GroupLabel,
 
     /**
      * Explainers and descriptions.
@@ -68,6 +75,7 @@ internal operator fun BuilderType.get(style: BuilderTextStyle): TextStyle =
         BuilderTextStyle.Wordmark -> wordmark
         BuilderTextStyle.Title -> title
         BuilderTextStyle.SectionLabel -> sectionLabel
+        BuilderTextStyle.GroupLabel -> groupLabel
         BuilderTextStyle.Body -> body
         BuilderTextStyle.Label -> label
         BuilderTextStyle.Value -> value

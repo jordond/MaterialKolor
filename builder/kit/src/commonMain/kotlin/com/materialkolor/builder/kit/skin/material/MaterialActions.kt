@@ -157,6 +157,12 @@ private fun RowScope.MaterialLabel(
 private val HintPadding: PaddingValues = PaddingValues(start = 16.dp, end = 4.dp)
 
 /**
+ * Room round a toggle button's content, Material's small button sides with nothing above or below,
+ * so the label fits the compact height.
+ */
+private val TogglePadding: PaddingValues = PaddingValues(horizontal = 16.dp)
+
+/**
  * Room round a compact button's content.
  */
 private val CompactPadding: PaddingValues = PaddingValues(horizontal = CompactButtonPadding)
@@ -334,13 +340,16 @@ internal fun MaterialToggleButton(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     MaterialTarget {
+        // The pill draws at a compact button's height inside the touch target materialFeedback keeps.
         ToggleButton(
             checked = checked,
             onCheckedChange = onCheckedChange,
             modifier = modifier
                 .foldState(name, ControlState.Checked(checked), enabled)
-                .materialFeedback(interactionSource, ButtonDefaults.shape),
+                .materialFeedback(interactionSource, ButtonDefaults.shape)
+                .height(CompactButtonHeight),
             enabled = enabled,
+            contentPadding = TogglePadding,
             interactionSource = interactionSource,
         ) {
             MaterialLabel(label, icon)

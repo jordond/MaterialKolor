@@ -78,7 +78,7 @@ internal fun HelpHost(
                         BuilderText(
                             text = stringResource(topic.question),
                             modifier = Modifier.semantics { heading() },
-                            style = BuilderTextStyle.SectionLabel,
+                            style = BuilderTextStyle.GroupLabel,
                         )
                         BuilderText(text = stringResource(topic.explanation), emphasis = Emphasis.Secondary)
                     }

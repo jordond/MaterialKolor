@@ -2,6 +2,7 @@ package com.materialkolor.builder.feature.poster
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
@@ -102,6 +103,9 @@ internal enum class InfoTopic {
  * @param[modifier] Applied to the column.
  * @param[end] What sits at the far end of the label's line, such as a readout. The explanation
  * opens under the whole line, so it never squeezes what sits here.
+ * @param[detail] What opens under the explanation with it, such as why the target treats the
+ * section differently. It stays out of the section until the info button opens it, so a section
+ * with more to say still fits the poster, and it reads out with the explanation once open.
  */
 @Composable
 internal fun InfoLabel(
@@ -109,6 +113,7 @@ internal fun InfoLabel(
     topic: InfoTopic,
     modifier: Modifier = Modifier,
     end: @Composable RowScope.() -> Unit = {},
+    detail: @Composable ColumnScope.() -> Unit = {},
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     var open by rememberSaveable(topic) { mutableStateOf(false) }
@@ -123,6 +128,7 @@ internal fun InfoLabel(
         }
         if (open) {
             InfoNote(topic)
+            detail()
         }
     }
 }

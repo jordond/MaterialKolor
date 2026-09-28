@@ -95,7 +95,7 @@ internal fun RolesTab(
                 BuilderText(
                     text = stringResource(group.title),
                     modifier = Modifier.semantics { heading() },
-                    style = BuilderTextStyle.SectionLabel,
+                    style = BuilderTextStyle.GroupLabel,
                 )
                 SwatchGrid {
                     for (swatch in group.swatches) {

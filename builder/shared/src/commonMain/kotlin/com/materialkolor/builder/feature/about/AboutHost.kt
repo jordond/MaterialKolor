@@ -168,7 +168,7 @@ private fun AboutSection(
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     Column(verticalArrangement = Arrangement.spacedBy(spacing.small)) {
-        BuilderText(text = title, modifier = Modifier.semantics { heading() }, style = BuilderTextStyle.SectionLabel)
+        BuilderText(text = title, modifier = Modifier.semantics { heading() }, style = BuilderTextStyle.GroupLabel)
         content()
     }
 }

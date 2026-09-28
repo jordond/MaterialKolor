@@ -52,6 +52,7 @@ class BuilderFontTest {
         type.wordmark.fontFamily shouldBe brand
         type.title.fontFamily shouldBe brand
         type.sectionLabel.fontFamily shouldBe brand
+        type.groupLabel.fontFamily shouldBe brand
         type.body.fontFamily shouldBe brand
         type.label.fontFamily shouldBe brand
         type.value.fontFamily shouldBe mono

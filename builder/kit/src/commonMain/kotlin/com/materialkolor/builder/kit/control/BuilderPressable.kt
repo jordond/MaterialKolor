@@ -1,11 +1,16 @@
 package com.materialkolor.builder.kit.control
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,6 +51,10 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  * a ring in the skin's accent a little outside [shape], and on the web it says so in its name,
  * "Kelp picture, selected". The focus ring still draws over it.
  *
+ * An outlined one, given a [border], draws that line just inside [shape], over what it holds, the
+ * way a card button with no fill does. While a mouse is over it, it lays a faint wash of the skin's
+ * body ink under what it holds, so it answers the pointer the way the skins' own buttons do.
+ *
  * It takes at least the layout's primary touch target, as the other kit controls do, with [content]
  * in the middle of it.
  *
@@ -55,6 +64,7 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  * @param[enabled] Whether it can be pressed. A disabled one draws faint.
  * @param[shape] The outline [content] is clipped to and the focus ring follows.
  * @param[selected] Whether it is the current one of a set.
+ * @param[border] The line drawn just inside [shape], or null for none.
  * @param[content] What it shows.
  */
 @Composable
@@ -65,11 +75,15 @@ public fun BuilderPressable(
     enabled: Boolean = true,
     shape: Shape = RoundedCornerShape(LocalBuilderTokens.current.radius.small),
     selected: Boolean = false,
+    border: BorderStroke? = null,
     content: @Composable BoxScope.() -> Unit,
 ) {
+    val tokens = LocalBuilderTokens.current
     val interactionSource = remember { MutableInteractionSource() }
+    val hovered by interactionSource.collectIsHoveredAsState()
     val name = stateName(label, state = if (selected) ControlState.Selected(true) else null, enabled)
-    val ring = if (selected) LocalBuilderTokens.current.accent else Color.Unspecified
+    val ring = if (selected) tokens.accent else Color.Unspecified
+    val wash = if (border != null && enabled && hovered) tokens.textStrong.copy(alpha = HoverWashAlpha) else Color.Transparent
     Box(
         modifier = modifier
             .clickable(
@@ -88,11 +102,19 @@ public fun BuilderPressable(
             // Drawn ahead of the focus ring, so the focus ring lands over it.
             .selectedRing(ring, shape)
             .controlRing(interactionSource, shape)
-            .clip(shape),
+            .clip(shape)
+            .background(wash)
+            .then(if (border != null) Modifier.border(border, shape) else Modifier),
         contentAlignment = Alignment.Center,
         content = content,
     )
 }
+
+/**
+ * How strong the wash under an outlined pressable is while a mouse is over it, Material's hover
+ * state layer.
+ */
+private const val HoverWashAlpha = 0.08f
 
 /**
  * How thick the ring around a selected pressable is.

@@ -132,7 +132,7 @@ internal fun CheatSheet(
                         BuilderText(
                             text = stringResource(groupTitle(group)),
                             modifier = Modifier.semantics { heading() },
-                            style = BuilderTextStyle.SectionLabel,
+                            style = BuilderTextStyle.GroupLabel,
                         )
                         Shortcut.entries.filter { shortcut -> shortcut.group == group }.forEach { shortcut ->
                             ShortcutRow(stringResource(shortcutLabel(shortcut)), shortcut.text(apple))
