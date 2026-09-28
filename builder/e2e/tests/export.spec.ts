@@ -119,9 +119,17 @@ function asGolden(code: string, golden: string): string {
   });
 }
 
-// The share code's layout, ShareCodec.kt in builder/domain.
+// The share code's layout, copied from its source of truth, ShareCodec.kt in
+// builder/domain/src/commonMain/kotlin/com/materialkolor/builder/domain/link, whose layout and
+// CRC-8 ShareCodecTest.kt and ShareCodecCorruptionTest.kt beside it pin down. A format change lands
+// there first. These helpers throw on any byte they do not expect, so a change the copy here misses
+// fails loudly instead of rewriting a code it does not understand.
+const VERSION_BYTE = 0;
+const SHARE_CODEC_VERSION = 1;
 const SECTIONS_BYTE = 7;
 const SECTION_PROJECT_NAME = 0x10;
+/** A name length of this or more takes a second varint byte, which the rewrite does not read. */
+const VARINT_CONTINUES = 0x80;
 
 /**
  * [shareCode] with its project name taken out and the checksum written again. Only for a code whose
@@ -129,9 +137,18 @@ const SECTION_PROJECT_NAME = 0x10;
  */
 function withoutProjectName(shareCode: string): string {
   const bytes = Buffer.from(shareCode, 'base64url');
-  expect(bytes[SECTIONS_BYTE], 'only a project name after the header').toBe(SECTION_PROJECT_NAME);
+  if (bytes[VERSION_BYTE] !== SHARE_CODEC_VERSION) {
+    throw new Error(`Share code version ${bytes[VERSION_BYTE]}, this rewrite knows ${SHARE_CODEC_VERSION} only`);
+  }
+  if (crc8(bytes.subarray(0, bytes.length - 1)) !== bytes[bytes.length - 1]) {
+    throw new Error('The share code checksum does not match this CRC-8, see ShareCodec.kt');
+  }
+  if (bytes[SECTIONS_BYTE] !== SECTION_PROJECT_NAME) {
+    throw new Error(`Sections byte ${bytes[SECTIONS_BYTE]}, this rewrite expects the project name alone`);
+  }
   const length = bytes[SECTIONS_BYTE + 1]!;
-  expect(SECTIONS_BYTE + 2 + length, 'the name runs to the checksum').toBe(bytes.length - 1);
+  if (length >= VARINT_CONTINUES) throw new Error(`Name length byte ${length} continues a varint`);
+  if (SECTIONS_BYTE + 2 + length !== bytes.length - 1) throw new Error('The name does not run to the checksum');
   const body = Buffer.from(bytes.subarray(0, SECTIONS_BYTE + 1));
   body[SECTIONS_BYTE] = 0;
   return Buffer.concat([body, Buffer.from([crc8(body)])]).toString('base64url');
