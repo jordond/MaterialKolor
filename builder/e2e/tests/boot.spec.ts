@@ -9,26 +9,32 @@ import { A11Y, BOOT_TIMEOUT_MS, labelled, openWorkspace, seedField, seedText, sh
 // opens with its seed and style, and the address bar goes back to `/`. The Worker's own theme
 // page is booted from `wrangler dev`, the one server that writes a link's meta.
 
+/** How many share codes one page boots in turn, few enough to stay well inside the test timeout. */
+const CODES_PER_PAGE = 3;
+
 test.beforeEach(async ({ context }) => {
   await wantHooks(context);
 });
 
 test.describe('share codes', () => {
-  // Every vector on one page, a fresh load per code, so the lot stays one boot's worth of setup.
-  test('boots every code with its seed and style', async ({ page }) => {
-    const vectors = shareVectors();
-    test.setTimeout(vectors.length * BOOT_TIMEOUT_MS);
-    for (const vector of vectors) {
-      await openWorkspace(page, `/t/${vector.code}`);
+  // A code opens only at boot, so each one is a fresh load. One page boots a handful in turn, and the
+  // handfuls run side by side, which keeps the lot to a few boots' time on each worker.
+  const vectors = shareVectors();
+  for (let start = 0; start < vectors.length; start += CODES_PER_PAGE) {
+    const chunk = vectors.slice(start, start + CODES_PER_PAGE);
+    test(`boots with the seed and style of ${chunk.map((vector) => vector.label).join(', ')}`, async ({ page }) => {
+      for (const vector of chunk) {
+        await openWorkspace(page, `/t/${vector.code}`);
 
-      await expect.poll(() => seedText(page), { message: vector.label }).toBe(vector.seedHex);
-      await expect(selectedStyle(page, vector.style), vector.label).toHaveCount(1);
-      if (vector.projectName !== null) {
-        await expect(labelled(page, `Projects, ${vector.projectName}`).first(), vector.label).toBeAttached();
+        await expect.poll(() => seedText(page), { message: vector.label }).toBe(vector.seedHex);
+        await expect(selectedStyle(page, vector.style), vector.label).toHaveCount(1);
+        if (vector.projectName !== null) {
+          await expect(labelled(page, `Projects, ${vector.projectName}`).first(), vector.label).toBeAttached();
+        }
+        expect(await page.evaluate(() => location.pathname + location.search), vector.label).toBe('/');
       }
-      expect(await page.evaluate(() => location.pathname + location.search), vector.label).toBe('/');
-    }
-  });
+    });
+  }
 });
 
 test.describe('served by the Worker', () => {
