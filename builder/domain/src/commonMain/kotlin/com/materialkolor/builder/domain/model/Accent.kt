@@ -1,5 +1,6 @@
 package com.materialkolor.builder.domain.model
 
+import androidx.compose.runtime.Immutable
 import com.materialkolor.builder.domain.color.Argb
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -17,6 +18,7 @@ import kotlinx.serialization.Serializable
  * @property[dark] The tones the family is cut at in dark mode.
  * @property[threshold] The contrast the on colors of this family have to clear.
  */
+@Immutable
 @Serializable
 public data class Accent(
     @SerialName("name")
@@ -39,6 +41,7 @@ public data class Accent(
  * @property[color] The tone of the family's accent slot.
  * @property[container] The tone of the family's container slot.
  */
+@Immutable
 @Serializable
 public data class FamilyTones(
     @SerialName("color")

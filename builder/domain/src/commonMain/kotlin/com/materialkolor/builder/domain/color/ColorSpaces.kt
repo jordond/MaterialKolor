@@ -1,5 +1,6 @@
 package com.materialkolor.builder.domain.color
 
+import androidx.compose.runtime.Immutable
 import kotlin.math.PI
 import kotlin.math.atan2
 import kotlin.math.cbrt
@@ -16,6 +17,7 @@ import kotlin.math.sin
  *
  * A channel can land outside 0.0 to 1.0 partway through a conversion, and that is how a color outside sRGB shows up.
  */
+@Immutable
 internal class Rgb(
     val red: Double,
     val green: Double,

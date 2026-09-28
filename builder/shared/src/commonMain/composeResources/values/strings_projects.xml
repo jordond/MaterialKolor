@@ -88,11 +88,8 @@
 
     <!-- The share dialog. -->
     <string name="share_title">Share this theme</string>
-    <string name="share_body">Anyone with the link opens this theme as it is now. Later edits need a new link.</string>
-    <!-- The well that shows the card chats and posts draw for the link. -->
     <string name="share_card_heading">Link preview</string>
     <string name="share_card_name">Link preview card</string>
-    <string name="share_card_caption">Chats and posts show this card with the link.</string>
     <string name="share_card_loading">Loading the preview card</string>
     <string name="share_card_updating">Updating card</string>
     <string name="share_card_failed">The preview card didn’t load</string>

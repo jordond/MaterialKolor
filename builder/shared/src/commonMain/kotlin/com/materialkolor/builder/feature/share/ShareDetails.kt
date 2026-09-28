@@ -113,7 +113,6 @@ internal fun ShareDetails(
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.large)) {
-        BuilderText(text = stringResource(Res.string.share_body), emphasis = Emphasis.Secondary)
         NameSection(name)
         DetailList(document)
         LinkBox(link)

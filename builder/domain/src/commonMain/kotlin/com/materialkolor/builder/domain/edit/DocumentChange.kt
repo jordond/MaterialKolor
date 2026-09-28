@@ -1,5 +1,6 @@
 package com.materialkolor.builder.domain.edit
 
+import androidx.compose.runtime.Immutable
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.color.ContrastLevel
 import com.materialkolor.builder.domain.model.Accent
@@ -83,6 +84,7 @@ public sealed interface DocumentChange {
      * @property[argb] The new seed.
      * @property[source] How the seed was chosen.
      */
+    @Immutable
     public data class SetSeed(
         public val argb: Argb,
         public val source: SeedSource,
@@ -109,6 +111,7 @@ public sealed interface DocumentChange {
      * @property[slot] The palette being set.
      * @property[argb] The color it is built from, or null to derive it from the seed again.
      */
+    @Immutable
     public data class SetKeyColor(
         public val slot: KeyColor,
         public val argb: Argb?,
@@ -126,6 +129,7 @@ public sealed interface DocumentChange {
     /**
      * Hands every palette back to the seed.
      */
+    @Immutable
     public data object ResetKeyColors : DocumentChange {
         override val coalesceKey: String
             get() = "keyColors.reset"
@@ -141,6 +145,7 @@ public sealed interface DocumentChange {
      *
      * @property[style] The style to generate with.
      */
+    @Immutable
     public data class SetStyle(
         public val style: Style,
     ) : DocumentChange {
@@ -158,6 +163,7 @@ public sealed interface DocumentChange {
      *
      * @property[argb] The tertiary seed, or null to let the style choose.
      */
+    @Immutable
     public data class SetCmfSeed(
         public val argb: Argb?,
     ) : DocumentChange {
@@ -179,6 +185,7 @@ public sealed interface DocumentChange {
      *
      * @property[level] The new contrast, one of [ContrastLevel.Stops].
      */
+    @Immutable
     public data class SetContrast(
         public val level: ContrastLevel,
     ) : DocumentChange {
@@ -196,6 +203,7 @@ public sealed interface DocumentChange {
      *
      * @property[spec] The spec to generate against.
      */
+    @Immutable
     public data class SetSpec(
         public val spec: SpecVersion,
     ) : DocumentChange {
@@ -213,6 +221,7 @@ public sealed interface DocumentChange {
      *
      * @property[platform] The device to tune for.
      */
+    @Immutable
     public data class SetPlatform(
         public val platform: SchemePlatform,
     ) : DocumentChange {
@@ -230,6 +239,7 @@ public sealed interface DocumentChange {
      *
      * @property[amoled] Whether dark mode drops its surfaces to true black.
      */
+    @Immutable
     public data class SetAmoled(
         public val amoled: Boolean,
     ) : DocumentChange {
@@ -247,6 +257,7 @@ public sealed interface DocumentChange {
      *
      * @property[accent] The accent to add.
      */
+    @Immutable
     public data class AddAccent(
         public val accent: Accent,
     ) : DocumentChange {
@@ -268,6 +279,7 @@ public sealed interface DocumentChange {
      * @property[index] Where the accent sits in the document's list.
      * @property[accent] What it becomes.
      */
+    @Immutable
     public data class UpdateAccent(
         public val index: Int,
         public val accent: Accent,
@@ -297,6 +309,7 @@ public sealed interface DocumentChange {
      *
      * @property[index] Where the accent sits in the document's list.
      */
+    @Immutable
     public data class RemoveAccent(
         public val index: Int,
     ) : DocumentChange {
@@ -327,6 +340,7 @@ public sealed interface DocumentChange {
      * @property[mode] Which half of the pin changes.
      * @property[argb] The color that mode takes, or null to derive it again.
      */
+    @Immutable
     public data class SetPin(
         public val role: Role,
         public val mode: PinMode,
@@ -360,6 +374,7 @@ public sealed interface DocumentChange {
     /**
      * Lets every pinned role go back to being derived.
      */
+    @Immutable
     public data object ClearPins : DocumentChange {
         override val coalesceKey: String
             get() = "pins.clear"
@@ -380,6 +395,7 @@ public sealed interface DocumentChange {
      * @property[style] The style the pick lands on, or null to keep the document's.
      * @property[spec] The spec the pick lands on, or null to keep the document's.
      */
+    @Immutable
     public data class SetLibrary(
         public val library: Library,
         public val expressive: Boolean,
@@ -406,6 +422,7 @@ public sealed interface DocumentChange {
      *
      * @property[motionScheme] The motion scheme to export.
      */
+    @Immutable
     public data class SetMotionScheme(
         public val motionScheme: MotionSchemeChoice,
     ) : DocumentChange {
@@ -423,6 +440,7 @@ public sealed interface DocumentChange {
      *
      * @property[name] The new name.
      */
+    @Immutable
     public data class SetThemeName(
         public val name: String,
     ) : DocumentChange {
@@ -441,6 +459,7 @@ public sealed interface DocumentChange {
      * @property[slot] The slot being tuned.
      * @property[tone] The tones it takes, or null to drop the override.
      */
+    @Immutable
     public data class SetCustomTone(
         public val slot: CustomSlot,
         public val tone: CustomTone?,
@@ -466,6 +485,7 @@ public sealed interface DocumentChange {
      *
      * @property[document] The document that takes over.
      */
+    @Immutable
     public data class Replace(
         public val document: ThemeDocument,
     ) : DocumentChange {

@@ -1,5 +1,6 @@
 package com.materialkolor.builder.domain.color
 
+import androidx.compose.runtime.Immutable
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -18,6 +19,7 @@ import kotlin.jvm.JvmInline
  *
  * @property[value] The packed color, always with an alpha byte of `0xFF`.
  */
+@Immutable
 @JvmInline
 @Serializable(with = ArgbSerializer::class)
 public value class Argb private constructor(

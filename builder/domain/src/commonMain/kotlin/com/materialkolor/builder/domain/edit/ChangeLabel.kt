@@ -1,5 +1,6 @@
 package com.materialkolor.builder.domain.edit
 
+import androidx.compose.runtime.Immutable
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -13,6 +14,7 @@ import kotlinx.serialization.Serializable
  * @property[kind] Which sort of change this was.
  * @property[detail] The value the change landed on, when there is one worth naming.
  */
+@Immutable
 @Serializable
 public data class ChangeLabel(
     @SerialName("kind")

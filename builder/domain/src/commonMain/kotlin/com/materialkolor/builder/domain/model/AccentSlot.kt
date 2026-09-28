@@ -1,5 +1,7 @@
 package com.materialkolor.builder.domain.model
 
+import androidx.compose.runtime.Immutable
+
 /**
  * The address of one color an accent family generates.
  *
@@ -13,6 +15,7 @@ package com.materialkolor.builder.domain.model
  * @property[index] Which accent of the document this belongs to, counted from its position in the list.
  * @property[part] Which of the family's four colors this names.
  */
+@Immutable
 public data class AccentSlot(
     public val index: Int,
     public val part: AccentPart,

@@ -1,5 +1,6 @@
 package com.materialkolor.builder.domain.model
 
+import androidx.compose.runtime.Immutable
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.color.ContrastLevel
 import kotlinx.serialization.SerialName
@@ -34,6 +35,7 @@ import kotlinx.serialization.Serializable
  * @property[themeName] What the exported theme is called.
  * @property[customTones] Tones moved on the slots of the custom target.
  */
+@Immutable
 @Serializable
 public data class ThemeDocument(
     @SerialName("seed")

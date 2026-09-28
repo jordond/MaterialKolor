@@ -117,7 +117,6 @@ internal fun ShareWell(
     ) {
         Eyebrow(stringResource(Res.string.share_card_heading))
         CardBox(card, Modifier.weight(1f, fill = false).align(Alignment.CenterHorizontally).cardFit())
-        BuilderText(text = stringResource(Res.string.share_card_caption), emphasis = Emphasis.Secondary)
     }
 }
 

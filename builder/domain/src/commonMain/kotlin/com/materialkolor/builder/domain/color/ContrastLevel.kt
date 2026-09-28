@@ -1,5 +1,6 @@
 package com.materialkolor.builder.domain.color
 
+import androidx.compose.runtime.Immutable
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -22,6 +23,7 @@ import kotlin.math.abs
  *
  * @property[hundredths] The level in hundredths, from -100 to 100.
  */
+@Immutable
 @JvmInline
 @Serializable(with = ContrastLevelSerializer::class)
 public value class ContrastLevel(
