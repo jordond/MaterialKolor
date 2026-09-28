@@ -158,7 +158,11 @@ internal fun ExportSheet(
     val keysShown = !LocalLayout.current.coarsePointer
     val copyFileLabel = stringResource(Res.string.export_copy_file)
     val copiedLabel = stringResource(Res.string.export_copied)
-    val copyFile: @Composable (picked: GeneratedFile?, onCode: Boolean, place: Modifier) -> Unit = { picked, onCode, place ->
+    val copyFile: @Composable (
+        picked: GeneratedFile?,
+        onCode: Boolean,
+        place: Modifier,
+    ) -> Unit = { picked, onCode, place ->
         val copied = sheet.copied == CopyKind.File
         val onClick = { if (picked != null) copy(CopyKind.File, picked.text) }
         if (onCode) {
