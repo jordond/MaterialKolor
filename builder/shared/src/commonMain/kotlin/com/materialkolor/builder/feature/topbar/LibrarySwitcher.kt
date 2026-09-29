@@ -21,6 +21,7 @@ import com.materialkolor.builder.generated.resources.topbar_expressive
 import com.materialkolor.builder.generated.resources.topbar_library
 import com.materialkolor.builder.generated.resources.topbar_library_custom
 import com.materialkolor.builder.generated.resources.topbar_library_fluent
+import com.materialkolor.builder.generated.resources.topbar_library_inklet
 import com.materialkolor.builder.generated.resources.topbar_library_m3
 import com.materialkolor.builder.generated.resources.topbar_library_m3_expressive
 import com.materialkolor.builder.generated.resources.topbar_library_unstyled
@@ -32,7 +33,7 @@ import com.materialkolor.builder.kit.layout.WindowClass
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The five choices the switcher offers. M3 Expressive is Material 3 with the Expressive flag on, a
+ * The six choices the switcher offers. M3 Expressive is Material 3 with the Expressive flag on, a
  * choice of its own here while the document keeps it as a flag.
  *
  * @property[library] The library the choice exports for.
@@ -46,6 +47,7 @@ internal enum class LibraryChoice(
     M3Expressive(Library.Material3, expressive = true),
     Unstyled(Library.Unstyled),
     Fluent(Library.Fluent),
+    Inklet(Library.Inklet),
     Custom(Library.Custom),
     ;
 
@@ -126,7 +128,7 @@ internal fun LibrarySwitcher(
             label = label,
             modifier = tracked,
             selectOnFocus = false,
-            // Each name keeps its own width, so M3 Expressive does not widen the four short ones.
+            // Each name keeps its own width, so M3 Expressive does not widen the five short ones.
             equalWidths = false,
             optionLabel = { choice -> names.getValue(choice) },
         )
@@ -180,6 +182,7 @@ internal fun libraryName(choice: LibraryChoice): String =
             LibraryChoice.M3Expressive -> Res.string.topbar_library_m3_expressive
             LibraryChoice.Unstyled -> Res.string.topbar_library_unstyled
             LibraryChoice.Fluent -> Res.string.topbar_library_fluent
+            LibraryChoice.Inklet -> Res.string.topbar_library_inklet
             LibraryChoice.Custom -> Res.string.topbar_library_custom
         },
     )

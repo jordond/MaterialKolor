@@ -34,7 +34,7 @@ internal class DynamicExport private constructor(
      */
     fun colors(isDark: Boolean): Map<String, Argb> =
         when (target) {
-            ExportTarget.Material3, ExportTarget.Material3Expressive -> {
+            ExportTarget.Material3, ExportTarget.Material3Expressive, ExportTarget.Inklet -> {
                 material3Roles(document, isDark).byName() + material3Pins(isDark) + families("ExtendedColors", isDark)
             }
             ExportTarget.Unstyled -> {

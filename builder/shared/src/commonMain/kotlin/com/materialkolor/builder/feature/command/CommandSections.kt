@@ -54,6 +54,7 @@ import com.materialkolor.builder.generated.resources.topbar_help
 import com.materialkolor.builder.generated.resources.topbar_library
 import com.materialkolor.builder.generated.resources.topbar_library_custom
 import com.materialkolor.builder.generated.resources.topbar_library_fluent
+import com.materialkolor.builder.generated.resources.topbar_library_inklet
 import com.materialkolor.builder.generated.resources.topbar_library_m3
 import com.materialkolor.builder.generated.resources.topbar_library_m3_expressive
 import com.materialkolor.builder.generated.resources.topbar_library_unstyled
@@ -303,6 +304,7 @@ private val LIBRARY_KEYS = listOf(
     Shortcut.Library3,
     Shortcut.Library4,
     Shortcut.Library5,
+    Shortcut.Library6,
 )
 
 private fun libraryName(choice: LibraryChoice): StringResource =
@@ -311,6 +313,7 @@ private fun libraryName(choice: LibraryChoice): StringResource =
         LibraryChoice.M3Expressive -> Res.string.topbar_library_m3_expressive
         LibraryChoice.Unstyled -> Res.string.topbar_library_unstyled
         LibraryChoice.Fluent -> Res.string.topbar_library_fluent
+        LibraryChoice.Inklet -> Res.string.topbar_library_inklet
         LibraryChoice.Custom -> Res.string.topbar_library_custom
     }
 

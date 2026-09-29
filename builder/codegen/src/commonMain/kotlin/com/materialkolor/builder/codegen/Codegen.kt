@@ -73,7 +73,7 @@ public fun zipArchive(
  */
 private fun themeFiles(input: ExportInput): List<GeneratedFile> =
     when (input.target) {
-        ExportTarget.Material3, ExportTarget.Material3Expressive -> {
+        ExportTarget.Material3, ExportTarget.Material3Expressive, ExportTarget.Inklet -> {
             when (input.prefs.mode) {
                 ExportMode.Dynamic -> Material3Dynamic.files(input)
                 ExportMode.Frozen -> Material3Frozen.files(input)

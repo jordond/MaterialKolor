@@ -35,6 +35,7 @@ import com.materialkolor.builder.generated.resources.export_expressive_caption
 import com.materialkolor.builder.generated.resources.export_library_custom_caption
 import com.materialkolor.builder.generated.resources.export_library_fluent_caption
 import com.materialkolor.builder.generated.resources.export_library_fluent_note
+import com.materialkolor.builder.generated.resources.export_library_inklet_caption
 import com.materialkolor.builder.generated.resources.export_library_m3
 import com.materialkolor.builder.generated.resources.export_library_m3_caption
 import com.materialkolor.builder.generated.resources.export_library_unstyled_caption
@@ -242,6 +243,7 @@ private fun libraryCaption(choice: LibraryChoice): StringResource =
         LibraryChoice.M3, LibraryChoice.M3Expressive -> Res.string.export_library_m3_caption
         LibraryChoice.Unstyled -> Res.string.export_library_unstyled_caption
         LibraryChoice.Fluent -> Res.string.export_library_fluent_caption
+        LibraryChoice.Inklet -> Res.string.export_library_inklet_caption
         LibraryChoice.Custom -> Res.string.export_library_custom_caption
     }
 

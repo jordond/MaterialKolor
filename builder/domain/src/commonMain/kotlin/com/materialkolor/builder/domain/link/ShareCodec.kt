@@ -66,7 +66,9 @@ public sealed interface DecodeResult {
  *
  * The seed sits at bytes 1 to 3 so a page script or the link preview Worker can read it, along
  * with the style in the low four bits of byte 4 and the library in the low two bits of byte 5,
- * without decoding the rest.
+ * without decoding the rest. Inklet, the one library past code 3, sets bit 3 of byte 5 on top of a
+ * Material 3 low pair, so a reader that only looks at those two bits sees the Material 3 colors it
+ * is drawn with.
  *
  * The writing is canonical. Sections are written only when they differ from the defaults, always
  * in the same order, and pins and custom tones go out in code order, so equal documents give equal
@@ -136,7 +138,7 @@ public object ShareCodec {
                 (document.platform.code shl PLATFORM_SHIFT) or
                 (if (document.amoled) AMOLED_FLAG else 0),
         )
-        writer.byte(document.library.code or (if (document.expressive) EXPRESSIVE_FLAG else 0))
+        writer.byte(document.library.targetBits or (if (document.expressive) EXPRESSIVE_FLAG else 0))
         writer.byte(document.contrast.hundredths)
         writer.byte(sections)
         if (sections has SECTION_KEY_COLORS) writer.keyColors(document.keyColors)
@@ -187,10 +189,18 @@ private const val PLATFORM_SHIFT: Int = 6
 private const val PLATFORM_MASK: Int = 0x01
 private const val AMOLED_FLAG: Int = 0x80
 
-// Byte 5, the export target. The library takes the low two bits.
+// Byte 5, the export target. The library takes the low two bits and bit 3 carries its third bit.
 private const val LIBRARY_MASK: Int = 0x03
 private const val EXPRESSIVE_FLAG: Int = 0x04
-private const val TARGET_RESERVED: Int = 0xF8
+private const val LIBRARY_HIGH_FLAG: Int = 0x08
+private const val LIBRARY_HIGH_CODE: Int = 0x04
+private const val TARGET_RESERVED: Int = 0xF0
+
+/**
+ * The bits of byte 5 that name this library.
+ */
+private val Library.targetBits: Int
+    get() = (code and LIBRARY_MASK) or (if (code has LIBRARY_HIGH_CODE) LIBRARY_HIGH_FLAG else 0)
 
 // Byte 7, which sections follow, in the order they are written.
 private const val SECTION_KEY_COLORS: Int = 0x01
@@ -401,7 +411,8 @@ private fun ByteReader.document(): DecodeResult.Ok? {
     val platform = SchemePlatform.entries.withCodeOrNull((scheme shr PLATFORM_SHIFT) and PLATFORM_MASK) ?: return null
     val target = byte() ?: return null
     if (target has TARGET_RESERVED) return null
-    val library = Library.entries.withCodeOrNull(target and LIBRARY_MASK) ?: return null
+    val libraryCode = (target and LIBRARY_MASK) or (if (target has LIBRARY_HIGH_FLAG) LIBRARY_HIGH_CODE else 0)
+    val library = Library.entries.withCodeOrNull(libraryCode) ?: return null
     val contrast = (byte() ?: return null).toByte().toInt()
     if (contrast !in -100..100) return null
     val sections = byte() ?: return null

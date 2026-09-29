@@ -160,8 +160,11 @@ internal val MaterialCards: List<GalleryCard> = listOf(
     GalleryCard("Tooltips", GalleryGroup.Feedback) { state -> InlineTooltips(state) },
 )
 
+/**
+ * A group's header, the group's name as a large title.
+ */
 @Composable
-private fun MaterialGroupHeader(group: GalleryGroup) {
+internal fun MaterialGroupHeader(group: GalleryGroup) {
     Text(
         text = group.name,
         modifier = Modifier.padding(top = Gap).semantics { heading() },
@@ -173,7 +176,7 @@ private fun MaterialGroupHeader(group: GalleryGroup) {
  * The outlined frame a card's components sit in, titled with the card's name.
  */
 @Composable
-private fun MaterialCardFrame(
+internal fun MaterialCardFrame(
     card: GalleryCard,
     state: DemoAppState,
     modifier: Modifier,

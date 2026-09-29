@@ -117,8 +117,15 @@ class ShareCodecTest {
             assertEquals(document.seed.green, bytes.unsigned(2))
             assertEquals(document.seed.blue, bytes.unsigned(3))
             assertEquals(document.style.code, bytes.unsigned(4) and 0x0F)
-            assertEquals(document.library.code, bytes.unsigned(5) and 0x03)
+            assertEquals(document.library.code and 0x03, bytes.unsigned(5) and 0x03)
         }
+    }
+
+    @Test
+    fun encode_inklet_setsBitThreeOverTheMaterial3Pair() {
+        val bytes =
+            checkNotNull(Base64Url.decode(ShareCodec.encode(ThemeDocument.Default.copy(library = Library.Inklet))))
+        assertEquals(Library.Material3.code or 0x08, bytes.unsigned(5))
     }
 
     @Test
@@ -126,7 +133,8 @@ class ShareCodecTest {
         assertTrue(Style.entries.all { style -> style.code in 0..0x0F })
         assertTrue(SpecVersion.entries.all { spec -> spec.code in 0..0x03 })
         assertTrue(SchemePlatform.entries.all { platform -> platform.code in 0..0x01 })
-        assertTrue(Library.entries.all { library -> library.code in 0..0x03 })
+        // Two low bits in byte 5 and one more in bit 3 of it, so a library code tops out at 7.
+        assertTrue(Library.entries.all { library -> library.code in 0..0x07 })
         assertTrue(KeyColor.entries.all { slot -> slot.code in 0..5 })
         assertTrue(Role.entries.all { role -> role.code in 0..0xFF })
         assertTrue(CustomSlot.entries.all { slot -> slot.code in 0..0xFE })

@@ -98,6 +98,7 @@ public object Symbols {
     public val FluentTheme: Symbol = Symbol(FLUENT, "FluentTheme", SymbolKind.Function)
     public val FluentColors: Symbol = Symbol(FLUENT, "Colors", SymbolKind.Class)
     public val FluentShades: Symbol = Symbol(FLUENT, "Shades", SymbolKind.Class)
+    public val InkletTheme: Symbol = Symbol("dev.ggoggam.inklet", "InkletTheme", SymbolKind.Function)
 }
 
 private const val COMPOSE_RUNTIME = "androidx.compose.runtime"

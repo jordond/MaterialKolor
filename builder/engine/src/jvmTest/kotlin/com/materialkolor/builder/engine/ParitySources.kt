@@ -175,6 +175,7 @@ internal class SchemeCall(
          */
         private val SchemeCalls = mapOf(
             ExportTarget.Material3 to listOf("rememberDynamicMaterialThemeState", "DynamicMaterialTheme"),
+            ExportTarget.Inklet to listOf("rememberDynamicMaterialThemeState", "DynamicMaterialTheme"),
             ExportTarget.Material3Expressive to listOf(
                 "rememberDynamicMaterialThemeState",
                 "DynamicMaterialExpressiveTheme",

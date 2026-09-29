@@ -88,7 +88,9 @@ describe('codes the builder would not read', () => {
     const header = [VERSION, 0xd9, 0x65, 0x3b];
     expect(decodeShareCode(codeOf([...header, 0x0a, 0, 0, 0])), 'style 10').toBeNull();
     expect(decodeShareCode(codeOf([...header, 0x30, 0, 0, 0])), 'spec 3').toBeNull();
-    expect(decodeShareCode(codeOf([...header, 0, 0x08, 0, 0])), 'target bit').toBeNull();
+    expect(decodeShareCode(codeOf([...header, 0, 0x10, 0, 0])), 'target bit').toBeNull();
+    expect(decodeShareCode(codeOf([...header, 0, 0x09, 0, 0])), 'library 5').toBeNull();
+    expect(decodeShareCode(codeOf([...header, 0, 0x08, 0, 0]))?.library).toBe('Inklet');
     expect(decodeShareCode(codeOf([...header, 0, 0, 101, 0])), 'contrast 101').toBeNull();
     expect(decodeShareCode(codeOf([...header, 0, 0, 0, 0x40])), 'section bit').toBeNull();
     expect(decodeShareCode(codeOf([...header, 0, 0, 0, 0, 0])), 'trailing byte').toBeNull();

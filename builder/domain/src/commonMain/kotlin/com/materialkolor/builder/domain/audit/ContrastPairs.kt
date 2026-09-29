@@ -186,6 +186,7 @@ public object ContrastPairs {
         val pairs = when (library) {
             Library.Material3,
             Library.Unstyled,
+            Library.Inklet,
             -> rolePairs + accentPairs(accentCount)
             Library.Fluent -> fluentPairs
             Library.Custom -> slotPairs + accentPairs(accentCount) + pinnedRolePairs(pinned - rolesTakenBySlots)

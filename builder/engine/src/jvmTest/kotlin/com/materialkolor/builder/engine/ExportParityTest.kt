@@ -68,6 +68,11 @@ class ExportParityTest {
     }
 
     @Test
+    fun dynamicInkletExport_everyDocument_passesTheArgumentsTheEngineResolvesWith() {
+        assertPassesTheEngineArguments(ExportTarget.Inklet)
+    }
+
+    @Test
     fun dynamicUnstyledExport_everyDocument_passesTheArgumentsTheEngineResolvesWith() {
         assertPassesTheEngineArguments(ExportTarget.Unstyled)
     }
@@ -95,6 +100,11 @@ class ExportParityTest {
     @Test
     fun dynamicExpressiveExport_everyDocument_givesThePreviewColors() {
         assertGivesThePreviewColors(ExportTarget.Material3Expressive)
+    }
+
+    @Test
+    fun dynamicInkletExport_everyDocument_givesThePreviewColors() {
+        assertGivesThePreviewColors(ExportTarget.Inklet)
     }
 
     @Test
@@ -191,7 +201,7 @@ class ExportParityTest {
                     val lowerMode = mode.replaceFirstChar(Char::lowercaseChar)
                     val scope = if (prefix.isEmpty()) lowerMode else "$prefix$mode"
                     when (target) {
-                        ExportTarget.Material3, ExportTarget.Material3Expressive -> {
+                        ExportTarget.Material3, ExportTarget.Material3Expressive, ExportTarget.Inklet -> {
                             preview.roleColors(isDark).forEach { (role, color) ->
                                 put("${role.name.lowerFirst()}$mode${prefix.upperFirst()}", color)
                             }
@@ -241,7 +251,7 @@ class ExportParityTest {
                 }
             }.toMap()
         return when (target) {
-            ExportTarget.Material3, ExportTarget.Material3Expressive, ExportTarget.Unstyled -> {
+            ExportTarget.Material3, ExportTarget.Material3Expressive, ExportTarget.Inklet, ExportTarget.Unstyled -> {
                 roles + families
             }
             ExportTarget.Fluent -> {
@@ -268,7 +278,7 @@ class ExportParityTest {
                 AccentPart.entries.mapNotNull { part ->
                     val color = family.mode(isDark).part(part)
                     val path = when (target) {
-                        ExportTarget.Material3, ExportTarget.Material3Expressive -> {
+                        ExportTarget.Material3, ExportTarget.Material3Expressive, ExportTarget.Inklet -> {
                             "extended${mode.upperFirst()}/$name/${part.property}"
                         }
                         ExportTarget.Unstyled -> {
@@ -301,6 +311,7 @@ class ExportParityTest {
             composeUnstyled = "2.10.0",
             composeMaterial3 = "1.12.0-alpha03",
             androidxMaterial3 = "1.5.0-alpha28",
+            inklet = "0.3.0",
         )
 
         /**
@@ -316,6 +327,7 @@ class ExportParityTest {
 private fun ThemeDocument.on(target: ExportTarget): ThemeDocument {
     val library = when (target) {
         ExportTarget.Material3, ExportTarget.Material3Expressive -> Library.Material3
+        ExportTarget.Inklet -> Library.Inklet
         ExportTarget.Unstyled -> Library.Unstyled
         ExportTarget.Fluent -> Library.Fluent
         ExportTarget.Custom -> Library.Custom

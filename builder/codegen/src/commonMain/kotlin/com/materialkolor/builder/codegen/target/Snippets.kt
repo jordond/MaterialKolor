@@ -55,7 +55,8 @@ internal class Dependency(
  * needs Compose Material 3, which `material-kolor-material3` does not hand on, from Compose
  * Multiplatform in a multiplatform build and from Jetpack Compose in an Android one. An Unstyled
  * export needs the Compose Unstyled theming library, which `material-kolor-unstyled` leaves to the
- * app on JVM and Android, and a Fluent export needs Compose Fluent. Every MaterialKolor module is
+ * app on JVM and Android, a Fluent export needs Compose Fluent, and an Inklet export needs Compose
+ * Material 3 and then Inklet itself. Every MaterialKolor module is
  * named at the one pinned version. The snippets carry no comments.
  */
 internal object Snippets {
@@ -82,6 +83,9 @@ internal object Snippets {
                     ExportTarget.Material3, ExportTarget.Material3Expressive -> {
                         listOf(materialKolor("material3", input), material3(input))
                     }
+                    ExportTarget.Inklet -> {
+                        listOf(materialKolor("material3", input), material3(input), inklet(input))
+                    }
                     ExportTarget.Unstyled -> {
                         listOf(materialKolor("unstyled", input), unstyledTheming(input))
                     }
@@ -99,6 +103,7 @@ internal object Snippets {
             ExportMode.Frozen -> {
                 when (input.target) {
                     ExportTarget.Material3, ExportTarget.Material3Expressive -> listOf(material3(input))
+                    ExportTarget.Inklet -> listOf(material3(input), inklet(input))
                     ExportTarget.Custom -> emptyList()
                     ExportTarget.Unstyled -> listOf(unstyledTheming(input))
                     ExportTarget.Fluent -> listOf(fluent(input))
@@ -111,11 +116,13 @@ internal object Snippets {
      */
     fun platformNote(target: ExportTarget): String? =
         when (target) {
-            ExportTarget.Material3, ExportTarget.Material3Expressive, ExportTarget.Custom -> {
+            ExportTarget.Material3,
+            ExportTarget.Material3Expressive,
+            ExportTarget.Custom,
+            ExportTarget.Inklet,
+            ExportTarget.Unstyled,
+            -> {
                 null
-            }
-            ExportTarget.Unstyled -> {
-                "Compose Unstyled needs JVM 17 and Android minSdk 23, and has no macOS native target."
             }
             ExportTarget.Fluent -> {
                 "Compose Fluent needs JVM 17 and has no macOS native target."
@@ -163,6 +170,14 @@ internal object Snippets {
             module = "io.github.compose-fluent:fluent",
             versionKey = "composeFluent",
             version = input.versions.fluent,
+        )
+
+    private fun inklet(input: ExportInput): Dependency =
+        Dependency(
+            alias = "inklet",
+            module = "dev.ggoggam.inklet:inklet",
+            versionKey = "inklet",
+            version = input.versions.inklet,
         )
 
     private fun unstyledTheming(input: ExportInput): Dependency =

@@ -40,6 +40,7 @@
     <string name="export_library_m3_caption">MaterialTheme</string>
     <string name="export_library_unstyled_caption">Compose Unstyled</string>
     <string name="export_library_fluent_caption">Compose Fluent</string>
+    <string name="export_library_inklet_caption">MaterialTheme with InkletTheme</string>
     <string name="export_library_custom_caption">Your own slots</string>
     <string name="export_expressive_caption">Calls DynamicMaterialExpressiveTheme</string>
     <!-- The note under the libraries on the platforms each one runs on. -->

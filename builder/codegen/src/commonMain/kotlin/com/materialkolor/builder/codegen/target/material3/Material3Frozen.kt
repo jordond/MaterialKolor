@@ -26,7 +26,8 @@ import com.materialkolor.builder.domain.persist.ExportMode
 import com.materialkolor.builder.domain.persist.ExportTarget
 
 /**
- * The Material 3 export that writes every color out as a literal, plain or expressive.
+ * The Material 3 export that writes every color out as a literal, plain or expressive. The Inklet
+ * export is this one with the theme's content wrapped in `InkletTheme`.
  *
  * It writes `Color.kt` with every role in both modes, `Theme.kt` with a light and a dark scheme for
  * each contrast variant and a theme function that uses the standard pair, and `ExtendedColors.kt`
@@ -40,7 +41,8 @@ public object Material3Frozen {
      */
     public fun files(input: ExportInput): List<GeneratedFile> {
         val target = input.target
-        require(target == ExportTarget.Material3 || target == ExportTarget.Material3Expressive) {
+        val material3 = target == ExportTarget.Material3 || target == ExportTarget.Material3Expressive
+        require(material3 || target == ExportTarget.Inklet) {
             "The Material 3 frozen export cannot write a $target theme"
         }
 

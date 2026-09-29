@@ -156,6 +156,7 @@ class LibrarySymbolsTest {
             "androidx.compose.material3.dynamicLightColorScheme",
             "androidx.compose.ui.platform.LocalContext",
         )
+
         val ParameterLine = Regex("""^ {4}(?:(?:private )?val )?(\w+): (.+?)(?: = (.+?))?,$""")
         val ImportLine = Regex("""^import ([\w.]+)$""")
     }

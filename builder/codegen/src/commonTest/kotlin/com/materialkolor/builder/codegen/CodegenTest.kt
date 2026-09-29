@@ -82,7 +82,7 @@ class CodegenTest {
                                     val module = materialKolorModule(target, versions)
                                     add("com.materialkolor:material-kolor-$module:${versions.materialKolor}")
                                 }
-                                if (target == ExportTarget.Material3 || target == ExportTarget.Material3Expressive) {
+                                if (target in Material3Based) {
                                     if (multiplatform) {
                                         add("org.jetbrains.compose.material3:material3:${versions.composeMaterial3}")
                                     } else {
@@ -94,6 +94,9 @@ class CodegenTest {
                                 }
                                 if (target == ExportTarget.Fluent) {
                                     add("io.github.compose-fluent:fluent:${versions.fluent}")
+                                }
+                                if (target == ExportTarget.Inklet) {
+                                    add("dev.ggoggam.inklet:inklet:${versions.inklet}")
                                 }
                             }
                             val files = generate(Fixtures.input(documentFor(target), prefs, versions))
@@ -221,6 +224,7 @@ class CodegenTest {
     private fun documentFor(target: ExportTarget): ThemeDocument {
         val library = when (target) {
             ExportTarget.Material3, ExportTarget.Material3Expressive -> Library.Material3
+            ExportTarget.Inklet -> Library.Inklet
             ExportTarget.Unstyled -> Library.Unstyled
             ExportTarget.Fluent -> Library.Fluent
             ExportTarget.Custom -> Library.Custom
@@ -237,7 +241,7 @@ class CodegenTest {
         versions: ExportVersions,
     ): String =
         when (target) {
-            ExportTarget.Material3, ExportTarget.Material3Expressive -> {
+            ExportTarget.Material3, ExportTarget.Material3Expressive, ExportTarget.Inklet -> {
                 "material3"
             }
             ExportTarget.Unstyled -> {
@@ -289,7 +293,7 @@ class CodegenTest {
         mode: ExportMode,
     ): List<String> =
         when (target) {
-            ExportTarget.Material3, ExportTarget.Material3Expressive -> {
+            ExportTarget.Material3, ExportTarget.Material3Expressive, ExportTarget.Inklet -> {
                 listOf("Color.kt", "Theme.kt")
             }
             ExportTarget.Unstyled -> {
@@ -313,6 +317,9 @@ class CodegenTest {
         }
 
     private companion object {
+        val Material3Based: Set<ExportTarget> =
+            setOf(ExportTarget.Material3, ExportTarget.Material3Expressive, ExportTarget.Inklet)
+
         val FixedFiles: List<GeneratedFile> = listOf(
             GeneratedFile(
                 path = "src/commonMain/kotlin/com/example/theme/Theme.kt",

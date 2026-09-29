@@ -17,6 +17,7 @@ private val BAKED =
         composeUnstyled = "2.10.0",
         composeMaterial3 = "1.12.0-alpha03",
         androidxMaterial3 = "1.5.0-alpha28",
+        inklet = "0.3.0",
         fluentModuleAvailable = false,
     )
 
@@ -28,6 +29,7 @@ private const val LIVE_JSON =
       "androidxMaterial3": ["1.4.0", "1.5.0-alpha28", "1.5.0"],
       "composeUnstyled": ["2.10.0", "2.11.1"],
       "fluent": ["v0.1.0", "v0.1.1"],
+      "inklet": ["0.2.0", "0.3.0", "0.3.1"],
       "fetchedAt": "2026-09-27T00:00:00.000Z"
     }
     """
@@ -43,6 +45,7 @@ class LiveVersionsTest {
                 androidxMaterial3 = "1.5.0",
                 composeUnstyled = "2.11.1",
                 fluent = "v0.1.1",
+                inklet = "0.3.1",
             )
     }
 

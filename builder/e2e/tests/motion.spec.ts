@@ -54,7 +54,7 @@ test.describe('frozen motion', () => {
     );
     await openWorkspace(page, '/?motion=frozen');
     await expect(page).toHaveScreenshot('material3.png', { maxDiffPixelRatio: 0.02 });
-    for (const [key, name] of [['2', 'material3-expressive'], ['3', 'unstyled'], ['4', 'fluent'], ['5', 'custom']]) {
+    for (const [key, name] of [['2', 'material3-expressive'], ['3', 'unstyled'], ['4', 'fluent'], ['5', 'inklet'], ['6', 'custom']]) {
       await focusCanvas(page);
       await page.keyboard.press(key);
       await expect(button(page, /^Undo library change/)).toHaveCount(1, { timeout: LAND_TIMEOUT_MS });

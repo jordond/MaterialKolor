@@ -1,0 +1,9 @@
+[versions]
+materialKolor = "6.0.0"
+compose-material3 = "1.12.0-alpha03"
+inklet = "0.3.0"
+
+[libraries]
+materialKolor-material3 = { module = "com.materialkolor:material-kolor-material3", version.ref = "materialKolor" }
+compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose-material3" }
+inklet = { module = "dev.ggoggam.inklet:inklet", version.ref = "inklet" }

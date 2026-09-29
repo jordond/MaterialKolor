@@ -85,6 +85,12 @@ public enum class Library(
      */
     @SerialName("Custom")
     Custom(code = 3),
+
+    /**
+     * A Compose Material 3 `ColorScheme` under Inklet's hand drawn components.
+     */
+    @SerialName("Inklet")
+    Inklet(code = 4),
 }
 
 /**

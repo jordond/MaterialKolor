@@ -42,6 +42,7 @@ import com.materialkolor.builder.generated.resources.projects_rename
 import com.materialkolor.builder.generated.resources.projects_target_custom
 import com.materialkolor.builder.generated.resources.projects_target_expressive
 import com.materialkolor.builder.generated.resources.projects_target_fluent
+import com.materialkolor.builder.generated.resources.projects_target_inklet
 import com.materialkolor.builder.generated.resources.projects_target_m3
 import com.materialkolor.builder.generated.resources.projects_target_unstyled
 import com.materialkolor.builder.generated.resources.projects_updated_days
@@ -261,4 +262,5 @@ internal fun targetLabel(target: ExportTarget): String =
         ExportTarget.Unstyled -> stringResource(Res.string.projects_target_unstyled)
         ExportTarget.Fluent -> stringResource(Res.string.projects_target_fluent)
         ExportTarget.Custom -> stringResource(Res.string.projects_target_custom)
+        ExportTarget.Inklet -> stringResource(Res.string.projects_target_inklet)
     }

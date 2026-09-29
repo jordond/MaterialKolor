@@ -23,6 +23,7 @@ private val VERSIONS =
         composeUnstyled = "1.0.0",
         composeMaterial3 = "1.12.0-alpha03",
         androidxMaterial3 = "1.5.0-alpha28",
+        inklet = "0.3.0",
     )
 
 class ExportTreeTest {
