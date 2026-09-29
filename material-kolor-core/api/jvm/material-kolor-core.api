@@ -9,9 +9,6 @@ public final class com/materialkolor/Contrast : java/lang/Enum {
 	public static fun values ()[Lcom/materialkolor/Contrast;
 }
 
-public abstract interface annotation class com/materialkolor/InternalMaterialKolorApi : java/lang/annotation/Annotation {
-}
-
 public final class com/materialkolor/MaterialKolors {
 	public static final field $stable I
 	public fun <init> (Lcom/materialkolor/dynamiccolor/DynamicScheme;Z)V

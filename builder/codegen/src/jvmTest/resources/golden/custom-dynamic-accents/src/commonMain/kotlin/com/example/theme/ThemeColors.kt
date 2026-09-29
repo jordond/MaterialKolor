@@ -8,6 +8,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import com.materialkolor.MaterialKolors
+import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.ktx.ContrastThreshold
 import com.materialkolor.ktx.onTone
 import com.materialkolor.ktx.rememberDynamicScheme
@@ -70,6 +71,7 @@ fun rememberThemeColors(
     val scheme = rememberDynamicScheme(
         seedColor = seedColor,
         isDark = isDark,
+        specVersion = ColorSpec.SpecVersion.SPEC_2021,
     )
     val brandPalette = rememberTonalPalette(
         seed = BrandSeed,

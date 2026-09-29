@@ -3,6 +3,7 @@ package com.materialkolor.builder.codegen.symbol
 import com.materialkolor.builder.codegen.Fixtures
 import com.materialkolor.builder.codegen.dsl.kotlinFile
 import com.materialkolor.builder.codegen.dsl.ref
+import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.ThemeDocument
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -22,18 +23,28 @@ class DefaultArgumentsTest {
     }
 
     @Test
-    fun optionalArgument_plainWrapperOnTonalSpot2021_leavesBothOut() {
-        val text = themeCall(DefaultArguments.DynamicMaterialTheme, Fixtures.Default.input.document)
+    fun optionalArgument_plainWrapperOnTonalSpot2025_leavesBothOut() {
+        val document = Fixtures.Default.input.document
+            .copy(spec = SpecVersion.Spec2025)
+        val text = themeCall(DefaultArguments.DynamicMaterialTheme, document)
 
         assertFalse("style" in text, text)
         assertFalse("specVersion" in text, text)
     }
 
     @Test
-    fun optionalArgument_watchUnder2025_writesPlatformAndSpec() {
+    fun optionalArgument_plainWrapperOnTonalSpot2021_writesTheSpec() {
+        val text = themeCall(DefaultArguments.DynamicMaterialTheme, Fixtures.Default.input.document)
+
+        assertFalse("style" in text, text)
+        assertTrue("specVersion = Spec.Spec2021" in text, text)
+    }
+
+    @Test
+    fun optionalArgument_watchUnder2025_writesOnlyThePlatform() {
         val text = themeCall(DefaultArguments.DynamicMaterialTheme, Fixtures.Watch2025.input.document)
 
-        assertTrue("specVersion = Spec.Spec2025" in text, text)
+        assertFalse("specVersion" in text, text)
         assertTrue("platform = Platform.Watch" in text, text)
     }
 

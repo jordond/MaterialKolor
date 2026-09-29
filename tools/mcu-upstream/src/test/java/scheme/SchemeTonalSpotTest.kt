@@ -1,5 +1,6 @@
 package scheme
 
+import com.materialkolor.dynamiccolor.ColorSpec.SpecVersion
 import com.materialkolor.hct.Hct
 import com.materialkolor.scheme.SchemeTonalSpot
 import utils.ContrastLevels
@@ -13,56 +14,56 @@ class SchemeTonalSpotTest {
     @Test
     fun default() {
         val expected = SchemeTonalSpot(expectedHct, false, ContrastLevels.Default)
-        val actual = SchemeTonalSpot(actualHct, false, ContrastLevels.Default)
+        val actual = SchemeTonalSpot(actualHct, false, ContrastLevels.Default, specVersion = SpecVersion.SPEC_2021)
         expected shouldMatch actual
     }
 
     @Test
     fun defaultDark() {
         val expected = SchemeTonalSpot(expectedHct, true, ContrastLevels.Default)
-        val actual = SchemeTonalSpot(actualHct, true, ContrastLevels.Default)
+        val actual = SchemeTonalSpot(actualHct, true, ContrastLevels.Default, specVersion = SpecVersion.SPEC_2021)
         expected shouldMatch actual
     }
 
     @Test
     fun reducedContrast() {
         val expected = SchemeTonalSpot(expectedHct, false, ContrastLevels.Reduced)
-        val actual = SchemeTonalSpot(actualHct, false, ContrastLevels.Reduced)
+        val actual = SchemeTonalSpot(actualHct, false, ContrastLevels.Reduced, specVersion = SpecVersion.SPEC_2021)
         expected shouldMatch actual
     }
 
     @Test
     fun reducedContrastDark() {
         val expected = SchemeTonalSpot(expectedHct, true, ContrastLevels.Reduced)
-        val actual = SchemeTonalSpot(actualHct, true, ContrastLevels.Reduced)
+        val actual = SchemeTonalSpot(actualHct, true, ContrastLevels.Reduced, specVersion = SpecVersion.SPEC_2021)
         expected shouldMatch actual
     }
 
     @Test
     fun mediumContrast() {
         val expected = SchemeTonalSpot(expectedHct, false, ContrastLevels.Medium)
-        val actual = SchemeTonalSpot(actualHct, false, ContrastLevels.Medium)
+        val actual = SchemeTonalSpot(actualHct, false, ContrastLevels.Medium, specVersion = SpecVersion.SPEC_2021)
         expected shouldMatch actual
     }
 
     @Test
     fun mediumContrastDark() {
         val expected = SchemeTonalSpot(expectedHct, true, ContrastLevels.Medium)
-        val actual = SchemeTonalSpot(actualHct, true, ContrastLevels.Medium)
+        val actual = SchemeTonalSpot(actualHct, true, ContrastLevels.Medium, specVersion = SpecVersion.SPEC_2021)
         expected shouldMatch actual
     }
 
     @Test
     fun highContrast() {
         val expected = SchemeTonalSpot(expectedHct, false, ContrastLevels.High)
-        val actual = SchemeTonalSpot(actualHct, false, ContrastLevels.High)
+        val actual = SchemeTonalSpot(actualHct, false, ContrastLevels.High, specVersion = SpecVersion.SPEC_2021)
         expected shouldMatch actual
     }
 
     @Test
     fun highContrastDark() {
         val expected = SchemeTonalSpot(expectedHct, true, ContrastLevels.High)
-        val actual = SchemeTonalSpot(actualHct, true, ContrastLevels.High)
+        val actual = SchemeTonalSpot(actualHct, true, ContrastLevels.High, specVersion = SpecVersion.SPEC_2021)
         expected shouldMatch actual
     }
 }

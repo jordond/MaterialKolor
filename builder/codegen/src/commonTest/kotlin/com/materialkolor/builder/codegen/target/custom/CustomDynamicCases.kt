@@ -126,7 +126,11 @@ class CustomDynamicTest {
         val seeds = file(Fixtures.PrimaryOverride.custom().input, "ThemeSeeds.kt")
 
         assertTrue("val scheme = rememberDynamicScheme(\n        seedColor = seedColor,\n" in colors, colors)
-        assertTrue("        isDark = isDark,\n        primary = Primary,\n    )" in colors, colors)
+        val overrides = "        isDark = isDark,\n" +
+            "        primary = Primary,\n" +
+            "        specVersion = ColorSpec.SpecVersion.SPEC_2021,\n" +
+            "    )"
+        assertTrue(overrides in colors, colors)
         assertTrue("val SeedColor = Color(0xFFD9653B)" in seeds, seeds)
         assertTrue("val Primary = Color(0xFF6750A4)" in seeds, seeds)
     }

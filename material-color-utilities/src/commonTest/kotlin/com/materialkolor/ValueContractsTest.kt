@@ -5,10 +5,15 @@ import com.materialkolor.dynamiccolor.DynamicColor
 import com.materialkolor.dynamiccolor.DynamicScheme
 import com.materialkolor.dynamiccolor.ToneDeltaPair
 import com.materialkolor.dynamiccolor.ToneDeltaPair.TonePolarity
+import com.materialkolor.hct.Cam16
 import com.materialkolor.hct.Hct
+import com.materialkolor.hct.ViewingConditions
+import com.materialkolor.palettes.CorePalettes
 import com.materialkolor.palettes.TonalPalette
 import com.materialkolor.scheme.SchemeTonalSpot
 import com.materialkolor.temperature.TemperatureCache
+import com.materialkolor.utils.ColorUtils
+import kotlin.math.PI
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -180,5 +185,29 @@ class ValueContractsTest {
             pair(15.0),
             ToneDeltaPair(first, second, 15.0, TonePolarity.DARKER, constraint = ToneDeltaPair.DeltaConstraint.FARTHER),
         )
+    }
+
+    @Test
+    fun viewingConditionsCompareTheirArrayContent() {
+        fun make() = ViewingConditions.make(ColorUtils.whitePointD65(), 200.0 / PI * 0.184, 50.0, 2.0, false)
+        val first = make()
+        val second = make()
+        assertNotSame(first.rgbD, second.rgbD)
+        assertEquals(first, second)
+        assertEquals(first.hashCode(), second.hashCode())
+        assertEquals(first.toString(), second.toString())
+        assertNotEquals(first, ViewingConditions.defaultWithBackgroundLstar(20.0))
+    }
+
+    @Test
+    fun cam16AndCorePalettesKeepValueEquality() {
+        assertEquals(Cam16.fromInt(0xff4285f4.toInt()), Cam16.fromInt(0xff4285f4.toInt()))
+        assertNotEquals(Cam16.fromInt(0xff4285f4.toInt()), Cam16.fromInt(0xffff0000.toInt()))
+        val palettes = List(5) { index -> TonalPalette.fromHueAndChroma(index * 60.0, 30.0) }
+
+        fun core() = CorePalettes(palettes[0], palettes[1], palettes[2], palettes[3], palettes[4])
+        assertEquals(core(), core())
+        assertEquals(core().hashCode(), core().hashCode())
+        assertTrue(core().toString().startsWith("CorePalettes(primary="))
     }
 }

@@ -6,7 +6,6 @@ package com.example.theme
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import com.materialkolor.PaletteStyle
-import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.material3.DynamicMaterialTheme
 
 @Composable
@@ -18,7 +17,6 @@ fun AppTheme(
         seedColor = SeedColor,
         isDark = isDark,
         style = PaletteStyle.Cmf(tertiarySeedColor = TertiarySeedColor),
-        specVersion = ColorSpec.SpecVersion.SPEC_2026,
         content = content,
     )
 }

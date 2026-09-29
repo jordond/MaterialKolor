@@ -9,7 +9,6 @@ import androidx.compose.material3.MotionScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import com.materialkolor.PaletteStyle
-import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.material3.DynamicMaterialExpressiveTheme
 import com.materialkolor.material3.rememberDynamicMaterialThemeState
 
@@ -23,7 +22,6 @@ fun AppTheme(
         seedColor = SeedColor,
         isDark = isDark,
         style = PaletteStyle.Expressive,
-        specVersion = ColorSpec.SpecVersion.SPEC_2025,
         modifyColorScheme = { scheme ->
             scheme.copy(
                 primary = if (isDark) Color(0xFFFFB4A8) else Color(0xFF8B1A10),

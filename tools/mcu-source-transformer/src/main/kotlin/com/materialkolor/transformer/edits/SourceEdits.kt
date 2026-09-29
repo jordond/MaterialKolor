@@ -21,6 +21,13 @@ internal class SourceEdits(
         rule: Rule,
     ) = add(node.textRange.startOffset, node.textRange.endOffset, replacement, rule)
 
+    fun replace(
+        start: Int,
+        end: Int,
+        replacement: String,
+        rule: Rule,
+    ) = add(start, end, replacement, rule)
+
     fun insert(
         offset: Int,
         text: String,

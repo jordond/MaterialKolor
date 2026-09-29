@@ -6,6 +6,7 @@ package com.example.theme
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import com.materialkolor.PaletteStyle
+import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.fluent.rememberFluentColors
 import io.github.composefluent.FluentTheme
 
@@ -19,6 +20,7 @@ fun AppTheme(
         isDark = isDark,
         primary = Primary,
         style = PaletteStyle.Vibrant,
+        specVersion = ColorSpec.SpecVersion.SPEC_2021,
     )
 
     FluentTheme(

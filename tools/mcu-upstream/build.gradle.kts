@@ -1,4 +1,5 @@
 import com.materialkolor.convention.mcu.GenerateMcuSources
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("java-library")
@@ -74,6 +75,20 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+// The parity tests compare implementation details the library keeps `internal`, such as `HctSolver` and the
+// `ViewingConditions` intermediates, so they compile as a friend of the library the way its own tests do.
+tasks.named<KotlinCompile>("compileTestKotlin") {
+    val library = configurations.testCompileClasspath.map { classpath ->
+        classpath.incoming
+            .artifactView {
+                componentFilter { component ->
+                    component is ProjectComponentIdentifier && component.projectPath == ":material-color-utilities"
+                }
+            }.files
+    }
+    friendPaths.from(library)
 }
 
 tasks.compileJava { dependsOn(rootProject.tasks.named("verifyMcuUpstream")) }
