@@ -250,7 +250,7 @@ class PreviewPaneTest {
 @Composable
 private fun panePrimaryOf(library: Library): Color? =
     when (library) {
-        Library.Material3 -> MaterialTheme.colorScheme.primary
+        Library.Material3, Library.Inklet -> MaterialTheme.colorScheme.primary
         Library.Unstyled -> Theme[MaterialKolorTokens.colors][MaterialKolorTokens.primary]
         Library.Fluent -> null
         Library.Custom -> LocalPreviewIdentity.current[CustomSlot.Primary]

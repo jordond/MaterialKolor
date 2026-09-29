@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.preview.custom.CustomGalleryEntry
 import com.materialkolor.builder.preview.fluent.FluentGalleryEntry
+import com.materialkolor.builder.preview.inklet.InkletGalleryEntry
 import com.materialkolor.builder.preview.material.MaterialGalleryEntry
 import com.materialkolor.builder.preview.split.LocalCompositionProbe
 import com.materialkolor.builder.preview.split.PaneSpec
@@ -59,7 +60,8 @@ public fun ComponentsTab(
 ) {
     val document = spec.result.document
     when (document.library) {
-        Library.Material3, Library.Inklet -> MaterialGalleryEntry(spec, state, modifier)
+        Library.Material3 -> MaterialGalleryEntry(spec, state, modifier)
+        Library.Inklet -> InkletGalleryEntry(spec, state, modifier)
         Library.Unstyled -> UnstyledGalleryEntry(spec, state, modifier)
         Library.Fluent -> FluentGalleryEntry(spec, state, modifier)
         Library.Custom -> CustomGalleryEntry(spec, state, modifier)
