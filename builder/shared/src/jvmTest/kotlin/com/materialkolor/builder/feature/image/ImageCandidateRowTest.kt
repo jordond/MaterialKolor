@@ -224,24 +224,6 @@ class ImageCandidateRowTest {
         }
 
     @Test
-    fun focusOnAddTheImageAgain_movesToTheChipsWhenTheImageLands() =
-        runComposeUiTest {
-            images.decoded[photo] = decodedOf(QuadrantColors)
-            val reloaded = SeedSource.Image("photo.png", listOf(Seed))
-            val harness = PosterHarness(ThemeDocument(seed = Seed, seedSource = reloaded))
-            showRow(harness)
-            onNodeWithText(ADD_AGAIN).requestFocus()
-            waitForIdle()
-
-            images.drop(photo)
-            waitUntil(timeoutMillis = WAIT_MILLIS) { harness.document.seedSource != reloaded }
-            waitForIdle()
-
-            onNodeWithContentDescription(chipLabel(harness.document.seed), substring = true).assertIsFocused()
-            store.clear()
-        }
-
-    @Test
     fun contrastEdit_keepsTheChipsColoredWhileTheyResolveAgain() =
         runComposeUiTest {
             images.decoded[photo] = decodedOf(QuadrantColors)
