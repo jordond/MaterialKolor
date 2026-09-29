@@ -212,7 +212,7 @@ private fun themeCall(
             val duration = Literals.int(prefs.animationDurationMs)
             argument("animationSpec", call(Symbols.Tween) { argument("durationMillis", duration) })
         }
-        argument(CONTENT, themeContent(input))
+        themeContent(input)
     }
 }
 

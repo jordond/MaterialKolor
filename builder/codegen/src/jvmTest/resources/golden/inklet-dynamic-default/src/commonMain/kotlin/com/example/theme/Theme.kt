@@ -16,6 +16,7 @@ fun AppTheme(
     DynamicMaterialTheme(
         seedColor = SeedColor,
         isDark = isDark,
-        content = { InkletTheme(content = content) },
-    )
+    ) {
+        InkletTheme(content = content)
+    }
 }

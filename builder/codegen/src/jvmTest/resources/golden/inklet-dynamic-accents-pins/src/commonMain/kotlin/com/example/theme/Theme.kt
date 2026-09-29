@@ -35,7 +35,8 @@ fun AppTheme(
     CompositionLocalProvider(LocalExtendedColors provides extendedColors) {
         DynamicMaterialTheme(
             state = state,
-            content = { InkletTheme(content = content) },
-        )
+        ) {
+            InkletTheme(content = content)
+        }
     }
 }

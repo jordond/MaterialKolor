@@ -119,6 +119,7 @@ fun AppTheme(
 ) {
     MaterialTheme(
         colorScheme = if (isDark) darkScheme else lightScheme,
-        content = { InkletTheme(content = content) },
-    )
+    ) {
+        InkletTheme(content = content)
+    }
 }

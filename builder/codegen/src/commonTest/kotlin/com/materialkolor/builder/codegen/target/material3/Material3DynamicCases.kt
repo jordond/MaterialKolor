@@ -218,12 +218,13 @@ class Material3DynamicTest {
 
     @Test
     fun material3Dynamic_inklet_wrapsTheContentOfEveryThemeCallInInkletTheme() {
-        val wrapped = "content = { InkletTheme(content = content) },"
+        val wrapped = ") {\n            InkletTheme(content = content)\n        }"
         val seed = theme(Material3DynamicCases.all.getValue("inklet-dynamic-default"))
         val pinned = theme(Material3DynamicCases.all.getValue("inklet-dynamic-accents-pins"))
         val wallpaper = theme(Material3DynamicCases.all.getValue("inklet-dynamic-android-dynamic-color"))
 
-        assertEquals(1, seed.split(wrapped).size - 1, seed)
+        assertEquals(1, seed.split(") {\n        InkletTheme(content = content)\n    }").size - 1, seed)
+        assertFalse("content = content," in seed + pinned + wallpaper)
         assertTrue("import dev.ggoggam.inklet.InkletTheme" in seed, seed)
         assertEquals(1, pinned.split(wrapped).size - 1, pinned)
         assertTrue("state = state," in pinned, pinned)
