@@ -59,8 +59,9 @@ import com.composeunstyled.theme.ColorScheme as UnstyledColorScheme
  * AMOLED and the document's pins show, the Custom slots for Custom and the primary ramp of the
  * mode's scheme for Fluent. Nothing is generated here. Before the library theme goes on, the pane
  * sets content color, text style, selection colors and indication for every library, so nothing the
- * builder's own chrome provides reaches the preview, and whatever the pane provides ends at its edge. Material's themes get the library's own typography and
- * shapes too, since left out they would take the chrome's.
+ * builder's own chrome provides reaches the preview, and whatever the pane provides ends at its
+ * edge. Material's themes get the library's own typography and shapes too, since left out they
+ * would take the chrome's.
  *
  * @param[spec] The result, mode and filter to draw.
  * @param[modifier] Applied to the pane, outside its filter and background.

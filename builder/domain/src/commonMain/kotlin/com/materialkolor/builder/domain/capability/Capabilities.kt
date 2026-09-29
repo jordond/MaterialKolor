@@ -240,7 +240,8 @@ private fun fluentApart(
     fluent: ControlState,
 ): ControlState =
     when (target) {
-        ExportTarget.Material3, ExportTarget.Inklet,
+        ExportTarget.Material3,
+        ExportTarget.Inklet,
         ExportTarget.Material3Expressive,
         ExportTarget.Unstyled,
         ExportTarget.Custom,
@@ -260,7 +261,8 @@ private fun cmfSecondSeed(
 
 private fun contrast(target: ExportTarget): ControlState =
     when (target) {
-        ExportTarget.Material3, ExportTarget.Inklet,
+        ExportTarget.Material3,
+        ExportTarget.Inklet,
         ExportTarget.Material3Expressive,
         ExportTarget.Unstyled,
         -> enabled
@@ -270,7 +272,8 @@ private fun contrast(target: ExportTarget): ControlState =
 
 private fun rolePins(target: ExportTarget): ControlState =
     when (target) {
-        ExportTarget.Material3, ExportTarget.Inklet,
+        ExportTarget.Material3,
+        ExportTarget.Inklet,
         ExportTarget.Material3Expressive,
         ExportTarget.Custom,
         -> enabled
@@ -281,7 +284,8 @@ private fun rolePins(target: ExportTarget): ControlState =
 
 private fun amoledDark(target: ExportTarget): ControlState =
     when (target) {
-        ExportTarget.Material3, ExportTarget.Inklet,
+        ExportTarget.Material3,
+        ExportTarget.Inklet,
         ExportTarget.Material3Expressive,
         ExportTarget.Custom,
         -> enabled
@@ -292,7 +296,8 @@ private fun amoledDark(target: ExportTarget): ControlState =
 private fun motionScheme(target: ExportTarget): ControlState =
     when (target) {
         ExportTarget.Material3Expressive -> enabled
-        ExportTarget.Material3, ExportTarget.Inklet,
+        ExportTarget.Material3,
+        ExportTarget.Inklet,
         ExportTarget.Unstyled,
         ExportTarget.Fluent,
         ExportTarget.Custom,
@@ -301,7 +306,8 @@ private fun motionScheme(target: ExportTarget): ControlState =
 
 private fun colorAnimation(target: ExportTarget): ControlState =
     when (target) {
-        ExportTarget.Material3, ExportTarget.Inklet,
+        ExportTarget.Material3,
+        ExportTarget.Inklet,
         ExportTarget.Material3Expressive,
         ExportTarget.Unstyled,
         ExportTarget.Fluent,
@@ -313,7 +319,8 @@ private fun colorAnimation(target: ExportTarget): ControlState =
 private fun customToneTable(target: ExportTarget): ControlState =
     when (target) {
         ExportTarget.Custom -> enabled
-        ExportTarget.Material3, ExportTarget.Inklet,
+        ExportTarget.Material3,
+        ExportTarget.Inklet,
         ExportTarget.Material3Expressive,
         ExportTarget.Unstyled,
         ExportTarget.Fluent,
@@ -322,7 +329,8 @@ private fun customToneTable(target: ExportTarget): ControlState =
 
 private fun kmpOrAndroid(target: ExportTarget): ControlState =
     when (target) {
-        ExportTarget.Material3, ExportTarget.Inklet,
+        ExportTarget.Material3,
+        ExportTarget.Inklet,
         ExportTarget.Material3Expressive,
         ExportTarget.Custom,
         -> enabled

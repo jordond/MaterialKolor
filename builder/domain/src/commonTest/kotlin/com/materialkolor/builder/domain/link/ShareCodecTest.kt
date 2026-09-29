@@ -121,7 +121,8 @@ class ShareCodecTest {
         assertTrue(Style.entries.all { style -> style.code in 0..0x0F })
         assertTrue(SpecVersion.entries.all { spec -> spec.code in 0..0x03 })
         assertTrue(SchemePlatform.entries.all { platform -> platform.code in 0..0x01 })
-        assertTrue(Library.entries.all { library -> library.code in 0..0x04 })
+        // Two low bits in byte 5 and one more in bit 3 of it, so a library code tops out at 7.
+        assertTrue(Library.entries.all { library -> library.code in 0..0x07 })
         assertTrue(KeyColor.entries.all { slot -> slot.code in 0..5 })
         assertTrue(Role.entries.all { role -> role.code in 0..0xFF })
         assertTrue(CustomSlot.entries.all { slot -> slot.code in 0..0xFE })
