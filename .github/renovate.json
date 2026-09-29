@@ -1,6 +1,8 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended", "helpers:pinGitHubActionDigestsToSemver"],
+  "baseBranchPatterns": ["next"],
+  "useBaseBranchConfig": "merge",
   "labels": ["dependencies"],
   "prHourlyLimit": 0,
   "ignoreDeps": ["org.jetbrains.kotlin.android"],
