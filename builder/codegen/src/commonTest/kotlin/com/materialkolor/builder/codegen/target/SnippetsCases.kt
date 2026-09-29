@@ -24,6 +24,7 @@ internal object SnippetsCases {
     private val Fluent: ThemeDocument = Fixtures.Base.copy(library = Library.Fluent)
     private val Custom: ThemeDocument = Fixtures.Base.copy(library = Library.Custom)
     private val Expressive: ThemeDocument = Fixtures.Base.copy(expressive = true)
+    private val Inklet: ThemeDocument = Fixtures.Base.copy(library = Library.Inklet)
 
     private val Frozen: ExportPrefs = ExportPrefs(mode = ExportMode.Frozen)
     private val Android: ExportPrefs = ExportPrefs(multiplatform = false)
@@ -46,6 +47,8 @@ internal object SnippetsCases {
         "snippets-fluent-frozen-android" to Fixtures.input(Fluent, Frozen.copy(multiplatform = false)),
         "snippets-custom-dynamic-default" to Fixtures.input(Custom),
         "snippets-custom-frozen-android" to Fixtures.input(Custom, Frozen.copy(multiplatform = false)),
+        "snippets-inklet-dynamic-default" to Fixtures.input(Inklet),
+        "snippets-inklet-frozen-android" to Fixtures.input(Inklet, Frozen.copy(multiplatform = false)),
     )
 
     fun files(case: String): List<GeneratedFile> = generate(all.getValue(case)).filterNot { it.path.startsWith("src/") }

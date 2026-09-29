@@ -6,6 +6,7 @@ import com.materialkolor.builder.codegen.dsl.Expression
 import com.materialkolor.builder.codegen.dsl.call
 import com.materialkolor.builder.codegen.dsl.ifElse
 import com.materialkolor.builder.codegen.dsl.infix
+import com.materialkolor.builder.codegen.dsl.lambda
 import com.materialkolor.builder.codegen.dsl.member
 import com.materialkolor.builder.codegen.dsl.ref
 import com.materialkolor.builder.codegen.symbol.Symbols
@@ -17,7 +18,7 @@ import com.materialkolor.builder.domain.persist.ExportTarget
 
 // The theme calls the two Material 3 exports share. The frozen export calls `MaterialTheme` on its
 // literal colors, and either export calls it on the wallpaper colors when an Android export asks
-// for them.
+// for them. The Inklet export goes through the same calls.
 
 private const val CONTEXT = "context"
 
@@ -70,7 +71,7 @@ internal fun materialThemeCall(
     input: ExportInput,
     colorScheme: Expression,
 ): Expression {
-    val content = ref(CONTENT_PARAMETER)
+    val content = themeContent(input)
 
     return if (input.target == ExportTarget.Material3Expressive) {
         call(Symbols.MaterialExpressiveTheme, multiline = true) {
@@ -84,6 +85,20 @@ internal fun materialThemeCall(
             argument(CONTENT_PARAMETER, content)
         }
     }
+}
+
+/**
+ * The content the Material theme call hands on. An Inklet theme wraps it in `InkletTheme`, which
+ * gives the hand-drawn components their pen and animation clock, so the app wraps nothing else
+ * around them. Every other target passes the content through as it is.
+ */
+internal fun themeContent(input: ExportInput): Expression {
+    val content = ref(CONTENT_PARAMETER)
+    if (input.target != ExportTarget.Inklet) return content
+
+    val inklet = call(Symbols.InkletTheme) { argument(CONTENT_PARAMETER, content) }
+
+    return lambda { statement(inklet) }
 }
 
 /**

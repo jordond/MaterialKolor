@@ -105,6 +105,18 @@ class ReservedNamesTest {
     }
 
     @Test
+    fun of_inklet_reservesTheMaterial3NamesAndInkletTheme() {
+        assertEquals(ReservedNames.of(ExportTarget.Material3) + "InkletTheme", ReservedNames.of(ExportTarget.Inklet))
+    }
+
+    @Test
+    fun clashes_inkletThemeNamedInkletTheme_isReported() {
+        val document = ThemeDocument.Default.copy(library = Library.Inklet, themeName = "InkletTheme")
+
+        assertEquals(listOf(ReservedNameClash.ThemeName("InkletTheme")), ReservedNames.clashes(document))
+    }
+
+    @Test
     fun clashes_customAccentNamedLikeASlotOrADeclaration_isReported() {
         val document = ThemeDocument.Default.copy(
             library = Library.Custom,
