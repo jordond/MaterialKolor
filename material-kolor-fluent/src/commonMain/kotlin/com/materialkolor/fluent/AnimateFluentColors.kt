@@ -32,7 +32,8 @@ import io.github.composefluent.Shades
  * hold still because nothing in them ever depended on the accent.
  *
  * Flipping [Colors.darkMode] is a cut rather than a fade for the same reason. Fluent derives light
- * and dark from one set of shades and a flag, so there is no pair of colors to move between.
+ * and dark from the shades and a flag, and the flag cannot fade. When the scheme's ramp changes
+ * with it, as it does from `SPEC_2025`, the shades still animate to their new tones.
  *
  * @param[colors] The colors to animate towards, usually from [rememberFluentColors].
  * @param[animationSpec] How each of the seven shades animates.
