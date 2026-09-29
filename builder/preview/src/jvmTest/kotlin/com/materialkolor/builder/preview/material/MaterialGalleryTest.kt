@@ -113,6 +113,9 @@ private val GallerySources: List<String> = listOf(
     "src/commonMain/kotlin/com/materialkolor/builder/preview/material/SampleFields.kt",
     // The Trips note is a sample field too, so the text field ban reaches it.
     "src/commonMain/kotlin/com/materialkolor/builder/preview/material/TripDetail.kt",
+    "src/inkletMain/kotlin/com/materialkolor/builder/preview/inklet/InkletGallery.kt",
+    "src/inkletMain/kotlin/com/materialkolor/builder/preview/inklet/InkletGalleryPanels.kt",
+    "src/inkletMain/kotlin/com/materialkolor/builder/preview/inklet/InkletTripDetail.kt",
 )
 
 @OptIn(ExperimentalTestApi::class)

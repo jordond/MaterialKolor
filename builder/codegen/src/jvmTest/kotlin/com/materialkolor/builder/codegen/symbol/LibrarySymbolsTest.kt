@@ -44,7 +44,7 @@ class LibrarySymbolsTest {
         val imported = importedNames()
         val missing = librarySymbols()
             .filter { it.isImportable && !it.packageName.startsWith("com.materialkolor") }
-            .filterNot { it.qualifiedName in imported || it.qualifiedName in AndroidOnly + NotYetImported }
+            .filterNot { it.qualifiedName in imported || it.qualifiedName in AndroidOnly }
 
         assertEquals(emptyList(), missing, "No source in the repo imports these, so their packages are unverified")
     }
@@ -157,11 +157,6 @@ class LibrarySymbolsTest {
             "androidx.compose.ui.platform.LocalContext",
         )
 
-        /**
-         * Symbols no source in the repo imports yet, so only the compile check of `builder/codegen-check`
-         * holds their packages. Inklet leaves this once the Inklet preview imports it.
-         */
-        val NotYetImported = setOf("dev.ggoggam.inklet.InkletTheme")
         val ParameterLine = Regex("""^ {4}(?:(?:private )?val )?(\w+): (.+?)(?: = (.+?))?,$""")
         val ImportLine = Regex("""^import ([\w.]+)$""")
     }
