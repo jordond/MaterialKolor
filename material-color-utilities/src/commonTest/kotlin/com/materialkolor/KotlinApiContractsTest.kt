@@ -3,6 +3,7 @@ package com.materialkolor
 import com.materialkolor.dynamiccolor.ColorSpec.SpecVersion
 import com.materialkolor.dynamiccolor.ContrastCurve
 import com.materialkolor.dynamiccolor.DynamicColor
+import com.materialkolor.dynamiccolor.DynamicScheme
 import com.materialkolor.dynamiccolor.ToneDeltaPair
 import com.materialkolor.dynamiccolor.ToneDeltaPair.TonePolarity
 import com.materialkolor.dynamiccolor.extendSpecVersion
@@ -20,19 +21,20 @@ import kotlin.test.assertTrue
 
 class KotlinApiContractsTest {
     @Test
-    fun dynamicColorDefaultsAndCopyKeepValueSemantics() {
+    fun dynamicColorDefaultsKeepValueSemantics() {
         val scheme = SchemeTonalSpot(Hct.fromInt(0xff4285f4.toInt()), false, 0.0)
-        val color = DynamicColor(name = "custom", palette = { it.primaryPalette })
+        val palette: (DynamicScheme) -> TonalPalette = { it.primaryPalette }
+        val color = DynamicColor(name = "custom", palette = palette)
         assertFalse(color.isBackground)
         assertEquals(50.0, color.tone(scheme))
         assertEquals(50.0, DynamicColor.getInitialToneFromBackground()(scheme))
         color.getHct(scheme)
-        val copy = color.copy()
-        assertNotSame(color, copy)
-        assertEquals(color, copy)
-        assertEquals(color.hashCode(), copy.hashCode())
-        assertEquals(color.getArgb(scheme), copy.getArgb(scheme))
-        val background = color.copy(isBackground = true)
+        val same = DynamicColor(name = "custom", palette = palette, tone = color.tone)
+        assertNotSame(color, same)
+        assertEquals(color, same)
+        assertEquals(color.hashCode(), same.hashCode())
+        assertEquals(color.getArgb(scheme), same.getArgb(scheme))
+        val background = DynamicColor(name = "custom", palette = palette, isBackground = true, tone = color.tone)
         assertNotEquals(color, background)
         assertTrue(background.isBackground)
         val onBackground = DynamicColor(
