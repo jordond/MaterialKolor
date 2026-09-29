@@ -6,10 +6,6 @@
 // - Show declarations: true
 
 // Library unique name: <MaterialKolor:material-kolor-core>
-open annotation class com.materialkolor/InternalMaterialKolorApi : kotlin/Annotation { // com.materialkolor/InternalMaterialKolorApi|null[0]
-    constructor <init>() // com.materialkolor/InternalMaterialKolorApi.<init>|<init>(){}[0]
-}
-
 final enum class com.materialkolor.ktx/ContrastThreshold : kotlin/Enum<com.materialkolor.ktx/ContrastThreshold> { // com.materialkolor.ktx/ContrastThreshold|null[0]
     enum entry WCAG_AAA_LARGE_TEXT // com.materialkolor.ktx/ContrastThreshold.WCAG_AAA_LARGE_TEXT|null[0]
     enum entry WCAG_AAA_NORMAL_TEXT // com.materialkolor.ktx/ContrastThreshold.WCAG_AAA_NORMAL_TEXT|null[0]

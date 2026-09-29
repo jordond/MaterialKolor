@@ -75,6 +75,18 @@ class ShareCodecTest {
     }
 
     @Test
+    fun encode_customToneWithNeitherToneMoved_isLeftOut() {
+        val tuned = ThemeDocument.Default.copy(customTones = mapOf(CustomSlot.Shadow to CustomTone(light = 4)))
+        val empty = CustomSlot.Primary to CustomTone()
+
+        assertEquals(ShareCodec.encode(tuned), ShareCodec.encode(tuned.copy(customTones = tuned.customTones + empty)))
+        assertEquals(
+            ShareCodec.encode(ThemeDocument.Default),
+            ShareCodec.encode(ThemeDocument.Default.copy(customTones = mapOf(empty))),
+        )
+    }
+
+    @Test
     fun encode_seedSource_neverChangesTheCode() {
         val sources =
             listOf(

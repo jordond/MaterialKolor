@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
+import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.ktx.DynamicScheme
 import io.github.composefluent.Colors
 import kotlin.test.Test
@@ -71,7 +72,11 @@ class RememberFluentColorsTest {
             val seen = mutableListOf<Colors>()
 
             setContent {
-                seen += rememberFluentColors(seedColor = seed, isDark = isDark)
+                seen += rememberFluentColors(
+                    seedColor = seed,
+                    isDark = isDark,
+                    specVersion = ColorSpec.SpecVersion.SPEC_2021,
+                )
             }
 
             waitForIdle()
@@ -82,7 +87,7 @@ class RememberFluentColorsTest {
             assertEquals(false, seen.first().darkMode)
             assertEquals(true, seen.last().darkMode)
 
-            // Fluent derives light and dark from the same seven shades, so only the flag moves.
+            // Under the 2021 spec the palettes do not depend on the mode, so only the flag moves.
             assertEquals(seen.first().shades, seen.last().shades)
         }
 }

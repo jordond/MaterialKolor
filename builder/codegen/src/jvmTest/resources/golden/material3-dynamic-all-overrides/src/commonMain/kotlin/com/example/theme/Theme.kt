@@ -5,6 +5,7 @@ package com.example.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.material3.DynamicMaterialTheme
 
 @Composable
@@ -21,6 +22,7 @@ fun AppTheme(
         neutral = Neutral,
         neutralVariant = NeutralVariant,
         error = Error,
+        specVersion = ColorSpec.SpecVersion.SPEC_2021,
         content = content,
     )
 }

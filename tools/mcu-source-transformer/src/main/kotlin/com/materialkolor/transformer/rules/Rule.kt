@@ -10,7 +10,6 @@ internal enum class Rule(
     ArraySort("array-sort"),
     Cam16Visibility("cam16-visibility"),
     CollectionImport("collection-import"),
-    ContrastFloat("contrast-float"),
     DiagnosticFormatPolicy("diagnostic-format-policy"),
     DynamicColorFactory("dynamic-color-factory"),
     EnumDefault("enum-default"),
@@ -30,7 +29,9 @@ internal enum class Rule(
     MathMax("math-max"),
     MathToDegrees("math-toDegrees"),
     MathToRadians("math-toRadians"),
+    MemberVisibility("member-visibility"),
     Package("package"),
+    PokoClass("poko-class"),
     PrivateListCopy("private-list-copy"),
     RemoveJvmImport("remove-jvm-import"),
     RgbFormat("rgb-format"),
@@ -41,10 +42,13 @@ internal enum class Rule(
     ScoreDefault("score-default"),
     ScoreNullableFallback("score-nullable-fallback"),
     ScoreOptionalFallback("score-optional-fallback"),
+    SpecDefault("spec-default"),
+    SubclassOptIn("subclass-opt-in"),
+    SubclassOptInRequired("subclass-opt-in-required"),
     Suppression("suppression"),
     ValueEquality("value-equality"),
     ValueInputVisibility("value-input-visibility"),
-    ViewingVisibility("viewing-visibility"),
+    WhitePointCopy("white-point-copy"),
     ;
 
     override fun toString(): String = id

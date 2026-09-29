@@ -370,6 +370,8 @@ class Reader {
         const light = this.byte();
         const dark = this.byte();
         if (light === null || dark === null || !isToneOrNone(light) || !isToneOrNone(dark)) return false;
+        // The writer drops a slot with neither tone moved.
+        if (light === NO_TONE && dark === NO_TONE) return false;
       }
     }
     return true;

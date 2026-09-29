@@ -8,6 +8,7 @@ import com.materialkolor.builder.codegen.GoldenHashes
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
 import com.materialkolor.builder.codegen.target.lintFailures
 import com.materialkolor.builder.domain.model.Library
+import com.materialkolor.builder.domain.model.SpecVersion
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -29,7 +30,7 @@ internal object UnstyledDynamicCases {
         document = Fixtures.Pins.input.document.copy(
             keyColors = Fixtures.PrimaryOverride.input.document.keyColors,
             contrast = Fixtures.HighContrast.input.document.contrast,
-            spec = Fixtures.Watch2025.input.document.spec,
+            spec = SpecVersion.Spec2021,
             platform = Fixtures.Watch2025.input.document.platform,
         ),
         prefs = Fixtures.Animated.input.prefs,
@@ -80,7 +81,14 @@ class UnstyledDynamicTest {
 
     @Test
     fun unstyledDynamic_default_writesOnlyTheSeed() {
-        val theme = theme(Fixtures.Default.unstyled().input)
+        val latest = Fixtures.Default.input.document
+            .copy(spec = SpecVersion.Spec2025)
+        val theme = theme(
+            Fixtures.Default
+                .with(document = latest)
+                .unstyled()
+                .input,
+        )
 
         assertTrue("val (light, dark) = rememberDynamicLightDarkColors(seedColor = SeedColor)" in theme, theme)
         assertTrue("properties[MaterialKolorTokens.colors] = light" in theme, theme)
@@ -133,7 +141,7 @@ class UnstyledDynamicTest {
         listOf(
             "primary = Primary,",
             "contrastLevel = 1.0,",
-            "specVersion = ColorSpec.SpecVersion.SPEC_2025,",
+            "specVersion = ColorSpec.SpecVersion.SPEC_2021,",
             "platform = DynamicScheme.Platform.WATCH,",
         ).forEach { argument -> assertEquals(2, theme.occurrences(argument), "$argument in $theme") }
         assertTrue("$TRANSITION = tween(durationMillis = 500)" in theme, theme)

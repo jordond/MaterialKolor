@@ -77,9 +77,10 @@ public sealed interface DecodeResult {
  * the four named levels, which older codes can carry and which reads as the nearest level.
  *
  * A document that passes [validateAccents] and holds a named contrast level comes back from its
- * code unchanged apart from its seed source. The writer refuses more than [MAX_ACCENTS] accents or an accent name over
- * [MAX_ACCENT_NAME_BYTES] UTF-8 bytes, because the reader would refuse them too. The project name is
- * the one field cut to fit rather than refused.
+ * code unchanged apart from its seed source and any custom tone entry with neither tone moved,
+ * which the writer drops. The writer refuses more than [MAX_ACCENTS] accents or an accent name over
+ * [MAX_ACCENT_NAME_BYTES] UTF-8 bytes, because the reader would refuse them too. The project name
+ * is the one field cut to fit rather than refused.
  *
  * The seed source never travels. It is local history, and an image source would leak a file name.
  * Accents travel as their seed, name, harmonize choice, tones and threshold, and nothing else.
@@ -89,6 +90,13 @@ public object ShareCodec {
      * The format version this codec writes, and the only one it reads.
      */
     public const val VERSION: Int = 1
+
+    /**
+     * The longest text [decode] reads. With every capped field full and a 255 byte theme name a
+     * code is about 1,460 characters, so only a theme name over five kilobytes could go past this,
+     * and pasted text that long is refused without being decoded.
+     */
+    public const val MAX_CODE_LENGTH: Int = 8192
 
     /**
      * The share code for [document], with [projectName] riding along when there is one.
@@ -145,9 +153,11 @@ public object ShareCodec {
 
     /**
      * The theme [code] carries, with a contrast between the named levels moved onto the nearest
-     * one. Never throws, whatever the text.
+     * one. Never throws, whatever the text, and text longer than [MAX_CODE_LENGTH] is refused
+     * before any of it is read.
      */
     public fun decode(code: String): DecodeResult {
+        if (code.length > MAX_CODE_LENGTH) return DecodeResult.Corrupt
         val bytes = Base64Url.decode(code) ?: return DecodeResult.Corrupt
         if (bytes.isEmpty()) return DecodeResult.Corrupt
         val version = bytes[0].toInt() and BYTE_MASK
@@ -162,6 +172,8 @@ public object ShareCodec {
 private val DEFAULT_DOCUMENT: ThemeDocument = ThemeDocument.Default
 
 private val DEFAULT_ACCENT: Accent = Accent(name = "", seed = DEFAULT_DOCUMENT.seed)
+
+private val EMPTY_CUSTOM_TONE: CustomTone = CustomTone()
 
 private const val BYTE_MASK: Int = 0xFF
 private const val MIN_CODE_BYTES: Int = 9
@@ -236,8 +248,13 @@ private class TargetOptions(
                 (if (themeName != DEFAULT_DOCUMENT.themeName) OPTION_THEME_NAME else 0)
 
     companion object {
+        // A slot with neither tone moved is the same as no entry, so it never travels.
         fun of(document: ThemeDocument): TargetOptions =
-            TargetOptions(document.motionScheme, document.themeName, document.customTones)
+            TargetOptions(
+                motionScheme = document.motionScheme,
+                themeName = document.themeName,
+                customTones = document.customTones.filterValues { tone -> tone != EMPTY_CUSTOM_TONE },
+            )
     }
 }
 
@@ -529,6 +546,8 @@ private fun ByteReader.customTones(): Map<CustomSlot, CustomTone>? {
         val light = byte() ?: return null
         val dark = byte() ?: return null
         if (!light.isToneOrNone() || !dark.isToneOrNone()) return null
+        // The writer drops a slot with neither tone moved.
+        if (light == NO_TONE && dark == NO_TONE) return null
         tones[slot] = CustomTone(light = light.toneOrNull(), dark = dark.toneOrNull())
     }
     return tones

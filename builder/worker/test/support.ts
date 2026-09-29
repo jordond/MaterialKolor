@@ -102,4 +102,5 @@ export const BAD_CODES: readonly [string, string][] = [
   ['truncated', 'AdllOwAAAA'],
   ['newer version', codeOf([VERSION + 1, 0xd9, 0x65, 0x3b, 0, 0, 0, 0])],
   ['over the length cap', longestCode(THEME_NAME_ALLOWANCE_BYTES + 1)],
+  ['custom slot with neither tone', codeOf([VERSION, 0xd9, 0x65, 0x3b, 0, 0, 0, 0x20, 0x02, 1, 0, 0xff, 0xff])],
 ];

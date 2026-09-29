@@ -1,7 +1,6 @@
 package com.materialkolor
 
 import com.materialkolor.blend.Blend
-import com.materialkolor.contrast.Contrast
 import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.dynamiccolor.DynamicColor
 import com.materialkolor.dynamiccolor.DynamicScheme
@@ -17,24 +16,6 @@ import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class ConvenienceContractsTest {
-    @Test
-    fun floatContrastOverloadsDelegateWithoutChangingPrecision() {
-        for (tone in listOf(0.0, 20.0, 50.0, 80.0, 100.0)) {
-            for (ratio in listOf(1.0f, 3.0f, 4.5f, 21.0f)) {
-                assertEquals(Contrast.lighter(tone, ratio.toDouble())?.toFloat(), Contrast.lighter(tone, ratio))
-                assertEquals(Contrast.darker(tone, ratio.toDouble())?.toFloat(), Contrast.darker(tone, ratio))
-                assertEquals(
-                    Contrast.lighterUnsafe(tone, ratio.toDouble()).toFloat(),
-                    Contrast.lighterUnsafe(tone, ratio),
-                )
-                assertEquals(
-                    Contrast.darkerUnsafe(tone, ratio.toDouble()).toFloat(),
-                    Contrast.darkerUnsafe(tone, ratio),
-                )
-            }
-        }
-    }
-
     @Test
     fun harmonizeAcceptsHctValuesAndReturnsAnHctValue() {
         val design = Hct.fromInt(0xffff0000.toInt())
@@ -77,7 +58,7 @@ class ConvenienceContractsTest {
             neutralVariantPalette = palettes[4],
             errorPalette = palettes[5],
         )
-        assertEquals(ColorSpec.SpecVersion.SPEC_2021, scheme.specVersion)
+        assertEquals(ColorSpec.SpecVersion.SPEC_2025, scheme.specVersion)
         assertEquals(DynamicScheme.Platform.PHONE, scheme.platform)
         val changed = DynamicScheme.from(scheme, isDark = true, contrastLevel = 0.5)
         assertTrue(changed.isDark)

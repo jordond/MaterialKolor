@@ -73,9 +73,11 @@ public fun TonalPalette.toFluentShades(): Shades =
  * }
  * ```
  *
- * Light and dark are the same seven shades with a different flag, because that is how Fluent works.
- * `lightColors` and `darkColors` both call `generateShades` and differ only in the `darkMode` they
- * pass on. This reads [DynamicScheme.isDark] so the two stay in step.
+ * Fluent builds light and dark from seven shades and a flag. `lightColors` and `darkColors` both
+ * call `generateShades` and differ only in the `darkMode` they pass on. This reads
+ * [DynamicScheme.isDark] for that flag, so a dark scheme always gives dark Fluent colors. From
+ * `SPEC_2025` the scheme's primary ramp also changes between light and dark, so the shades differ
+ * as well.
  *
  * Only the primary ramp is used. Fluent's `success`, `caution` and `critical` come from
  * `Colors.system`, which is built from constants and has no setter a caller can reach, so a

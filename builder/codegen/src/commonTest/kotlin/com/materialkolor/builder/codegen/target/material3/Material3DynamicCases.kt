@@ -141,7 +141,9 @@ class Material3DynamicTest {
 
     @Test
     fun material3Dynamic_defaults_areLeftOut() {
-        val theme = theme(Fixtures.Default.input)
+        val latest = Fixtures.Default.input.document
+            .copy(spec = SpecVersion.Spec2025)
+        val theme = theme(Fixtures.Default.with(document = latest).input)
 
         listOf("style", "contrastLevel", "specVersion", "platform", "isAmoled", "animate").forEach { name ->
             assertFalse("$name =" in theme, "$name in $theme")
@@ -149,13 +151,20 @@ class Material3DynamicTest {
     }
 
     @Test
-    fun material3Dynamic_spec_writesTheOneTheStyleRuns() {
+    fun material3Dynamic_spec2021_isWrittenBecauseTheLibraryDefaultIs2025() {
+        val theme = theme(Fixtures.Default.input)
+
+        assertTrue("specVersion = ColorSpec.SpecVersion.SPEC_2021," in theme, theme)
+    }
+
+    @Test
+    fun material3Dynamic_spec_leftOutWhenTheLibraryFallsBackToIt() {
         val newest = Fixtures.Default.input.document
             .copy(spec = SpecVersion.Spec2026)
         val tonalSpot = theme(Fixtures.Default.with(document = newest).input)
         val rainbow = theme(Fixtures.Default.with(document = newest.copy(style = Style.Rainbow)).input)
 
-        assertTrue("specVersion = ColorSpec.SpecVersion.SPEC_2025," in tonalSpot, tonalSpot)
+        assertFalse("specVersion =" in tonalSpot, tonalSpot)
         assertFalse("specVersion =" in rainbow, rainbow)
     }
 

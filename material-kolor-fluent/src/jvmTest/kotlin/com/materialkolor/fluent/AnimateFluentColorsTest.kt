@@ -96,6 +96,29 @@ class AnimateFluentColorsTest {
             assertEquals(Colors(shadesFor(seed), darkMode = true).system, colors.system)
         }
 
-    private fun shadesFor(seedColor: Color): Shades =
-        DynamicScheme(seedColor = seedColor, isDark = false).primaryPalette.toFluentShades()
+    @Test
+    fun animateFluentColors_cutsTheShadesWithTheDarkFlag() =
+        runComposeUiTest {
+            var isDark by mutableStateOf(false)
+            var latest: Colors? = null
+
+            setContent {
+                latest = animateFluentColors(rememberFluentColors(seedColor = seed, isDark = isDark))
+            }
+
+            waitForIdle()
+            mainClock.autoAdvance = false
+            isDark = true
+            mainClock.advanceTimeByFrame()
+
+            // The default spec gives dark its own ramp, so a dark flag over light shades is a flash.
+            assertNotEquals(shadesFor(seed), shadesFor(seed, isDark = true))
+            assertEquals(true, latest?.darkMode)
+            assertEquals(shadesFor(seed, isDark = true), latest?.shades)
+        }
+
+    private fun shadesFor(
+        seedColor: Color,
+        isDark: Boolean = false,
+    ): Shades = DynamicScheme(seedColor = seedColor, isDark = isDark).primaryPalette.toFluentShades()
 }
