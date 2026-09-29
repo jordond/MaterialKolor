@@ -77,6 +77,9 @@ internal object Material3FrozenCases {
                 prefs = frozenPrefs(FrozenVariants.AllContrasts),
             ).input,
         "material3-frozen-android-dynamic-color" to Fixtures.Default.with(prefs = AndroidDynamicColor).input,
+        "inklet-frozen-default" to Fixtures.Default
+            .with(document = Fixtures.Base.copy(library = Library.Inklet), prefs = frozenPrefs())
+            .input,
     )
 
     fun files(case: String): List<GeneratedFile> = Material3Frozen.files(all.getValue(case))
@@ -215,6 +218,15 @@ class Material3FrozenTest {
             input = Material3FrozenCases.ExpressiveAccentsAndroidDynamicColor,
             themeCall = "MaterialExpressiveTheme(",
         )
+    }
+
+    @Test
+    fun material3Frozen_inklet_wrapsTheContentInInkletTheme() {
+        val theme = theme(Material3FrozenCases.all.getValue("inklet-frozen-default"))
+
+        assertTrue("    MaterialTheme(\n" in theme, theme)
+        assertTrue("        content = { InkletTheme(content = content) },\n" in theme, theme)
+        assertTrue("import dev.ggoggam.inklet.InkletTheme" in theme, theme)
     }
 
     @Test

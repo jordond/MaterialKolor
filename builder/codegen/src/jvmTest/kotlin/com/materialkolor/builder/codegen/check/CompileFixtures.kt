@@ -62,6 +62,7 @@ private class FixtureCase(
         get() {
             val target = when (input.target) {
                 ExportTarget.Material3, ExportTarget.Material3Expressive -> "material3"
+                ExportTarget.Inklet -> "inklet"
                 ExportTarget.Unstyled -> "unstyled"
                 ExportTarget.Fluent -> "fluent"
                 ExportTarget.Custom -> "custom"
@@ -275,10 +276,10 @@ private class FixtureProject(
      */
     private fun baseDependency(): Pair<String, String>? =
         when (name) {
-            "material3-frozen" -> {
+            "material3-frozen", "inklet-frozen" -> {
                 "Frozen Material 3 writes no snippet, its README names Compose Material 3." to "repo.compose.material3"
             }
-            "material3-dynamic" -> {
+            "material3-dynamic", "inklet-dynamic" -> {
                 "Dynamic Material 3 and Expressive import androidx.compose.material3 themselves, which " +
                     "material-kolor-material3 keeps off the compile classpath, so their README names Compose " +
                     "Material 3." to "repo.compose.material3"

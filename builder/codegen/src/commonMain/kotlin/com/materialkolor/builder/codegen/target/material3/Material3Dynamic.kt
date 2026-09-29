@@ -33,7 +33,8 @@ import com.materialkolor.builder.domain.persist.ExportMode
 import com.materialkolor.builder.domain.persist.ExportTarget
 
 /**
- * The Material 3 export that builds its scheme from the seed at runtime, plain or expressive.
+ * The Material 3 export that builds its scheme from the seed at runtime, plain or expressive. The
+ * Inklet export is this one with the theme's content wrapped in `InkletTheme`.
  *
  * It writes `Color.kt` with the seed and every color the document sets by hand, `Theme.kt` with a
  * single call of `DynamicMaterialTheme` or `DynamicMaterialExpressiveTheme`, and `ExtendedColors.kt`
@@ -47,7 +48,8 @@ public object Material3Dynamic {
      */
     public fun files(input: ExportInput): List<GeneratedFile> {
         val target = input.target
-        require(target == ExportTarget.Material3 || target == ExportTarget.Material3Expressive) {
+        val material3 = target == ExportTarget.Material3 || target == ExportTarget.Material3Expressive
+        require(material3 || target == ExportTarget.Inklet) {
             "The Material 3 dynamic export cannot write a $target theme"
         }
 
@@ -210,7 +212,7 @@ private fun themeCall(
             val duration = Literals.int(prefs.animationDurationMs)
             argument("animationSpec", call(Symbols.Tween) { argument("durationMillis", duration) })
         }
-        argument(CONTENT, ref(CONTENT))
+        argument(CONTENT, themeContent(input))
     }
 }
 

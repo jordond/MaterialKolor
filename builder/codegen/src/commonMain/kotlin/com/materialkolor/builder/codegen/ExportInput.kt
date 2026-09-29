@@ -70,6 +70,7 @@ public data class ExportInput(
  * or Expressive export depends on.
  * @property[androidxMaterial3] The Jetpack Compose Material 3 version an Android Material 3 or
  * Expressive export depends on.
+ * @property[inklet] The Inklet version an Inklet export depends on.
  * @property[fluentModuleAvailable] Whether `material-kolor-fluent` is published at [materialKolor].
  * When it is not, a Fluent export builds its shades inline from core.
  */
@@ -80,6 +81,7 @@ public data class ExportVersions(
     public val composeUnstyled: String,
     public val composeMaterial3: String,
     public val androidxMaterial3: String,
+    public val inklet: String,
     public val fluentModuleAvailable: Boolean = true,
 ) {
     /**

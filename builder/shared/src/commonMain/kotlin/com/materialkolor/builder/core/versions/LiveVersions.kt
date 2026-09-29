@@ -64,6 +64,7 @@ internal fun exportVersionsOf(
         composeUnstyled = pick("composeUnstyled", baked.composeUnstyled),
         composeMaterial3 = pick("composeMaterial3", baked.composeMaterial3),
         androidxMaterial3 = pick("androidxMaterial3", baked.androidxMaterial3),
+        inklet = pick("inklet", baked.inklet),
     )
 }
 
@@ -100,5 +101,6 @@ internal fun bakedExportVersions(): ExportVersions =
         composeUnstyled = BuildKonfig.COMPOSE_UNSTYLED_VERSION,
         composeMaterial3 = BuildKonfig.COMPOSE_MATERIAL3_VERSION,
         androidxMaterial3 = BuildKonfig.ANDROIDX_MATERIAL3_VERSION,
+        inklet = BuildKonfig.INKLET_VERSION,
         fluentModuleAvailable = BuildKonfig.FLUENT_MODULE,
     )

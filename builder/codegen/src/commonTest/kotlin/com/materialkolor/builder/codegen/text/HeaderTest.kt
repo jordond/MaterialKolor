@@ -42,6 +42,7 @@ class HeaderTest {
                 composeUnstyled = "2.11.0",
                 composeMaterial3 = "1.12.0-alpha03",
                 androidxMaterial3 = "1.5.0-alpha28",
+                inklet = "0.3.0",
             ),
             shareUrl = "https://example.com/t/abc",
         )

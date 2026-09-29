@@ -40,6 +40,15 @@ internal object Material3DynamicCases {
 
     private val AndroidDynamicColor: ExportPrefs = ExportPrefs(multiplatform = false, androidDynamicColor = true)
 
+    private val InkletDefault: Fixture = Fixtures.Default.with(document = Fixtures.Base.copy(library = Library.Inklet))
+
+    private val InkletAccentsPins: Fixture = Fixtures.Pins.with(
+        document = Fixtures.Pins.input.document.copy(
+            library = Library.Inklet,
+            accents = Fixtures.ThreeAccents.input.document.accents,
+        ),
+    )
+
     private val plain: List<Fixture> = listOf(
         Fixtures.Default,
         Fixtures.FirstTheme,
@@ -72,6 +81,9 @@ internal object Material3DynamicCases {
                         ),
                         prefs = AndroidDynamicColor,
                     ).input,
+                "inklet-dynamic-default" to InkletDefault.input,
+                "inklet-dynamic-accents-pins" to InkletAccentsPins.input,
+                "inklet-dynamic-android-dynamic-color" to InkletDefault.with(prefs = AndroidDynamicColor).input,
             )
 
     fun files(case: String): List<GeneratedFile> = Material3Dynamic.files(all.getValue(case))
@@ -201,6 +213,29 @@ class Material3DynamicTest {
             val asked = input.copy(prefs = input.prefs.copy(androidDynamicColor = true))
 
             assertEquals(Material3Dynamic.files(input).texts(), Material3Dynamic.files(asked).texts())
+        }
+    }
+
+    @Test
+    fun material3Dynamic_inklet_wrapsTheContentOfEveryThemeCallInInkletTheme() {
+        val wrapped = "content = { InkletTheme(content = content) },"
+        val seed = theme(Material3DynamicCases.all.getValue("inklet-dynamic-default"))
+        val pinned = theme(Material3DynamicCases.all.getValue("inklet-dynamic-accents-pins"))
+        val wallpaper = theme(Material3DynamicCases.all.getValue("inklet-dynamic-android-dynamic-color"))
+
+        assertEquals(1, seed.split(wrapped).size - 1, seed)
+        assertTrue("import dev.ggoggam.inklet.InkletTheme" in seed, seed)
+        assertEquals(1, pinned.split(wrapped).size - 1, pinned)
+        assertTrue("state = state," in pinned, pinned)
+        assertTrue("CompositionLocalProvider(LocalExtendedColors provides extendedColors) {" in pinned, pinned)
+        assertEquals(2, wallpaper.split(wrapped).size - 1, wallpaper)
+        assertFalse("Expressive" in seed + pinned + wallpaper)
+    }
+
+    @Test
+    fun material3Dynamic_material3_neverNamesInklet() {
+        Material3DynamicCases.all.values.filter { input -> input.document.library != Library.Inklet }.forEach { input ->
+            assertFalse("InkletTheme" in theme(input), theme(input))
         }
     }
 

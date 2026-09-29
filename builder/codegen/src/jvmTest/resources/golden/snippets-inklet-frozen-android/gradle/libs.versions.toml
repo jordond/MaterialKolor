@@ -1,0 +1,7 @@
+[versions]
+compose-material3 = "1.5.0-alpha28"
+inklet = "0.3.0"
+
+[libraries]
+androidx-compose-material3 = { module = "androidx.compose.material3:material3", version.ref = "compose-material3" }
+inklet = { module = "dev.ggoggam.inklet:inklet", version.ref = "inklet" }

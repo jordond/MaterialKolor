@@ -100,8 +100,11 @@ public object ReservedNames {
      */
     private fun topLevel(target: ExportTarget): Set<String> =
         when (target) {
-            ExportTarget.Material3, ExportTarget.Material3Expressive, ExportTarget.Inklet -> {
+            ExportTarget.Material3, ExportTarget.Material3Expressive -> {
                 Material3Symbols.names() + Material3Declared
+            }
+            ExportTarget.Inklet -> {
+                Material3Symbols.names() + Material3Declared + Symbols.InkletTheme.simpleName
             }
             ExportTarget.Unstyled -> {
                 UnstyledSymbols.names() + UnstyledDeclared
