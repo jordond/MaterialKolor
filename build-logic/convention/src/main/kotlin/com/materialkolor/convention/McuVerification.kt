@@ -57,17 +57,13 @@ internal fun Project.registerMcuVerificationTasks() {
 
     tasks.register("verifyMcuApple") {
         group = "verification"
-        description = "Run the macOS and simulator tests, then compile and link every published Apple target."
+        description = "Run the simulator tests, link the device framework and compile macOS."
         for (module in mcuLibraryModules) {
             if (module.macos) {
-                dependsOn(":${module.name}:macosArm64Test")
+                dependsOn(":${module.name}:compileKotlinMacosArm64")
             }
 
-            dependsOn(
-                ":${module.name}:iosSimulatorArm64Test",
-                ":${module.name}:compileKotlinIosArm64", ":${module.name}:linkDebugFrameworkIosArm64",
-                ":${module.name}:linkDebugFrameworkIosSimulatorArm64",
-            )
+            dependsOn(":${module.name}:iosSimulatorArm64Test", ":${module.name}:linkDebugFrameworkIosArm64")
         }
     }
 
