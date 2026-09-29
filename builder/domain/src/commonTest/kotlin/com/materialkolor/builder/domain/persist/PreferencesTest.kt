@@ -49,6 +49,8 @@ class PreferencesTest {
             (Library.Fluent to true) to ExportTarget.Fluent,
             (Library.Custom to false) to ExportTarget.Custom,
             (Library.Custom to true) to ExportTarget.Custom,
+            (Library.Inklet to false) to ExportTarget.Inklet,
+            (Library.Inklet to true) to ExportTarget.Inklet,
         )
         val actual = Library.entries
             .flatMap { library -> listOf(library to false, library to true) }

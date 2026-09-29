@@ -160,6 +160,12 @@ public enum class ExportTarget {
      */
     @SerialName("Custom")
     Custom,
+
+    /**
+     * A Compose Material 3 theme with Inklet's pen settings around it.
+     */
+    @SerialName("Inklet")
+    Inklet,
     ;
 
     public companion object {
@@ -176,6 +182,7 @@ public enum class ExportTarget {
                 Library.Unstyled -> Unstyled
                 Library.Fluent -> Fluent
                 Library.Custom -> Custom
+                Library.Inklet -> Inklet
             }
     }
 }

@@ -73,7 +73,16 @@ class ShareCodecCorruptionTest {
 
     @Test
     fun decode_reservedBitInTheTargetByte_isCorrupt() {
-        assertReservedBitsRejected(default, index = 5, reserved = 0xF8)
+        assertReservedBitsRejected(default, index = 5, reserved = 0xF0)
+    }
+
+    @Test
+    fun decode_libraryHighBitWithoutTheMaterial3Pair_isCorrupt() {
+        listOf(0x09, 0x0A, 0x0B).forEach { target ->
+            val bytes = bytesOf(ShareCodec.encode(default))
+            bytes[5] = target.toByte()
+            assertEquals(DecodeResult.Corrupt, ShareCodec.decode(resealed(bytes)), target.toString())
+        }
     }
 
     @Test

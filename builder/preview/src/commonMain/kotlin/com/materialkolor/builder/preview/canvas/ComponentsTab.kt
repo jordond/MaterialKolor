@@ -59,7 +59,7 @@ public fun ComponentsTab(
 ) {
     val document = spec.result.document
     when (document.library) {
-        Library.Material3 -> MaterialGalleryEntry(spec, state, modifier)
+        Library.Material3, Library.Inklet -> MaterialGalleryEntry(spec, state, modifier)
         Library.Unstyled -> UnstyledGalleryEntry(spec, state, modifier)
         Library.Fluent -> FluentGalleryEntry(spec, state, modifier)
         Library.Custom -> CustomGalleryEntry(spec, state, modifier)

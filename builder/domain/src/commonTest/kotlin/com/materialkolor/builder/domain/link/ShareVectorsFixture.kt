@@ -847,6 +847,41 @@ internal val SHARE_VECTORS_JSON: String =
             "style": "TonalSpot"
         },
         {
+            "label": "library Inklet",
+            "document": {
+                "seed": "#D9653B",
+                "seedSource": {
+                    "type": "Typed"
+                },
+                "keyColors": {
+                    "primary": null,
+                    "secondary": null,
+                    "tertiary": null,
+                    "error": null,
+                    "neutral": null,
+                    "neutralVariant": null
+                },
+                "style": "TonalSpot",
+                "cmfTertiarySeed": null,
+                "contrast": 0,
+                "spec": "Spec2026",
+                "platform": "Phone",
+                "amoled": false,
+                "accents": [],
+                "pins": {},
+                "library": "Inklet",
+                "expressive": false,
+                "motionScheme": "Expressive",
+                "themeName": "AppTheme",
+                "customTones": {}
+            },
+            "projectName": null,
+            "code": "AdllOyAIAACM",
+            "seedHex": "#D9653B",
+            "library": "Inklet",
+            "style": "TonalSpot"
+        },
+        {
             "label": "material3 expressive",
             "document": {
                 "seed": "#D9653B",

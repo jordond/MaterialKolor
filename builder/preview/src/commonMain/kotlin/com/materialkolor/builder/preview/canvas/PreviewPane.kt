@@ -95,6 +95,7 @@ public fun PreviewPane(
         PaneLocals(ink) {
             when (document.library) {
                 Library.Material3 -> MaterialPane(roles, document.expressive, document.motionScheme, content)
+                Library.Inklet -> MaterialPane(roles, expressive = false, document.motionScheme, content)
                 Library.Unstyled -> UnstyledPane(roles, spec.isDark, ink, content)
                 Library.Fluent -> FluentPane(spec, content)
                 Library.Custom -> CompositionLocalProvider(

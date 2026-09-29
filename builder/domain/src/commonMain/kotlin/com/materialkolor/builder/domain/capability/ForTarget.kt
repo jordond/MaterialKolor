@@ -59,6 +59,7 @@ private val ExportTarget.library: Library
         ExportTarget.Unstyled -> Library.Unstyled
         ExportTarget.Fluent -> Library.Fluent
         ExportTarget.Custom -> Library.Custom
+        ExportTarget.Inklet -> Library.Inklet
     }
 
 /**

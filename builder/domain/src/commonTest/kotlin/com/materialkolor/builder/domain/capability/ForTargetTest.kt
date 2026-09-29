@@ -99,6 +99,10 @@ class ForTargetTest {
         ExportTarget.Custom to mapOf(
             Field.MotionScheme to null,
         ),
+        ExportTarget.Inklet to mapOf(
+            Field.MotionScheme to null,
+            Field.CustomTones to null,
+        ),
     )
 
     /**
@@ -211,6 +215,7 @@ class ForTargetTest {
             ExportTarget.Unstyled -> Library.Unstyled
             ExportTarget.Fluent -> Library.Fluent
             ExportTarget.Custom -> Library.Custom
+            ExportTarget.Inklet -> Library.Inklet
         }
         val capabilities = Capabilities.of(
             library = library,

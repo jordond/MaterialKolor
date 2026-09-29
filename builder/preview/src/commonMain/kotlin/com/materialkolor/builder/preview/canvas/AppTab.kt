@@ -29,7 +29,7 @@ public fun AppTab(
 ) {
     val document = spec.result.document
     when (document.library) {
-        Library.Material3 -> MaterialAppEntry(spec, state, deviceWidth, modifier)
+        Library.Material3, Library.Inklet -> MaterialAppEntry(spec, state, deviceWidth, modifier)
         Library.Unstyled -> UnstyledAppEntry(spec, state, deviceWidth, modifier)
         Library.Fluent -> FluentAppEntry(spec, state, deviceWidth, modifier)
         Library.Custom -> CustomAppEntry(spec, state, deviceWidth, modifier)

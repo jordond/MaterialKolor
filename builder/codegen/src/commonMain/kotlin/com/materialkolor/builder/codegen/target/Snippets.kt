@@ -79,7 +79,7 @@ internal object Snippets {
         when (input.prefs.mode) {
             ExportMode.Dynamic -> {
                 when (input.target) {
-                    ExportTarget.Material3, ExportTarget.Material3Expressive -> {
+                    ExportTarget.Material3, ExportTarget.Material3Expressive, ExportTarget.Inklet -> {
                         listOf(materialKolor("material3", input), material3(input))
                     }
                     ExportTarget.Unstyled -> {
@@ -98,7 +98,9 @@ internal object Snippets {
             }
             ExportMode.Frozen -> {
                 when (input.target) {
-                    ExportTarget.Material3, ExportTarget.Material3Expressive -> listOf(material3(input))
+                    ExportTarget.Material3, ExportTarget.Material3Expressive, ExportTarget.Inklet -> listOf(
+                        material3(input),
+                    )
                     ExportTarget.Custom -> emptyList()
                     ExportTarget.Unstyled -> listOf(unstyledTheming(input))
                     ExportTarget.Fluent -> listOf(fluent(input))
@@ -111,7 +113,7 @@ internal object Snippets {
      */
     fun platformNote(target: ExportTarget): String? =
         when (target) {
-            ExportTarget.Material3, ExportTarget.Material3Expressive, ExportTarget.Custom -> {
+            ExportTarget.Material3, ExportTarget.Material3Expressive, ExportTarget.Custom, ExportTarget.Inklet -> {
                 null
             }
             ExportTarget.Unstyled -> {

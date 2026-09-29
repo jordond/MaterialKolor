@@ -55,7 +55,7 @@ class WireNamesTest {
             Appearance.serializer().descriptor to listOf("System", "Light", "Dark"),
             MotionOverride.serializer().descriptor to listOf("System", "Reduce", "Full"),
             ExportTarget.serializer().descriptor to
-                listOf("Material3", "Material3Expressive", "Unstyled", "Fluent", "Custom"),
+                listOf("Material3", "Material3Expressive", "Unstyled", "Fluent", "Custom", "Inklet"),
             ExportMode.serializer().descriptor to listOf("Dynamic", "Frozen"),
             FrozenVariants.serializer().descriptor to listOf("StandardOnly", "AllContrasts"),
         )

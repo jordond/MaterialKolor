@@ -56,7 +56,7 @@ class ShareVectorsTest {
             assertEquals(vector.document.style.name, vector.style, vector.label)
             assertEquals(vector.document.style.code, bytes.unsigned(4) and 0x0F, vector.label)
             assertEquals(vector.document.library.name, vector.library, vector.label)
-            assertEquals(vector.document.library.code, bytes.unsigned(5) and 0x03, vector.label)
+            assertEquals(vector.document.library.code and 0x03, bytes.unsigned(5) and 0x03, vector.label)
         }
     }
 
