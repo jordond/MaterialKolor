@@ -24,5 +24,3 @@ kotlin {
     }
 }
 ```
-
-Compose Unstyled needs JVM 17 and Android minSdk 23, and has no macOS native target.

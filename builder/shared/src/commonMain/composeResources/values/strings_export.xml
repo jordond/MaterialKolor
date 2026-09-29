@@ -46,7 +46,6 @@
     <!-- The note under the libraries on the platforms each one runs on. -->
     <string name="export_library_unstyled_note">Compose Unstyled needs JVM 17 and Android minSdk 23.</string>
     <string name="export_library_fluent_note">Compose Fluent needs JVM 17.</string>
-    <string name="export_library_inklet_note">Inklet needs Android minSdk 23, and has no JS, macOS or iosX64 target.</string>
 
     <!-- What the file tree is called, read out for its files. -->
     <string name="export_tree">Files in the zip</string>

@@ -10,8 +10,6 @@ The `src` folder is laid out like a module, so copy it into the module that hold
 - `Color.kt`
 - `Theme.kt`
 
-The theme gives the Inklet components their Material 3 colors and already wraps its content in `InkletTheme`, so wrap nothing else around them.
-
 ## Add the dependencies
 
 Merge `gradle/libs.versions.toml` into the version catalog of your project, then add these lines to the build file of the same module. They are also in `snippets/build.gradle.kts`.
@@ -22,5 +20,3 @@ dependencies {
     implementation(libs.inklet)
 }
 ```
-
-Inklet needs Android minSdk 23, and has no JS, macOS or iosX64 target.

@@ -5,7 +5,6 @@ import com.materialkolor.builder.codegen.dsl.GeneratedFile
 import com.materialkolor.builder.codegen.dsl.Language
 import com.materialkolor.builder.codegen.dsl.plainToken
 import com.materialkolor.builder.domain.persist.ExportMode
-import com.materialkolor.builder.domain.persist.ExportTarget
 
 /**
  * Where the readme sits in the export.
@@ -59,13 +58,6 @@ internal object Readme {
             add("")
             sources.forEach { file -> add("- `${file.path.substringAfterLast('/')}`") }
             add("")
-            if (input.target == ExportTarget.Inklet) {
-                add(
-                    "The theme gives the Inklet components their Material 3 colors and already wraps its content " +
-                        "in `InkletTheme`, so wrap nothing else around them.",
-                )
-                add("")
-            }
             add("## Add the dependencies")
             add("")
             if (build == null) {

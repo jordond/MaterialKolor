@@ -116,14 +116,13 @@ internal object Snippets {
      */
     fun platformNote(target: ExportTarget): String? =
         when (target) {
-            ExportTarget.Material3, ExportTarget.Material3Expressive, ExportTarget.Custom -> {
+            ExportTarget.Material3,
+            ExportTarget.Material3Expressive,
+            ExportTarget.Custom,
+            ExportTarget.Inklet,
+            ExportTarget.Unstyled,
+            -> {
                 null
-            }
-            ExportTarget.Inklet -> {
-                "Inklet needs Android minSdk 23, and has no JS, macOS or iosX64 target."
-            }
-            ExportTarget.Unstyled -> {
-                "Compose Unstyled needs JVM 17 and Android minSdk 23, and has no macOS native target."
             }
             ExportTarget.Fluent -> {
                 "Compose Fluent needs JVM 17 and has no macOS native target."

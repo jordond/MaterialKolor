@@ -65,7 +65,6 @@ const STYLES: readonly Style[] = [
   'Content',
   'Cmf',
 ];
-// Indexed by code. Inklet, code 4, travels as bit 3 of the target byte over a Material 3 low pair.
 const LIBRARIES: readonly Library[] = ['Material3', 'Unstyled', 'Fluent', 'Custom', 'Inklet'];
 const SPEC_COUNT = 3;
 const KEY_COLOR_COUNT = 6;
