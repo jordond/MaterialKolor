@@ -221,7 +221,6 @@ final class com.materialkolor.dynamiccolor/DynamicColor { // com.materialkolor.d
         final fun fromArgb(kotlin/String, kotlin/Int): com.materialkolor.dynamiccolor/DynamicColor // com.materialkolor.dynamiccolor/DynamicColor.Companion.fromArgb|fromArgb(kotlin.String;kotlin.Int){}[0]
         final fun fromPalette(kotlin/String, kotlin/Function1<com.materialkolor.dynamiccolor/DynamicScheme, com.materialkolor.palettes/TonalPalette>, kotlin/Function1<com.materialkolor.dynamiccolor/DynamicScheme, kotlin/Double>, kotlin/Boolean = ...): com.materialkolor.dynamiccolor/DynamicColor // com.materialkolor.dynamiccolor/DynamicColor.Companion.fromPalette|fromPalette(kotlin.String;kotlin.Function1<com.materialkolor.dynamiccolor.DynamicScheme,com.materialkolor.palettes.TonalPalette>;kotlin.Function1<com.materialkolor.dynamiccolor.DynamicScheme,kotlin.Double>;kotlin.Boolean){}[0]
         final fun getInitialToneFromBackground(kotlin/Function1<com.materialkolor.dynamiccolor/DynamicScheme, com.materialkolor.dynamiccolor/DynamicColor?>? = ...): kotlin/Function1<com.materialkolor.dynamiccolor/DynamicScheme, kotlin/Double> // com.materialkolor.dynamiccolor/DynamicColor.Companion.getInitialToneFromBackground|getInitialToneFromBackground(kotlin.Function1<com.materialkolor.dynamiccolor.DynamicScheme,com.materialkolor.dynamiccolor.DynamicColor?>?){}[0]
-        final fun tonePrefersLightForeground(kotlin/Double): kotlin/Boolean // com.materialkolor.dynamiccolor/DynamicColor.Companion.tonePrefersLightForeground|tonePrefersLightForeground(kotlin.Double){}[0]
     }
 }
 

@@ -145,7 +145,6 @@ public final class com/materialkolor/dynamiccolor/DynamicColor {
 	public fun hashCode ()I
 	public final fun isBackground ()Z
 	public fun toString ()Ljava/lang/String;
-	public static final fun tonePrefersLightForeground (D)Z
 }
 
 public final class com/materialkolor/dynamiccolor/DynamicColor$Companion {
@@ -154,7 +153,6 @@ public final class com/materialkolor/dynamiccolor/DynamicColor$Companion {
 	public static synthetic fun fromPalette$default (Lcom/materialkolor/dynamiccolor/DynamicColor$Companion;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ZILjava/lang/Object;)Lcom/materialkolor/dynamiccolor/DynamicColor;
 	public final fun getInitialToneFromBackground (Lkotlin/jvm/functions/Function1;)Lkotlin/jvm/functions/Function1;
 	public static synthetic fun getInitialToneFromBackground$default (Lcom/materialkolor/dynamiccolor/DynamicColor$Companion;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lkotlin/jvm/functions/Function1;
-	public final fun tonePrefersLightForeground (D)Z
 }
 
 public final class com/materialkolor/dynamiccolor/DynamicColorKt {

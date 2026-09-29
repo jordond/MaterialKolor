@@ -49,7 +49,12 @@ private val internalMembers = mapOf(
     "dynamiccolor/DynamicColor.kt" to
         (
             "DynamicColor.Companion" to
-                setOf("foregroundTone", "enableLightForeground", "toneAllowsLightForeground")
+                setOf(
+                    "foregroundTone",
+                    "enableLightForeground",
+                    "tonePrefersLightForeground",
+                    "toneAllowsLightForeground",
+                )
         ),
     "hct/ViewingConditions.kt" to ("ViewingConditions" to setOf("rgbD")),
 )
