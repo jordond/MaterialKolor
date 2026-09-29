@@ -826,6 +826,7 @@ final object com.materialkolor.utils/ColorUtils { // com.materialkolor.utils/Col
     final fun lstarFromArgb(kotlin/Int): kotlin/Double // com.materialkolor.utils/ColorUtils.lstarFromArgb|lstarFromArgb(kotlin.Int){}[0]
     final fun lstarFromY(kotlin/Double): kotlin/Double // com.materialkolor.utils/ColorUtils.lstarFromY|lstarFromY(kotlin.Double){}[0]
     final fun redFromArgb(kotlin/Int): kotlin/Int // com.materialkolor.utils/ColorUtils.redFromArgb|redFromArgb(kotlin.Int){}[0]
+    final fun whitePointD65(): kotlin/DoubleArray // com.materialkolor.utils/ColorUtils.whitePointD65|whitePointD65(){}[0]
     final fun xyzFromArgb(kotlin/Int): kotlin/DoubleArray // com.materialkolor.utils/ColorUtils.xyzFromArgb|xyzFromArgb(kotlin.Int){}[0]
     final fun yFromLstar(kotlin/Double): kotlin/Double // com.materialkolor.utils/ColorUtils.yFromLstar|yFromLstar(kotlin.Double){}[0]
 }

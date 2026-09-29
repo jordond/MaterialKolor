@@ -27,6 +27,8 @@ class ApiSurfaceTest {
             text.contains("// Fallback color is Google Blue.\n    fallbackColorArgb: Int? = 0xff4285f4.toInt(),"),
         )
         assertTrue(text.contains("filter: Boolean = true,"))
+        assertTrue(text.contains("@JvmStatic\n  @JvmOverloads\n  fun score("))
+        assertTrue(text.contains("import kotlin.jvm.JvmOverloads"))
     }
 
     @Test
@@ -85,6 +87,10 @@ class ApiSurfaceTest {
             "palettes/Swatch.kt",
             "package palettes\nobject Swatches { private data class Swatch(val argb: Int) }\n",
         )
+        library(
+            "palettes/Swatch.kt",
+            "package palettes\nobject Swatches { fun count(): Int { data class Swatch(val argb: Int); return 0 } }\n",
+        )
     }
 
     @Test
@@ -129,6 +135,12 @@ class ApiSurfaceTest {
     fun hctHarmonizeIsStaticLikeTheIntOverload() {
         val text = library("blend/Blend.kt").text
         assertTrue(text.contains("@JvmStatic\n  fun harmonize(designColor: Hct, sourceColor: Hct): Hct"))
+    }
+
+    @Test
+    fun whitePointIsPublicAndACopy() {
+        val text = library("utils/ColorUtils.kt").text
+        assertTrue(text.contains("  fun whitePointD65(): DoubleArray {\n    return WHITE_POINT_D65.copyOf()\n"))
     }
 
     @Test

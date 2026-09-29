@@ -38,8 +38,8 @@ scheme/SchemeNeutral.kt	import-package=5,package=1,subclass-opt-in=2
 scheme/SchemeRainbow.kt	import-package=5,package=1,subclass-opt-in=2
 scheme/SchemeTonalSpot.kt	import-package=5,package=1,subclass-opt-in=2
 scheme/SchemeVibrant.kt	import-package=5,package=1,subclass-opt-in=2
-score/Score.kt	collection-import=1,import-package=2,jvm-static-import=1,list-sort=1,package=1,remove-jvm-import=1,score-default=5,score-nullable-fallback=1,score-optional-fallback=1
+score/Score.kt	collection-import=1,import-package=2,jvm-static-import=1,list-sort=1,package=1,remove-jvm-import=1,score-default=7,score-nullable-fallback=1,score-optional-fallback=1
 temperature/TemperatureCache.kt	analogous-property=1,collection-import=2,import-package=3,math-toDegrees=1,math-toRadians=1,package=1,private-list-copy=1,remove-jvm-import=1,value-equality=1,value-input-visibility=1
-utils/ColorUtils.kt	luminance-member=1,member-visibility=6,package=1
+utils/ColorUtils.kt	luminance-member=1,member-visibility=5,package=1,white-point-copy=1
 utils/MathUtils.kt	implementation-visibility=1,package=1
 utils/StringUtils.kt	package=1,rgb-format=1

@@ -18,7 +18,7 @@ private val policies: Map<String, (KtFile, SourceEdits) -> Unit> = mapOf(
     "temperature/TemperatureCache.kt" to ::temperatureCache,
     "dynamiccolor/ContrastCurve.kt" to ::contrastCurve,
     "blend/Blend.kt" to ::blendHarmonize,
-    "utils/ColorUtils.kt" to ::colorUtilsLuminance,
+    "utils/ColorUtils.kt" to ::colorUtilsPolicies,
     "dynamiccolor/DynamicColor.kt" to ::dynamicColorFactory,
     "dynamiccolor/DynamicScheme.kt" to ::schemeConveniences,
     "dynamiccolor/ColorSpec.kt" to ::colorSpecDefault,
@@ -182,16 +182,29 @@ private fun blendHarmonize(
     )
 }
 
-private fun colorUtilsLuminance(
+private fun colorUtilsPolicies(
     file: KtFile,
     edits: SourceEdits,
 ) {
+    val type = file.type("ColorUtils")
     append(
-        type = file.type("ColorUtils"),
+        type = type,
         source = "  fun calculateLuminance(argb: Int): Double = xyzFromArgb(argb)[1] / 100.0",
         rule = Rule.LuminanceMember,
         edits = edits,
     )
+
+    // The public white point is a copy, so callers cannot mutate the array every conversion reads.
+    val whitePoint = type.declarations
+        .filterIsInstance<KtNamedFunction>()
+        .single { function -> function.name == "whitePointD65" }
+    val body = whitePoint.bodyBlockExpression
+        ?.statements
+        ?.singleOrNull()
+    require(body?.text == "return WHITE_POINT_D65") {
+        "${file.name}:${whitePoint.textOffset}: white-point-copy: upstream body changed"
+    }
+    edits.replace(requireNotNull(body), "return WHITE_POINT_D65.copyOf()", Rule.WhitePointCopy)
 }
 
 private fun dynamicColorFactory(
@@ -348,6 +361,14 @@ private fun scoreFallback(
         }
         edits.insert(parameter.textRange.endOffset, " = $default", Rule.ScoreDefault)
     }
+
+    // Java callers keep the shorter forms the removed overloads gave them.
+    edits.insert(requireNotNull(full.funKeyword).textRange.startOffset, "@JvmOverloads\n  ", Rule.ScoreDefault)
+    edits.insert(
+        offset = requireNotNull(file.packageDirective).textRange.endOffset,
+        text = "\n\nimport kotlin.jvm.JvmOverloads",
+        rule = Rule.ScoreDefault,
+    )
 
     val fallback = full.nodes<KtCallExpression>().single { it.text == "add(fallbackColorArgb)" }
     val statement = requireNotNull(fallback.parent)

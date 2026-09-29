@@ -571,6 +571,9 @@ public final class com/materialkolor/scheme/SchemeVibrant : com/materialkolor/dy
 
 public final class com/materialkolor/score/Score {
 	public static final field INSTANCE Lcom/materialkolor/score/Score;
+	public static final fun score (Ljava/util/Map;)Ljava/util/List;
+	public static final fun score (Ljava/util/Map;I)Ljava/util/List;
+	public static final fun score (Ljava/util/Map;ILjava/lang/Integer;)Ljava/util/List;
 	public static final fun score (Ljava/util/Map;ILjava/lang/Integer;Z)Ljava/util/List;
 	public static synthetic fun score$default (Ljava/util/Map;ILjava/lang/Integer;ZILjava/lang/Object;)Ljava/util/List;
 }
@@ -606,6 +609,7 @@ public final class com/materialkolor/utils/ColorUtils {
 	public final fun lstarFromArgb (I)D
 	public final fun lstarFromY (D)D
 	public final fun redFromArgb (I)I
+	public final fun whitePointD65 ()[D
 	public final fun xyzFromArgb (I)[D
 	public final fun yFromLstar (D)D
 }

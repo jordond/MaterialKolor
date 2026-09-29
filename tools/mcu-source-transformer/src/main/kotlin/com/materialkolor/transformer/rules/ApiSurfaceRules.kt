@@ -40,7 +40,7 @@ private val internalTypes = mapOf(
  */
 private val internalMembers = mapOf(
     "utils/ColorUtils.kt" to
-        ("ColorUtils" to setOf("argbFromLinrgb", "linearized", "delinearized", "whitePointD65", "labF", "labInvf")),
+        ("ColorUtils" to setOf("argbFromLinrgb", "linearized", "delinearized", "labF", "labInvf")),
     "dynamiccolor/DynamicScheme.kt" to
         (
             "DynamicScheme.Companion" to
@@ -120,6 +120,8 @@ private fun rejectUnreviewedDataClasses(file: KtFile) {
     val hiddenType = internalTypes[file.name]
     for (type in file.nodes<KtClass>().filter { it.isData() }) {
         if (type.isTopLevel() && type.name == pokoClasses[file.name]) continue
+        // A class declared inside a function never reaches the ABI.
+        if (type.isLocal) continue
 
         val owners = generateSequence<KtClassOrObject>(type) { owner -> owner.getStrictParentOfType<KtClassOrObject>() }
         val hidden = owners.any { owner ->

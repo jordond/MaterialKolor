@@ -48,6 +48,7 @@ internal enum class Rule(
     Suppression("suppression"),
     ValueEquality("value-equality"),
     ValueInputVisibility("value-input-visibility"),
+    WhitePointCopy("white-point-copy"),
     ;
 
     override fun toString(): String = id
