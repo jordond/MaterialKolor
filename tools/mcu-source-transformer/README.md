@@ -30,9 +30,14 @@ The passes are deliberately small.
   location and rule name. Compiler/parity checks remain required because PSI is
   not symbol resolution.
 - `SemanticRules` adds guarded members and visibility/value contracts. These
-  preserve Hct immutability, cache-independent value equality, Float delegates,
-  nullable Score fallback, small factories, and source-list/custom-palette scheme
-  copying. Color calculations are still upstream implementations.
+  preserve Hct immutability, cache-independent value equality, the single
+  defaulted Score function with a nullable fallback, small factories, and
+  source-list/custom-palette scheme copying. Color calculations are still
+  upstream implementations.
+- `ApiSurfaceRules` narrows the public ABI. It hides implementation types and
+  members, turns the reviewed data classes into Poko classes, refuses any other
+  public data class, and requires `InternalMaterialKolorApi` opt-in to subclass
+  `ColorSpec` or `DynamicScheme`.
 - `SourceLock` and `Generator` validate the full inventory before writing, stage
   the complete candidate tree, replace owned output and report with rollback, and
   emit relative paths, hashes and sorted rule counts without timestamps.
