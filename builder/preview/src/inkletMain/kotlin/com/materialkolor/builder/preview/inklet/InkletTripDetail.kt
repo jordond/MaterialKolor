@@ -227,9 +227,9 @@ private fun MapsNeedSignal(state: DemoAppState) {
             )
             InkletButton(
                 onClick = { state.setOn(OfflineMapsSwitch, true) },
-                modifier = Modifier.previewRoles(Role.Error),
+                modifier = Modifier.previewRoles(Role.OnErrorContainer),
                 variant = InkletVariant.Outline,
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.error),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.onErrorContainer),
                 seed = SignalSeed + 1,
             ) { Text("Turn on") }
         }
