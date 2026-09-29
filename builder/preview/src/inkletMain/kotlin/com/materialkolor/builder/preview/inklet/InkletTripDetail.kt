@@ -283,7 +283,11 @@ private fun PackingCard(state: DemoAppState) {
 @Composable
 private fun NoteCard(state: DemoAppState) {
     InkletCard(
-        modifier = Modifier.fillMaxWidth().previewRoles(Role.SurfaceContainerLowest, Role.OnSurface, Role.OutlineVariant),
+        modifier = Modifier.fillMaxWidth().previewRoles(
+            Role.SurfaceContainerLowest,
+            Role.OnSurface,
+            Role.OutlineVariant,
+        ),
         containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
         seed = NoteSeed,
     ) {

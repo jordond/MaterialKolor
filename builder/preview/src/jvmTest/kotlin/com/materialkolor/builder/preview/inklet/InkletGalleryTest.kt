@@ -63,7 +63,9 @@ class InkletGalleryTest {
             val state = DemoAppState()
             setContent {
                 val probe = remember {
-                    { where: String -> if (where.startsWith(GALLERY_CARD)) composed += where.removePrefix(GALLERY_CARD) }
+                    { where: String ->
+                        if (where.startsWith(GALLERY_CARD)) composed += where.removePrefix(GALLERY_CARD)
+                    }
                 }
                 CompositionLocalProvider(
                     LocalMotionFrozen provides true,

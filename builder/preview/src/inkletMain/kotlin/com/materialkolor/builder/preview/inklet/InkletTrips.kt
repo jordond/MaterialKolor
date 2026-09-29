@@ -369,8 +369,13 @@ private fun TripThumb(
     Box(
         modifier = Modifier
             .size(TripsLayout.ThumbSize)
-            .inkletSurface(containerColor = container, ink = content, cornerRadius = ThumbCorner, seed = ThumbSeed + index)
-            .previewRoles(trip.tint.container, trip.tint.content),
+            .inkletSurface(
+                containerColor = container,
+                ink = content,
+                cornerRadius = ThumbCorner,
+                seed =
+                    ThumbSeed + index,
+            ).previewRoles(trip.tint.container, trip.tint.content),
         contentAlignment = Alignment.Center,
     ) {
         Icon(trip.icon, contentDescription = null, tint = content)

@@ -24,8 +24,8 @@ import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.choice
 import com.materialkolor.builder.preview.canvas.choose
-import com.materialkolor.builder.preview.material.Gap
 import com.materialkolor.builder.preview.material.GalleryComponent
+import com.materialkolor.builder.preview.material.Gap
 import com.materialkolor.builder.preview.material.PaneGap
 import com.materialkolor.builder.preview.material.previewRoles
 import dev.ggoggam.inklet.InkletDecoration
