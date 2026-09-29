@@ -198,6 +198,30 @@ private fun shareVectors(): List<ShareVector> {
                 ),
             ),
         )
+        // Every code a reader has to know, so a reader missing a new role or slot fails here.
+        add(
+            ShareVector(
+                "every role pinned",
+                base.copy(
+                    pins =
+                        Role.entries.associateWith { role ->
+                            RolePin(light = Argb(0x0A0B0C * (role.code % 20 + 1)))
+                        },
+                ),
+            ),
+        )
+        add(
+            ShareVector(
+                "every custom slot tuned",
+                base.copy(
+                    library = Library.Custom,
+                    customTones =
+                        CustomSlot.entries.associateWith { slot ->
+                            CustomTone(light = slot.code, dark = 100 - slot.code)
+                        },
+                ),
+            ),
+        )
         add(ShareVector("standard motion", base.copy(motionScheme = MotionSchemeChoice.Standard)))
         add(ShareVector("renamed theme", base.copy(themeName = "BrandTheme")))
         add(
@@ -210,7 +234,7 @@ private fun shareVectors(): List<ShareVector> {
                             CustomSlot.PrimaryPressed to CustomTone(light = 28),
                             CustomSlot.SurfaceRaised to CustomTone(dark = 10),
                             CustomSlot.BorderStrong to CustomTone(light = 50, dark = 60),
-                            CustomSlot.Shadow to CustomTone(),
+                            CustomSlot.Shadow to CustomTone(dark = 0),
                         ),
                 ),
             ),

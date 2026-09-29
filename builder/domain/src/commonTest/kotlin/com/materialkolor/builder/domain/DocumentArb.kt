@@ -117,11 +117,16 @@ class DocumentArb(
         CustomSlot.entries
             .shuffled(random)
             .take(random.nextInt(from = 0, until = 5))
-            .associateWith { slot -> CustomTone(light = nextToneOrNull(), dark = nextToneOrNull()) }
+            .associateWith { slot -> nextCustomTone() }
+
+    private fun nextCustomTone(): CustomTone =
+        when (random.nextInt(until = 3)) {
+            0 -> CustomTone(light = nextTone())
+            1 -> CustomTone(dark = nextTone())
+            else -> CustomTone(light = nextTone(), dark = nextTone())
+        }
 
     private fun nextTone(): Int = random.nextInt(from = 0, until = 101)
-
-    private fun nextToneOrNull(): Int? = if (random.nextBoolean()) nextTone() else null
 
     private fun nextWord(): String = WORDS.random(random)
 

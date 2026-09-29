@@ -136,6 +136,15 @@ class ShareCodecCorruptionTest {
         val custom = bytesOf(ShareCodec.encode(default.copy(customTones = customTones)))
         assertCorruptWith(custom) { bytes -> bytes[11] = 101 }
         assertCorruptWith(custom) { bytes -> bytes[12] = 254.toByte() }
+        // A slot with neither tone moved, which the writer drops.
+        assertCorruptWith(custom) { bytes -> bytes[11] = 0xFF.toByte() }
+    }
+
+    @Test
+    fun decode_textLongerThanTheLimit_isCorrupt() {
+        val code = ShareCodec.encode(default)
+        val padded = code + "A".repeat(ShareCodec.MAX_CODE_LENGTH - code.length + 1)
+        assertEquals(DecodeResult.Corrupt, ShareCodec.decode(padded))
     }
 
     @Test

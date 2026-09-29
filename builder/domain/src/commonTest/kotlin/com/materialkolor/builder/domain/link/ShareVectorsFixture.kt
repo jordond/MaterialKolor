@@ -1318,6 +1318,398 @@ internal val SHARE_VECTORS_JSON: String =
             "style": "TonalSpot"
         },
         {
+            "label": "every role pinned",
+            "document": {
+                "seed": "#D9653B",
+                "seedSource": {
+                    "type": "Typed"
+                },
+                "keyColors": {
+                    "primary": null,
+                    "secondary": null,
+                    "tertiary": null,
+                    "error": null,
+                    "neutral": null,
+                    "neutralVariant": null
+                },
+                "style": "TonalSpot",
+                "cmfTertiarySeed": null,
+                "contrast": 0,
+                "spec": "Spec2026",
+                "platform": "Phone",
+                "amoled": false,
+                "accents": [],
+                "pins": {
+                    "Primary": {
+                        "light": "#0A0B0C",
+                        "dark": null
+                    },
+                    "OnPrimary": {
+                        "light": "#141618",
+                        "dark": null
+                    },
+                    "PrimaryContainer": {
+                        "light": "#1E2124",
+                        "dark": null
+                    },
+                    "OnPrimaryContainer": {
+                        "light": "#282C30",
+                        "dark": null
+                    },
+                    "InversePrimary": {
+                        "light": "#32373C",
+                        "dark": null
+                    },
+                    "Secondary": {
+                        "light": "#3C4248",
+                        "dark": null
+                    },
+                    "OnSecondary": {
+                        "light": "#464D54",
+                        "dark": null
+                    },
+                    "SecondaryContainer": {
+                        "light": "#505860",
+                        "dark": null
+                    },
+                    "OnSecondaryContainer": {
+                        "light": "#5A636C",
+                        "dark": null
+                    },
+                    "Tertiary": {
+                        "light": "#646E78",
+                        "dark": null
+                    },
+                    "OnTertiary": {
+                        "light": "#6E7984",
+                        "dark": null
+                    },
+                    "TertiaryContainer": {
+                        "light": "#788490",
+                        "dark": null
+                    },
+                    "OnTertiaryContainer": {
+                        "light": "#828F9C",
+                        "dark": null
+                    },
+                    "Background": {
+                        "light": "#8C9AA8",
+                        "dark": null
+                    },
+                    "OnBackground": {
+                        "light": "#96A5B4",
+                        "dark": null
+                    },
+                    "Surface": {
+                        "light": "#A0B0C0",
+                        "dark": null
+                    },
+                    "OnSurface": {
+                        "light": "#AABBCC",
+                        "dark": null
+                    },
+                    "SurfaceVariant": {
+                        "light": "#B4C6D8",
+                        "dark": null
+                    },
+                    "OnSurfaceVariant": {
+                        "light": "#BED1E4",
+                        "dark": null
+                    },
+                    "SurfaceTint": {
+                        "light": "#C8DCF0",
+                        "dark": null
+                    },
+                    "InverseSurface": {
+                        "light": "#0A0B0C",
+                        "dark": null
+                    },
+                    "InverseOnSurface": {
+                        "light": "#141618",
+                        "dark": null
+                    },
+                    "Error": {
+                        "light": "#1E2124",
+                        "dark": null
+                    },
+                    "OnError": {
+                        "light": "#282C30",
+                        "dark": null
+                    },
+                    "ErrorContainer": {
+                        "light": "#32373C",
+                        "dark": null
+                    },
+                    "OnErrorContainer": {
+                        "light": "#3C4248",
+                        "dark": null
+                    },
+                    "Outline": {
+                        "light": "#464D54",
+                        "dark": null
+                    },
+                    "OutlineVariant": {
+                        "light": "#505860",
+                        "dark": null
+                    },
+                    "Scrim": {
+                        "light": "#5A636C",
+                        "dark": null
+                    },
+                    "SurfaceBright": {
+                        "light": "#646E78",
+                        "dark": null
+                    },
+                    "SurfaceDim": {
+                        "light": "#6E7984",
+                        "dark": null
+                    },
+                    "SurfaceContainer": {
+                        "light": "#788490",
+                        "dark": null
+                    },
+                    "SurfaceContainerHigh": {
+                        "light": "#828F9C",
+                        "dark": null
+                    },
+                    "SurfaceContainerHighest": {
+                        "light": "#8C9AA8",
+                        "dark": null
+                    },
+                    "SurfaceContainerLow": {
+                        "light": "#96A5B4",
+                        "dark": null
+                    },
+                    "SurfaceContainerLowest": {
+                        "light": "#A0B0C0",
+                        "dark": null
+                    },
+                    "PrimaryFixed": {
+                        "light": "#AABBCC",
+                        "dark": null
+                    },
+                    "PrimaryFixedDim": {
+                        "light": "#B4C6D8",
+                        "dark": null
+                    },
+                    "OnPrimaryFixed": {
+                        "light": "#BED1E4",
+                        "dark": null
+                    },
+                    "OnPrimaryFixedVariant": {
+                        "light": "#C8DCF0",
+                        "dark": null
+                    },
+                    "SecondaryFixed": {
+                        "light": "#0A0B0C",
+                        "dark": null
+                    },
+                    "SecondaryFixedDim": {
+                        "light": "#141618",
+                        "dark": null
+                    },
+                    "OnSecondaryFixed": {
+                        "light": "#1E2124",
+                        "dark": null
+                    },
+                    "OnSecondaryFixedVariant": {
+                        "light": "#282C30",
+                        "dark": null
+                    },
+                    "TertiaryFixed": {
+                        "light": "#32373C",
+                        "dark": null
+                    },
+                    "TertiaryFixedDim": {
+                        "light": "#3C4248",
+                        "dark": null
+                    },
+                    "OnTertiaryFixed": {
+                        "light": "#464D54",
+                        "dark": null
+                    },
+                    "OnTertiaryFixedVariant": {
+                        "light": "#505860",
+                        "dark": null
+                    }
+                },
+                "library": "Material3",
+                "expressive": false,
+                "motionScheme": "Expressive",
+                "themeName": "AppTheme",
+                "customTones": {}
+            },
+            "projectName": null,
+            "code": "AdllOyAAAAgwAAEKCwwBARQWGAIBHiEkAwEoLDAEATI3PAUBPEJIBgFGTVQHAVBYYAgBWmNsCQFkbngKAW55hAsBeISQDAGCj5wNAYyaqA4BlqW0DwGgsMAQAaq7zBEBtMbYEgG-0eQTAcjc8BQBCgsMFQEUFhgWAR4hJBcBKCwwGAEyNzwZATxCSBoBRk1UGwFQWGAcAVpjbB0BZG54HgFueYQfAXiEkCABgo-cIQGMmqgiAZaltCMBoLDAJAGqu8wlAbTG2CYBvtHkJwHI3PAoAQoLDCkBFBYYKgEeISQrASgsMCwBMjc8LQE8QkguAUZNVC8BUFhgYQ",
+            "seedHex": "#D9653B",
+            "library": "Material3",
+            "style": "TonalSpot"
+        },
+        {
+            "label": "every custom slot tuned",
+            "document": {
+                "seed": "#D9653B",
+                "seedSource": {
+                    "type": "Typed"
+                },
+                "keyColors": {
+                    "primary": null,
+                    "secondary": null,
+                    "tertiary": null,
+                    "error": null,
+                    "neutral": null,
+                    "neutralVariant": null
+                },
+                "style": "TonalSpot",
+                "cmfTertiarySeed": null,
+                "contrast": 0,
+                "spec": "Spec2026",
+                "platform": "Phone",
+                "amoled": false,
+                "accents": [],
+                "pins": {},
+                "library": "Custom",
+                "expressive": false,
+                "motionScheme": "Expressive",
+                "themeName": "AppTheme",
+                "customTones": {
+                    "primary": {
+                        "light": 0,
+                        "dark": 100
+                    },
+                    "onPrimary": {
+                        "light": 1,
+                        "dark": 99
+                    },
+                    "primaryContainer": {
+                        "light": 2,
+                        "dark": 98
+                    },
+                    "onPrimaryContainer": {
+                        "light": 3,
+                        "dark": 97
+                    },
+                    "primaryPressed": {
+                        "light": 4,
+                        "dark": 96
+                    },
+                    "primaryRaised": {
+                        "light": 5,
+                        "dark": 95
+                    },
+                    "secondary": {
+                        "light": 6,
+                        "dark": 94
+                    },
+                    "onSecondary": {
+                        "light": 7,
+                        "dark": 93
+                    },
+                    "secondaryContainer": {
+                        "light": 8,
+                        "dark": 92
+                    },
+                    "onSecondaryContainer": {
+                        "light": 9,
+                        "dark": 91
+                    },
+                    "tertiary": {
+                        "light": 10,
+                        "dark": 90
+                    },
+                    "onTertiary": {
+                        "light": 11,
+                        "dark": 89
+                    },
+                    "tertiaryContainer": {
+                        "light": 12,
+                        "dark": 88
+                    },
+                    "onTertiaryContainer": {
+                        "light": 13,
+                        "dark": 87
+                    },
+                    "error": {
+                        "light": 14,
+                        "dark": 86
+                    },
+                    "onError": {
+                        "light": 15,
+                        "dark": 85
+                    },
+                    "errorContainer": {
+                        "light": 16,
+                        "dark": 84
+                    },
+                    "onErrorContainer": {
+                        "light": 17,
+                        "dark": 83
+                    },
+                    "surface": {
+                        "light": 30,
+                        "dark": 70
+                    },
+                    "surfaceRaised": {
+                        "light": 31,
+                        "dark": 69
+                    },
+                    "surfaceSunken": {
+                        "light": 32,
+                        "dark": 68
+                    },
+                    "surfaceInverse": {
+                        "light": 33,
+                        "dark": 67
+                    },
+                    "onSurface": {
+                        "light": 34,
+                        "dark": 66
+                    },
+                    "onSurfaceInverse": {
+                        "light": 35,
+                        "dark": 65
+                    },
+                    "textStrong": {
+                        "light": 36,
+                        "dark": 64
+                    },
+                    "textMuted": {
+                        "light": 37,
+                        "dark": 63
+                    },
+                    "borderFaint": {
+                        "light": 38,
+                        "dark": 62
+                    },
+                    "borderSoft": {
+                        "light": 39,
+                        "dark": 61
+                    },
+                    "borderStrong": {
+                        "light": 40,
+                        "dark": 60
+                    },
+                    "scrim": {
+                        "light": 46,
+                        "dark": 54
+                    },
+                    "focusRing": {
+                        "light": 47,
+                        "dark": 53
+                    },
+                    "shadow": {
+                        "light": 48,
+                        "dark": 52
+                    }
+                }
+            },
+            "projectName": null,
+            "code": "AdllOyADACACIAAAZAEBYwICYgMDYQQEYAUFXwYGXgcHXQgIXAkJWwoKWgsLWQwMWA0NVw4OVg8PVRAQVBERUx4eRh8fRSAgRCEhQyIiQiMjQSQkQCUlPyYmPicnPSgoPC4uNi8vNTAwNJE",
+            "seedHex": "#D9653B",
+            "library": "Custom",
+            "style": "TonalSpot"
+        },
+        {
             "label": "standard motion",
             "document": {
                 "seed": "#D9653B",
@@ -1429,12 +1821,12 @@ internal val SHARE_VECTORS_JSON: String =
                     },
                     "shadow": {
                         "light": null,
-                        "dark": null
+                        "dark": 0
                     }
                 }
             },
             "projectName": null,
-            "code": "AdllOyADACACBAQc_x__CigyPDD__6E",
+            "code": "AdllOyADACACBAQc_x__CigyPDD_AFI",
             "seedHex": "#D9653B",
             "library": "Custom",
             "style": "TonalSpot"
