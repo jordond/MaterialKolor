@@ -71,7 +71,8 @@ class ShortcutsTest {
                 Key.Two to LibraryChoice.M3Expressive,
                 Key.Three to LibraryChoice.Unstyled,
                 Key.Four to LibraryChoice.Fluent,
-                Key.Five to LibraryChoice.Custom,
+                Key.Five to LibraryChoice.Inklet,
+                Key.Six to LibraryChoice.Custom,
             )
             keysToChoices.forEach { (key, choice) ->
                 keys { pressKey(key) }

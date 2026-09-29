@@ -2,12 +2,13 @@
 <resources>
     <!-- The library switcher's name, read out before the choice. -->
     <string name="topbar_library">Library</string>
-    <!-- The five library choices. They stay short to fit one segmented row. -->
+    <!-- The six library choices. They stay short to fit one segmented row. -->
     <string name="topbar_library_m3">M3</string>
     <!-- M3 with its expressive shapes and type, a choice of its own after M3. Undo, redo and History name it too. -->
     <string name="topbar_library_m3_expressive">M3 Expressive</string>
     <string name="topbar_library_unstyled">Unstyled</string>
     <string name="topbar_library_fluent">Fluent</string>
+    <string name="topbar_library_inklet">Inklet</string>
     <string name="topbar_library_custom">Custom</string>
     <!-- The export sheet's switch under the M3 card, which moves between M3 and M3 Expressive. -->
     <string name="topbar_expressive">Expressive</string>

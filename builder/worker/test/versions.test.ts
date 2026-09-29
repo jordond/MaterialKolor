@@ -75,7 +75,7 @@ describe('/api/versions', () => {
     });
     const response = await libraryVersions(request(), withKv(new FakeKv({})), createExecutionContext(), maven.fetch);
     const body = (await response.json()) as Record<string, unknown>;
-    expect(Object.keys(body).sort()).toEqual(['androidxMaterial3', 'composeMaterial3', 'fetchedAt']);
+    expect(Object.keys(body).sort()).toEqual(['androidxMaterial3', 'composeMaterial3', 'fetchedAt', 'inklet']);
   });
 
   it('keeps nothing when every source failed', async () => {

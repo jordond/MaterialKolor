@@ -17,7 +17,7 @@ export type Style =
   | 'Content'
   | 'Cmf';
 
-export type Library = 'Material3' | 'Unstyled' | 'Fluent' | 'Custom';
+export type Library = 'Material3' | 'Unstyled' | 'Fluent' | 'Custom' | 'Inklet';
 
 /** A named accent as the card draws it. */
 export interface SharedAccent {
@@ -65,7 +65,8 @@ const STYLES: readonly Style[] = [
   'Content',
   'Cmf',
 ];
-const LIBRARIES: readonly Library[] = ['Material3', 'Unstyled', 'Fluent', 'Custom'];
+// Indexed by code. Inklet, code 4, travels as bit 3 of the target byte over a Material 3 low pair.
+const LIBRARIES: readonly Library[] = ['Material3', 'Unstyled', 'Fluent', 'Custom', 'Inklet'];
 const SPEC_COUNT = 3;
 const KEY_COLOR_COUNT = 6;
 const ROLE_COUNT = 48;
@@ -89,8 +90,9 @@ const SECTION_PINS = 0x08;
 const SECTION_PROJECT_NAME = 0x10;
 const SECTION_TARGET_OPTIONS = 0x20;
 const SECTION_RESERVED = 0xc0;
-const TARGET_RESERVED = 0xf8;
+const TARGET_RESERVED = 0xf0;
 const EXPRESSIVE_FLAG = 0x04;
+const LIBRARY_HIGH_FLAG = 0x08;
 const KEY_COLORS_RESERVED = 0xc0;
 const ACCENT_TONES = 0x02;
 const ACCENT_THRESHOLD = 0x04;
@@ -226,6 +228,8 @@ class Reader {
     const style = STYLES[scheme & 0x0f];
     if (style === undefined || ((scheme >> 4) & 0x03) >= SPEC_COUNT) return null;
     if (target & TARGET_RESERVED) return null;
+    const library = LIBRARIES[(target & 0x03) | (target & LIBRARY_HIGH_FLAG ? 0x04 : 0)];
+    if (library === undefined) return null;
     const signed = contrast > 127 ? contrast - 256 : contrast;
     if (signed < -100 || signed > 100 || sections & SECTION_RESERVED) return null;
 
@@ -244,7 +248,7 @@ class Reader {
     return {
       seed,
       style,
-      library: LIBRARIES[target & 0x03]!,
+      library,
       expressive: (target & EXPRESSIVE_FLAG) !== 0,
       contrast: nearestContrast(signed),
       keyColors,

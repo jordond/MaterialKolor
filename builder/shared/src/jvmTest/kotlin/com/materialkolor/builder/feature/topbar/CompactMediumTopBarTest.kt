@@ -69,6 +69,7 @@ private val NAMES = mapOf(
     LibraryChoice.M3Expressive to "M3 Expressive",
     LibraryChoice.Unstyled to "Unstyled",
     LibraryChoice.Fluent to "Fluent",
+    LibraryChoice.Inklet to "Inklet",
     LibraryChoice.Custom to "Custom",
 )
 

@@ -7,6 +7,7 @@ const LIBRARY_NAMES: Record<Library, string> = {
   Unstyled: 'Unstyled',
   Fluent: 'Fluent',
   Custom: 'Custom',
+  Inklet: 'Inklet',
 };
 
 /** The export target the theme was shared for, as the projects list names it. */

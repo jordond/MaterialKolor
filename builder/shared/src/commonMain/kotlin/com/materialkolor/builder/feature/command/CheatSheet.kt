@@ -39,6 +39,7 @@ import com.materialkolor.builder.generated.resources.command_key_library_2
 import com.materialkolor.builder.generated.resources.command_key_library_3
 import com.materialkolor.builder.generated.resources.command_key_library_4
 import com.materialkolor.builder.generated.resources.command_key_library_5
+import com.materialkolor.builder.generated.resources.command_key_library_6
 import com.materialkolor.builder.generated.resources.command_key_new_project
 import com.materialkolor.builder.generated.resources.command_key_next_tab
 import com.materialkolor.builder.generated.resources.command_key_palette
@@ -189,6 +190,7 @@ internal fun shortcutLabel(shortcut: Shortcut): StringResource =
         Shortcut.Library3 -> Res.string.command_key_library_3
         Shortcut.Library4 -> Res.string.command_key_library_4
         Shortcut.Library5 -> Res.string.command_key_library_5
+        Shortcut.Library6 -> Res.string.command_key_library_6
         Shortcut.PreviewMode -> Res.string.command_key_preview_mode
         Shortcut.Appearance -> Res.string.command_key_appearance
         Shortcut.PreviousTab -> Res.string.command_key_previous_tab

@@ -40,11 +40,13 @@
     <string name="export_library_m3_caption">MaterialTheme</string>
     <string name="export_library_unstyled_caption">Compose Unstyled</string>
     <string name="export_library_fluent_caption">Compose Fluent</string>
+    <string name="export_library_inklet_caption">MaterialTheme with InkletTheme</string>
     <string name="export_library_custom_caption">Your own slots</string>
     <string name="export_expressive_caption">Calls DynamicMaterialExpressiveTheme</string>
     <!-- The note under the libraries on the platforms each one runs on. -->
     <string name="export_library_unstyled_note">Compose Unstyled needs JVM 17 and Android minSdk 23.</string>
     <string name="export_library_fluent_note">Compose Fluent needs JVM 17.</string>
+    <string name="export_library_inklet_note">Inklet needs Android minSdk 23 and has no JS or macOS target.</string>
 
     <!-- What the file tree is called, read out for its files. -->
     <string name="export_tree">Files in the zip</string>

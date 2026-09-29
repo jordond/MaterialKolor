@@ -11,6 +11,7 @@ export const LIBRARY_METADATA = {
   androidxMaterial3: 'https://dl.google.com/android/maven2/androidx/compose/material3/material3/maven-metadata.xml',
   composeUnstyled: 'https://repo1.maven.org/maven2/com/composables/composeunstyled-theming/maven-metadata.xml',
   fluent: 'https://repo1.maven.org/maven2/io/github/compose-fluent/fluent/maven-metadata.xml',
+  inklet: 'https://repo1.maven.org/maven2/dev/ggoggam/inklet/inklet/maven-metadata.xml',
 } as const;
 
 export type Library = keyof typeof LIBRARY_METADATA;
