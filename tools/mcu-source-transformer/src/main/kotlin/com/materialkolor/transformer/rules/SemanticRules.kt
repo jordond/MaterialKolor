@@ -1,6 +1,7 @@
 package com.materialkolor.transformer.rules
 
 import com.materialkolor.transformer.edits.SourceEdits
+import com.materialkolor.transformer.psi.comments
 import com.materialkolor.transformer.psi.nodes
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.KtCallExpression
@@ -16,30 +17,13 @@ private val policies: Map<String, (KtFile, SourceEdits) -> Unit> = mapOf(
     "palettes/TonalPalette.kt" to ::tonalPaletteCache,
     "temperature/TemperatureCache.kt" to ::temperatureCache,
     "dynamiccolor/ContrastCurve.kt" to ::contrastCurve,
-    "contrast/Contrast.kt" to ::contrastFloatOverloads,
     "blend/Blend.kt" to ::blendHarmonize,
     "utils/ColorUtils.kt" to ::colorUtilsLuminance,
     "dynamiccolor/DynamicColor.kt" to ::dynamicColorFactory,
     "dynamiccolor/DynamicScheme.kt" to ::schemeConveniences,
     "dynamiccolor/ColorSpec.kt" to ::colorSpecDefault,
     "score/Score.kt" to ::scoreFallback,
-    "hct/ViewingConditions.kt" to ::viewingConditionsVisibility,
     "hct/Cam16.kt" to ::cam16Visibility,
-)
-
-/**
- * Implementation types the library hides without touching their declarations otherwise.
- */
-private val internalTypes = mapOf(
-    "utils/MathUtils.kt" to "MathUtils",
-    "dynamiccolor/ColorSpecs.kt" to "ColorSpecs",
-    "quantize/Quantizer.kt" to "Quantizer",
-    "quantize/QuantizerMap.kt" to "QuantizerMap",
-    "quantize/QuantizerResult.kt" to "QuantizerResult",
-    "quantize/QuantizerWu.kt" to "QuantizerWu",
-    "quantize/QuantizerWsmeans.kt" to "QuantizerWsmeans",
-    "quantize/PointProvider.kt" to "PointProvider",
-    "quantize/PointProviderLab.kt" to "PointProviderLab",
 )
 
 /**
@@ -54,13 +38,7 @@ internal fun semantics(
     require(path == expectedPath) { "$path:0: semantic-inventory: expected $expectedPath" }
 
     policies[path]?.invoke(file, edits)
-
-    internalTypes[path]?.let { name ->
-        val type = file.type(name)
-        if (!type.hasModifier(KtTokens.INTERNAL_KEYWORD)) {
-            edits.insert(type.textRange.startOffset, "internal ", Rule.ImplementationVisibility)
-        }
-    }
+    apiSurface(file, edits)
 }
 
 private fun immutableHct(
@@ -133,9 +111,6 @@ private fun immutableHct(
             fun isBlue(): Boolean = isBlue(hue)
             fun isYellow(): Boolean = isYellow(hue)
             fun isCyan(): Boolean = isCyan(hue)
-            fun withHue(newHue: Float): Hct = withHue(newHue.toDouble())
-            fun withChroma(newChroma: Float): Hct = withChroma(newChroma.toDouble())
-            fun withTone(newTone: Float): Hct = withTone(newTone.toDouble())
             """.trimIndent(),
         rule = Rule.HctValueContract,
         edits = edits,
@@ -194,32 +169,13 @@ private fun contrastCurve(
     hideConstructorInputs(type, edits)
 }
 
-private fun contrastFloatOverloads(
-    file: KtFile,
-    edits: SourceEdits,
-) {
-    val type = file.type("Contrast")
-    val additions = listOf("lighter", "lighterUnsafe", "darker", "darkerUnsafe").joinToString("\n") { name ->
-        val original = type.declarations.filterIsInstance<KtNamedFunction>().single { it.name == name }
-        require(original.valueParameters.map { it.typeReference?.text } == listOf("Double", "Double")) {
-            "${file.name}:${original.textOffset}: contrast-float: signature changed"
-        }
-
-        val optional = if (name.endsWith("Unsafe")) "" else "?"
-
-        "  fun $name(tone: Double, ratio: Float): Float$optional = " +
-            "$name(tone, ratio.toDouble())$optional.toFloat()"
-    }
-    append(type, additions, Rule.ContrastFloat, edits)
-}
-
 private fun blendHarmonize(
     file: KtFile,
     edits: SourceEdits,
 ) {
     append(
         type = file.type("Blend"),
-        source = "  fun harmonize(designColor: Hct, sourceColor: Hct): Hct = " +
+        source = "  @JvmStatic\n  fun harmonize(designColor: Hct, sourceColor: Hct): Hct = " +
             "Hct.fromInt(harmonize(designColor.toInt(), sourceColor.toInt()))",
         rule = Rule.HarmonizeHct,
         edits = edits,
@@ -284,20 +240,6 @@ private fun colorSpecDefault(
     edits: SourceEdits,
 ) {
     enumDefault(file, "SpecVersion", "SPEC_2021", edits)
-}
-
-private fun viewingConditionsVisibility(
-    file: KtFile,
-    edits: SourceEdits,
-) {
-    val type = file.type("ViewingConditions") as KtClass
-    val inputs = type.primaryConstructorParameters.filter { it.name in setOf("ncb", "c", "nc", "fl", "z") }
-    require(inputs.size == 5) { "${file.name}:0: viewing-visibility: input inventory changed" }
-
-    inputs.forEach { parameter ->
-        val keyword = requireNotNull(parameter.modifierList?.getModifier(KtTokens.INTERNAL_KEYWORD))
-        edits.replace(keyword, "public", Rule.ViewingVisibility)
-    }
 }
 
 private fun cam16Visibility(
@@ -368,16 +310,37 @@ private fun scoreFallback(
         "${file.name}:0: score-fallback: overload inventory changed"
     }
 
-    // Keep the upstream overloads. Defaults on the full overload also enable named optional arguments.
-    for (function in functions.filter { it.valueParameters.size >= 3 }) {
-        val parameter = function.valueParameters.single { it.name == "fallbackColorArgb" }
-        require(parameter.typeReference?.text == "Int") {
-            "${file.name}:${parameter.textOffset}: score-fallback: fallback signature changed"
+    // The shorter overloads must only restate the defaults the full function receives below.
+    val delegations = listOf(
+        "return score(colorsToPopulation, 4, 0xff4285f4.toInt(), true)",
+        "return score(colorsToPopulation, desired, 0xff4285f4.toInt(), true)",
+        "return score(colorsToPopulation, desired, fallbackColorArgb, true)",
+    )
+    val shorter = functions.dropLast(1)
+    for ((function, delegation) in shorter.zip(delegations)) {
+        val body = function.bodyBlockExpression
+            ?.statements
+            ?.singleOrNull()
+            ?.text
+        require(body == delegation) {
+            "${file.name}:${function.textOffset}: score-fallback: overload no longer delegates with the defaults"
         }
-        edits.replace(requireNotNull(parameter.typeReference), "Int?", Rule.ScoreNullableFallback)
     }
 
     val full = functions.last()
+    val fallbackParameter = full.valueParameters.single { it.name == "fallbackColorArgb" }
+    require(fallbackParameter.typeReference?.text == "Int") {
+        "${file.name}:${fallbackParameter.textOffset}: score-fallback: fallback signature changed"
+    }
+    edits.replace(requireNotNull(fallbackParameter.typeReference), "Int?", Rule.ScoreNullableFallback)
+
+    // One function with defaults replaces the overloads. Their comments move to the parameter they explain.
+    val removed = shorter.first().textRange.startOffset until full.textRange.startOffset
+    edits.replace(removed.first, removed.last + 1, "", Rule.ScoreDefault)
+    for ((comment, count) in comments(file.text.substring(removed.first, removed.last + 1))) {
+        repeat(count) { edits.insert(fallbackParameter.textRange.startOffset, "$comment\n    ", Rule.ScoreDefault) }
+    }
+
     for ((name, default) in mapOf("desired" to "4", "fallbackColorArgb" to "0xff4285f4.toInt()", "filter" to "true")) {
         val parameter = full.valueParameters.single { it.name == name }
         require(parameter.defaultValue == null) {
@@ -485,12 +448,12 @@ private fun enumDefault(
     edits.insert(offset, ";\n    companion object { val Default: $name = $value }\n  ", Rule.EnumDefault)
 }
 
-private fun KtFile.type(name: String): KtClassOrObject =
+internal fun KtFile.type(name: String): KtClassOrObject =
     declarations
         .filterIsInstance<KtClassOrObject>()
         .single { it.name == name }
 
-private fun append(
+internal fun append(
     type: KtClassOrObject,
     source: String,
     rule: Rule,

@@ -8,9 +8,7 @@ import io.kotest.matchers.doubles.shouldBeExactly
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.shouldBe
 import utils.shouldBeExactly
-import kotlin.math.roundToInt
 import kotlin.test.Test
-import kotlin.test.assertNotNull
 
 /**
  * Asserts that a Java safe-contrast result matches its upstream Kotlin counterpart.
@@ -62,30 +60,12 @@ class ContrastTest {
     }
 
     @Test
-    fun lighterFloat() {
-        val expectedHct = hct.Hct.fromInt(COLOR1)
-        val expected = contrast.Contrast.lighter(expectedHct.tone, 1.0)
-        val actualHct = Hct.fromInt(COLOR1)
-        val actual = Contrast.lighter(actualHct.tone, 1.0f)
-        expected.roundToInt() shouldBe assertNotNull(actual).roundToInt()
-    }
-
-    @Test
     fun lighterUnsafe() {
         val expectedHct = hct.Hct.fromInt(COLOR1)
         val expected = contrast.Contrast.lighterUnsafe(expectedHct.tone, 1.0)
         val actualHct = Hct.fromInt(COLOR1)
         val actual = Contrast.lighterUnsafe(actualHct.tone, 1.0)
         expected shouldBeExactly actual
-    }
-
-    @Test
-    fun lighterUnsafeFloat() {
-        val expectedHct = hct.Hct.fromInt(COLOR1)
-        val expected = contrast.Contrast.lighterUnsafe(expectedHct.tone, 1.0)
-        val actualHct = Hct.fromInt(COLOR1)
-        val actual = Contrast.lighterUnsafe(actualHct.tone, 1.0f)
-        expected.roundToInt() shouldBeExactly actual.roundToInt()
     }
 
     @Test
@@ -202,24 +182,6 @@ class ContrastTest {
         val expected = contrast.Contrast.darker(tone, ratio)
         val actual = Contrast.darker(tone, ratio)
         expected shouldMatchKotlin actual
-    }
-
-    @Test
-    fun darkerFloat() {
-        val expectedHct = hct.Hct.fromInt(COLOR1)
-        val expected = contrast.Contrast.darker(expectedHct.tone, 1.0)
-        val actualHct = Hct.fromInt(COLOR1)
-        val actual = Contrast.darker(actualHct.tone, 1.0f)
-        expected.roundToInt() shouldBe assertNotNull(actual).roundToInt()
-    }
-
-    @Test
-    fun darkerUnsafeFloat() {
-        val expectedHct = hct.Hct.fromInt(COLOR1)
-        val expected = contrast.Contrast.darkerUnsafe(expectedHct.tone, 1.0)
-        val actualHct = Hct.fromInt(COLOR1)
-        val actual = Contrast.darkerUnsafe(actualHct.tone, 1.0f)
-        expected.roundToInt() shouldBe actual.roundToInt()
     }
 
     companion object {

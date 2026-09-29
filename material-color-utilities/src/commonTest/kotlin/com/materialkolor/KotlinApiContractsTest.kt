@@ -20,15 +20,6 @@ import kotlin.test.assertTrue
 
 class KotlinApiContractsTest {
     @Test
-    fun floatHctAdjustmentMembersDelegateToDoubleMembers() {
-        val original = Hct.fromInt(0xff4285f4.toInt())
-        assertEquals(original.withHue(120.0), original.withHue(120.0f))
-        assertEquals(original.withChroma(5.0), original.withChroma(5.0f))
-        assertEquals(original.withTone(90.0), original.withTone(90.0f))
-        assertEquals(0xff4285f4.toInt(), original.toInt())
-    }
-
-    @Test
     fun dynamicColorDefaultsAndCopyKeepValueSemantics() {
         val scheme = SchemeTonalSpot(Hct.fromInt(0xff4285f4.toInt()), false, 0.0)
         val color = DynamicColor(name = "custom", palette = { it.primaryPalette })
@@ -54,12 +45,18 @@ class KotlinApiContractsTest {
     }
 
     @Test
-    fun toneDeltaCopyUsesConstraintSpellingAndKeepsTheOriginal() {
+    fun toneDeltaPairUsesConstraintSpellingAndDefaultsToExact() {
         val first = DynamicColor.fromArgb("first", 0xff4285f4.toInt())
         val second = DynamicColor.fromArgb("second", 0xffff0000.toInt())
         val original = ToneDeltaPair(first, second, 15.0, TonePolarity.DARKER)
-        assertEquals(original, original.copy())
-        val changed = original.copy(constraint = ToneDeltaPair.DeltaConstraint.FARTHER)
+        assertEquals(original, ToneDeltaPair(first, second, 15.0, TonePolarity.DARKER))
+        val changed = ToneDeltaPair(
+            roleA = first,
+            roleB = second,
+            delta = 15.0,
+            polarity = TonePolarity.DARKER,
+            constraint = ToneDeltaPair.DeltaConstraint.FARTHER,
+        )
         assertEquals(ToneDeltaPair.DeltaConstraint.EXACT, original.constraint)
         assertEquals(ToneDeltaPair.DeltaConstraint.FARTHER, changed.constraint)
         assertNotEquals(original, changed)
