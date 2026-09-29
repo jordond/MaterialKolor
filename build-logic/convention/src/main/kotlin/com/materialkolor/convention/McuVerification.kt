@@ -58,8 +58,6 @@ internal fun Project.registerMcuVerificationTasks() {
     tasks.register("verifyMcuApple") {
         group = "verification"
         description = "Run the simulator tests, link the device framework and compile macOS."
-        // The simulator test binary already links the simulator target, and macOS shares every
-        // source set with iOS, so one test run and one framework link cover the Apple family.
         for (module in mcuLibraryModules) {
             if (module.macos) {
                 dependsOn(":${module.name}:compileKotlinMacosArm64")

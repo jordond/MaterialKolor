@@ -150,7 +150,6 @@ jobs:
       - name: Verify Apple targets
         run: ./gradlew verifyMcuUpstream verifyMcuApple --scan
 
-  # Kotlin builds the Apple klibs on Linux, so the publication check needs no Mac.
   verify-publication:
     name: "Verify publication"
     runs-on: ubuntu-latest
