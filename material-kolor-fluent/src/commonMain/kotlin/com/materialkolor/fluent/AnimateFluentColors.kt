@@ -6,6 +6,7 @@ import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.ui.graphics.Color
 import com.materialkolor.InternalMaterialKolorApi
 import com.materialkolor.ktx.defaultColorSpring
@@ -32,8 +33,9 @@ import io.github.composefluent.Shades
  * hold still because nothing in them ever depended on the accent.
  *
  * Flipping [Colors.darkMode] is a cut rather than a fade for the same reason. Fluent derives light
- * and dark from the shades and a flag, and the flag cannot fade. When the scheme's ramp changes
- * with it, as it does from `SPEC_2025`, the shades still animate to their new tones.
+ * and dark from the shades and a flag, and the flag cannot fade. From `SPEC_2025` the scheme's ramp
+ * changes with the mode, so the shades cut along with the flag. Animating them would pair the dark
+ * flag with light tones until the spring settled.
  *
  * @param[colors] The colors to animate towards, usually from [rememberFluentColors].
  * @param[animationSpec] How each of the seven shades animates.
@@ -48,6 +50,17 @@ public fun animateFluentColors(
         defaultColorSpring
     },
     label: String = "FluentColorsAnimation",
+): Colors =
+    // A new transition starts at its target, so a change of mode lands on the new ramp in one frame.
+    key(colors.darkMode) {
+        animatedColors(colors = colors, animationSpec = animationSpec, label = label)
+    }
+
+@Composable
+private fun animatedColors(
+    colors: Colors,
+    animationSpec: @Composable Transition.Segment<Shades>.() -> FiniteAnimationSpec<Color>,
+    label: String,
 ): Colors {
     // Shades is a data class, so the transition restarts on a real change of ramp rather than on
     // every new Colors instance.
