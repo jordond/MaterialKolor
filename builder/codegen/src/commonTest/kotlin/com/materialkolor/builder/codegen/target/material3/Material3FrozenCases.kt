@@ -225,7 +225,8 @@ class Material3FrozenTest {
         val theme = theme(Material3FrozenCases.all.getValue("inklet-frozen-default"))
 
         assertTrue("    MaterialTheme(\n" in theme, theme)
-        assertTrue("        content = { InkletTheme(content = content) },\n" in theme, theme)
+        assertTrue(") {\n        InkletTheme(content = content)\n    }\n" in theme, theme)
+        assertFalse("content = content," in theme, theme)
         assertTrue("import dev.ggoggam.inklet.InkletTheme" in theme, theme)
     }
 

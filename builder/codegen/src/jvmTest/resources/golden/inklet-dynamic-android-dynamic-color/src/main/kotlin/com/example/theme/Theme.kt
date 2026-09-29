@@ -24,13 +24,15 @@ fun AppTheme(
     if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         MaterialTheme(
             colorScheme = if (isDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context),
-            content = { InkletTheme(content = content) },
-        )
+        ) {
+            InkletTheme(content = content)
+        }
     } else {
         DynamicMaterialTheme(
             seedColor = SeedColor,
             isDark = isDark,
-            content = { InkletTheme(content = content) },
-        )
+        ) {
+            InkletTheme(content = content)
+        }
     }
 }

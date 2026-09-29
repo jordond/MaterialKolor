@@ -1,12 +1,12 @@
 package com.materialkolor.builder.codegen.target.material3
 
 import com.materialkolor.builder.codegen.ExportInput
+import com.materialkolor.builder.codegen.dsl.ArgumentsScope
 import com.materialkolor.builder.codegen.dsl.BodyScope
 import com.materialkolor.builder.codegen.dsl.Expression
 import com.materialkolor.builder.codegen.dsl.call
 import com.materialkolor.builder.codegen.dsl.ifElse
 import com.materialkolor.builder.codegen.dsl.infix
-import com.materialkolor.builder.codegen.dsl.lambda
 import com.materialkolor.builder.codegen.dsl.member
 import com.materialkolor.builder.codegen.dsl.ref
 import com.materialkolor.builder.codegen.symbol.Symbols
@@ -70,35 +70,34 @@ internal fun androidDynamicColorBranch(
 internal fun materialThemeCall(
     input: ExportInput,
     colorScheme: Expression,
-): Expression {
-    val content = themeContent(input)
-
-    return if (input.target == ExportTarget.Material3Expressive) {
+): Expression =
+    if (input.target == ExportTarget.Material3Expressive) {
         call(Symbols.MaterialExpressiveTheme, multiline = true) {
             argument("colorScheme", colorScheme)
             argument("motionScheme", motionSchemeExpression(input.document.motionScheme))
-            argument(CONTENT_PARAMETER, content)
+            themeContent(input)
         }
     } else {
         call(Symbols.MaterialTheme, multiline = true) {
             argument("colorScheme", colorScheme)
-            argument(CONTENT_PARAMETER, content)
+            themeContent(input)
         }
     }
-}
 
 /**
- * The content the Material theme call hands on. An Inklet theme wraps it in `InkletTheme`, which
- * gives the hand-drawn components their pen and animation clock, so the app wraps nothing else
- * around them. Every other target passes the content through as it is.
+ * The content the Material theme call hands on, which closes its arguments. An Inklet theme wraps
+ * it in `InkletTheme` as a trailing lambda, which gives the hand-drawn components their pen and
+ * animation clock, so the app wraps nothing else around them. Every other target passes the
+ * content through as it is.
  */
-internal fun themeContent(input: ExportInput): Expression {
+internal fun ArgumentsScope.themeContent(input: ExportInput) {
     val content = ref(CONTENT_PARAMETER)
-    if (input.target != ExportTarget.Inklet) return content
+    if (input.target != ExportTarget.Inklet) {
+        argument(CONTENT_PARAMETER, content)
+        return
+    }
 
-    val inklet = call(Symbols.InkletTheme) { argument(CONTENT_PARAMETER, content) }
-
-    return lambda { statement(inklet) }
+    trailingLambda { call(Symbols.InkletTheme) { argument(CONTENT_PARAMETER, content) } }
 }
 
 /**
