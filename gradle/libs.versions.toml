@@ -19,6 +19,7 @@ colormath = "3.7.0"
 composeUnstyled = "2.10.0"
 lucide = "1.1.0"
 fluent = "v0.1.0"
+inklet = "0.3.0"
 haze = "1.7.3"
 materialIconsExtended = "1.7.3"
 poko = "0.23.2"
@@ -63,6 +64,7 @@ composeUnstyled-theming = { module = "com.composables:composeunstyled-theming", 
 composeUnstyled = { module = "com.composables:composeunstyled", version.ref = "composeUnstyled" }
 lucide = { module = "com.composables:icons-lucide", version.ref = "lucide" }
 fluent = { module = "io.github.compose-fluent:fluent", version.ref = "fluent" }
+inklet = { module = "dev.ggoggam.inklet:inklet", version.ref = "inklet" }
 haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
 material-icons-extended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "androidx-lifecycle" }
