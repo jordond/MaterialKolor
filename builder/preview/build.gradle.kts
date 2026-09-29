@@ -29,6 +29,17 @@ kotlin {
             implementation(libs.fluent)
         }
 
+        // Inklet publishes no js, so only the targets it ships for see it. The js fallback draws
+        // Inklet documents as plain Material 3 through the actuals in jsMain.
+        val inkletMain by creating {
+            dependsOn(commonMain.get())
+            dependencies {
+                implementation(libs.inklet)
+            }
+        }
+        jvmMain.get().dependsOn(inkletMain)
+        wasmJsMain.get().dependsOn(inkletMain)
+
         jvmTest.dependencies {
             implementation(libs.compose.ui.test)
             implementation(composeExtension.dependencies.desktop.currentOs)

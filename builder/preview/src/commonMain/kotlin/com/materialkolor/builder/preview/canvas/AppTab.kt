@@ -6,6 +6,7 @@ import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.persist.DeviceWidth
 import com.materialkolor.builder.preview.custom.CustomAppEntry
 import com.materialkolor.builder.preview.fluent.FluentAppEntry
+import com.materialkolor.builder.preview.inklet.InkletAppEntry
 import com.materialkolor.builder.preview.material.MaterialAppEntry
 import com.materialkolor.builder.preview.split.PaneSpec
 import com.materialkolor.builder.preview.unstyled.UnstyledAppEntry
@@ -29,7 +30,8 @@ public fun AppTab(
 ) {
     val document = spec.result.document
     when (document.library) {
-        Library.Material3, Library.Inklet -> MaterialAppEntry(spec, state, deviceWidth, modifier)
+        Library.Material3 -> MaterialAppEntry(spec, state, deviceWidth, modifier)
+        Library.Inklet -> InkletAppEntry(spec, state, deviceWidth, modifier)
         Library.Unstyled -> UnstyledAppEntry(spec, state, deviceWidth, modifier)
         Library.Fluent -> FluentAppEntry(spec, state, deviceWidth, modifier)
         Library.Custom -> CustomAppEntry(spec, state, deviceWidth, modifier)

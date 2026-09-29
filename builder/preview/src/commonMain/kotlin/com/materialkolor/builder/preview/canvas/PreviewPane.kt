@@ -38,6 +38,7 @@ import com.materialkolor.builder.domain.model.MotionSchemeChoice
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.engine.mapping.toColor
 import com.materialkolor.builder.engine.resolve.RoleEntry
+import com.materialkolor.builder.preview.inklet.InkletPaneTheme
 import com.materialkolor.builder.preview.split.LocalCompositionProbe
 import com.materialkolor.builder.preview.split.PaneSpec
 import com.materialkolor.fluent.toFluentColors
@@ -54,12 +55,11 @@ import com.composeunstyled.theme.ColorScheme as UnstyledColorScheme
 /**
  * One copy of the preview, drawn in a fresh theme of the library [spec] targets.
  *
- * Every color comes from `spec.result`, the role tables for Material 3 and Unstyled so AMOLED and
- * the document's pins show, the Custom slots for Custom and the primary ramp of the mode's scheme
- * for Fluent. Nothing is generated here. Before the
- * library theme goes on, the pane sets content color, text style, selection colors and indication
- * for every library, so nothing the builder's own chrome provides reaches the preview, and whatever
- * the pane provides ends at its edge. Material's themes get the library's own typography and
+ * Every color comes from `spec.result`, the role tables for Material 3, Inklet and Unstyled so
+ * AMOLED and the document's pins show, the Custom slots for Custom and the primary ramp of the
+ * mode's scheme for Fluent. Nothing is generated here. Before the library theme goes on, the pane
+ * sets content color, text style, selection colors and indication for every library, so nothing the
+ * builder's own chrome provides reaches the preview, and whatever the pane provides ends at its edge. Material's themes get the library's own typography and
  * shapes too, since left out they would take the chrome's.
  *
  * @param[spec] The result, mode and filter to draw.
@@ -95,7 +95,9 @@ public fun PreviewPane(
         PaneLocals(ink) {
             when (document.library) {
                 Library.Material3 -> MaterialPane(roles, document.expressive, document.motionScheme, content)
-                Library.Inklet -> MaterialPane(roles, expressive = false, document.motionScheme, content)
+                Library.Inklet -> MaterialPane(roles, expressive = false, document.motionScheme) {
+                    InkletPaneTheme(content)
+                }
                 Library.Unstyled -> UnstyledPane(roles, spec.isDark, ink, content)
                 Library.Fluent -> FluentPane(spec, content)
                 Library.Custom -> CompositionLocalProvider(
