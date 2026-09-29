@@ -136,4 +136,21 @@ class ApiSurfaceTest {
         assertFalse(library("contrast/Contrast.kt").text.contains("Float"))
         assertFalse(library("hct/Hct.kt").text.contains("Float"))
     }
+
+    @Test
+    fun specDefaultIs2025AndSchemesReadIt() {
+        assertTrue(library("dynamiccolor/ColorSpec.kt").text.contains("val Default: SpecVersion = SPEC_2025"))
+        val scheme = library("dynamiccolor/DynamicScheme.kt").text
+        assertTrue(scheme.contains("internal val DEFAULT_SPEC_VERSION = SpecVersion.Default"))
+    }
+
+    @Test
+    fun specDefaultRefusesAnUpstreamDefaultChange() {
+        val changed = upstream("dynamiccolor/DynamicScheme.kt").replace(
+            "val DEFAULT_SPEC_VERSION = SpecVersion.SPEC_2021",
+            "val DEFAULT_SPEC_VERSION = SpecVersion.SPEC_2025",
+        )
+        val error = assertFailsWith<IllegalArgumentException> { library("dynamiccolor/DynamicScheme.kt", changed) }
+        assertTrue(error.message.orEmpty().contains("spec-default"))
+    }
 }

@@ -6,6 +6,7 @@ package com.example.theme
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.material3.DynamicMaterialTheme
 import com.materialkolor.material3.rememberDynamicMaterialThemeState
 
@@ -17,6 +18,7 @@ fun AppTheme(
     val state = rememberDynamicMaterialThemeState(
         seedColor = SeedColor,
         isDark = isDark,
+        specVersion = ColorSpec.SpecVersion.SPEC_2021,
         modifyColorScheme = { scheme ->
             scheme.copy(
                 primary = if (isDark) Color(0xFFFFB4A8) else Color(0xFF8B1A10),

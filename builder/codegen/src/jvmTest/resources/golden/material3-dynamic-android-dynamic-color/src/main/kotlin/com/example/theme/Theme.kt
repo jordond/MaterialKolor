@@ -10,6 +10,7 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.material3.DynamicMaterialTheme
 
 @Composable
@@ -29,6 +30,7 @@ fun AppTheme(
         DynamicMaterialTheme(
             seedColor = SeedColor,
             isDark = isDark,
+            specVersion = ColorSpec.SpecVersion.SPEC_2021,
             content = content,
         )
     }

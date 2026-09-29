@@ -1,5 +1,6 @@
 package scheme
 
+import com.materialkolor.dynamiccolor.ColorSpec.SpecVersion
 import com.materialkolor.hct.Hct
 import com.materialkolor.scheme.SchemeMonochrome
 import utils.ContrastLevels
@@ -13,56 +14,56 @@ class SchemeMonochromeTest {
     @Test
     fun default() {
         val expected = SchemeMonochrome(expectedHct, false, ContrastLevels.Default)
-        val actual = SchemeMonochrome(actualHct, false, ContrastLevels.Default)
+        val actual = SchemeMonochrome(actualHct, false, ContrastLevels.Default, specVersion = SpecVersion.SPEC_2021)
         expected shouldMatch actual
     }
 
     @Test
     fun defaultDark() {
         val expected = SchemeMonochrome(expectedHct, true, ContrastLevels.Default)
-        val actual = SchemeMonochrome(actualHct, true, ContrastLevels.Default)
+        val actual = SchemeMonochrome(actualHct, true, ContrastLevels.Default, specVersion = SpecVersion.SPEC_2021)
         expected shouldMatch actual
     }
 
     @Test
     fun reducedContrast() {
         val expected = SchemeMonochrome(expectedHct, false, ContrastLevels.Reduced)
-        val actual = SchemeMonochrome(actualHct, false, ContrastLevels.Reduced)
+        val actual = SchemeMonochrome(actualHct, false, ContrastLevels.Reduced, specVersion = SpecVersion.SPEC_2021)
         expected shouldMatch actual
     }
 
     @Test
     fun reducedContrastDark() {
         val expected = SchemeMonochrome(expectedHct, true, ContrastLevels.Reduced)
-        val actual = SchemeMonochrome(actualHct, true, ContrastLevels.Reduced)
+        val actual = SchemeMonochrome(actualHct, true, ContrastLevels.Reduced, specVersion = SpecVersion.SPEC_2021)
         expected shouldMatch actual
     }
 
     @Test
     fun mediumContrast() {
         val expected = SchemeMonochrome(expectedHct, false, ContrastLevels.Medium)
-        val actual = SchemeMonochrome(actualHct, false, ContrastLevels.Medium)
+        val actual = SchemeMonochrome(actualHct, false, ContrastLevels.Medium, specVersion = SpecVersion.SPEC_2021)
         expected shouldMatch actual
     }
 
     @Test
     fun mediumContrastDark() {
         val expected = SchemeMonochrome(expectedHct, true, ContrastLevels.Medium)
-        val actual = SchemeMonochrome(actualHct, true, ContrastLevels.Medium)
+        val actual = SchemeMonochrome(actualHct, true, ContrastLevels.Medium, specVersion = SpecVersion.SPEC_2021)
         expected shouldMatch actual
     }
 
     @Test
     fun highContrast() {
         val expected = SchemeMonochrome(expectedHct, false, ContrastLevels.High)
-        val actual = SchemeMonochrome(actualHct, false, ContrastLevels.High)
+        val actual = SchemeMonochrome(actualHct, false, ContrastLevels.High, specVersion = SpecVersion.SPEC_2021)
         expected shouldMatch actual
     }
 
     @Test
     fun highContrastDark() {
         val expected = SchemeMonochrome(expectedHct, true, ContrastLevels.High)
-        val actual = SchemeMonochrome(actualHct, true, ContrastLevels.High)
+        val actual = SchemeMonochrome(actualHct, true, ContrastLevels.High, specVersion = SpecVersion.SPEC_2021)
         expected shouldMatch actual
     }
 }

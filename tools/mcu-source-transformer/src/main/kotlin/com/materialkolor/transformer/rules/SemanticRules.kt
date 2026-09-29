@@ -239,7 +239,7 @@ private fun colorSpecDefault(
     file: KtFile,
     edits: SourceEdits,
 ) {
-    enumDefault(file, "SpecVersion", "SPEC_2021", edits)
+    enumDefault(file, "SpecVersion", "SPEC_2025", edits)
 }
 
 private fun cam16Visibility(
@@ -427,6 +427,18 @@ private fun schemeConveniences(
     )
 
     enumDefault(file, "Platform", "PHONE", edits)
+
+    // Constructing a scheme directly and passing SpecVersion.Default must agree, so the constant reads the default.
+    val specDefault = type.companionObjects
+        .single()
+        .declarations
+        .filterIsInstance<KtProperty>()
+        .single { property -> property.name == "DEFAULT_SPEC_VERSION" }
+    val initializer = requireNotNull(specDefault.initializer)
+    require(initializer.text == "SpecVersion.SPEC_2021") {
+        "${file.name}:${initializer.textOffset}: spec-default: upstream default changed to ${initializer.text}"
+    }
+    edits.replace(initializer, "SpecVersion.Default", Rule.SpecDefault)
 }
 
 private fun enumDefault(

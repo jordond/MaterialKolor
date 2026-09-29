@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import com.composeunstyled.theme.ColorScheme
 import com.composeunstyled.theme.buildThemeV2
+import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.ktx.rememberDynamicScheme
 import com.materialkolor.unstyled.MaterialKolorTokens
 import com.materialkolor.unstyled.toThemeValues
@@ -15,10 +16,12 @@ val AppTheme = buildThemeV2 {
     val lightScheme = rememberDynamicScheme(
         seedColor = SeedColor,
         isDark = false,
+        specVersion = ColorSpec.SpecVersion.SPEC_2021,
     )
     val darkScheme = rememberDynamicScheme(
         seedColor = SeedColor,
         isDark = true,
+        specVersion = ColorSpec.SpecVersion.SPEC_2021,
     )
 
     properties[MaterialKolorTokens.colors] = remember(lightScheme) {

@@ -42,6 +42,7 @@ internal enum class Rule(
     ScoreDefault("score-default"),
     ScoreNullableFallback("score-nullable-fallback"),
     ScoreOptionalFallback("score-optional-fallback"),
+    SpecDefault("spec-default"),
     SubclassOptIn("subclass-opt-in"),
     SubclassOptInRequired("subclass-opt-in-required"),
     Suppression("suppression"),

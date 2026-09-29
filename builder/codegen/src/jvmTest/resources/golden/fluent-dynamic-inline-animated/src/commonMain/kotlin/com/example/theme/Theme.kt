@@ -6,6 +6,7 @@ package com.example.theme
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.ktx.rememberDynamicScheme
 import com.materialkolor.ktx.toneColor
 import com.materialkolor.palettes.TonalPalette
@@ -21,6 +22,7 @@ fun AppTheme(
     val scheme = rememberDynamicScheme(
         seedColor = SeedColor,
         isDark = isDark,
+        specVersion = ColorSpec.SpecVersion.SPEC_2021,
     )
     val colors = remember(scheme) {
         Colors(

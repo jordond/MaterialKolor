@@ -226,17 +226,18 @@ dynamicColorScheme(
 ### Updated Colors
 
 With the release of Material3 Expressive, Google has added a new color spec used when generating
-colors. By default MaterialKolor uses the `SPEC_2021` version. If you want to try out the new colors
-you will need to use `ColorSpec.SpecVersion.SPEC_2025`:
+colors. By default MaterialKolor uses the `SPEC_2025` version. If you want to keep the colors from
+earlier releases, pass `ColorSpec.SpecVersion.SPEC_2021`:
 
 ```kotlin
 val scheme = rememberDynamicColorScheme(
     seedColor = seedColor,
     isDark = isDark,
-    specVersion = ColorSpec.SpecVersion.SPEC_2025,
-    style = PaletteStyle.Expressive, // Optional but recommended if you are using `MaterialExpressiveTheme`
+    specVersion = ColorSpec.SpecVersion.SPEC_2021,
 )
 ```
+
+`PaletteStyle.Expressive` is optional but recommended if you are using `MaterialExpressiveTheme`.
 
 ### DynamicMaterialTheme
 

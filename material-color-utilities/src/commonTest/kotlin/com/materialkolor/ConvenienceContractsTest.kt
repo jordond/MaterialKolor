@@ -58,7 +58,7 @@ class ConvenienceContractsTest {
             neutralVariantPalette = palettes[4],
             errorPalette = palettes[5],
         )
-        assertEquals(ColorSpec.SpecVersion.SPEC_2021, scheme.specVersion)
+        assertEquals(ColorSpec.SpecVersion.SPEC_2025, scheme.specVersion)
         assertEquals(DynamicScheme.Platform.PHONE, scheme.platform)
         val changed = DynamicScheme.from(scheme, isDark = true, contrastLevel = 0.5)
         assertTrue(changed.isDark)

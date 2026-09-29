@@ -27,7 +27,7 @@ class LegacyAndroidColorsTest {
             Triple(colors.textHintInverse, 0xffe2e2e9, 0xff1a1b20),
         )
         for (isDark in listOf(false, true)) {
-            val scheme = SchemeTonalSpot(Hct.fromInt(0xff4285f4.toInt()), isDark, 0.0)
+            val scheme = SchemeTonalSpot(Hct.fromInt(0xff4285f4.toInt()), isDark, 0.0, SpecVersion.SPEC_2021)
             for ((role, light, dark) in cases) {
                 val expected = if (isDark) dark else light
                 assertEquals(expected.toInt(), role.getArgb(scheme), "${role.name} isDark=$isDark")

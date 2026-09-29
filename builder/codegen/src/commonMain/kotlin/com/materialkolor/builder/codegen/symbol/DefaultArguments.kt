@@ -197,7 +197,7 @@ public object DefaultArguments {
         DefaultArgument("contrastLevel", ContrastLevel.Standard, "Contrast.Default.value")
 
     private fun defaultSpec(): DefaultArgument<SpecVersion> =
-        DefaultArgument("specVersion", SpecVersion.Spec2021, "ColorSpec.SpecVersion.Default")
+        DefaultArgument("specVersion", SpecVersion.Spec2025, "ColorSpec.SpecVersion.Default")
 
     private fun defaultPlatform(): DefaultArgument<SchemePlatform> =
         DefaultArgument("platform", SchemePlatform.Phone, "DynamicScheme.Platform.Default")
