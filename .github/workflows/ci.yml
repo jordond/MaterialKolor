@@ -33,6 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       engine: ${{ steps.filter.outputs.engine }}
+      apple: ${{ steps.filter.outputs.apple }}
     steps:
       - name: Checkout
         if: github.event_name == 'pull_request'
@@ -51,26 +52,40 @@ jobs:
           if [ "$EVENT_NAME" != 'pull_request' ]; then
             echo "Event is '$EVENT_NAME': running the full matrix."
             echo 'engine=true' >> "$GITHUB_OUTPUT"
+            echo 'apple=true' >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
           # Paths that can affect the generated engine, the PSI source
-          # transformer, the Apple targets, the upstream monitor, or the
-          # publication and artifact-only consumer verification. `tools/`
-          # covers the pinned upstream checkout and the transformer alike, and
-          # the module pattern picks up any new material-kolor-* module.
+          # transformer, the upstream monitor, or the publication and
+          # artifact-only consumer verification. `tools/` covers the pinned
+          # upstream checkout and the transformer alike, and the module pattern
+          # picks up any new material-kolor-* module.
           engine_paths='^(material-(color-utilities|kolor-[^/]+)/|tools/|build-logic/|gradle/|kotlin-js-store/|settings\.gradle\.kts$|build\.gradle\.kts$|gradle\.properties$|gradlew(\.bat)?$|\.github/workflows/ci\.yml$|\.github/check-upstream$|\.github/tests/)'
+
+          # The macOS lane is slow, so pull requests only run it for the MCU
+          # engine, its transformer and upstream pin, and this workflow. Every
+          # push to main, preview and next still runs it for everything else.
+          apple_paths='^(material-color-utilities/|tools/mcu-|gradle/mcu-upstream\.lock\.json$|\.github/workflows/ci\.yml$)'
 
           changed="$(git diff --name-only "$BASE_SHA...HEAD")"
           echo 'Files changed in this pull request:'
           echo "$changed"
 
           if grep -qE "$engine_paths" <<< "$changed"; then
-            echo 'Engine or build machinery touched: running the Apple and publication lane.'
+            echo 'Engine or build machinery touched: running the publication lane.'
             echo 'engine=true' >> "$GITHUB_OUTPUT"
           else
-            echo 'No engine or build machinery changes: skipping the Apple and publication lane.'
+            echo 'No engine or build machinery changes: skipping the publication lane.'
             echo 'engine=false' >> "$GITHUB_OUTPUT"
+          fi
+
+          if grep -qE "$apple_paths" <<< "$changed"; then
+            echo 'MCU engine touched: running the Apple lane.'
+            echo 'apple=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'No MCU engine changes: skipping the Apple lane.'
+            echo 'apple=false' >> "$GITHUB_OUTPUT"
           fi
 
   verify-linux:
@@ -113,10 +128,10 @@ jobs:
         run: ./gradlew verifyMcuUpstream ${{ matrix.task }} --scan
 
   verify-apple:
-    name: "Verify Apple and publication"
+    name: "Verify Apple"
     runs-on: macos-latest
     needs: changes
-    if: needs.changes.outputs.engine == 'true'
+    if: needs.changes.outputs.apple == 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -135,5 +150,26 @@ jobs:
       - name: Verify Apple targets
         run: ./gradlew verifyMcuUpstream verifyMcuApple --scan
 
+  # Kotlin builds the Apple klibs on Linux, so the publication check needs no Mac.
+  verify-publication:
+    name: "Verify publication"
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.engine == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - name: Setup Java
+        uses: actions/setup-java@v6
+        with:
+          java-version: 25
+          distribution: temurin
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
       - name: Verify local publication and documentation
-        run: ./gradlew verifyMcuPublication --scan
+        run: ./gradlew verifyMcuUpstream verifyMcuPublication --scan
