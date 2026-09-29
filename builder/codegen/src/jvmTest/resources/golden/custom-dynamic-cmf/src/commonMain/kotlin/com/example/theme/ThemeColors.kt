@@ -9,7 +9,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import com.materialkolor.MaterialKolors
 import com.materialkolor.PaletteStyle
-import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.ktx.rememberDynamicScheme
 import com.materialkolor.ktx.toneColor
 
@@ -58,7 +57,6 @@ fun rememberThemeColors(
         seedColor = seedColor,
         isDark = isDark,
         style = PaletteStyle.Cmf(tertiarySeedColor = TertiarySeedColor),
-        specVersion = ColorSpec.SpecVersion.SPEC_2026,
     )
 
     return remember(scheme) {

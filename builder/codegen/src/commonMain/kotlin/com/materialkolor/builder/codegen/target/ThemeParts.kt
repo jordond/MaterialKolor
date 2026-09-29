@@ -213,7 +213,10 @@ internal fun ArgumentsScope.schemeArguments(
             Literals.decimal(contrast.hundredths)
         }
     }
-    optionalArgument(defaults.specVersion, document.runningSpec) { spec -> specExpression(spec) }
+    optionalArgument(
+        name = defaults.specVersion.parameter,
+        value = if (document.namesSpec(defaults)) specExpression(document.runningSpec) else null,
+    )
     optionalArgument(defaults.platform, document.platform) { platform -> platformExpression(platform) }
 }
 
@@ -224,3 +227,10 @@ internal fun ArgumentsScope.schemeArguments(
  */
 internal val ThemeDocument.runningSpec: SpecVersion
     get() = EffectiveSpec.of(style = style, requested = spec)
+
+/**
+ * Whether a scheme call must name its spec. The library falls back from its own default spec the
+ * same way, so a style with a single form runs the right spec without it.
+ */
+internal fun ThemeDocument.namesSpec(defaults: SchemeDefaults): Boolean =
+    runningSpec != EffectiveSpec.of(style = style, requested = defaults.specVersion.value)

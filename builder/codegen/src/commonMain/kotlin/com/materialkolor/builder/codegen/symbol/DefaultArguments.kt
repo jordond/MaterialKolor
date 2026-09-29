@@ -83,9 +83,9 @@ public class SchemeDefaults(
  * The defaults of every library function an export calls, so an argument can be left out exactly
  * when the called function would pick the same value on its own.
  *
- * `DynamicMaterialExpressiveTheme` defaults to the expressive style and the 2025 spec, while
- * `DynamicMaterialTheme` defaults to tonal spot and 2021. An expressive export of a tonal spot 2021
- * document therefore writes both arguments, and a plain one writes neither.
+ * `DynamicMaterialExpressiveTheme` defaults to the expressive style, while `DynamicMaterialTheme`
+ * defaults to tonal spot. Both default to the 2025 spec. An expressive export of a tonal spot 2021
+ * document therefore writes both arguments, and a plain one writes only the spec.
  */
 public object DefaultArguments {
     public val DynamicMaterialTheme: SchemeDefaults = SchemeDefaults(

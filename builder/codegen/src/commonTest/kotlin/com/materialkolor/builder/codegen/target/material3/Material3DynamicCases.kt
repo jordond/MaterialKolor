@@ -146,14 +146,14 @@ class Material3DynamicTest {
     }
 
     @Test
-    fun material3Dynamic_spec_writesTheOneTheStyleRuns() {
+    fun material3Dynamic_spec_leftOutWhenTheLibraryFallsBackToIt() {
         val newest = Fixtures.Default.input.document
             .copy(spec = SpecVersion.Spec2026)
         val tonalSpot = theme(Fixtures.Default.with(document = newest).input)
         val rainbow = theme(Fixtures.Default.with(document = newest.copy(style = Style.Rainbow)).input)
 
         assertFalse("specVersion =" in tonalSpot, tonalSpot)
-        assertTrue("specVersion = ColorSpec.SpecVersion.SPEC_2021," in rainbow, rainbow)
+        assertFalse("specVersion =" in rainbow, rainbow)
     }
 
     @Test

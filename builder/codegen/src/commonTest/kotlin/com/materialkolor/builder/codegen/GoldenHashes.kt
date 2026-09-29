@@ -9,7 +9,7 @@ package com.materialkolor.builder.codegen
 internal object GoldenHashes {
     val cases: Map<String, Long> = mapOf(
         "custom-dynamic-accents" to 0x683747D4L,
-        "custom-dynamic-cmf" to 0x96285227L,
+        "custom-dynamic-cmf" to 0x8E81664AL,
         "custom-dynamic-custom-tones" to 0x830AE24FL,
         "custom-dynamic-default" to 0xD271D44BL,
         "custom-dynamic-pins-amoled" to 0xB66AE9E8L,
@@ -38,7 +38,7 @@ internal object GoldenHashes {
         "material3-dynamic-android-dynamic-color" to 0xD0B2536EL,
         "material3-dynamic-android-only" to 0x9827845CL,
         "material3-dynamic-animated" to 0x733BB36CL,
-        "material3-dynamic-cmf" to 0x1586783BL,
+        "material3-dynamic-cmf" to 0xA873D3C9L,
         "material3-dynamic-default" to 0xA38197E5L,
         "material3-dynamic-first-theme" to 0xEB49942DL,
         "material3-dynamic-high-contrast" to 0x15E1BC89L,
