@@ -1,12 +1,12 @@
-import { expect, test } from '@playwright/test';
-import { openBuilder, pressBareCanvas, SETTLE_MS, wantHooks } from './builder';
+import { expect, openBuilder, test } from './builder';
 import {
   button,
   LAND_TIMEOUT_MS,
   onPage,
   openWorkspace,
   press,
-  pressKeyUntil,
+  pressBareCanvas,
+  pressKey,
   storedDocument,
 } from '../fixtures/workspace';
 
@@ -22,10 +22,6 @@ const SELECTED_TAB = `${A11Y} [aria-label$=", tab, selected"]`;
 /** The top bar's Undo, which names a library switch once it has landed. */
 const UNDO_SWITCH = /^Undo library change/;
 
-test.beforeEach(async ({ context }) => {
-  await wantHooks(context);
-});
-
 test('4 switches the library to Fluent and 1 back, with no page error and the shell tab names kept', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
@@ -34,14 +30,13 @@ test('4 switches the library to Fluent and 1 back, with no page error and the sh
   const undo = page.locator(A11Y).getByRole('button', { name: UNDO_SWITCH });
 
   await page.keyboard.press('4');
-  await expect(undo).toHaveCount(1, { timeout: 10_000 });
-  await page.waitForTimeout(SETTLE_MS);
+  await expect(undo).toHaveAttribute('aria-label', /Fluent$/, { timeout: 10_000 });
   await expect(page.locator(SELECTED_TAB).first()).toBeAttached({ timeout: 10_000 });
   await expect(page.locator(`${A11Y} [aria-label^="Contrast, tab, "]`).first()).toBeAttached();
 
   await pressBareCanvas(page);
   await page.keyboard.press('1');
-  await page.waitForTimeout(SETTLE_MS);
+  await expect(undo).toHaveAttribute('aria-label', /M3$/, { timeout: 10_000 });
   await expect(page.locator(SELECTED_TAB).first()).toBeAttached({ timeout: 10_000 });
 
   expect(errors).toEqual([]);
@@ -65,10 +60,10 @@ test('3, 4 and 1 switch the library, 2 picks M3 Expressive with its style, and 1
     (await undo.evaluateAll((buttons) => buttons.map((button) => button.getAttribute('aria-label') ?? ''))).some((label) =>
       label.endsWith(name),
     );
-  await pressKeyUntil(page, '3', () => undoNames('Unstyled'));
-  await pressKeyUntil(page, '4', () => undoNames('Fluent'));
-  await pressKeyUntil(page, '1', () => undoNames('M3'));
-  await pressKeyUntil(page, '2', () => undoNames('M3 Expressive'));
+  await pressKey(page, '3', () => undoNames('Unstyled'));
+  await pressKey(page, '4', () => undoNames('Fluent'));
+  await pressKey(page, '1', () => undoNames('M3'));
+  await pressKey(page, '2', () => undoNames('M3 Expressive'));
 
   await expect.poll(async () => pick(await storedDocument(page)), { timeout: LAND_TIMEOUT_MS }).toEqual({
     style: 'Expressive',
@@ -77,7 +72,7 @@ test('3, 4 and 1 switch the library, 2 picks M3 Expressive with its style, and 1
   });
   await expect(onPage(page, /^Use the Expressive style\?/)).toHaveCount(0);
 
-  await pressKeyUntil(page, '1', () => undoNames('M3'));
+  await pressKey(page, '1', () => undoNames('M3'));
   await expect.poll(async () => pick(await storedDocument(page)), { timeout: LAND_TIMEOUT_MS }).toEqual({
     style: 'TonalSpot',
     spec: 'Spec2021',

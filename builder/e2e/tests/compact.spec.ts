@@ -1,5 +1,5 @@
-import { expect, test, type CDPSession, type Locator, type Page } from '@playwright/test';
-import { openBuilder, wantHooks } from './builder';
+import type { CDPSession, Locator, Page } from '@playwright/test';
+import { expect, openBuilder, test } from './builder';
 import { settledBox, tap, type Box, type Point } from './touch';
 
 // The builder on a phone held upright, with a finger. The preview comes first, the library chips sit
@@ -15,10 +15,6 @@ const TOP_BAR_HEIGHT = 64;
 const VIEWPORT = { width: 390, height: 844 };
 
 test.use({ viewport: VIEWPORT, hasTouch: true });
-
-test.beforeEach(async ({ context }) => {
-  await wantHooks(context);
-});
 
 test('at 390 wide with a finger, the chips sit under the bar, the poster peeks and Pick follows the finger', async ({
   page,

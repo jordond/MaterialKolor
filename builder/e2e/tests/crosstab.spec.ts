@@ -1,9 +1,10 @@
-import { expect, test, type Locator, type Page } from '@playwright/test';
-import { wantHooks } from './builder';
+import type { Locator, Page } from '@playwright/test';
+import { expect, test } from './builder';
 import {
   boxOf,
   button,
   LAND_TIMEOUT_MS,
+  nextFrames,
   onPage,
   openWorkspace,
   press,
@@ -27,10 +28,6 @@ const FINE_TUNE = /^Fine-tune, /;
 
 /** The first extra color's light tone slider, which the mirror writes as text. */
 const TONE_SLIDER = /light color tone, slider/;
-
-test.beforeEach(async ({ context }) => {
-  await wantHooks(context);
-});
 
 test('an edit in one tab lands in the other as a step its Undo takes back', async ({ context }) => {
   const { writer, reader } = await twoTabs(context.newPage.bind(context));
@@ -71,7 +68,8 @@ test('an edit in one tab offers the other the latest while it drags, and Load la
   const moving = (async () => {
     for (let step = 0; holding; step++) {
       await reader.mouse.move(middle.x + (step % 2 === 0 ? 12 : -12), middle.y, { steps: 3 });
-      await reader.waitForTimeout(200);
+      // A step every few frames keeps the slider moving without swamping the page.
+      await nextFrames(reader, 10);
     }
   })();
 
@@ -84,7 +82,7 @@ test('an edit in one tab offers the other the latest while it drags, and Load la
     await reader.mouse.up();
   }
   await reader.keyboard.press('Escape');
-  expect(await seedText(reader)).not.toBe('#0B6E4F');
+  await expect.poll(() => seedText(reader)).not.toBe('#0B6E4F');
   await expect(button(reader, 'Keep mine')).toHaveCount(1);
   await press(reader, button(reader, 'Load latest'));
   await expect.poll(() => seedText(reader), { timeout: LAND_TIMEOUT_MS }).toBe('#0B6E4F');
@@ -126,7 +124,7 @@ async function twoTabs(newPage: () => Promise<Page>): Promise<{ writer: Page; re
   await expect.poll(async () => (await storedProjects(writer)).length).toBe(1);
   const reader = await newPage();
   await openWorkspace(reader);
-  expect(await seedText(reader)).toBe(await seedText(writer));
+  await expect.poll(async () => (await seedText(reader)) === (await seedText(writer))).toBe(true);
   await expect(onPage(reader, CONFLICT)).toHaveCount(0);
   return { writer, reader };
 }

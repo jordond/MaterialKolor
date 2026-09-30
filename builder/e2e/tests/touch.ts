@@ -1,14 +1,13 @@
-import { expect, type CDPSession, type Locator, type Page } from '@playwright/test';
+import type { CDPSession, Locator, Page } from '@playwright/test';
+import { expect } from './builder';
+import { nextFrames, settledBox, type Box } from '../fixtures/workspace';
+
+export { settledBox };
 
 // What the touch specs share, a finger through a Chromium CDP session, the mirror's buttons and the
 // mirror's size. `text-toolbar.spec.ts` and `sample-fields.spec.ts` both import it.
 
-export interface Box {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
+export type { Box };
 
 export interface Point {
   x: number;
@@ -18,12 +17,6 @@ export interface Point {
 /** How long a long press holds the finger down, well past the long press timeout under load. */
 const LONG_PRESS_MS = 1_000;
 
-/**
- * How long a box has to hold still to count as laid out, longer than the listener's longest wait
- * before it syncs the mirror.
- */
-const STILL_MS = 1_200;
-
 /** The box of [target] as it is now. */
 export async function boxOf(target: Locator): Promise<Box> {
   const box = await target.boundingBox();
@@ -31,44 +24,13 @@ export async function boxOf(target: Locator): Promise<Box> {
   return box;
 }
 
-/**
- * The box of [target] once it is laid out, when it has a height and has held still for `STILL_MS`.
- * A scroll, a docked panel or a dialog that is still moving moves the mirror's box with it, and a
- * touch read off the box before then lands beside the field.
- */
-export async function settledBox(target: Locator, timeout = 15_000): Promise<Box> {
-  const page = target.page();
-  const deadline = Date.now() + timeout;
-  let last: Box | null = null;
-  let since = Date.now();
-  while (Date.now() < deadline) {
-    const box = await target.boundingBox();
-    const shown = box !== null && box.height > 0;
-    if (shown && last && sameBox(box, last)) {
-      if (Date.now() - since >= STILL_MS) return box;
-    } else {
-      last = shown ? box : null;
-      since = Date.now();
-    }
-    await page.waitForTimeout(200);
-  }
-  throw new Error(`The field never held still, last at ${JSON.stringify(last)}`);
-}
-
-function sameBox(one: Box, two: Box): boolean {
-  return (
-    Math.abs(one.x - two.x) < 0.5 &&
-    Math.abs(one.y - two.y) < 0.5 &&
-    Math.abs(one.width - two.width) < 0.5 &&
-    Math.abs(one.height - two.height) < 0.5
-  );
-}
-
 /** Holds a finger at [at] past the long press timeout, then lifts it. */
 export async function longPressAt(page: Page, cdp: CDPSession, at: Point): Promise<void> {
   checkPoint(at);
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [at] });
-  await page.waitForTimeout(LONG_PRESS_MS);
+  await hold(LONG_PRESS_MS);
+  // The page has drawn with the finger still down, so the press has reached Compose.
+  await nextFrames(page);
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
 }
 
@@ -76,8 +38,13 @@ export async function longPressAt(page: Page, cdp: CDPSession, at: Point): Promi
 export async function tap(cdp: CDPSession, point: Point): Promise<void> {
   checkPoint(point);
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] });
-  await new Promise((resolve) => setTimeout(resolve, 60));
+  await hold(60);
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+}
+
+/** Keeps a finger down for [ms], how long the gesture lasts and not a wait on the page. */
+function hold(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /** Fails with a readable message on a point with no place, which CDP only calls invalid parameters. */
@@ -113,7 +80,7 @@ export async function openBy(page: Page, button: Locator, opened: Locator): Prom
 }
 
 /**
- * The number of elements in the mirror once it has held still for a second, which is longer than
+ * The number of elements in the mirror once it has held the same for a second, which is longer than
  * the listener's longest wait before it syncs.
  */
 export async function settledMirror(page: Page): Promise<number> {
@@ -131,11 +98,16 @@ export async function settledMirror(page: Page): Promise<number> {
       return -1;
     });
   let last = -1;
-  for (let round = 0; round < 20; round++) {
-    await page.waitForTimeout(1_000);
-    const now = await count();
-    if (now === last) return now;
-    last = now;
-  }
+  await expect
+    .poll(
+      async () => {
+        const now = await count();
+        const same = now === last;
+        last = now;
+        return same;
+      },
+      { timeout: 20_000, intervals: [1_000], message: 'The mirror never held still' },
+    )
+    .toBe(true);
   return last;
 }

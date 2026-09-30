@@ -1,5 +1,5 @@
-import { expect, test, type Page } from '@playwright/test';
-import { hook, openBuilder, reloadBuilder, wantHooks } from './builder';
+import type { Page } from '@playwright/test';
+import { expect, hook, openBuilder, reloadBuilder, test } from './builder';
 import {
   A11Y,
   boxOf,
@@ -29,10 +29,6 @@ const HINT = 'Paste a color or drop an image anywhere.';
  * name, and only "Projects" before that. The hint shows in the same frame the name does.
  */
 const NAMED_PROJECTS = '#cmp_a11y_root [aria-label^="Projects, "]';
-
-test.beforeEach(async ({ context }) => {
-  await wantHooks(context);
-});
 
 test.describe('first run', () => {
   test('a fresh page shows the hint', async ({ page }) => {
@@ -98,7 +94,7 @@ test('the first run, from a typed seed to a copied Theme.kt, retires the hint fo
   await pressFor(page, labelled(page, 'Theme.kt, tab, not selected'), labelled(page, 'Theme.kt, tab, selected'));
   await pressFor(page, button(page, 'Copy file'), button(page, 'Copied'));
   if (browserName === 'chromium') {
-    expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('package com.example.theme');
+    await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toContain('package com.example.theme');
   }
   await press(page, button(page, 'Close'));
   await expect(page.locator(A11Y).getByText(/^Export code, dialog/)).toHaveCount(0, { timeout: LAND_TIMEOUT_MS });

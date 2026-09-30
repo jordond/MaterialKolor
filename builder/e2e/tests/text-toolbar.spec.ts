@@ -1,6 +1,7 @@
-import { expect, test, type CDPSession, type Locator, type Page } from '@playwright/test';
-import { openBuilder, reloadBuilder, wantHooks } from './builder';
+import type { CDPSession, Locator, Page } from '@playwright/test';
+import { expect, openBuilder, reloadBuilder, test } from './builder';
 import { longPressAt, mirrorButton, openBy, settledBox, settledMirror, tap, type Box, type Point } from './touch';
+import { storedDocument } from '../fixtures/workspace';
 
 // The text toolbar the kit draws in the page for a touch selection. A long press on a field
 // shows it, and Paste reads the clipboard inside the tap's own user activation. Chromium only, since
@@ -31,7 +32,6 @@ test.use({ hasTouch: true });
 
 test.beforeEach(async ({ context, browserName }) => {
   test.skip(browserName !== 'chromium', 'The long press goes through a Chromium CDP session');
-  await wantHooks(context);
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
 });
 
@@ -49,7 +49,7 @@ test('a long press on a field shows the toolbar and Paste puts the clipboard tex
 
   // The new seed tints the page, and once saved it is what the field shows after a reload.
   await expect.poll(() => themeColor(page), { timeout: 10_000 }).not.toBe(tint);
-  await page.waitForTimeout(1_500);
+  await expect.poll(async () => String((await storedDocument(page))?.seed ?? '').toUpperCase()).toContain(PASTED);
   await reloadBuilder(page);
   await expect.poll(async () => (await seedField(page)).textContent(), { timeout: 10_000 }).toContain(PASTED);
 });

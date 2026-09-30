@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import { expect, test, type Page } from '@playwright/test';
-import { wantHooks } from './builder';
+import type { Page } from '@playwright/test';
+import { expect, test } from './builder';
 import { startWorker, workerMissing, type Worker } from '../fixtures/worker';
 import { A11Y, BOOT_TIMEOUT_MS, labelled, openWorkspace, seedField, seedText, shareVectors } from '../fixtures/workspace';
 
@@ -11,10 +11,6 @@ import { A11Y, BOOT_TIMEOUT_MS, labelled, openWorkspace, seedField, seedText, sh
 
 /** How many share codes one page boots in turn, few enough to stay well inside the test timeout. */
 const CODES_PER_PAGE = 3;
-
-test.beforeEach(async ({ context }) => {
-  await wantHooks(context);
-});
 
 test.describe('share codes', () => {
   // A code opens only at boot, so each one is a fresh load. One page boots a handful in turn, and the

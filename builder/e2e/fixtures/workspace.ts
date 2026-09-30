@@ -46,13 +46,17 @@ export async function openWorkspace(page: Page, route = '/'): Promise<void> {
   await boxOf(seedField(page), BOOT_TIMEOUT_MS);
 }
 
+export interface Box {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 /** Where the canvas draws [target], once it has given it a size. */
-export async function boxOf(
-  target: Locator,
-  timeout = LAND_TIMEOUT_MS,
-): Promise<{ x: number; y: number; width: number; height: number }> {
+export async function boxOf(target: Locator, timeout = LAND_TIMEOUT_MS): Promise<Box> {
   const first = target.first();
-  let box: { x: number; y: number; width: number; height: number } | null = null;
+  let box: Box | null = null;
   await expect
     .poll(
       async () => {
@@ -66,9 +70,72 @@ export async function boxOf(
   return box!;
 }
 
+/**
+ * How long a box has to hold still to count as laid out, longer than the mirror's longest wait
+ * before it syncs.
+ */
+const STILL_MS = 1_200;
+
+/**
+ * The box of [target] once it is laid out, when it has a height and has held still for `STILL_MS`.
+ * A scroll, a docked panel or a dialog that is still moving moves the mirror's box with it, and a
+ * press read off the box before then lands beside it.
+ */
+export async function settledBox(target: Locator, timeout = 15_000): Promise<Box> {
+  let last: Box | null = null;
+  let since = 0;
+  await expect
+    .poll(
+      async () => {
+        const box = await target.boundingBox();
+        if (box === null || box.height === 0) {
+          last = null;
+          return false;
+        }
+        if (last === null || !sameBox(box, last)) {
+          last = box;
+          since = Date.now();
+          return false;
+        }
+        return Date.now() - since >= STILL_MS;
+      },
+      { timeout, intervals: [200], message: 'The box never held still' },
+    )
+    .toBe(true);
+  return last!;
+}
+
+function sameBox(one: Box, two: Box): boolean {
+  return (
+    Math.abs(one.x - two.x) < 0.5 &&
+    Math.abs(one.y - two.y) < 0.5 &&
+    Math.abs(one.width - two.width) < 0.5 &&
+    Math.abs(one.height - two.height) < 0.5
+  );
+}
+
+/** Waits for the page to draw [count] more frames, so Compose has taken whatever came in before. */
+export async function nextFrames(page: Page, count = 2): Promise<void> {
+  await page.evaluate(
+    (frames) =>
+      new Promise<void>((resolve) => {
+        let left = frames;
+        const step = () => (--left <= 0 ? resolve() : requestAnimationFrame(step));
+        requestAnimationFrame(step);
+      }),
+    count,
+  );
+}
+
 /** Clicks the middle of [target] where the canvas draws it. */
 export async function press(page: Page, target: Locator): Promise<void> {
   const box = await boxOf(target);
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+}
+
+/** Clicks the middle of [target] once it holds still, for a control that slides or fades in. */
+export async function pressSettled(page: Page, target: Locator): Promise<void> {
+  const box = await settledBox(target.first());
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
 }
 
@@ -98,6 +165,29 @@ export async function focusCanvas(page: Page): Promise<void> {
   if (!viewport) throw new Error('The page has no viewport');
   const tab = await boxOf(labelled(page, 'Contrast, tab, '), BOOT_TIMEOUT_MS);
   await page.mouse.click((tab.x + tab.width + viewport.width) / 2, tab.y + tab.height / 2);
+  await canvasHoldsFocus(page);
+}
+
+/**
+ * Presses the canvas where nothing is, in the preview's header row halfway from its last tab to the
+ * window's edge, and waits for the canvas to hold the page's focus.
+ */
+export async function pressBareCanvas(page: Page): Promise<void> {
+  const viewport = page.viewportSize();
+  if (!viewport) throw new Error('The page has no viewport');
+  const tabs = page.locator(A11Y).getByText('Contrast', { exact: true });
+  await expect(tabs.first()).toBeAttached({ timeout: BOOT_TIMEOUT_MS });
+  const boxes = (await Promise.all((await tabs.all()).map((tab) => tab.boundingBox()))).filter(
+    (box): box is Box => box !== null && box.x > viewport.width / 3,
+  );
+  if (boxes.length === 0) throw new Error('The preview has no Contrast tab on screen');
+  const tab = boxes.reduce((top, box) => (box.y < top.y ? box : top));
+  await page.mouse.click((tab.x + tab.width + viewport.width) / 2, tab.y + tab.height / 2);
+  await canvasHoldsFocus(page);
+}
+
+/** Waits for the canvas to hold the page's focus with no text field under it, and for Compose to have taken that. */
+async function canvasHoldsFocus(page: Page): Promise<void> {
   await expect
     .poll(() =>
       page.evaluate(() => {
@@ -109,31 +199,30 @@ export async function focusCanvas(page: Page): Promise<void> {
     .toBe('CANVAS');
   await expect(page.locator('.compose-backing-field')).toHaveCount(0);
   // Compose takes the press on its next frame, so the frame after that has it.
-  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+  await nextFrames(page);
+}
+
+/** Focuses the canvas, presses [key] once and waits for [landed] to say it has. */
+export async function pressKey(page: Page, key: string, landed: () => Promise<boolean>): Promise<void> {
+  await focusCanvas(page);
+  await page.keyboard.press(key);
+  await expect.poll(landed, { timeout: LAND_TIMEOUT_MS }).toBe(true);
+}
+
+/** Focuses the canvas, presses [key] once and waits for [shows] to be in the mirror. */
+export async function pressKeyFor(page: Page, key: string, shows: Locator): Promise<void> {
+  await focusCanvas(page);
+  await page.keyboard.press(key);
+  await expect(shows.first()).toBeAttached({ timeout: LAND_TIMEOUT_MS });
 }
 
 /**
- * Presses [key] on the canvas until [landed] says it has. A key that arrives while a skin reveal
- * runs, or before Compose has taken the press that focused the canvas, can go unheard, so each try
- * focuses the canvas again. Only for keys that do the same thing when pressed twice.
+ * Clicks the middle of text field [field] once it holds still, since a panel that just closed can
+ * still be sliding it into place, and waits for Compose's backing field to take the keys.
  */
-export async function pressKeyUntil(page: Page, key: string, landed: () => Promise<boolean>): Promise<void> {
-  await expect
-    .poll(
-      async () => {
-        if (await landed()) return true;
-        await focusCanvas(page);
-        await page.keyboard.press(key);
-        return false;
-      },
-      { timeout: LAND_TIMEOUT_MS * 2, intervals: [1_000] },
-    )
-    .toBe(true);
-}
-
-/** Presses [key] on the canvas until [shows] is in the mirror. */
-export async function pressKeyFor(page: Page, key: string, shows: Locator): Promise<void> {
-  await pressKeyUntil(page, key, async () => (await shows.count()) > 0);
+export async function focusField(page: Page, field: Locator): Promise<void> {
+  await pressSettled(page, field);
+  await expect(page.locator('.compose-backing-field')).toBeFocused({ timeout: LAND_TIMEOUT_MS });
 }
 
 /** `Meta` when the page's user agent names an Apple system, where it takes Cmd, else `Control`. */
@@ -195,8 +284,7 @@ export async function storedDocument(page: Page): Promise<Record<string, unknown
  * backing field in the page, and the keys wait for that to have focus.
  */
 export async function typeInto(page: Page, field: Locator, text: string): Promise<void> {
-  await press(page, field);
-  await expect(page.locator('.compose-backing-field')).toBeFocused({ timeout: LAND_TIMEOUT_MS });
+  await focusField(page, field);
   // Select all is Cmd or Ctrl by the host system in Compose, not by the page's user agent, so the
   // old text goes a key at a time from wherever the press left the caret.
   const old = ((await field.first().textContent()) ?? '').length;

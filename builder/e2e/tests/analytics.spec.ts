@@ -1,5 +1,5 @@
-import { expect, test, type Page, type Request } from '@playwright/test';
-import { openBuilder, wantHooks } from './builder';
+import type { Page, Request } from '@playwright/test';
+import { expect, openBuilder, test } from './builder';
 
 // Cloudflare Web Analytics loads only after the first frame and sets no cookie. The
 // site the e2e run builds has no token, so it never asks for the beacon. The token test adds the
@@ -11,17 +11,13 @@ const TOKEN = '0123456789abcdef0123456789abcdef';
 /** Where `boot.js` is loaded, which the site build puts `#mk-config` in front of. */
 const BOOT_TAG = '<script src="/boot.js"></script>';
 
-test.beforeEach(async ({ context }) => {
-  await wantHooks(context);
-});
-
 test('a site built with no token never asks for the beacon', async ({ page }) => {
   const insights = watchInsights(page);
 
+  // The page decides on the beacon as it marks its first frame, which the open waits for.
   await openBuilder(page);
-  await waitForFirstFrame(page);
-  await page.waitForTimeout(1_000);
 
+  await expect(page.locator('script[src*="cloudflareinsights.com"]')).toHaveCount(0);
   expect(insights).toEqual([]);
 });
 
@@ -72,10 +68,4 @@ function watchInsights(page: Page): string[] {
     if (new URL(request.url()).hostname.endsWith('cloudflareinsights.com')) seen.push(request.url());
   });
   return seen;
-}
-
-async function waitForFirstFrame(page: Page): Promise<void> {
-  await expect
-    .poll(() => page.evaluate(() => performance.getEntriesByName('mk:first-frame').length), { timeout: 30_000 })
-    .toBe(1);
 }

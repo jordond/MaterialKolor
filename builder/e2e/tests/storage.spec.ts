@@ -1,13 +1,9 @@
-import { expect, test, type Page } from '@playwright/test';
-import { hook, openBuilder, wantHooks } from './builder';
+import type { Page } from '@playwright/test';
+import { expect, hook, openBuilder, test } from './builder';
 
 // The storage behind the builder, driven through the shell's test hooks. What storage turns up is
 // told to the user, so those checks read the page's accessibility tree. The router and the page
 // around it have their own specs.
-
-test.beforeEach(async ({ context }) => {
-  await wantHooks(context);
-});
 
 test.describe('storage', () => {
   test("another tab's write arrives as one change and the store reads it", async ({ context }, testInfo) => {
@@ -19,6 +15,7 @@ test.describe('storage', () => {
     // that first and count only the changes after it.
     await settlePulse(writer);
     await settlePulse(reader);
+    await syncTabs(writer, reader);
     const before = prefsChanges(await hook(reader, 'externalChanges'));
     await reader.evaluate(() => {
       window.addEventListener('storage', (event) => {
@@ -39,8 +36,8 @@ test.describe('storage', () => {
     testInfo.annotations.push({ type: 'storage event ms', description: (arrivedAt - sentAt).toFixed(1) });
     console.log(`[storage] ${testInfo.project.name} storage event after ${(arrivedAt - sentAt).toFixed(1)} ms`);
 
-    // One write is one event, however long the reader waits.
-    await reader.waitForTimeout(250);
+    // One write is one event. A later write has reached the reader, so any second event for it would have too.
+    await syncTabs(writer, reader);
     expect(prefsChanges(await hook(reader, 'externalChanges'))).toBe(before + 1);
   });
 
@@ -107,13 +104,34 @@ const NEWER_DATA = 'A newer version of the builder saved some of your work here'
 /** The hint the builder dismisses by itself once the library switcher has pulsed. */
 const SWITCHER_PULSE = 'switcher-pulse';
 
-/** Longer than the pulse takes in any skin, so a page that started one has stored it. */
-const PULSE_SETTLE_MS = 1_000;
-
-/** Wait until [page] has pulsed the library switcher, or seen another tab do it, and stored that. */
+/**
+ * Wait until [page] has pulsed the library switcher, or seen another tab do it, and stored that.
+ * Under reduced motion the pulse stores itself as soon as it is due, and once stored it never runs again.
+ */
 async function settlePulse(page: Page): Promise<void> {
   await expect.poll(() => hook(page, 'seenHints'), { timeout: 30_000 }).toContain(SWITCHER_PULSE);
-  await page.waitForTimeout(PULSE_SETTLE_MS);
+}
+
+/**
+ * Writes a key the builder never reads in [from] and waits for [to] to hear it. Storage events
+ * reach another tab in the order the writes were made, so every write [from] made before it has
+ * reached [to] by then.
+ */
+async function syncTabs(from: Page, to: Page): Promise<void> {
+  const mark = `${Date.now()}-${Math.random()}`;
+  // The listener is on before the write, so the event cannot slip past it.
+  await to.evaluate((value) => {
+    (window as any).__mkSynced = new Promise<void>((resolve) => {
+      const listen = (event: StorageEvent) => {
+        if (event.key !== 'e2e:sync' || event.newValue !== value) return;
+        window.removeEventListener('storage', listen);
+        resolve();
+      };
+      window.addEventListener('storage', listen);
+    });
+  }, mark);
+  await from.evaluate((value) => localStorage.setItem('e2e:sync', value), mark);
+  await to.evaluate(() => (window as any).__mkSynced);
 }
 
 /** The hints in [hints] a user or a spec dismissed, leaving out the one the builder keeps by itself. */

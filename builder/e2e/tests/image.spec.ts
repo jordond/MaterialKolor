@@ -1,5 +1,5 @@
-import { expect, test, type Locator, type Page } from '@playwright/test';
-import { openBuilder, wantHooks } from './builder';
+import type { Locator, Page } from '@playwright/test';
+import { expect, openBuilder, test } from './builder';
 import { dispatchDrag, dispatchPaste, installFileMakers } from './image-files';
 import path from 'node:path';
 import { button, press, pressFor, scrollTo, seedText, storedDocument } from '../fixtures/workspace';
@@ -22,7 +22,6 @@ const UNSUPPORTED = 'couldn’t be read as an image';
 const SEED_TIMEOUT_MS = 15_000;
 
 test.beforeEach(async ({ context }) => {
-  await wantHooks(context);
   await context.addInitScript(installFileMakers);
 });
 

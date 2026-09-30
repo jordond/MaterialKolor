@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs';
-import { expect, test, type Page } from '@playwright/test';
-import { wantHooks } from './builder';
+import type { Page } from '@playwright/test';
+import { expect, test } from './builder';
 import { button, focusCanvas, LAND_TIMEOUT_MS, openWorkspace } from '../fixtures/workspace';
 
 // Motion on a library switch. The new preview and colors reveal from the switcher in a circle,
@@ -21,7 +21,6 @@ const STILL_MS = 1_000;
 const CHANGED = 32;
 
 test.beforeEach(async ({ context }) => {
-  await wantHooks(context);
   await context.addInitScript(copyFrames, CELLS);
 });
 

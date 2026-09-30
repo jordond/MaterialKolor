@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs';
-import { expect, test, type Browser } from '@playwright/test';
-import { wantHooks } from './builder';
+import type { Browser } from '@playwright/test';
+import { expect, test, wantHooks } from './builder';
 import { readZip } from '../fixtures/zip';
-import { button, onPage, openWorkspace, press, pressKeyFor, seedText, shareVectors } from '../fixtures/workspace';
+import { button, onPage, openWorkspace, pressKeyFor, pressSettled, seedText, shareVectors } from '../fixtures/workspace';
 
 // The JS engine, the fallback for browsers without WasmGC (D61). ?engine=js boots it where wasm
 // would run, and the same share code exports the same code on both engines. The codegen's own
@@ -52,7 +52,7 @@ async function exportFrom(
 
     await pressKeyFor(page, 'e', onPage(page, EXPORT_DIALOG));
     const download = page.waitForEvent('download');
-    await press(page, button(page, 'Download zip'));
+    await pressSettled(page, button(page, 'Download zip'));
     const zip = readZip(readFileSync((await (await download).path())!));
     return new Map([...zip].map(([name, bytes]) => [name, bytes.toString('utf8')]));
   } finally {

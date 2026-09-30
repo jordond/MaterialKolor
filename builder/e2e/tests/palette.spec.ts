@@ -1,5 +1,6 @@
-import { expect, test, type Locator, type Page } from '@playwright/test';
-import { clickMiddle, openBuilder, pressBareCanvas, wantHooks } from './builder';
+import type { Locator, Page } from '@playwright/test';
+import { expect, openBuilder, test } from './builder';
+import { A11Y, focusField, openOverlay, pressBareCanvas, primaryKey } from '../fixtures/workspace';
 
 // The command palette on the real builder, opened with Cmd or Ctrl+K and read from the page's
 // accessibility tree. Keys only reach the page once it has focus, so each test first presses the bare
@@ -9,17 +10,11 @@ import { clickMiddle, openBuilder, pressBareCanvas, wantHooks } from './builder'
 // fixes to Windows, so the primary key here comes from the page's own user agent, as in
 // shortcuts.spec.ts.
 
-const A11Y = '#cmp_a11y_root';
-
-test.beforeEach(async ({ context }) => {
-  await wantHooks(context);
-});
-
 test('a search with one match, a style, runs it on Enter', async ({ page }) => {
   await openBuilder(page);
   const field = await openPalette(page);
 
-  await clickMiddle(page, field);
+  await focusField(page, field);
   await page.keyboard.type('Monochrome');
   await expect(paletteRow(page, /^Use style Monochrome/)).toHaveCount(1, { timeout: 10_000 });
   await page.keyboard.press('Enter');
@@ -32,7 +27,7 @@ test('a typed hex leads with setting the seed to it', async ({ page }) => {
   await openBuilder(page);
   const field = await openPalette(page);
 
-  await clickMiddle(page, field);
+  await focusField(page, field);
   await page.keyboard.type('#0B6E4F');
   await expect(paletteRow(page, /^Set seed to #0B6E4F/)).toHaveCount(1, { timeout: 10_000 });
   // Enter runs the top row, so the seed changing says the row came first.
@@ -58,11 +53,6 @@ test('Esc then Cmd or Ctrl+O opens Projects in the history, and Back closes it',
   await expect(projects).toHaveCount(0, { timeout: 10_000 });
   expect(await openOverlay(page)).toBeNull();
 });
-
-/** The overlay the page's router last put in the history, the open panel's name. */
-async function openOverlay(page: Page): Promise<string | null> {
-  return page.evaluate(() => (history.state as { mkOverlay?: string } | null)?.mkOverlay ?? null);
-}
 
 /** Opens the palette with Cmd or Ctrl+K and returns its search field. */
 async function openPalette(page: Page): Promise<Locator> {
@@ -91,10 +81,4 @@ async function seedField(page: Page): Promise<Locator> {
 /** What the seed field shows, the seed's hex. */
 async function seedText(page: Page): Promise<string> {
   return (await (await seedField(page)).textContent()) ?? '';
-}
-
-/** `Meta` when the page's user agent names an Apple system, where it takes Cmd, else `Control`. */
-async function primaryKey(page: Page): Promise<'Meta' | 'Control'> {
-  const apple = await page.evaluate(() => /Macintosh|Mac OS|iPhone|iPad|iPod|Darwin/.test(navigator.userAgent));
-  return apple ? 'Meta' : 'Control';
 }

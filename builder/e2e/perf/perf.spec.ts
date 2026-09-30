@@ -1,7 +1,7 @@
 import { expect, test, type Browser, type BrowserContext, type Locator, type Page } from '@playwright/test';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { clickMiddle, pressBareCanvas } from '../tests/builder';
+import { press, pressBareCanvas } from '../fixtures/workspace';
 import { servePerfSite, type PerfSite } from './serve-compressed';
 
 // The perf run against the budgets in `budgets.json`.
@@ -113,7 +113,7 @@ test('a broadband visit, then seed changes, drags, a library switch and a photo'
     // the seed picker's. Its hue moves the seed on each step, and Esc cancels the picker after.
     const pick = page.locator(A11Y).getByRole('button', { name: 'Pick', exact: true });
     await expect(pick).toHaveCount(1, { timeout: 10_000 });
-    await clickMiddle(page, pick);
+    await press(page, pick);
     const frames = await dragAcross(page, page.locator(A11Y).getByText(/^Hue, slider, /), 0.8);
     await page.keyboard.press('Escape');
     await expect(page.locator(A11Y).getByRole('button', { name: 'Done', exact: true })).toHaveCount(0, {
