@@ -1,12 +1,9 @@
 name: Upstream changes
 
 on:
-  # Scheduled runs only fire from the default branch, so the daily run starts once 6.0 lands on
-  # main. Until then run it by hand with `gh workflow run upstream.yml --ref next`.
   schedule:
     - cron: "0 3 * * *"
   workflow_dispatch:
-  # A pin change on the base branch can leave the open bump pull request stale or already merged.
   push:
     branches:
       - next
@@ -20,8 +17,6 @@ concurrency:
 permissions:
   contents: read
 
-# When 6.0 lands on main, set BASE_BRANCH and the push branch above to main, and drop the stopped
-# schedule and the `--ref next` hint.
 env:
   BASE_BRANCH: next
   BUMP_BRANCH: upstream/mcu
@@ -41,7 +36,6 @@ jobs:
           GH_TOKEN: ${{ secrets.UPSTREAM_BOT_TOKEN }}
         run: '[ -n "$GH_TOKEN" ] || { echo "::error::Add an UPSTREAM_BOT_TOKEN repository secret with contents, pull requests and issues write access."; exit 1; }'
 
-  # Runs upstream code through Gradle, so it holds no write token.
   prepare:
     name: "Prepare the upstream bump"
     needs: preflight
@@ -115,8 +109,6 @@ jobs:
           retention-days: 1
           if-no-files-found: error
 
-  # Holds the write token in a fresh checkout that never ran upstream code. Pull requests opened
-  # with GITHUB_TOKEN do not trigger CI or Builder, hence the fine-grained token.
   publish:
     name: "Publish the upstream bump"
     needs: prepare
