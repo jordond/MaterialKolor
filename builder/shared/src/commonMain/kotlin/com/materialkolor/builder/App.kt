@@ -58,6 +58,8 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.LocalResourceReader
 import kotlin.time.Clock
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * The builder, on whatever platform [platform] describes.
@@ -143,6 +145,8 @@ internal const val ShellExpressive: Boolean = true
  * @param[awaitIdle] Waits for an idle moment. With it the builder warms up the reveal a library
  * switch plays once the first frame is up. None by default, and no warm-up then.
  * @param[probe] Drawn over the workspace with the state it was handed, for tests. Nothing by default.
+ * @param[stringsWait] The longest the splash waits on the first screen's strings, so a read that
+ * never answers still lets the builder show.
  */
 @OptIn(ExperimentalResourceApi::class)
 @Composable
@@ -151,6 +155,7 @@ internal fun BuilderRoot(
     model: AppModel = metroViewModel(),
     workspaceModel: WorkspaceModel = metroViewModel(),
     awaitIdle: (suspend () -> Unit)? = null,
+    stringsWait: Duration = 2.seconds,
     probe: @Composable (state: WorkspaceModel.State) -> Unit = {},
 ) {
     val state by model.collectAsState()
@@ -166,9 +171,7 @@ internal fun BuilderRoot(
     LaunchedEffect(model) {
         model.boot()
         withFrameNanos {}
-        // The splash stays up until the strings the first screen asked for are in and drawn.
-        withTimeoutOrNull(STRINGS_WAIT_MILLIS) { resourceReader.awaitReads() }
-        withFrameNanos {}
+        withTimeoutOrNull(stringsWait) { resourceReader.awaitFirstScreen() }
         withFrameNanos {}
         environment.hideSplash()
         environment.mark(TimingMarks.FIRST_FRAME)
@@ -204,10 +207,16 @@ internal fun BuilderRoot(
 }
 
 /**
- * The longest the splash waits on the first screen's strings, so a read that never answers still
- * lets the builder show.
+ * Waits until every string the first screen asks for is in, frame after frame, since a string that
+ * arrives can compose more that ask for their own.
  */
-private const val STRINGS_WAIT_MILLIS = 2_000L
+private suspend fun WholeFileResourceReader.awaitFirstScreen() {
+    do {
+        val seen = partsStarted
+        awaitReads()
+        withFrameNanos {}
+    } while (partsStarted != seen)
+}
 
 /**
  * Tints the browser's own chrome with the surface the shell stands on.
