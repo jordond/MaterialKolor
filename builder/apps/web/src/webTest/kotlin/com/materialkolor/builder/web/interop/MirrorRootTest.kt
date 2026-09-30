@@ -9,25 +9,30 @@ import org.w3c.dom.ShadowRootInit
 import org.w3c.dom.ShadowRootMode
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.Promise
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 class MirrorRootTest {
+    private val viewport = attached()
+
+    @AfterTest
+    fun removeViewport() {
+        viewport.remove()
+    }
+
     @Test
     fun aRootAlreadyThereIsScrubbed() {
-        val viewport = attached()
         val root = viewport.child().asMirrorRoot()
 
         MirrorRoot.install(viewport)
 
         root.assertScrubbed()
-        viewport.remove()
     }
 
     @Test
     fun aRootInsideTheViewportShadowRootIsScrubbed() {
-        val viewport = attached()
         val shadow = viewport.child().attachShadow(ShadowRootInit(ShadowRootMode.OPEN))
         val root = (document.createElement("div") as HTMLElement).asMirrorRoot()
         shadow.appendChild(root)
@@ -35,18 +40,15 @@ class MirrorRootTest {
         MirrorRoot.install(viewport)
 
         root.assertScrubbed()
-        viewport.remove()
     }
 
     @Test
     fun aRootThatArrivesLaterIsScrubbed(): Promise<JsAny?> {
-        val viewport = attached()
         MirrorRoot.install(viewport)
         val root = viewport.child().asMirrorRoot()
 
         return nextFrame().then { _ ->
             root.assertScrubbed()
-            viewport.remove()
             null
         }
     }
@@ -56,20 +58,17 @@ class MirrorRootTest {
      */
     @Test
     fun aRootInsideAHostThatArrivesLaterIsScrubbed(): Promise<JsAny?> {
-        val viewport = attached()
         MirrorRoot.install(viewport)
         val root = viewport.hostWithMirrorRoot()
 
         return nextFrame().then { _ ->
             root.assertScrubbed()
-            viewport.remove()
             null
         }
     }
 
     @Test
     fun aHostWithoutARootEndsTheWatch(): Promise<JsAny?> {
-        val viewport = attached()
         MirrorRoot.install(viewport)
         viewport.child()
 
@@ -80,7 +79,6 @@ class MirrorRootTest {
         }
         return late.then { _ ->
             assertEquals("polite", root.getAttribute("aria-live"))
-            viewport.remove()
             null
         }
     }

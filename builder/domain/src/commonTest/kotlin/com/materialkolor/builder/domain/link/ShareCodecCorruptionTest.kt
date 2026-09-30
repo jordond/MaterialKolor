@@ -36,7 +36,7 @@ class ShareCodecCorruptionTest {
 
     @Test
     fun decode_everySingleBitFlipAfterTheVersion_isCorrupt() {
-        DocumentArb(seed = 5).documents(count = 20).forEach { document ->
+        DocumentArb(seed = 5).documents(count = 200).forEach { document ->
             val bytes = bytesOf(ShareCodec.encode(document, projectName = "Acme"))
             for (index in 1 until bytes.size) {
                 for (bit in 0 until 8) {

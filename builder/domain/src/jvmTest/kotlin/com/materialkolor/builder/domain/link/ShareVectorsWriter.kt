@@ -25,6 +25,7 @@ import kotlinx.serialization.json.put
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
  * Writes the share code vectors that every other reader of the format checks itself against.
@@ -51,7 +52,7 @@ class ShareVectorsWriter {
         val fixture = File(root, FIXTURE_PATH)
         val constant = File(root, CONSTANT_PATH)
 
-        if (System.getenv(WRITE_VARIABLE) == "true" || !fixture.isFile) {
+        if (System.getenv(WRITE_VARIABLE) == "true") {
             fixture.parentFile.mkdirs()
             fixture.writeText(rendered)
             constant.writeText(renderConstant(rendered))
@@ -59,6 +60,7 @@ class ShareVectorsWriter {
             return
         }
 
+        assertTrue(fixture.isFile, "$FIXTURE_PATH is missing, run with $WRITE_VARIABLE=true")
         assertEquals(rendered, fixture.readText(), "$FIXTURE_PATH is stale, run with $WRITE_VARIABLE=true")
         val stale = "is stale, run with $WRITE_VARIABLE=true"
         assertEquals(rendered.trimEnd('\n'), SHARE_VECTORS_JSON, "$CONSTANT_PATH $stale")
