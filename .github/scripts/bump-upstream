@@ -1,9 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
-# Moves the upstream pin on the bump branch, writes the lock, checks the transform and regenerates
-# the golden fixtures, then bundles the new commits for the publishing job. It runs upstream code
-# through Gradle, so it must never see a write token.
+# Moves the upstream pin on the bump branch, writes the lock and the README badge, checks the
+# transform and regenerates the golden fixtures, then bundles the new commits for the publishing
+# job. It runs upstream code through Gradle, so it must never see a write token.
 
 CWD="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 ROOT="$(cd "$CWD"/../.. >/dev/null 2>&1 && pwd)"
@@ -61,7 +61,8 @@ git -C "$SUBMODULE" checkout --quiet --detach "$TARGET"
 ./gradlew candidateMcuUpstreamLock
 # The candidate is pretty-printed with four spaces, the tracked lock with two.
 jq --indent 2 . build/mcu-upstream.lock.candidate.json > gradle/mcu-upstream.lock.json
-git add "$SUBMODULE" gradle/mcu-upstream.lock.json
+"$CWD/readme-mcu-badge"
+git add "$SUBMODULE" gradle/mcu-upstream.lock.json README.md
 git commit --quiet -m "$TITLE"
 
 # Each command is checked by hand because `set -e` does not apply inside a function called as an

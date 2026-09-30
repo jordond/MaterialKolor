@@ -9,7 +9,7 @@ import tempfile
 import unittest
 
 
-SCRIPT = Path(__file__).resolve().parents[1] / "scripts/bump-upstream"
+SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 REAL_GIT = shutil.which("git")
 FIXTURES = "material-color-utilities/src/commonTest/kotlin/com/materialkolor/conformance"
 SUBMODULE = "tools/mcu-upstream/src/main"
@@ -34,6 +34,11 @@ elif task.startswith(":mcu-upstream:printMcu"):
 '''
 
 
+def badge(revision):
+    return (f"[![MCU](https://img.shields.io/badge/mcu-{revision[:7]}-blue)]"
+            f"(https://github.com/material-foundation/material-color-utilities/tree/{revision})")
+
+
 class BumpUpstreamTest(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
@@ -56,7 +61,8 @@ class BumpUpstreamTest(unittest.TestCase):
         self.repo.mkdir()
         self.run_git(self.repo, "init", "--quiet", "-b", "next")
         (self.repo / ".github/scripts").mkdir(parents=True)
-        shutil.copyfile(SCRIPT, self.repo / ".github/scripts/bump-upstream")
+        for name in ["bump-upstream", "readme-mcu-badge"]:
+            shutil.copy2(SCRIPTS / name, self.repo / ".github/scripts" / name)
         gradlew = self.repo / "gradlew"
         gradlew.write_text(FAKE_GRADLEW)
         gradlew.chmod(0o755)
@@ -67,6 +73,7 @@ class BumpUpstreamTest(unittest.TestCase):
         (self.repo / "gradle").mkdir()
         (self.repo / "gradle/mcu-upstream.lock.json").write_text(
             json.dumps({"upstreamRevision": self.old_pin}, indent=2) + "\n")
+        (self.repo / "README.md").write_text(f"# Kolor\n{badge(self.old_pin)}\n")
         fixtures = self.repo / FIXTURES
         fixtures.mkdir(parents=True)
         for name in ["UpstreamRoleGoldenData.kt", "UpstreamQuantizerGoldenData.kt"]:
@@ -127,6 +134,8 @@ class BumpUpstreamTest(unittest.TestCase):
         self.assertIn(f"commit {self.new_pin}", gitlink)
         lock = self.run_git(self.repo, "show", f"{pin_commit}:gradle/mcu-upstream.lock.json")
         self.assertEqual(json.dumps({"upstreamRevision": self.new_pin}, indent=2), lock)
+        readme = self.run_git(self.repo, "show", f"{pin_commit}:README.md")
+        self.assertEqual(f"# Kolor\n{badge(self.new_pin)}", readme)
         role = (self.repo / FIXTURES / "UpstreamRoleGoldenData.kt").read_text()
         self.assertIn(f"printMcuRoleGoldens {self.new_pin}", role)
         # The build is warmed before the quiet prints, so no build output reaches a fixture.
