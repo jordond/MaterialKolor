@@ -35,58 +35,18 @@ jobs:
       engine: ${{ steps.filter.outputs.engine }}
       apple: ${{ steps.filter.outputs.apple }}
     steps:
+      # Pull requests need history back to their base to list the changed files.
       - name: Checkout
-        if: github.event_name == 'pull_request'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 0
+          fetch-depth: ${{ github.event_name == 'pull_request' && 0 || 1 }}
 
       - name: Detect engine and build machinery changes
         id: filter
         env:
           EVENT_NAME: ${{ github.event_name }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        run: |
-          set -euo pipefail
-
-          if [ "$EVENT_NAME" != 'pull_request' ]; then
-            echo "Event is '$EVENT_NAME': running the full matrix."
-            echo 'engine=true' >> "$GITHUB_OUTPUT"
-            echo 'apple=true' >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          # Paths that can affect the generated engine, the PSI source
-          # transformer, the upstream monitor, or the publication and
-          # artifact-only consumer verification. `tools/` covers the pinned
-          # upstream checkout and the transformer alike, and the module pattern
-          # picks up any new material-kolor-* module.
-          engine_paths='^(material-(color-utilities|kolor-[^/]+)/|tools/|build-logic/|gradle/|kotlin-js-store/|settings\.gradle\.kts$|build\.gradle\.kts$|gradle\.properties$|gradlew(\.bat)?$|\.github/workflows/ci\.yml$|\.github/scripts/|\.github/tests/)'
-
-          # The macOS lane is slow, so pull requests only run it for the MCU
-          # engine, its transformer and upstream pin, and this workflow. Every
-          # push to main, preview and next still runs it for everything else.
-          apple_paths='^(material-color-utilities/|tools/mcu-|gradle/mcu-upstream\.lock\.json$|\.github/workflows/ci\.yml$)'
-
-          changed="$(git diff --name-only "$BASE_SHA...HEAD")"
-          echo 'Files changed in this pull request:'
-          echo "$changed"
-
-          if grep -qE "$engine_paths" <<< "$changed"; then
-            echo 'Engine or build machinery touched: running the publication lane.'
-            echo 'engine=true' >> "$GITHUB_OUTPUT"
-          else
-            echo 'No engine or build machinery changes: skipping the publication lane.'
-            echo 'engine=false' >> "$GITHUB_OUTPUT"
-          fi
-
-          if grep -qE "$apple_paths" <<< "$changed"; then
-            echo 'MCU engine touched: running the Apple lane.'
-            echo 'apple=true' >> "$GITHUB_OUTPUT"
-          else
-            echo 'No MCU engine changes: skipping the Apple lane.'
-            echo 'apple=false' >> "$GITHUB_OUTPUT"
-          fi
+        run: ./.github/scripts/detect-engine-changes --github-output "$GITHUB_OUTPUT"
 
   verify-linux:
     name: "Verify ${{ matrix.platform }}"
@@ -116,7 +76,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
 
-      - name: Check upstream monitor with local fixtures
+      - name: Check the CI and upstream scripts with local fixtures
         if: matrix.platform == 'JVM'
         run: python3 -B -m unittest discover -s .github/tests -v
 
