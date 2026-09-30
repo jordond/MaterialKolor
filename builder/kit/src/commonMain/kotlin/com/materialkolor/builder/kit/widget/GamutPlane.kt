@@ -77,6 +77,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
+import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -282,9 +283,12 @@ private fun planeSpan(hue: Double): Double {
 
 /**
  * The picture a plane shows, which trails the hue. The last one stays up until the next is ready.
+ * Each picture not kept builds on [builder], off the main thread unless a test hands in its own.
  */
 @Stable
-internal class PlanePictures {
+internal class PlanePictures(
+    private val builder: CoroutineContext = Dispatchers.Default,
+) {
     var shown: PlanePicture? by mutableStateOf(null)
         private set
 
@@ -300,7 +304,7 @@ internal class PlanePictures {
     suspend fun follow(hue: () -> Double) {
         snapshotFlow { hue().roundToInt().mod(HueSlots) }.collectLatest { whole ->
             shown = KeptPictures.take(whole)
-                ?: withContext(Dispatchers.Default) { planePicture(whole) }.also(KeptPictures::keep)
+                ?: withContext(builder) { planePicture(whole) }.also(KeptPictures::keep)
         }
     }
 }
