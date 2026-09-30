@@ -17,6 +17,7 @@ import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
 import com.materialkolor.builder.domain.persist.DeviceWidth
 import com.materialkolor.builder.domain.persist.PreviewMode
+import com.materialkolor.builder.feature.command.LocalShortcutFocus
 import com.materialkolor.builder.feature.poster.handFocusTo
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
@@ -55,7 +56,9 @@ import org.jetbrains.compose.resources.stringResource
  * order, so Inspect shows as a glyph alone and the mode switch drops the glyphs. Fullscreen leaves
  * through the floating exit instead of the dock. While the keyboard is in use, focus comes back to
  * the Fullscreen button when fullscreen ends, since the exit that held it is gone, and to the Inspect
- * toggle when Inspect ends, since the preview that held it lets go. A pointer leaves the focus alone.
+ * toggle when Inspect ends, since the preview that held it lets go. A pointer leaves the focus alone,
+ * and so does Inspect ending while the page's focus holder has it, as it does after the I shortcut,
+ * so the next shortcut still reaches the page.
  */
 @Composable
 internal fun DockContent(
@@ -76,10 +79,11 @@ internal fun DockContent(
     }
 
     val inspectToggle = remember { FocusRequester() }
+    val shortcutFocus = LocalShortcutFocus.current
     val wasInspecting = remember { mutableStateOf(state.inspect) }
     LaunchedEffect(state.inspect) {
         val ended = wasInspecting.value && !state.inspect
-        if (ended) inputModes.handFocusTo(inspectToggle)
+        if (ended && shortcutFocus?.holderFocused != true) inputModes.handFocusTo(inspectToggle)
         wasInspecting.value = state.inspect
     }
 
