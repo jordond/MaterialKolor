@@ -2,6 +2,7 @@ import { expect, test, type Browser, type BrowserContext, type Locator, type Pag
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { press, pressBareCanvas } from '../fixtures/workspace';
+import { wantHooks } from '../tests/builder';
 import { servePerfSite, type PerfSite } from './serve-compressed';
 
 // The perf run against the budgets in `budgets.json`.
@@ -226,6 +227,7 @@ interface Visit {
 
 async function newContext(browser: Browser): Promise<BrowserContext> {
   const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  await wantHooks(context);
   await context.addInitScript(instrument);
   return context;
 }
