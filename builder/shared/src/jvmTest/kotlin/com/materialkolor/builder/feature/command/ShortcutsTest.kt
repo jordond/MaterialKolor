@@ -86,6 +86,22 @@ class ShortcutsTest {
         }
 
     @Test
+    fun space_afterFOnAndOff_shufflesAndLeavesFullscreenOff() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            boot()
+            keys { pressKey(Key.F) }
+            harness.workspace.state.value.fullscreen shouldBe true
+            keys { pressKey(Key.F) }
+            harness.workspace.state.value.fullscreen shouldBe false
+            val seed = seed()
+
+            keys { pressKey(Key.Spacebar) }
+
+            harness.workspace.state.value.fullscreen shouldBe false
+            seed() shouldNotBe seed
+        }
+
+    @Test
     fun numberKeys_eachSwitchTheLibraryAsOneUndoEntry() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             boot()
