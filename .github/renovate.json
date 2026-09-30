@@ -1,41 +1,118 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended"],
+  "extends": ["config:recommended", "helpers:pinGitHubActionDigestsToSemver"],
+  "baseBranchPatterns": ["next"],
+  "useBaseBranchConfig": "merge",
   "labels": ["dependencies"],
+  "prHourlyLimit": 0,
   "ignoreDeps": ["org.jetbrains.kotlin.android"],
+  "ignorePaths": [
+    "**/node_modules/**",
+    "**/bower_components/**",
+    "**/vendor/**",
+    "**/examples/**",
+    "**/__tests__/**",
+    "**/test/**",
+    "**/tests/**",
+    "**/__fixtures__/**",
+    "builder/codegen/src/jvmTest/resources/golden/**"
+  ],
   "packageRules": [
+    {
+      "description": "Compose snapshots from the JetBrains dev repo are not release candidates.",
+      "matchPackageNames": ["org.jetbrains.compose{/,}**"],
+      "allowedVersions": "!/-SNAPSHOT/"
+    },
     {
       "groupName": "Kotlin & Compose",
       "matchPackageNames": [
         "org.jetbrains.compose{/,}**",
         "org.jetbrains.kotlin{/,}**",
-        "org.jetbrains.kotlinx:binary-compatibility-validator{/,}**",
-        "com.android.tools.build:gradle{/,}**",
-        "com.android{/,}**"
+        "org.jetbrains.kotlinx:binary-compatibility-validator{/,}**"
       ]
     },
     {
+      "description": "AGP and the Android KMP library plugin share a version.",
+      "groupName": "Android Gradle Plugin",
+      "matchPackageNames": ["com.android.tools.build:gradle{/,}**", "com.android{/,}**"]
+    },
+    {
+      "description": "Gradle deps only the builder uses.",
       "groupName": "Builder dependencies",
+      "addLabels": ["builder"],
+      "automerge": true,
       "matchPackageNames": [
-        "io.ktor{/,}**",
-        "io.github.xxfast{/,}**",
         "co.touchlab:kermit{/,}**",
         "dev.jordond.stateholder{/,}**",
-        "com.mohamedrejeb.calf{/,}**",
-        "dev.snipme:highlights{/,}**",
-        "br.com.devsrsouza.compose.icons{/,}**",
-        "com.github.skydoves:colorpicker-compose{/,}**",
         "com.codingfeline.buildkonfig{/,}**",
         "org.jetbrains.compose.hot-reload{/,}**",
-        "org.jetbrains.compose.material3.adaptive{/,}**",
         "org.jetbrains.androidx.lifecycle{/,}**",
-        "androidx.activity{/,}**",
-        "androidx.core{/,}**",
-        "org.jetbrains.kotlinx:kotlinx-datetime{/,}**",
         "org.jetbrains.kotlinx:kotlinx-collections-immutable{/,}**",
         "org.jetbrains.kotlinx:kotlinx-browser{/,}**",
-        "org.jetbrains.kotlinx:kotlinx-coroutines-guava{/,}**"
+        "dev.zacsweers.metro{/,}**"
       ]
+    },
+    {
+      "description": "Every npm dep lives under builder/ (e2e and worker), so batch them into one weekly PR. Releases wait 3 days in case a package is hijacked.",
+      "groupName": "Builder npm dependencies",
+      "addLabels": ["builder"],
+      "matchManagers": ["npm"],
+      "matchFileNames": ["builder/**"],
+      "rangeStrategy": "pin",
+      "minimumReleaseAge": "3 days",
+      "schedule": ["* 0-5 * * 1"]
+    },
+    {
+      "description": "Keep the Node types on the Node version CI runs.",
+      "matchPackageNames": ["@types/node"],
+      "allowedVersions": "<=24"
+    },
+    {
+      "description": "Actions only the builder workflow uses",
+      "addLabels": ["builder"],
+      "matchManagers": ["github-actions"],
+      "matchPackageNames": [
+        "actions/download-artifact",
+        "actions/setup-node",
+        "actions/upload-artifact",
+        "marocchino/sticky-pull-request-comment"
+      ]
+    },
+    {
+      "description": "Gradle deps only the samples use",
+      "addLabels": ["samples"],
+      "automerge": true,
+      "matchPackageNames": [
+        "dev.chrisbanes.haze{/,}**",
+        "org.jetbrains.compose.material:material-icons-extended{/,}**"
+      ]
+    },
+    {
+      "description": "Patch releases merge once CI passes, main library deps included.",
+      "matchUpdateTypes": ["patch", "digest", "pin", "pinDigest"],
+      "automerge": true
+    },
+    {
+      "description": "Action and npm minors merge once CI passes. Builder and sample Gradle minors turn on automerge in their own rules.",
+      "matchManagers": ["github-actions", "npm"],
+      "matchUpdateTypes": ["minor"],
+      "automerge": true
+    },
+    {
+      "description": "Majors always need a review.",
+      "matchUpdateTypes": ["major"],
+      "automerge": false
+    },
+    {
+      "description": "0.x minors can break.",
+      "matchUpdateTypes": ["minor"],
+      "matchCurrentVersion": "/^v?0\\./",
+      "automerge": false
+    },
+    {
+      "description": "Pre-release bumps like material3 alphas can change API, so they need a review.",
+      "matchCurrentVersion": "/-/",
+      "automerge": false
     }
   ]
 }
