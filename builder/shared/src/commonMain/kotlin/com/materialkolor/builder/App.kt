@@ -20,6 +20,7 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import com.materialkolor.builder.core.platform.Environment
 import com.materialkolor.builder.core.platform.PlatformServices
 import com.materialkolor.builder.core.platform.TimingMarks
+import com.materialkolor.builder.core.resources.WholeFileResourceReader
 import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.domain.capability.forTarget
 import com.materialkolor.builder.domain.color.Argb
@@ -53,7 +54,12 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withTimeoutOrNull
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.LocalResourceReader
 import kotlin.time.Clock
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * The builder, on whatever platform [platform] describes.
@@ -139,13 +145,17 @@ internal const val ShellExpressive: Boolean = true
  * @param[awaitIdle] Waits for an idle moment. With it the builder warms up the reveal a library
  * switch plays once the first frame is up. None by default, and no warm-up then.
  * @param[probe] Drawn over the workspace with the state it was handed, for tests. Nothing by default.
+ * @param[stringsWait] The longest the splash waits on the first screen's strings, so a read that
+ * never answers still lets the builder show.
  */
+@OptIn(ExperimentalResourceApi::class)
 @Composable
 internal fun BuilderRoot(
     graph: AppGraph,
     model: AppModel = metroViewModel(),
     workspaceModel: WorkspaceModel = metroViewModel(),
     awaitIdle: (suspend () -> Unit)? = null,
+    stringsWait: Duration = 2.seconds,
     probe: @Composable (state: WorkspaceModel.State) -> Unit = {},
 ) {
     val state by model.collectAsState()
@@ -155,9 +165,13 @@ internal fun BuilderRoot(
     val result by rememberThemeResult(document, graph.themeResolver, environment)
     val announcer = remember(environment) { Announcer { message -> environment.announce(message) } }
     val firstFrame = remember { CompletableDeferred<Unit>() }
+    val baseReader = LocalResourceReader.current
+    val resourceReader = remember(baseReader) { WholeFileResourceReader(baseReader) }
 
     LaunchedEffect(model) {
         model.boot()
+        withFrameNanos {}
+        withTimeoutOrNull(stringsWait) { resourceReader.awaitFirstScreen() }
         withFrameNanos {}
         environment.hideSplash()
         environment.mark(TimingMarks.FIRST_FRAME)
@@ -167,6 +181,7 @@ internal fun BuilderRoot(
     ImageMarkEffects(environment)
 
     CompositionLocalProvider(
+        LocalResourceReader provides resourceReader,
         LocalThemeResult provides result,
         LocalThemeResolver provides graph.themeResolver,
         LocalAnnouncer provides announcer,
@@ -189,6 +204,17 @@ internal fun BuilderRoot(
             }
         }
     }
+}
+
+/**
+ * Waits until every string the first screen asks for is in, frame after frame, since a string that
+ * arrives can compose more that ask for their own.
+ */
+private suspend fun WholeFileResourceReader.awaitFirstScreen() {
+    do {
+        awaitReads()
+        withFrameNanos {}
+    } while (isReading)
 }
 
 /**
