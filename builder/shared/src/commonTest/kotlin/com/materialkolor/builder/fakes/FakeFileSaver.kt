@@ -47,7 +47,8 @@ internal class FakeFileSaver(
         mime: String,
     ): Result<Unit> = attempt { savedFiles.update { saved -> saved + OutgoingFile(name, bytes, mime) } }
 
-    override suspend fun shareFiles(files: List<OutgoingFile>): Result<Unit> = attempt { sharedFiles.update { shared -> shared + listOf(files) } }
+    override suspend fun shareFiles(files: List<OutgoingFile>): Result<Unit> =
+        attempt { sharedFiles.update { shared -> shared.plusElement(files) } }
 
     /**
      * Every link handed to the share sheet, with its title, oldest first.

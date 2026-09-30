@@ -15,7 +15,6 @@ import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import com.materialkolor.builder.HEIGHT
 import com.materialkolor.builder.WAIT_MILLIS
 import com.materialkolor.builder.WIDTH
-import com.materialkolor.builder.fakes.FakePlatform
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
@@ -26,6 +25,7 @@ import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.MotionOverride
 import com.materialkolor.builder.domain.persist.PreviewTab
+import com.materialkolor.builder.fakes.FakePlatform
 import com.materialkolor.builder.feature.canvas.RampTarget
 import com.materialkolor.builder.feature.workspace.FineTuneSection
 import io.kotest.matchers.shouldBe
