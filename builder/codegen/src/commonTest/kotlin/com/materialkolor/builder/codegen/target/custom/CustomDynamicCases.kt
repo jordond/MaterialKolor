@@ -196,7 +196,7 @@ class CustomDynamicTest {
         assertTrue("return remember(scheme, brandPalette, successPalette, warningPalette) {" in colors, colors)
         assertTrue("    val brand: ColorFamily,\n" in colors, colors)
         assertTrue("brand = brandPalette.colorFamily(\n" in colors, colors)
-        assertTrue("threshold = ContrastThreshold.WCAG_AAA_NORMAL_TEXT," in colors, colors)
+        assertTrue("threshold = ContrastThreshold.WcagAaaNormalText," in colors, colors)
         assertTrue("private fun TonalPalette.colorFamily(" in colors, colors)
         assertFalse("ColorFamily" in themeColors(Fixtures.Default.custom().input))
     }

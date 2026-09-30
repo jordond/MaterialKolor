@@ -54,7 +54,7 @@ fun rememberExtendedColors(
 private fun TonalPalette.colorFamily(
     tone: Int,
     containerTone: Int,
-    threshold: ContrastThreshold = ContrastThreshold.WCAG_AA_NORMAL_TEXT,
+    threshold: ContrastThreshold = ContrastThreshold.WcagAaNormalText,
 ): ColorFamily {
     val color = toneColor(tone)
     val onColor = onTone(tone, threshold)

@@ -135,7 +135,7 @@ class Material3DynamicTest {
         val harmonized = "rememberTonalPalette(\n        seed = BrandSeed,\n        harmonizeWith = seedColor,\n    )"
         assertTrue(harmonized in extended, extended)
         assertTrue("rememberTonalPalette(seed = SuccessSeed)" in extended, extended)
-        assertTrue("threshold = ContrastThreshold.WCAG_AAA_NORMAL_TEXT" in extended, extended)
+        assertTrue("threshold = ContrastThreshold.WcagAaaNormalText" in extended, extended)
     }
 
     @Test

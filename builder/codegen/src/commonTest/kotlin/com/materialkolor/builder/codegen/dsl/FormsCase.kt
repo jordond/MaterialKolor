@@ -80,7 +80,7 @@ private fun KotlinFileScope.extendedColors() {
                     returns(
                         ref("palette").call(Symbols.OnTone) {
                             argument(ref("tone"))
-                            argument(ref(Symbols.ContrastThreshold).member("WCAG_AA_NORMAL_TEXT"))
+                            argument(ref(Symbols.ContrastThreshold).member("WcagAaNormalText"))
                         },
                     )
                 }

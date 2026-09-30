@@ -7,6 +7,7 @@ import com.materialkolor.hct.Hct
 import com.materialkolor.scheme.SchemeVibrant
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 
 class MaterialKolorsTest {
     private val darkScheme = vibrant(isDark = true)
@@ -86,8 +87,9 @@ class MaterialKolorsTest {
     }
 
     @Test
-    fun highestSurface_readsTheSchemeItIsGiven() {
-        assertEquals(Color(0xFF182760), MaterialKolors(vibrant(isDark = false)).highestSurface(darkScheme))
+    fun highestSurface_readsTheSchemeItWasBuiltWith() {
+        assertEquals(Color(0xFF182760), MaterialKolors(darkScheme).highestSurface())
+        assertNotEquals(Color(0xFF182760), MaterialKolors(vibrant(isDark = false)).highestSurface())
     }
 
     @Test

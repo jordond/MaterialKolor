@@ -60,7 +60,7 @@ public fun TonalPalette.toneColor(tone: Int): Color = Color(tone(tone))
  */
 public fun TonalPalette.onTone(
     tone: Int,
-    threshold: ContrastThreshold = ContrastThreshold.WCAG_AA_NORMAL_TEXT,
+    threshold: ContrastThreshold = ContrastThreshold.WcagAaNormalText,
 ): Color {
     val background = toneColor(tone)
     val ratio = threshold.threshold

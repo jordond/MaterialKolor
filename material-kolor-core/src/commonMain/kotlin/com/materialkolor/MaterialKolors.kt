@@ -33,12 +33,11 @@ public class MaterialKolors(
     private val colors = MaterialDynamicColors()
 
     /**
-     * Returns the highest surface color based on the given scheme.
+     * Returns the highest surface color of [scheme], the surface its spec treats as the top of the elevation stack.
      *
-     * @param scheme The dynamic scheme used to generate the color.
      * @see MaterialDynamicColors.highestSurface
      */
-    public fun highestSurface(scheme: DynamicScheme): Color = colors.highestSurface(scheme).getColor(scheme)
+    public fun highestSurface(): Color = colors.highestSurface(scheme).getColor(scheme)
 
     /**
      * Returns the primary palette key color.

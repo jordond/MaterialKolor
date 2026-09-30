@@ -63,7 +63,7 @@ internal fun Color.readableOn(): Color {
     val hct = toHct()
     return TonalPalette.from(hct).onTone(
         tone = hct.tone.roundToInt(),
-        threshold = ContrastThreshold.WCAG_AAA_NORMAL_TEXT,
+        threshold = ContrastThreshold.WcagAaaNormalText,
     )
 }
 

@@ -85,8 +85,13 @@ public fun Color.fixIfDisliked(): Color = DislikeAnalyzer.fixIfDisliked(toHct())
 /**
  * Convert the color to a hex string.
  *
+ * The hex digits are always uppercase. The [prefix] is written exactly as given.
+ *
  * @receiver[Color] to convert.
- * @param[includePrefix] whether to include the '#' [prefix].
+ * @param[includePrefix] Whether to start the string with [prefix].
+ * @param[prefix] The text written before the hex digits, `#` by default. Pass `0x` for a Kotlin literal.
+ * @param[alwaysIncludeAlpha] Whether to write the alpha byte for an opaque color too. A translucent color always
+ * gets it.
  * @return [String] hex representation of the color.
  */
 public fun Color.toHex(
@@ -105,7 +110,7 @@ public fun Color.toHex(
         append(red.format())
         append(green.format())
         append(blue.format())
-    }.uppercase()
+    }
 }
 
 /**
@@ -126,12 +131,12 @@ public fun Color.animate(
 ): State<Color> = animateColorAsState(this, animationSpec, label, finishedListener)
 
 /**
- * Format the integer as a hex string.
+ * Format the integer as a two digit uppercase hex string.
  *
  * @receiver[Int] to format.
  * @return [String] hex representation of the integer.
  */
-internal fun Int.format(): String = toString(16).padStart(2, '0')
+internal fun Int.format(): String = toString(16).uppercase().padStart(2, '0')
 
 /**
  * Create a [Color] with the same hue as this color, but with the saturation and lightness of [other].

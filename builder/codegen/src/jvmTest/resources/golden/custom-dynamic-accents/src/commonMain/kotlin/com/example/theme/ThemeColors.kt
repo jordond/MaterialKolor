@@ -130,7 +130,7 @@ fun rememberThemeColors(
             warning = warningPalette.colorFamily(
                 tone = if (isDark) 70 else 50,
                 containerTone = if (isDark) 20 else 95,
-                threshold = ContrastThreshold.WCAG_AAA_NORMAL_TEXT,
+                threshold = ContrastThreshold.WcagAaaNormalText,
             ),
         )
     }
@@ -139,7 +139,7 @@ fun rememberThemeColors(
 private fun TonalPalette.colorFamily(
     tone: Int,
     containerTone: Int,
-    threshold: ContrastThreshold = ContrastThreshold.WCAG_AA_NORMAL_TEXT,
+    threshold: ContrastThreshold = ContrastThreshold.WcagAaNormalText,
 ): ColorFamily {
     val color = toneColor(tone)
     val onColor = onTone(tone, threshold)

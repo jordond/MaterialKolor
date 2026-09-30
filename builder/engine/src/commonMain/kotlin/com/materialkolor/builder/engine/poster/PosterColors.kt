@@ -103,7 +103,7 @@ public class PosterColors private constructor(
 
             val inkCandidate = page.better(ramp.toneColor(darkTone), ramp.toneColor(lightTone))
             val ink = page.readable(inkCandidate, TEXT_RATIO)
-            val outline = page.readable(ramp.onTone(tone, ContrastThreshold.WCAG_AA_LARGE_TEXT), SHAPE_RATIO)
+            val outline = page.readable(ramp.onTone(tone, ContrastThreshold.WcagAaLargeText), SHAPE_RATIO)
             val mutedTone = (ink.tone.roundToInt() + outline.tone.roundToInt()) / 2
             val inkMuted = page.readable(ramp.toneColor(mutedTone), SHAPE_RATIO)
 
