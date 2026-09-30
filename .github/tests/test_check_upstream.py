@@ -275,8 +275,32 @@ class UpstreamMonitorTest(unittest.TestCase):
         self.assertEqual(0, result.returncode, result.stderr)
         self.assertEqual([("git", "fetch")], [(c["tool"], c["args"][0]) for c in self.requests()])
         # The submodule's SSH remote is unusable on a runner, so the fetch names HTTPS itself.
-        self.assertIn("https://github.com/material-foundation/material-color-utilities.git",
-                      self.requests()[0]["args"])
+        args = self.requests()[0]["args"]
+        self.assertIn("https://github.com/material-foundation/material-color-utilities.git", args)
+        # The script reads origin/main afterwards, so the refspec must fill the usual refs.
+        self.assertIn("+refs/heads/*:refs/remotes/origin/*", args)
+        self.assertNotIn("--unshallow", args)
+
+    def test_shallow_submodule_is_unshallowed(self):
+        self.git("update-ref", "refs/remotes/origin/main", "HEAD")
+        full = self.root / "full"
+        self.repo.rename(full)
+        subprocess.run([REAL_GIT, "clone", "--quiet", "--depth", "1", f"file://{full}", str(self.repo)],
+                       check=True, capture_output=True)
+        result = self.run_monitor(prepare_refs=False)
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertIn("--unshallow", self.requests()[0]["args"])
+
+    def test_long_file_names_are_cut(self):
+        # Each component stays under the file system's name limit.
+        long_path = "kotlin/" + "/".join(["d" * 60] * 5) + ".kt"
+        self.commit(long_path, "Kotlin update")
+        summary = self.root / "summary.md"
+        result = self.run_monitor("--summary", str(summary))
+        self.assertEqual(0, result.returncode, result.stderr)
+        text = summary.read_text()
+        self.assertNotIn(long_path, text)
+        self.assertIn("  - `..." + long_path[-160:] + "`", text)
 
     def test_option_without_a_value_is_rejected(self):
         for option in ["--github-output", "--summary"]:

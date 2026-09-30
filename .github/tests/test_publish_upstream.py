@@ -14,6 +14,8 @@ REAL_GIT = shutil.which("git")
 TOKEN = "fixture-secret-token"
 TARGET = "b" * 40
 CURRENT = "a" * 40
+SUBMODULE = "tools/mcu-upstream/src/main"
+FIXTURE = "material-color-utilities/src/commonTest/kotlin/com/materialkolor/conformance/UpstreamRoleGoldenData.kt"
 
 
 class PublishUpstreamTest(unittest.TestCase):
@@ -27,17 +29,20 @@ class PublishUpstreamTest(unittest.TestCase):
         subprocess.run([REAL_GIT, "init", "--quiet", "--bare", "-b", "next", str(self.origin)], check=True)
         subprocess.run([REAL_GIT, "clone", "--quiet", str(self.origin), str(self.builder)],
                        check=True, capture_output=True)
+        self.set_pin(self.builder, CURRENT)
         self.commit(self.builder, "README.md", "chore: base")
         self.git(self.builder, "push", "--quiet", "origin", "HEAD:next")
         self.base = self.git(self.builder, "rev-parse", "HEAD")
 
         # The bump is built in one clone and published from another, as the two jobs do.
         self.git(self.builder, "switch", "--quiet", "-c", "upstream/mcu")
+        self.set_pin(self.builder, TARGET)
         self.commit(self.builder, "gradle/mcu-upstream.lock.json", "fix(mcu): update upstream pin to bbbbbbb")
+        self.commit(self.builder, FIXTURE, "test(mcu): regenerate golden fixtures for upstream bbbbbbb")
         self.bump_head = self.git(self.builder, "rev-parse", "HEAD")
         self.bundle = self.root / "bump/bump.bundle"
         self.bundle.parent.mkdir()
-        self.git(self.builder, "bundle", "create", "--quiet", str(self.bundle), "upstream/mcu", f"^{self.base}")
+        self.make_bundle()
         subprocess.run([REAL_GIT, "clone", "--quiet", str(self.origin), str(self.checkout)],
                        check=True, capture_output=True)
 
@@ -68,6 +73,12 @@ class PublishUpstreamTest(unittest.TestCase):
             'os.execv(os.environ["REAL_GIT"], [os.environ["REAL_GIT"], *sys.argv[1:]])\n'
         ))
 
+    def set_pin(self, cwd, revision):
+        self.git(cwd, "update-index", "--add", "--cacheinfo", f"160000,{revision},{SUBMODULE}")
+
+    def make_bundle(self):
+        self.git(self.builder, "bundle", "create", "--quiet", str(self.bundle), "upstream/mcu", f"^{self.base}")
+
     def stub(self, name, source):
         path = self.bin / name
         path.write_text(source)
@@ -82,7 +93,8 @@ class PublishUpstreamTest(unittest.TestCase):
         file = cwd / path
         file.parent.mkdir(parents=True, exist_ok=True)
         file.write_text(message + "\n")
-        self.git(cwd, "add", "-A")
+        # Only the named file, since `add -A` would drop the Gitlink, which has no checkout.
+        self.git(cwd, "add", "--", path)
         self.git(cwd, "-c", "user.email=bot@example.invalid", "-c", "user.name=Bot", "commit",
                  "--quiet", "-m", message)
 
@@ -151,23 +163,58 @@ class PublishUpstreamTest(unittest.TestCase):
         (edit,) = self.calls("gh")
         self.assertEqual(["pr", "edit", "7"], edit["args"][:3])
 
-    def test_stale_lease_refuses_to_overwrite_the_branch(self):
-        self.git(self.builder, "push", "--quiet", "origin", "upstream/mcu")
-        self.commit(self.builder, "tools/rule.kt", "fix(mcu): maintainer change")
-        self.git(self.builder, "push", "--quiet", "origin", "upstream/mcu")
-        maintainer_head = self.origin_head()
-        result = self.publish("update", EXPECTED=self.bump_head)
+    def push_old_bot_branch(self):
+        """Leaves origin with a bump branch that diverges from the bundle, as a rewrite finds it."""
+        self.git(self.builder, "switch", "--quiet", "-c", "old-bump", self.base)
+        self.commit(self.builder, "gradle/mcu-upstream.lock.json", "fix(mcu): update upstream pin to older")
+        self.git(self.builder, "push", "--quiet", "origin", "old-bump:upstream/mcu")
+        return self.git(self.builder, "rev-parse", "HEAD")
+
+    def test_matching_lease_rewrites_a_diverged_branch(self):
+        old = self.push_old_bot_branch()
+        result = self.publish("update", EXPECTED=old, NUMBER="7")
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertEqual(self.bump_head, self.origin_head())
+
+    def test_stale_lease_refuses_to_overwrite_a_diverged_branch(self):
+        old = self.push_old_bot_branch()
+        result = self.publish("update", EXPECTED=self.base, NUMBER="7")
         self.assertNotEqual(0, result.returncode)
-        self.assertEqual(maintainer_head, self.origin_head())
+        self.assertEqual(old, self.origin_head())
         self.assertEqual([], self.calls("gh"))
 
-    def test_absent_lease_refuses_to_overwrite_a_new_branch(self):
-        self.git(self.builder, "push", "--quiet", "origin", "upstream/mcu")
-        self.commit(self.builder, "tools/rule.kt", "fix(mcu): maintainer change")
-        self.git(self.builder, "push", "--quiet", "--force", "origin", "upstream/mcu")
+    def test_absent_lease_refuses_to_overwrite_an_existing_branch(self):
+        old = self.push_old_bot_branch()
         result = self.publish("update", EXPECTED="")
         self.assertNotEqual(0, result.returncode)
+        self.assertEqual(old, self.origin_head())
         self.assertEqual([], self.calls("gh"))
+
+    def assertBumpRejected(self, message, **overrides):
+        self.make_bundle()
+        result = self.publish("update", **overrides)
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn(message, result.stderr)
+        self.assertEqual("", self.origin_head())
+        self.assertEqual([], self.calls("gh"))
+
+    def test_bump_touching_other_files_is_rejected(self):
+        self.commit(self.builder, ".github/scripts/publish-upstream", "chore: doctored script")
+        self.assertBumpRejected(".github/scripts/publish-upstream")
+
+    def test_bump_pinning_another_revision_is_rejected(self):
+        self.assertBumpRejected("instead of " + "c" * 40, TARGET="c" * 40)
+
+    def test_base_off_the_base_branch_is_rejected(self):
+        self.git(self.checkout, "-c", "user.email=x@example.invalid", "-c", "user.name=X", "commit",
+                 "--quiet", "--allow-empty", "-m", "detached work")
+        self.assertBumpRejected("is not on next")
+
+    def test_encoded_token_is_masked(self):
+        result = self.publish("update")
+        self.assertEqual(0, result.returncode, result.stderr)
+        encoded = __import__("base64").b64encode(f"x-access-token:{TOKEN}".encode()).decode()
+        self.assertIn(f"::add-mask::{encoded}", result.stdout)
 
     def test_status_lines_follow_the_bump_outcome(self):
         self.publish("update", TRANSFORM="failure", GOLDENS="skipped")

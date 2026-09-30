@@ -4,12 +4,15 @@ set -euo pipefail
 # Carries out the planned action on the rolling bump pull request. This is the only upstream script
 # that holds the write token, so it runs in a fresh checkout that has never run upstream code.
 
+SUBMODULE="tools/mcu-upstream/src/main"
+ALLOWED_PATHS="$SUBMODULE|gradle/mcu-upstream\.lock\.json|material-color-utilities/src/commonTest/kotlin/com/materialkolor/conformance/Upstream(Role|Quantizer)GoldenData\.kt"
+
 usage() {
     echo "Usage: $0 [--bundle <file>] [--summary <file>]"
     echo "  Reads GH_TOKEN, ACTION, BASE_BRANCH, BUMP_BRANCH and NUMBER for every action"
     echo "  close also reads DELETE_BRANCH"
     echo "  notify also reads TARGET, CURRENT and TARGET_SHORT"
-    echo "  update also reads TITLE, EXPECTED, CURRENT_SHORT, TARGET_SHORT, TRANSFORM, GOLDENS and RUN_URL,"
+    echo "  update also reads TITLE, EXPECTED, TARGET, CURRENT_SHORT, TARGET_SHORT, TRANSFORM, GOLDENS and RUN_URL,"
     echo "  and needs --bundle and --summary"
 }
 
@@ -98,8 +101,34 @@ write_body() {
     echo "- A red \`checkKotlinAbi\` means the public API moved. Review it against docs/upstream-psi.md, then run \`./gradlew updateKotlinAbi\` on macOS and push to this branch. When upstream moves again the bot rewrites the branch and drops those dump commits, so push them again."
 }
 
+# The bundle was built by a job that ran upstream code, so only the pin, the lock and the golden
+# fixtures may change, on top of the checked-out base, with the Gitlink at the planned target.
+verify_bump() {
+    local base="$1" changed unexpected gitlink
+    if ! git merge-base --is-ancestor "$base" "origin/$BASE_BRANCH"; then
+        echo "Checked-out base $base is not on $BASE_BRANCH" >&2
+        exit 1
+    fi
+    if ! git merge-base --is-ancestor "$base" "refs/heads/$BUMP_BRANCH"; then
+        echo "The bump does not build on $base" >&2
+        exit 1
+    fi
+    changed=$(git diff --name-only "$base" "refs/heads/$BUMP_BRANCH")
+    unexpected=$(grep -vxE "$ALLOWED_PATHS" <<< "$changed" || true)
+    if [[ -n "$unexpected" ]]; then
+        echo "The bump changes files it must not touch:" >&2
+        echo "$unexpected" >&2
+        exit 1
+    fi
+    gitlink=$(git ls-tree "refs/heads/$BUMP_BRANCH" "$SUBMODULE")
+    if [[ "$gitlink" != "160000 commit $TARGET"$'\t'"$SUBMODULE" ]]; then
+        echo "The bump pins $gitlink instead of $TARGET" >&2
+        exit 1
+    fi
+}
+
 update_pull_request() {
-    require TITLE CURRENT_SHORT TARGET_SHORT TRANSFORM GOLDENS RUN_URL
+    require TITLE TARGET CURRENT_SHORT TARGET_SHORT TRANSFORM GOLDENS RUN_URL
     if [[ -z "$bundle" || -z "$summary" ]]; then
         usage >&2
         exit 1
@@ -108,10 +137,15 @@ update_pull_request() {
     body=$(mktemp)
     write_body > "$body"
 
+    local base
+    base=$(git rev-parse HEAD)
     git fetch --quiet "$bundle" "+refs/heads/$BUMP_BRANCH:refs/heads/$BUMP_BRANCH"
+    verify_bump "$base"
     # The token travels as a header through the environment, never in a URL or on a command line.
     # The lease expects the branch exactly as planning saw it, or absent when it did not exist yet.
     authorization=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 | tr -d '\n')
+    # Actions masks the raw secret but not its encoded form.
+    echo "::add-mask::$authorization"
     GIT_CONFIG_COUNT=1 \
         GIT_CONFIG_KEY_0="http.https://github.com/.extraheader" \
         GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $authorization" \

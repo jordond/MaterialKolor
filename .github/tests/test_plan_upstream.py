@@ -241,6 +241,17 @@ class PlanUpstreamTest(unittest.TestCase):
         self.assertNotEqual(0, result.returncode)
         self.assertIn("is gone", result.stderr)
 
+    def test_base_is_the_checked_out_commit(self):
+        values = self.assertPlan("update")
+        self.assertEqual(self.git("rev-parse", "HEAD"), values["base"])
+
+    def test_failed_branch_lookup_is_not_read_as_absent(self):
+        self.git("remote", "set-url", "origin", str(self.root / "missing.git"))
+        result, values = self.plan()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("Could not look up upstream/mcu", result.stderr)
+        self.assertNotIn("action", values)
+
     def test_missing_input_is_rejected(self):
         result, _ = self.plan(TARGET_SHORT="")
         self.assertNotEqual(0, result.returncode)

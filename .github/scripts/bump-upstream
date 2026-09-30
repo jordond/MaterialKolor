@@ -13,7 +13,7 @@ FIXTURES="material-color-utilities/src/commonTest/kotlin/com/materialkolor/confo
 usage() {
     echo "Usage: $0 --github-output <file> --bundle <file>"
     echo "  Reads BUMP_BRANCH, BOT_NAME, BOT_EMAIL, TARGET, TARGET_SHORT and TITLE"
-    echo "  Appends base, transform (success or failure) and goldens (success, failure or skipped)"
+    echo "  Appends transform (success or failure) and goldens (success, failure or skipped)"
 }
 
 github_output=""
@@ -96,4 +96,4 @@ fi
 
 mkdir -p "$(dirname "$bundle")"
 git bundle create --quiet "$bundle" "$BUMP_BRANCH" "^$base"
-printf 'base=%s\ntransform=%s\ngoldens=%s\n' "$base" "$transform" "$goldens" >> "$github_output"
+printf 'transform=%s\ngoldens=%s\n' "$transform" "$goldens" >> "$github_output"

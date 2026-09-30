@@ -29,10 +29,22 @@ env:
   BOT_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
 
 jobs:
+  # Fails in seconds instead of after the build when the token is missing.
+  preflight:
+    name: "Check the bot token"
+    if: github.repository == 'jordond/MaterialKolor'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require the bot token
+        env:
+          GH_TOKEN: ${{ secrets.UPSTREAM_BOT_TOKEN }}
+        run: '[ -n "$GH_TOKEN" ] || { echo "::error::Add an UPSTREAM_BOT_TOKEN repository secret with contents, pull requests and issues write access."; exit 1; }'
+
   # Runs upstream code through Gradle, so it holds no write token.
   prepare:
     name: "Prepare the upstream bump"
-    if: github.repository == 'jordond/MaterialKolor'
+    needs: preflight
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
@@ -48,7 +60,7 @@ jobs:
       current_short: ${{ steps.check.outputs.current_short }}
       target: ${{ steps.check.outputs.target }}
       target_short: ${{ steps.check.outputs.target_short }}
-      base: ${{ steps.bump.outputs.base }}
+      base: ${{ steps.plan.outputs.base }}
       transform: ${{ steps.bump.outputs.transform }}
       goldens: ${{ steps.bump.outputs.goldens }}
     steps:

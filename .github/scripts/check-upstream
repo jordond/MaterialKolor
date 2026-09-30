@@ -11,6 +11,7 @@ MAX_SUMMARY_COMMITS=50
 MAX_SUMMARY_FILES=10
 MAX_SUMMARY_CHARACTERS=40000
 MAX_TITLE_CHARACTERS=120
+MAX_PATH_CHARACTERS=160
 SUBMODULE_PATH="$ROOT/tools/mcu-upstream/src/main"
 
 usage() {
@@ -80,9 +81,13 @@ markdown_title() {
 }
 
 # File names go inside a code span, where mentions and references stay inert, so only a backtick
-# that would end the span early is replaced.
+# that would end the span early is replaced. Long names are cut so the body cap holds.
 markdown_path() {
-    tr '`' "'" <<< "$1"
+    local path="$1"
+    if ((${#path} > MAX_PATH_CHARACTERS)); then
+        path="...${path: -MAX_PATH_CHARACTERS}"
+    fi
+    tr '`' "'" <<< "$path"
 }
 
 # The engine is generated from upstream's Kotlin alone, so only Kotlin and license changes need a

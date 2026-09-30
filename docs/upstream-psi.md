@@ -294,7 +294,8 @@ candidate pin drops `createForProduction`, that task fails before the pin is ado
 ## CI and the upstream monitor
 
 The upstream scripts live in `.github/scripts/`, and `.github/tests/` covers each one against
-disposable Git repositories with no network access. Run those tests, not the workflow, when changing
+disposable Git repositories with no network access. `test_workflow_wiring.py` checks that the
+workflows and scripts agree on every output and environment name. Run those tests, not the workflow, when changing
 them.
 
 `check-upstream` reports upstream commits that touch `kotlin/` or license and notice files. Java-only
@@ -312,15 +313,18 @@ Upstream issue references are rewritten to point at upstream, mentions are defus
 messages are logged with workflow commands stopped.
 
 `.github/workflows/upstream.yml` turns relevant upstream commits into one rolling pull request
-against `next` on the `upstream/mcu` branch, in two jobs.
+against `next` on the `upstream/mcu` branch. A `preflight` job first checks that the token secret
+exists, so a missing secret fails in seconds. Two jobs follow.
 
 1. `prepare` holds no write token, because it runs upstream code through Gradle. `plan-upstream`
    picks the action. `bump-upstream` moves the Gitlink to upstream's head, writes the lock from
    `candidateMcuUpstreamLock` and checks the transform. When the transform passes it regenerates the
    golden fixtures in a separate commit. The new commits leave the job as a Git bundle.
-2. `publish` starts from a fresh checkout that never ran upstream code. `publish-upstream` pushes
-   the bundle under a lease and opens, updates, closes or comments on the pull request. The token
-   reaches Git only as an HTTP header through the environment.
+2. `publish` starts from a fresh checkout of the base commit that `plan-upstream` recorded before
+   any upstream code ran. `publish-upstream` refuses a bundle that does not build on that base,
+   touches anything besides the Gitlink, the lock and the two golden fixture files, or pins another
+   revision than planned. It then pushes under a lease and opens, updates, closes or comments on the
+   pull request. The token reaches Git only as a masked HTTP header through the environment.
 
 CI and Builder then run on the pull request. The bot cannot refresh the ABI dumps, because
 `updateKotlinAbi` needs macOS. A red `checkKotlinAbi` is the prompt to review the API change and push

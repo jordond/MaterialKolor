@@ -117,7 +117,7 @@ class BumpUpstreamTest(unittest.TestCase):
     def test_clean_bump_commits_the_pin_then_the_fixtures(self):
         result, values, bundle = self.bump()
         self.assertEqual(0, result.returncode, result.stderr)
-        self.assertEqual({"base": self.base, "transform": "success", "goldens": "success"}, values)
+        self.assertEqual({"transform": "success", "goldens": "success"}, values)
         self.assertEqual([
             f"test(mcu): regenerate golden fixtures for upstream {self.new_pin[:7]}",
             f"fix(mcu): update upstream pin to {self.new_pin[:7]}",

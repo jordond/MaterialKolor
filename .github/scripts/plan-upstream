@@ -7,7 +7,7 @@ set -euo pipefail
 usage() {
     echo "Usage: $0 --github-output <file>"
     echo "  Reads BASE_BRANCH, BUMP_BRANCH, BOT_EMAIL, CURRENT, TARGET, TARGET_SHORT and RELEVANT"
-    echo "  Appends number, action (none, close, notify or update), delete_branch, title and expected"
+    echo "  Appends number, action (none, close, notify or update), delete_branch, title, expected and base"
 }
 
 github_output=""
@@ -75,7 +75,18 @@ revision=""
 base_pin=""
 edited=false
 expected=""
-if git ls-remote --exit-code --heads origin "$BUMP_BRANCH" > /dev/null; then
+# Exit code 2 means the branch is absent. Anything else is a failed lookup, which must not be read as
+# absent and lead to a lease that expects no branch.
+branch_exists=true
+git ls-remote --exit-code --heads origin "$BUMP_BRANCH" > /dev/null || {
+    status=$?
+    if ((status != 2)); then
+        echo "Could not look up $BUMP_BRANCH (git ls-remote exited $status)" >&2
+        exit 1
+    fi
+    branch_exists=false
+}
+if [[ "$branch_exists" == true ]]; then
     git fetch --quiet origin "+refs/heads/$BUMP_BRANCH:refs/remotes/origin/$BUMP_BRANCH"
     expected=$(git rev-parse "origin/$BUMP_BRANCH")
     revision=$(lock_revision "origin/$BUMP_BRANCH")
@@ -112,5 +123,7 @@ fi
 echo "Open pull request: ${number:-none}, pinned there: ${revision:-none}, based on: ${base_pin:-none}"
 echo "Base pin: $CURRENT, target: $TARGET, maintainer commits: $edited, closed for this target: $snoozed"
 echo "Action: $action"
-printf 'number=%s\naction=%s\ndelete_branch=%s\ntitle=%s\nexpected=%s\n' \
-    "$number" "$action" "$delete_branch" "$title" "$expected" >> "$github_output"
+# The publishing job checks out and runs its script from `base`, so it is recorded here, before any
+# upstream code runs, rather than by the bump.
+printf 'number=%s\naction=%s\ndelete_branch=%s\ntitle=%s\nexpected=%s\nbase=%s\n' \
+    "$number" "$action" "$delete_branch" "$title" "$expected" "$(git rev-parse HEAD)" >> "$github_output"
