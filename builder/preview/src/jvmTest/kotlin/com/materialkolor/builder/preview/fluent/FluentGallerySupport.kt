@@ -1,34 +1,23 @@
 package com.materialkolor.builder.preview.fluent
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.test.SemanticsMatcher
-import androidx.compose.ui.test.hasContentDescription
-import com.materialkolor.builder.kit.a11y.KitTestApi
-import com.materialkolor.builder.kit.a11y.ProvideWebFoldsForTest
-import com.materialkolor.builder.kit.motion.LocalMotionFrozen
-import com.materialkolor.builder.preview.Chrome
+import com.materialkolor.builder.preview.GalleryHarness
 import com.materialkolor.builder.preview.ShellExpressive
-import com.materialkolor.builder.preview.canvas.ComponentsTab
 import com.materialkolor.builder.preview.canvas.DemoAppState
-import com.materialkolor.builder.preview.canvas.GALLERY_CARD
-import com.materialkolor.builder.preview.canvas.PreviewPane
-import com.materialkolor.builder.preview.split.LocalCompositionProbe
+import com.materialkolor.builder.preview.gallerySnapshot
 import com.materialkolor.builder.preview.split.PaneSpec
 
-// What the Fluent gallery tests share, the harness, the matchers and the state they compare.
-
 /**
- * The switches and boxes the gallery keeps in [DemoAppState].
+ * The switches the gallery keeps in [DemoAppState].
  */
-internal val GallerySwitches: List<String> =
+private val GallerySwitches: List<String> =
     listOf(FluentGalleryKeys.Bold, FluentGalleryKeys.Wifi, FluentGalleryKeys.Details)
 
 /**
  * The single choices the gallery keeps in [DemoAppState], each a switch per option.
  */
-internal val GalleryChoices: List<String> = listOf(
+private val GalleryChoices: List<String> = listOf(
     FluentGalleryKeys.Volume,
     FluentGalleryKeys.Delivery,
     FluentGalleryKeys.View,
@@ -38,42 +27,25 @@ internal val GalleryChoices: List<String> = listOf(
 )
 
 /**
- * A node named [name] exactly.
+ * The boxes the gallery keeps in [DemoAppState].
  */
-internal fun galleryNamed(name: String): SemanticsMatcher = hasContentDescription(name)
+private val GalleryChecks: List<String> = listOf(FluentGalleryKeys.Updates, FluentGalleryKeys.Understood)
 
 /**
- * Everything the gallery keeps in [DemoAppState], to tell whether anything changed.
+ * Everything the Fluent gallery keeps in [DemoAppState], to tell whether anything changed.
  */
-internal fun DemoAppState.gallerySnapshot(): List<Any> {
-    val picks = GalleryChoices.flatMap { group -> (0 until 12).map { option -> isOn("$group.$option") } }
-    return picks + GallerySwitches.map { switch -> isOn(switch) } +
-        isChecked(FluentGalleryKeys.Updates) + isChecked(FluentGalleryKeys.Understood) + text
-}
+internal fun DemoAppState.fluentGallerySnapshot(): List<Any> =
+    gallerySnapshot(GalleryChoices, GallerySwitches, GalleryChecks)
 
 /**
  * The Fluent gallery in a Fluent pane of [spec], under the shell chrome, with motion frozen. With
  * [webFolds] the kit's fold modifiers fold state into names as they do on the web.
  */
-@OptIn(KitTestApi::class)
 @Composable
-internal fun GalleryHarness(
+internal fun FluentGalleryHarness(
     spec: PaneSpec,
     state: DemoAppState,
     modifier: Modifier,
     composed: MutableSet<String>? = null,
     webFolds: Boolean = false,
-) {
-    val probe: ((String) -> Unit)? = composed?.let { titles ->
-        { where: String -> if (where.startsWith(GALLERY_CARD)) titles += where.removePrefix(GALLERY_CARD) }
-    }
-    CompositionLocalProvider(LocalMotionFrozen provides true, LocalCompositionProbe provides probe) {
-        Chrome(ShellExpressive) {
-            if (webFolds) {
-                ProvideWebFoldsForTest { PreviewPane(spec, modifier) { ComponentsTab(spec, state) } }
-            } else {
-                PreviewPane(spec, modifier) { ComponentsTab(spec, state) }
-            }
-        }
-    }
-}
+) = GalleryHarness(spec, state, modifier, composed, expressive = ShellExpressive, webFolds = webFolds)
