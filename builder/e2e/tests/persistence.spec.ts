@@ -8,6 +8,7 @@ import {
   press,
   pressFor,
   pressKeyFor,
+  pressSettled,
   seedField,
   seedText,
   storedDocument,
@@ -32,8 +33,9 @@ test('an edit is saved, and a reload brings back the seed and the undo that reve
 
   await expect(seedField(page)).toBeAttached();
   await expect.poll(() => seedText(page)).toBe('#0B6E4F');
+  // The top bar is still laying out after the reload, so the press waits for Undo to hold still.
   const undo = button(page, /^Undo\b/).and(page.locator(':not([aria-label$="disabled"])'));
-  await press(page, undo);
+  await pressSettled(page, undo);
   await expect.poll(() => seedText(page)).toBe(first);
 });
 
