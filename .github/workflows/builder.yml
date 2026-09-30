@@ -177,6 +177,11 @@ jobs:
         working-directory: builder/e2e
         run: npm test -- --shard ${{ matrix.shard }}/4
 
+      - name: List flaky tests
+        if: always()
+        working-directory: builder/e2e
+        run: node flaky-summary.mjs
+
       - name: Upload the Playwright report
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

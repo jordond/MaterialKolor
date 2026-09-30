@@ -2,29 +2,45 @@ import { readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-// Fails when a spec or fixture sleeps with `waitForTimeout`. A test waits on something the page
-// shows, stores or draws, never on the clock. The perf and preview runs measure time and are left out.
+// Fails when a spec or fixture sleeps, with `waitForTimeout` or a `setTimeout` that resolves a
+// promise. A test waits on something the page shows, stores or draws, never on the clock. The
+// holds that are part of a gesture or a quiet window live in fixtures/timing.ts under names that
+// say what the time means, and only those are allowed. The perf and preview runs measure time and
+// are left out.
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const CHECKED = ['tests', 'fixtures'];
-const SLEEP = /\bwaitForTimeout\s*\(/;
+const WAIT_FOR_TIMEOUT = /\bwaitForTimeout\s*\(/;
+const SLEEP = /\bsetTimeout\s*\(\s*(?:resolve\b|\(\)\s*=>\s*resolve\s*\()/;
+const TIMING = 'fixtures/timing.ts';
+const TIMED_HOLDS = new Set(['holdFingerDown', 'holdBetweenTouches', 'networkQuietFor', 'pauseBeforeServerCheck']);
 
 const found = [];
 for (const folder of CHECKED) {
   for (const file of sources(path.join(here, folder))) {
+    const relative = path.relative(here, file).split(path.sep).join('/');
+    let inside = '';
     readFileSync(file, 'utf8')
       .split('\n')
       .forEach((line, index) => {
-        if (SLEEP.test(line)) found.push(`${path.relative(here, file)}:${index + 1}: ${line.trim()}`);
+        const declared = /^(?:export\s+)?(?:async\s+)?function\s+(\w+)/.exec(line);
+        if (declared) inside = declared[1];
+        const allowed = relative === TIMING && TIMED_HOLDS.has(inside);
+        if (WAIT_FOR_TIMEOUT.test(line) || (SLEEP.test(line) && !allowed)) {
+          found.push(`${relative}:${index + 1}: ${line.trim()}`);
+        }
       });
   }
 }
 
 if (found.length > 0) {
-  console.error(`waitForTimeout sleeps on the clock. Wait on the page's state instead.\n${found.join('\n')}`);
+  console.error(
+    'These sleep on the clock. Wait on the page state instead, or use a named hold from fixtures/timing.ts.\n' +
+      found.join('\n'),
+  );
   process.exit(1);
 }
-console.log(`No waitForTimeout in ${CHECKED.join(' or ')}.`);
+console.log(`No sleeps in ${CHECKED.join(' or ')}.`);
 
 function sources(folder) {
   return readdirSync(folder, { withFileTypes: true }).flatMap((entry) => {

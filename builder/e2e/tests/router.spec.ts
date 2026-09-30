@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 import { expect, hook, openBuilder, reloadBuilder, test } from './builder';
-import { nextFrames, openWorkspace, typeSeed } from '../fixtures/workspace';
+import { openWorkspace, typeSeed } from '../fixtures/workspace';
 
 // The router behind the builder, driven through the shell's test hooks. The route read at boot and
 // the history entries overlays push and pop. Then one real edit, which never moves the address or
@@ -31,7 +31,7 @@ test.describe('router', () => {
 
     await page.evaluate(() => history.back());
     await expect.poll(() => hook(page, 'overlayPops')).toBe('1');
-    await backSettled(page);
+    await backSettled(page, 1);
     expect(await hook(page, 'overlayPops')).toBe('1');
   });
 
@@ -110,7 +110,7 @@ test.describe('router', () => {
 
     await reloadBuilder(page);
     await expect.poll(() => historyState(page)).toBe('null');
-    await backSettled(page);
+    await backSettled(page, 1);
     expect(await hook(page, 'overlayPops')).toBe('0');
 
     await hook(page, 'pushOverlay', 'export');
@@ -133,7 +133,7 @@ test.describe('router', () => {
         }),
     );
     await expect.poll(() => historyState(page)).toBe('null');
-    await backSettled(page);
+    await backSettled(page, 3);
     expect(await hook(page, 'overlayPops')).toBe('1');
 
     await hook(page, 'pushOverlay', 'projects');
@@ -166,11 +166,12 @@ async function closeWithBacksHeld(page: Page, count: number): Promise<void> {
 }
 
 /**
- * Waits for the page to draw a few frames. The router counts a pop inside the browser's `popstate`
- * handler, and a back it sets off lands a task or two later, so a second pop would be counted by then.
+ * Waits until the router has handled [moves] `popstate` events since the page loaded and has no back
+ * of its own still on the way, so any second pop would have been counted already.
  */
-async function backSettled(page: Page): Promise<void> {
-  await nextFrames(page, 3);
+async function backSettled(page: Page, moves: number): Promise<void> {
+  await expect.poll(() => hook(page, 'routerMoves')).toBe(String(moves));
+  await expect.poll(() => hook(page, 'routerPendingBacks')).toBe('0');
 }
 
 async function historyLength(page: Page): Promise<number> {

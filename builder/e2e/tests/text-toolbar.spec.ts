@@ -48,10 +48,10 @@ test('a long press on a field shows the toolbar and Paste puts the clipboard tex
   await tap(cdp, row.button('Paste'));
 
   // The new seed tints the page, and once saved it is what the field shows after a reload.
-  await expect.poll(() => themeColor(page), { timeout: 10_000 }).not.toBe(tint);
+  await expect.poll(() => themeColor(page)).not.toBe(tint);
   await expect.poll(async () => String((await storedDocument(page))?.seed ?? '').toUpperCase()).toContain(PASTED);
   await reloadBuilder(page);
-  await expect.poll(async () => (await seedField(page)).textContent(), { timeout: 10_000 }).toContain(PASTED);
+  await expect.poll(async () => (await seedField(page)).textContent()).toContain(PASTED);
 });
 
 test('Copy from the toolbar puts the selection on the clipboard', async ({ page, context }) => {
@@ -65,7 +65,7 @@ test('Copy from the toolbar puts the selection on the clipboard', async ({ page,
   const row = await longPressForRow(page, cdp, box);
   await tap(cdp, row.button('Copy'));
 
-  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText()), { timeout: 10_000 }).not.toBe('');
+  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).not.toBe('');
   const copied = await page.evaluate(() => navigator.clipboard.readText());
   expect(text).toContain(copied);
 });
@@ -88,7 +88,7 @@ test('the mirror keeps the page through a long press and hears the paste after i
 
   await tap(cdp, row.button('Paste'));
   await expect
-    .poll(async () => (await seedField(page)).textContent(), { timeout: 10_000 })
+    .poll(async () => (await seedField(page)).textContent())
     .toContain(PASTED);
   console.log(`Mirror nodes after the paste: ${await settledMirror(page)}`);
 });
@@ -150,7 +150,7 @@ test('a long press on the export code keeps the mirror', async ({ page, context 
 /** The read only field of the open dialog, which holds the text to copy by hand. */
 async function copyField(page: Page): Promise<Box> {
   const field = page.locator('#cmp_a11y_root').getByRole('textbox', { name: /^Text to copy/ });
-  await expect(field).toBeAttached({ timeout: 10_000 });
+  await expect(field).toBeAttached();
   return settledBox(field);
 }
 
@@ -164,7 +164,7 @@ interface Row {
 async function seedField(page: Page): Promise<Locator> {
   const field = page.locator('#cmp_a11y_root').getByRole('textbox', { name: /^Seed color/ });
   await expect(field).toBeAttached({ timeout: 30_000 });
-  await expect.poll(async () => (await field.boundingBox())?.height ?? 0, { timeout: 10_000 }).toBeGreaterThan(0);
+  await expect.poll(async () => (await field.boundingBox())?.height ?? 0).toBeGreaterThan(0);
   return field;
 }
 
@@ -192,13 +192,10 @@ async function longPressForRow(
   await longPressAt(page, cdp, options.at ?? { x: field.x + field.width / 2, y: field.y + field.height * 0.4 });
   let row: Row | null = null;
   await expect
-    .poll(
-      async () => {
-        row = await findRow(page, before, field, readOnly);
-        return row?.labels ?? [];
-      },
-      { timeout: 15_000 },
-    )
+    .poll(async () => {
+      row = await findRow(page, before, field, readOnly);
+      return row?.labels ?? [];
+    })
     .toEqual(readOnly ? READ_ONLY_ROW : FULL_ROW);
   return row!;
 }

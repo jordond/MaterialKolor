@@ -97,7 +97,7 @@ test('the canvas tabs say which one is selected, and follow a click', async ({ p
 
   await press(page, button(page, 'Components, tab, not selected'));
 
-  await expect(button(page, 'Components, tab, selected')).toHaveCount(1, { timeout: 10_000 });
+  await expect(button(page, 'Components, tab, selected')).toHaveCount(1);
   await expect(button(page, 'App, tab, not selected')).toHaveCount(1);
 });
 
@@ -117,8 +117,8 @@ test('the export sheet is a named dialog with its buttons, and the page behind l
 
   await page.keyboard.press('Escape');
 
-  await expect(label(page, 'Export code, dialog')).toHaveCount(0, { timeout: 10_000 });
-  await expect(field(page, /^Seed color/)).toHaveCount(1, { timeout: 10_000 });
+  await expect(label(page, 'Export code, dialog')).toHaveCount(0);
+  await expect(field(page, /^Seed color/)).toHaveCount(1);
 });
 
 test('Tab stays inside the export sheet and comes back around to its first field', async ({ page }) => {
@@ -159,7 +159,7 @@ test('the split handle says how much light shows, follows a drag, and the hidden
   await page.mouse.up();
 
   await expect(handle).toHaveCount(1);
-  await expect(text(page, 'Split, 50% Light')).toHaveCount(0, { timeout: 10_000 });
+  await expect(text(page, 'Split, 50% Light')).toHaveCount(0);
 });
 
 /** Open the builder and wait until the mirror holds the workspace. */
@@ -173,7 +173,7 @@ async function openReady(page: Page): Promise<void> {
 async function openExport(page: Page): Promise<void> {
   await openReady(page);
   await press(page, button(page, 'Export code'));
-  await expect(label(page, 'Export code, dialog')).toHaveCount(1, { timeout: 10_000 });
+  await expect(label(page, 'Export code, dialog')).toHaveCount(1);
   await boxOf(field(page, 'Package name'));
 }
 

@@ -21,7 +21,7 @@ test('after a press on the bare canvas, Space shuffles the seed', async ({ page 
   await pressBareCanvas(page);
   await page.keyboard.press('Space');
 
-  await expect.poll(() => seedText(page), { timeout: 10_000 }).not.toBe(before);
+  await expect.poll(() => seedText(page)).not.toBe(before);
 });
 
 test('l typed in the seed field sets no lock', async ({ page }) => {
@@ -32,13 +32,13 @@ test('l typed in the seed field sets no lock', async ({ page }) => {
   await focusField(page, field);
   await page.keyboard.type('l');
   // The l showing in the field says the key has been handled, the page's shortcuts included.
-  await expect.poll(() => seedText(page), { timeout: 10_000 }).toContain('l');
+  await expect.poll(() => seedText(page)).toContain('l');
   expect(await lockState(page)).toBe(unlocked);
 
   // The same key on the page does set it, so the check above can tell the two apart.
   await pressBareCanvas(page);
   await page.keyboard.press('l');
-  await expect.poll(() => lockState(page), { timeout: 10_000 }).not.toBe(unlocked);
+  await expect.poll(() => lockState(page)).not.toBe(unlocked);
 });
 
 test('? opens the cheat sheet, and while it is open single keys and Space stay in it', async ({ page }) => {
@@ -49,7 +49,7 @@ test('? opens the cheat sheet, and while it is open single keys and Space stay i
 
   await page.keyboard.press('?');
   const note = page.locator(A11Y).getByText(SCREEN_READER_NOTE, { exact: true });
-  await expect(note).toHaveCount(1, { timeout: 10_000 });
+  await expect(note).toHaveCount(1);
 
   await page.keyboard.press('l');
   await page.keyboard.press('Space');
@@ -57,7 +57,7 @@ test('? opens the cheat sheet, and while it is open single keys and Space stay i
   // says the two keys before it have been handled.
   await expect(note).toHaveCount(1);
   await page.keyboard.press('Escape');
-  await expect(note).toHaveCount(0, { timeout: 10_000 });
+  await expect(note).toHaveCount(0);
 
   await expect.poll(() => seedText(page)).toBe(seed);
   await expect.poll(() => lockState(page)).toBe(unlocked);
@@ -73,17 +73,17 @@ test('Cmd or Ctrl with K, S and O belong to the page, and K opens the palette pa
 
   await page.keyboard.press(`${primary}+s`);
   await page.keyboard.press(`${primary}+k`);
-  await expect.poll(() => openOverlay(page), { timeout: 10_000 }).toBe('Palette');
+  await expect.poll(() => openOverlay(page)).toBe('Palette');
   // The router names the palette on the key, before the palette has drawn, so its search field
   // showing is what says it is open. The palette owns the keyboard then, so Esc closes it first, and
   // its pane leaving the page's tree says focus is back on the page. Until then a key goes to the
   // search field, where Compose on the web hears it a frame late, too late to keep it from the browser.
-  await expect(searchField(page)).toBeAttached({ timeout: 10_000 });
+  await expect(searchField(page)).toBeAttached();
   await page.keyboard.press('Escape');
-  await expect.poll(() => openOverlay(page), { timeout: 10_000 }).toBeNull();
-  await expect(page.locator(A11Y).getByText(/^Command palette, dialog/)).toHaveCount(0, { timeout: 10_000 });
+  await expect.poll(() => openOverlay(page)).toBeNull();
+  await expect(page.locator(A11Y).getByText(/^Command palette, dialog/)).toHaveCount(0);
   await page.keyboard.press(`${primary}+o`);
-  await expect(page.locator(A11Y).getByText(/^Projects, dialog/)).toHaveCount(1, { timeout: 10_000 });
+  await expect(page.locator(A11Y).getByText(/^Projects, dialog/)).toHaveCount(1);
 
   expect(await seenKeys(page)).toEqual(['s true', 'k true', 'o true']);
 });
@@ -94,7 +94,7 @@ test('inside the palette, Cmd or Ctrl with S and O never reach the browser, and 
   await pressBareCanvas(page);
   const primary = await primaryKey(page);
   await page.keyboard.press(`${primary}+k`);
-  await expect(searchField(page)).toBeAttached({ timeout: 10_000 });
+  await expect(searchField(page)).toBeAttached();
   // A key pressed in the search field reaches Compose a frame late on the web, too late to keep it
   // from the browser, so focus moves down into the rows first.
   await page.keyboard.press('ArrowDown');
@@ -110,13 +110,13 @@ test('inside the palette, Cmd or Ctrl with S and O never reach the browser, and 
   await page.keyboard.press(`${primary}+s`);
   await page.keyboard.press(`${primary}+o`);
 
-  await expect.poll(() => toast.count(), { timeout: 10_000 }).toBeGreaterThan(toastsBefore);
+  await expect.poll(() => toast.count()).toBeGreaterThan(toastsBefore);
   expect(await openOverlay(page)).toBe('Palette');
   await expect(page.locator(A11Y).getByText(/^Projects, dialog/)).toHaveCount(0);
   expect(await seenKeys(page)).toEqual(['s true', 'o true']);
   // The palette takes the poster out of the tree while it is open, so the button reads once it closes.
   await page.keyboard.press('Escape');
-  await expect(projects).toHaveAttribute('aria-label', /, saved$/, { timeout: 10_000 });
+  await expect(projects).toHaveAttribute('aria-label', /, saved$/);
 });
 
 test('after a number key switches the library, Space and V work with no click', async ({ page }) => {
@@ -129,12 +129,12 @@ test('after a number key switches the library, Space and V work with no click', 
   await page.keyboard.press('2');
   // The top bar's Undo names the switch once it has landed, and the page moves into the new skin then.
   // The keys reach the page again once the canvas holds focus with that label still in place.
-  await expect.poll(() => switchLanded(page), { timeout: 10_000 }).toBe(true);
+  await expect.poll(() => switchLanded(page)).toBe(true);
   await page.keyboard.press('Space');
-  await expect.poll(() => seedText(page), { timeout: 10_000 }).not.toBe(before);
+  await expect.poll(() => seedText(page)).not.toBe(before);
   await page.keyboard.press('v');
 
-  await expect(visionRow.first()).toBeAttached({ timeout: 10_000 });
+  await expect(visionRow.first()).toBeAttached();
 });
 
 /**
@@ -181,7 +181,7 @@ async function seenKeys(page: Page): Promise<string[]> {
 async function seedField(page: Page): Promise<Locator> {
   const field = page.locator(A11Y).getByRole('textbox', { name: /^Seed color/ });
   await expect(field).toBeAttached({ timeout: 30_000 });
-  await expect.poll(async () => (await field.boundingBox())?.height ?? 0, { timeout: 10_000 }).toBeGreaterThan(0);
+  await expect.poll(async () => (await field.boundingBox())?.height ?? 0).toBeGreaterThan(0);
   return field;
 }
 

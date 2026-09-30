@@ -3,7 +3,6 @@ import { expect, test } from './builder';
 import {
   boxOf,
   button,
-  LAND_TIMEOUT_MS,
   nextFrames,
   onPage,
   openWorkspace,
@@ -35,10 +34,10 @@ test('an edit in one tab lands in the other as a step its Undo takes back', asyn
 
   await typeSeed(writer, '#0B6E4F');
 
-  await expect.poll(() => seedText(reader), { timeout: LAND_TIMEOUT_MS }).toBe('#0B6E4F');
+  await expect.poll(() => seedText(reader)).toBe('#0B6E4F');
   await expect(onPage(reader, CONFLICT)).toHaveCount(0);
   await press(reader, button(reader, /^Undo\b/).and(reader.locator(':not([aria-label$="disabled"])')));
-  await expect.poll(() => seedText(reader), { timeout: LAND_TIMEOUT_MS }).toBe(first);
+  await expect.poll(() => seedText(reader)).toBe(first);
 });
 
 test('an edit in one tab offers the other the latest while it drags, and Load latest takes it', async ({ context }) => {
@@ -58,7 +57,7 @@ test('an edit in one tab offers the other the latest while it drags, and Load la
   await scrollBackUp(writer);
   await openFineTune(reader);
   const slider = onPage(reader, TONE_SLIDER);
-  await expect(slider.first()).toBeAttached({ timeout: LAND_TIMEOUT_MS });
+  await expect(slider.first()).toBeAttached();
   await scrollTo(reader, slider, poster(reader));
   const track = await boxOf(slider);
   const middle = { x: track.x + track.width / 2, y: track.y + track.height / 2 };
@@ -75,7 +74,7 @@ test('an edit in one tab offers the other the latest while it drags, and Load la
 
   try {
     await typeSeed(writer, '#0B6E4F');
-    await expect(onPage(reader, CONFLICT)).toHaveCount(1, { timeout: LAND_TIMEOUT_MS });
+    await expect(onPage(reader, CONFLICT)).toHaveCount(1);
   } finally {
     holding = false;
     await moving;
@@ -85,7 +84,7 @@ test('an edit in one tab offers the other the latest while it drags, and Load la
   await expect.poll(() => seedText(reader)).not.toBe('#0B6E4F');
   await expect(button(reader, 'Keep mine')).toHaveCount(1);
   await press(reader, button(reader, 'Load latest'));
-  await expect.poll(() => seedText(reader), { timeout: LAND_TIMEOUT_MS }).toBe('#0B6E4F');
+  await expect.poll(() => seedText(reader)).toBe('#0B6E4F');
   await expect(onPage(reader, CONFLICT)).toHaveCount(0);
 });
 
@@ -112,7 +111,7 @@ async function scrollBackUp(page: Page): Promise<void> {
         await page.mouse.wheel(0, -240);
         return false;
       },
-      { timeout: LAND_TIMEOUT_MS, intervals: [500] },
+      { intervals: [500] },
     )
     .toBe(true);
 }

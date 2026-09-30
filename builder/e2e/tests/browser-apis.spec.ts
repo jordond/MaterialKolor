@@ -353,7 +353,7 @@ async function pickPhoto(page: Page): Promise<void> {
 
 async function decodeLatest(page: Page): Promise<Record<string, unknown>> {
   await hook(page, 'decodeLatest');
-  await expect.poll(() => hook(page, 'decoded'), { timeout: 15_000 }).not.toBe('Pending');
+  await expect.poll(() => hook(page, 'decoded')).not.toBe('Pending');
   const decoded = await hook(page, 'decoded');
   expect(decoded).not.toBe('None');
   return JSON.parse(decoded);

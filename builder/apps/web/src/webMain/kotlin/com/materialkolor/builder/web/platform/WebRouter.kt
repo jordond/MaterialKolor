@@ -61,7 +61,7 @@ internal class WebRouter(
     init {
         history.onPop(::moved)
         goBackQuietly(depth)
-        exposeToE2e()
+        exposeToE2e(moves = { moves }, pendingBacks = { pendingBacks })
     }
 
     override fun replaceHome() {

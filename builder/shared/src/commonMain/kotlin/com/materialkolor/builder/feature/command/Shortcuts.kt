@@ -74,7 +74,7 @@ import kotlinx.coroutines.launch
 @ViewModelKey
 internal class ShortcutsModel(
     private val preferences: PreferencesRepository,
-    environment: Environment,
+    private val environment: Environment,
 ) : ViewModel() {
     /**
      * Whether this runs on an Apple system, where the shortcuts take Cmd.
@@ -97,6 +97,11 @@ internal class ShortcutsModel(
     fun setSingleKeys(on: Boolean) {
         viewModelScope.launch { preferences.update { prefs -> prefs.copy(singleKeyShortcuts = on) } }
     }
+
+    /**
+     * Tell the platform whether the page's focus holder has focus.
+     */
+    fun holderFocusChanged(focused: Boolean) = environment.holderFocusChanged(focused)
 }
 
 /**
@@ -427,6 +432,7 @@ internal fun rememberShortcuts(
             .pointerInput(focus) { claimUnclaimedPresses(focus, scope) { latestState.inspect } }
             .onFocusChanged { focusState ->
                 focus.pageHasFocus = focusState.hasFocus
+                if (focus.holderFocused != focusState.isFocused) model.holderFocusChanged(focusState.isFocused)
                 focus.holderFocused = focusState.isFocused
                 if (!focusState.isFocused) focus.armed = false
                 if (!focusState.isFocused) letGoOfGrayscale()
