@@ -87,14 +87,7 @@ class ImagePickTest {
     /**
      * The whole builder on fakes, booted.
      */
-    private fun ComposeUiTest.showRoot(): AppGraph {
-        val graph = with(app) {
-            bootRoot { graph ->
-                BuilderRoot(graph)
-            }
-        }
-        return graph
-    }
+    private fun ComposeUiTest.showRoot(): AppGraph = with(app) { bootRoot() }
 
     private companion object {
         const val UNSUPPORTED = "That file couldn’t be read as an image, so the theme stays as it was"

@@ -105,12 +105,11 @@ class PosterRailSessionTest {
      */
     private fun ComposeUiTest.showRoot(stores: InMemoryStoreFactory): AppGraph {
         val platform = FakePlatform(stores = stores)
-        val graph = with(app) {
+        return with(app) {
             bootRoot(platform = platform) { graph ->
                 workspace = metroViewModel()
                 BuilderRoot(graph, workspaceModel = workspace)
             }
         }
-        return graph
     }
 }

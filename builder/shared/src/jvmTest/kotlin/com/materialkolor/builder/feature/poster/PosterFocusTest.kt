@@ -219,13 +219,11 @@ class PosterFocusTest {
     /**
      * The whole builder on fakes, booted.
      */
-    private fun ComposeUiTest.showRoot(): AppGraph {
-        val graph = with(app) {
+    private fun ComposeUiTest.showRoot(): AppGraph =
+        with(app) {
             bootRoot { graph ->
                 workspace = metroViewModel()
                 BuilderRoot(graph, workspaceModel = workspace)
             }
         }
-        return graph
-    }
 }

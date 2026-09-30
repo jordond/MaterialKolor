@@ -161,15 +161,13 @@ class ColorPickerDialogTest {
             onNodeWithText("Pick").assertIsFocused()
         }
 
-    private fun ComposeUiTest.showRoot(): AppGraph {
-        val graph = with(app) {
+    private fun ComposeUiTest.showRoot(): AppGraph =
+        with(app) {
             bootRoot { graph ->
                 val workspace: WorkspaceModel = metroViewModel()
                 BuilderRoot(graph, workspaceModel = workspace)
             }
         }
-        return graph
-    }
 
     private companion object {
         val Screen = Argb(0xFF1A73E8.toInt())

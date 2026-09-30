@@ -218,6 +218,8 @@ class CommandPaletteTest {
             search("seed")
             onNode(rowMatcher("Go to Seed")).performScrollTo().performClick()
             waitUntil(timeoutMillis = WAIT_MILLIS) { !harness.workspace.state.value.preferences.posterCollapsed }
+            // The closed palette leaves the tree, and its search with it, before it opens again.
+            waitForIdle()
             harness.workspace.state.value.fineTune shouldBe null
 
             openPalette()

@@ -89,8 +89,8 @@ class TimingMarksTest {
     /**
      * The whole builder on fakes, booted.
      */
-    private fun ComposeUiTest.showRoot(): AppGraph {
-        val graph = with(app) {
+    private fun ComposeUiTest.showRoot(): AppGraph =
+        with(app) {
             bootRoot { graph ->
                 CompositionLocalProvider(
                     // The saving glyph turns on the frame clock, which would hold waitForIdle through the save.
@@ -101,8 +101,6 @@ class TimingMarksTest {
                 }
             }
         }
-        return graph
-    }
 
     private companion object {
         val IMAGE_MARKS = listOf(TimingMarks.THUMBNAIL, TimingMarks.EXTRACT)

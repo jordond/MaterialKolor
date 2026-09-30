@@ -215,14 +215,7 @@ class TopBarContentTest {
     /**
      * The whole builder on fakes, booted, with its graph so a test can read the session.
      */
-    private fun ComposeUiTest.showRoot(): AppGraph {
-        val graph = with(app) {
-            bootRoot { graph ->
-                BuilderRoot(graph)
-            }
-        }
-        return graph
-    }
+    private fun ComposeUiTest.showRoot(): AppGraph = with(app) { bootRoot() }
 
     /**
      * Moves the theme onto the 2021 spec, which a pick of M3 Expressive moves to 2025.

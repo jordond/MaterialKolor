@@ -403,11 +403,7 @@ class WorkspaceBannersTest {
     }
 
     private fun ComposeUiTest.showRoot(platform: FakePlatform) {
-        val graph = with(app) {
-            bootRoot(platform = platform) { graph ->
-                BuilderRoot(graph)
-            }
-        }
+        with(app) { bootRoot(platform = platform) }
     }
 }
 

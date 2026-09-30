@@ -343,14 +343,12 @@ class CompactMediumTopBarTest {
     private fun ComposeUiTest.showRoot(
         folds: Boolean = true,
         inTree: Boolean = false,
-    ): AppGraph {
-        val graph = with(app) {
+    ): AppGraph =
+        with(app) {
             bootRoot { graph ->
                 val root = @Composable { BuilderRoot(graph) }
                 val named = @Composable { if (folds) ProvideWebFoldsForTest(root) else root() }
                 if (inTree) ProvideOverlaysInTreeForTest(named) else named()
             }
         }
-        return graph
-    }
 }

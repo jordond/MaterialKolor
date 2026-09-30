@@ -4,7 +4,9 @@ import com.materialkolor.builder.core.platform.Router
 import com.materialkolor.builder.domain.link.Route
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 
 /**
  * A [Router] that remembers what it was asked to do and lets a test press back.
@@ -17,20 +19,23 @@ internal class FakeRouter(
     /**
      * Every call made so far, oldest first.
      */
-    val calls: MutableList<RouterCall> = mutableListOf()
+    val calls: List<RouterCall>
+        get() = kept.value
+
+    private val kept = MutableStateFlow<List<RouterCall>>(emptyList())
 
     override val overlayPops: Flow<Unit> = pops.receiveAsFlow()
 
     override fun replaceHome() {
-        calls += RouterCall.ReplaceHome
+        kept.update { calls -> calls + RouterCall.ReplaceHome }
     }
 
     override fun pushOverlay(id: String) {
-        calls += RouterCall.PushOverlay(id)
+        kept.update { calls -> calls + RouterCall.PushOverlay(id) }
     }
 
     override fun popOverlay() {
-        calls += RouterCall.PopOverlay
+        kept.update { calls -> calls + RouterCall.PopOverlay }
     }
 
     /**

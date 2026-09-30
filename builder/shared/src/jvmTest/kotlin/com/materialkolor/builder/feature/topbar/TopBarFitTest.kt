@@ -353,8 +353,8 @@ class TopBarFitTest {
      * The whole builder on fakes, booted, with its graph so a test can switch libraries. [fitProbe]
      * hears each time the switcher measures its segmented row.
      */
-    private fun ComposeUiTest.showRoot(fitProbe: (() -> Unit)? = null): AppGraph {
-        val graph = with(app) {
+    private fun ComposeUiTest.showRoot(fitProbe: (() -> Unit)? = null): AppGraph =
+        with(app) {
             bootRoot { graph ->
                 CompositionLocalProvider(
                     LocalSwitcherFitProbe provides fitProbe,
@@ -363,6 +363,4 @@ class TopBarFitTest {
                 }
             }
         }
-        return graph
-    }
 }

@@ -288,15 +288,13 @@ class FirstRunHintTest {
     /**
      * The whole builder on fakes, booted, with [probe] drawn over the workspace every frame.
      */
-    private fun ComposeUiTest.showRoot(probe: @Composable (state: WorkspaceModel.State) -> Unit = {}): AppGraph {
-        val graph = with(app) {
+    private fun ComposeUiTest.showRoot(probe: @Composable (state: WorkspaceModel.State) -> Unit = {}): AppGraph =
+        with(app) {
             bootRoot { graph ->
                 workspace = metroViewModel()
                 BuilderRoot(graph, workspaceModel = workspace, probe = probe)
             }
         }
-        return graph
-    }
 
     private fun ComposeUiTest.showTopBar(
         holder: TopBarHolder,

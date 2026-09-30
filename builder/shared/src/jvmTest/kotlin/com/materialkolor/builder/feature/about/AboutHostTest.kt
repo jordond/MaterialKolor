@@ -284,7 +284,7 @@ class AboutHostTest {
                 opened += uri
             }
         }
-        val graph = with(app) {
+        return with(app) {
             bootRoot { graph ->
                 CompositionLocalProvider(
                     LocalUriHandler provides uriHandler,
@@ -298,7 +298,6 @@ class AboutHostTest {
                 }
             }
         }
-        return graph
     }
 
     @Composable

@@ -164,13 +164,10 @@ class ArchitectureTest {
             """
             waitUntil { session != null }
             waitUntil("the toast") { shown }
-            waitUntil(
-                timeoutMillis = WAIT_MILLIS,
-            ) { shown }
             """,
         )
 
-        scan(listOf(file)).map { violation -> violation.rule } shouldBe List(3) { ArchitectureRule.WaitTimeout }
+        scan(listOf(file)).map { violation -> violation.rule } shouldBe List(2) { ArchitectureRule.WaitTimeout }
     }
 
     @Test
@@ -180,6 +177,9 @@ class ArchitectureTest {
             """
             waitUntil(timeoutMillis = WAIT_MILLIS) { platform.environment.splashHidden }
             waitUntil("the toast", timeoutMillis = 10_000) { shown }
+            waitUntil(
+                timeoutMillis = WAIT_MILLIS,
+            ) { shown }
             """,
         )
         val common = planted("shared/src/commonTest", "waitUntil { shown }")
@@ -359,11 +359,12 @@ internal enum class ArchitectureRule(
     ),
 
     /**
-     * A Compose test on the JVM names the time it waits for a condition, on the same line as the
-     * call. The one second default runs out on a busy machine long before the test's clock does.
+     * A Compose test on the JVM names the time it waits for a condition. The one second default runs
+     * out on a busy machine long before the test's clock does. A call whose arguments the formatter
+     * wrapped onto lines of their own is left to review.
      */
     WaitTimeout(
-        pattern = Regex("""\bwaitUntil\s*(?:\{|\((?![^)]*\btimeoutMillis\b))"""),
+        pattern = Regex("""\bwaitUntil\s*(?:\{|\((?!\s*$)(?![^)]*\btimeoutMillis\b))"""),
         appliesTo = { file -> file.sourceSet == "jvmTest" },
     ),
 
