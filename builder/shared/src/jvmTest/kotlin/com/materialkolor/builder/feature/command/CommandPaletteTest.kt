@@ -25,20 +25,32 @@ import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.MotionOverride
 import com.materialkolor.builder.domain.persist.PreviewTab
+import com.materialkolor.builder.fakes.FakePlatform
 import com.materialkolor.builder.feature.canvas.RampTarget
 import com.materialkolor.builder.feature.workspace.FineTuneSection
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import kotlin.test.AfterTest
 import kotlin.test.Test
 
 @OptIn(ExperimentalTestApi::class, ExperimentalComposeUiApi::class)
-internal class CommandPaletteTest : PaletteTestBase() {
+internal class CommandPaletteTest {
+    private val harness: CommandHarness = CommandHarness()
+
+    private val platform: FakePlatform = harness.platform
+
+    @AfterTest
+    fun tearDown() {
+        harness.close()
+    }
+
     // The category is the header over the row now, and the keys are keycaps at its end.
     @Test
     fun everyCommand_listsUnderItsCategoryWithItsKeys_andADisabledOneWithItsReason() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            boot()
-            openPalette()
+            var categories = emptyMap<CommandCategory, String>()
+            boot(harness) { titles -> categories = titles }
+            openPalette(harness)
             val apple = isApple(platform.environment.browser)
             // All but its own row, which would only open what is already open.
             val palette = harness.command("palette")
@@ -73,8 +85,8 @@ internal class CommandPaletteTest : PaletteTestBase() {
     @Test
     fun aRunCommand_leadsTheNextEmptySearch() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            boot()
-            openPalette()
+            boot(harness)
+            openPalette(harness)
             val copy = harness.command("copySeed").label
             rowLabels().first() shouldNotBe copy
 
@@ -82,7 +94,7 @@ internal class CommandPaletteTest : PaletteTestBase() {
             waitForIdle()
             harness.workspace.state.value.panel shouldBe null
             platform.clipboard.texts.size shouldBe 1
-            openPalette()
+            openPalette(harness)
 
             rowLabels().first() shouldBe copy
         }
@@ -90,9 +102,9 @@ internal class CommandPaletteTest : PaletteTestBase() {
     @Test
     fun tsp_findsTonalSpotFirst_andEnterUsesIt() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            boot()
+            boot(harness)
             runOnUiThread { harness.workspace.edit(DocumentChange.SetStyle(Style.Vibrant), EditPhase.Discrete) }
-            openPalette()
+            openPalette(harness)
 
             search("tsp")
             rowLabels().first() shouldBe "Use style TonalSpot"
@@ -105,8 +117,8 @@ internal class CommandPaletteTest : PaletteTestBase() {
     @Test
     fun aColor_leadsWithSetSeed() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            boot()
-            openPalette()
+            boot(harness)
+            openPalette(harness)
 
             search("#0B6E4F")
             rowLabels().first() shouldBe "Set seed to #0B6E4F"
@@ -118,10 +130,10 @@ internal class CommandPaletteTest : PaletteTestBase() {
     @Test
     fun aShareLink_leadsWithOpenSharedTheme() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            boot()
+            boot(harness)
             val shared = ThemeDocument.Default.copy(seed = Argb(0x8A2BE2))
             val code = ShareCodec.encode(shared, projectName = "Shared")
-            openPalette()
+            openPalette(harness)
 
             search("https://materialkolor.com/t/$code")
             rowLabels().first() shouldBe "Open shared theme"
@@ -133,8 +145,8 @@ internal class CommandPaletteTest : PaletteTestBase() {
     @Test
     fun aStyleName_leadsWithThatStyle() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            boot()
-            openPalette()
+            boot(harness)
+            openPalette(harness)
 
             search("vibrant")
             rowLabels().first() shouldBe "Use style Vibrant"
@@ -146,8 +158,8 @@ internal class CommandPaletteTest : PaletteTestBase() {
     @Test
     fun aRoleName_showsItOnItsRamp() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            boot()
-            openPalette()
+            boot(harness)
+            openPalette(harness)
 
             search("primary container")
             rowLabels().first() shouldBe "Show primaryContainer on ramp"
@@ -161,10 +173,10 @@ internal class CommandPaletteTest : PaletteTestBase() {
     @Test
     fun aSectionName_opensThePosterAtIt() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            boot()
+            boot(harness)
             runOnUiThread { harness.workspace.setPosterCollapsed(true) }
             waitUntil(timeoutMillis = WAIT_MILLIS) { harness.workspace.state.value.preferences.posterCollapsed }
-            openPalette()
+            openPalette(harness)
 
             search("key colors")
             rowLabels().first() shouldBe "Go to Key colors"
@@ -177,11 +189,11 @@ internal class CommandPaletteTest : PaletteTestBase() {
     @Test
     fun goTo_opensTheFineTuneSheetAtASectionItHolds_andSeedOnlyOpensThePoster() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            boot()
+            boot(harness)
             runOnUiThread { harness.workspace.setPosterCollapsed(true) }
             waitUntil(timeoutMillis = WAIT_MILLIS) { harness.workspace.state.value.preferences.posterCollapsed }
 
-            openPalette()
+            openPalette(harness)
             search("seed")
             onNode(rowMatcher("Go to Seed")).performScrollTo().performClick()
             waitUntil(timeoutMillis = WAIT_MILLIS) { !harness.workspace.state.value.preferences.posterCollapsed }
@@ -189,7 +201,7 @@ internal class CommandPaletteTest : PaletteTestBase() {
             waitForIdle()
             harness.workspace.state.value.fineTune shouldBe null
 
-            openPalette()
+            openPalette(harness)
             search("target options")
             onNode(rowMatcher("Go to Target options")).performScrollTo().performClick()
             waitForIdle()
@@ -199,8 +211,8 @@ internal class CommandPaletteTest : PaletteTestBase() {
     @Test
     fun motionRows_markTheCurrentOne_andSetTheOverride() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            boot()
-            openPalette()
+            boot(harness)
+            openPalette(harness)
             val system = harness.command("motion.${MotionOverride.System.name}").label
             val reduce = harness.command("motion.${MotionOverride.Reduce.name}").label
 
@@ -217,8 +229,8 @@ internal class CommandPaletteTest : PaletteTestBase() {
     @Test
     fun saveNow_stillSaysSaved_afterThePaletteHasGone() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            boot()
-            openPalette()
+            boot(harness)
+            openPalette(harness)
             search("save now")
             rowLabels().first() shouldBe harness.command("save").label
 
@@ -232,7 +244,7 @@ internal class CommandPaletteTest : PaletteTestBase() {
     fun aClosedPalette_buildsNoRegistryOnADragStep() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             var builds = 0
-            with(harness) { show(probe = { categories() }, registryBuilds = { builds++ }) }
+            with(harness) { show(probe = { categoryTitles() }, registryBuilds = { builds++ }) }
 
             fun dragStepBuilds(seed: Int): Int {
                 builds = 0
@@ -245,7 +257,7 @@ internal class CommandPaletteTest : PaletteTestBase() {
 
             // The page's own registry, as often as a drag step recomposes the page.
             val page = dragStepBuilds(0xFF1A73E8.toInt())
-            openPalette()
+            openPalette(harness)
             runOnUiThread { harness.workspace.closePanel() }
             waitForIdle()
 
@@ -255,8 +267,8 @@ internal class CommandPaletteTest : PaletteTestBase() {
     @Test
     fun theVisionMenuRow_closesThePalette_andOpensTheMenu() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            boot()
-            openPalette()
+            boot(harness)
+            openPalette(harness)
             search("vision menu")
             rowLabels().first() shouldBe harness.command("visionMenu").label
 

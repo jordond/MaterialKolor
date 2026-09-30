@@ -19,19 +19,30 @@ import androidx.compose.ui.text.input.SetComposingTextCommand
 import com.materialkolor.builder.HEIGHT
 import com.materialkolor.builder.WAIT_MILLIS
 import com.materialkolor.builder.WIDTH
+import com.materialkolor.builder.fakes.FakePlatform
 import com.materialkolor.builder.feature.workspace.Panel
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
+import kotlin.test.AfterTest
 import kotlin.test.Test
 
 @OptIn(ExperimentalTestApi::class, ExperimentalComposeUiApi::class)
-internal class CommandPaletteKeysTest : PaletteTestBase() {
+internal class CommandPaletteKeysTest {
+    private val harness: CommandHarness = CommandHarness()
+
+    private val platform: FakePlatform = harness.platform
+
+    @AfterTest
+    fun tearDown() {
+        harness.close()
+    }
+
     @Test
     fun enterOnCopyShareLink_writesBeforeTheKeyHandlerReturns() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            boot()
-            openPalette()
+            boot(harness)
+            openPalette(harness)
             search("copy share link")
             rowLabels().first() shouldBe "Copy share link"
             // No frame and no task runs after the key, so only a write started inside it lands.
@@ -47,9 +58,9 @@ internal class CommandPaletteKeysTest : PaletteTestBase() {
     fun enterWhileAnInputMethodComposes_runsNothing() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             var session: PlatformTextInputMethodRequest? = null
-            with(harness) { show(onTextInput = { request -> session = request }, probe = { categories() }) }
+            with(harness) { show(onTextInput = { request -> session = request }, probe = { categoryTitles() }) }
             session = null
-            openPalette()
+            openPalette(harness)
             search("copy share lin")
             waitUntil(timeoutMillis = WAIT_MILLIS) { session != null }
             val request = checkNotNull(session)
@@ -68,8 +79,8 @@ internal class CommandPaletteKeysTest : PaletteTestBase() {
     @Test
     fun esc_throwsTheSearchAway_thenCloses() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            boot()
-            openPalette()
+            boot(harness)
+            openPalette(harness)
             search("zzz")
             rowLabels() shouldBe emptyList()
 
@@ -86,8 +97,8 @@ internal class CommandPaletteKeysTest : PaletteTestBase() {
     @Test
     fun downAndUp_moveBetweenTheFieldAndTheRows() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            boot()
-            openPalette()
+            boot(harness)
+            openPalette(harness)
             search("shuffle")
             val shuffle = harness.command("shuffle").label
 
@@ -103,7 +114,7 @@ internal class CommandPaletteKeysTest : PaletteTestBase() {
     @Test
     fun closing_handsFocusBackToCommands_whenItsButtonOpenedIt() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            boot()
+            boot(harness)
             val commands = onNode(
                 hasClickAction() and hasContentDescription("Command palette") and !InPalette,
             )
@@ -121,7 +132,7 @@ internal class CommandPaletteKeysTest : PaletteTestBase() {
     @Test
     fun closing_handsFocusBackToThePage_whenCtrlKOpenedIt() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            boot()
+            boot(harness)
             keys { withKeyDown(Key.CtrlLeft) { pressKey(Key.K) } }
             harness.workspace.state.value.panel shouldBe Panel.Palette
 
@@ -142,7 +153,7 @@ internal class CommandPaletteKeysTest : PaletteTestBase() {
     @Test
     fun esc_thatReachesThePage_closesThePalette() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            boot()
+            boot(harness)
             keys { withKeyDown(Key.CtrlLeft) { pressKey(Key.K) } }
             harness.workspace.state.value.panel shouldBe Panel.Palette
 
@@ -155,8 +166,8 @@ internal class CommandPaletteKeysTest : PaletteTestBase() {
     @Test
     fun ctrlSInsideThePalette_saves_andCtrlO_leavesItOpen() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            boot()
-            openPalette()
+            boot(harness)
+            openPalette(harness)
 
             field().performKeyInput { withKeyDown(Key.CtrlLeft) { pressKey(Key.O) } }
             waitForIdle()

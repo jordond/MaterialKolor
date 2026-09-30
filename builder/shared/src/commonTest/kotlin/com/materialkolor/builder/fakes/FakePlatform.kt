@@ -4,6 +4,9 @@ import com.materialkolor.builder.core.platform.InMemoryStoreFactory
 import com.materialkolor.builder.core.platform.LibraryVersionSource
 import com.materialkolor.builder.core.platform.LinkCardSource
 import com.materialkolor.builder.core.platform.PlatformServices
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
+import kotlin.concurrent.Volatile
 
 /**
  * Every fake in one [PlatformServices], typed as the fakes so a test can reach their controls.
@@ -27,15 +30,19 @@ internal class FakeLinkCardSource : LinkCardSource {
     /**
      * What every fetch gives, null for no card.
      */
+    @Volatile
     var bytes: ByteArray? = null
 
     /**
      * Every url fetched, oldest first.
      */
-    val urls: MutableList<String> = mutableListOf()
+    val urls: List<String>
+        get() = fetched.value
+
+    private val fetched = MutableStateFlow<List<String>>(emptyList())
 
     override suspend fun fetch(url: String): ByteArray? {
-        urls += url
+        fetched.update { urls -> urls + url }
         return bytes
     }
 }
@@ -44,16 +51,24 @@ internal class FakeLinkCardSource : LinkCardSource {
  * A [LibraryVersionSource] that answers with [json] and counts how often it was asked.
  */
 internal class FakeLibraryVersionSource(
-    var json: String? = null,
+    json: String? = null,
 ) : LibraryVersionSource {
+    /**
+     * What every fetch gives, null for no answer.
+     */
+    @Volatile
+    var json: String? = json
+
     /**
      * How many times [fetch] ran.
      */
-    var fetches: Int = 0
-        private set
+    val fetches: Int
+        get() = count.value
+
+    private val count = MutableStateFlow(0)
 
     override suspend fun fetch(): String? {
-        fetches++
+        count.update { fetches -> fetches + 1 }
         return json
     }
 }
