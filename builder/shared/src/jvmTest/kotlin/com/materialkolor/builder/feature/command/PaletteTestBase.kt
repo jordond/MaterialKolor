@@ -44,7 +44,7 @@ internal abstract class PaletteTestBase {
     }
 
     @Composable
-    private fun categories() {
+    protected fun categories() {
         categories = CommandCategory.entries.associateWith { category -> stringResource(category.title) }
     }
 
