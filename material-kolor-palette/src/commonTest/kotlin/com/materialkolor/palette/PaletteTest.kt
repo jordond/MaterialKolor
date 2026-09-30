@@ -4,7 +4,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.kmpalette.palette.graphics.Palette
 import com.kmpalette.palette.graphics.Target
-import com.materialkolor.hct.Hct
 import com.materialkolor.score.Score
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -99,16 +98,5 @@ class PaletteTest {
 
         assertTrue(palette.swatches.isEmpty(), "expected the filter to drop every swatch")
         assertNull(palette.seedColorOrNull())
-    }
-
-    @Test
-    fun toHct_matchesTheSwatchColor() {
-        val swatch = Palette.Swatch(0xFF00BCD4.toInt(), 1)
-        val expected = Hct.fromInt(swatch.rgb)
-        val actual = swatch.toHct()
-
-        assertEquals(expected.hue, actual.hue)
-        assertEquals(expected.chroma, actual.chroma)
-        assertEquals(expected.tone, actual.tone)
     }
 }

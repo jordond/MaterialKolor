@@ -8,11 +8,24 @@ import androidx.compose.ui.graphics.ImageBitmapConfig
 import androidx.compose.ui.graphics.colorspace.ColorSpaces
 import androidx.compose.ui.graphics.toArgb
 import com.materialkolor.PaletteStyle
+import com.materialkolor.dynamiccolor.ColorSpec
+import com.materialkolor.hct.Hct
 import com.materialkolor.palettes.TonalPalette
+import com.materialkolor.scheme.SchemeCmf
+import com.materialkolor.scheme.SchemeContent
+import com.materialkolor.scheme.SchemeExpressive
+import com.materialkolor.scheme.SchemeFidelity
+import com.materialkolor.scheme.SchemeFruitSalad
+import com.materialkolor.scheme.SchemeMonochrome
+import com.materialkolor.scheme.SchemeNeutral
+import com.materialkolor.scheme.SchemeRainbow
+import com.materialkolor.scheme.SchemeTonalSpot
+import com.materialkolor.scheme.SchemeVibrant
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import com.materialkolor.dynamiccolor.DynamicScheme as McuDynamicScheme
 
 class ConsumerContractsTest {
     @Test
@@ -54,14 +67,18 @@ class ConsumerContractsTest {
 
     @Test
     fun absentOverridesUseTheSelectedStyle() {
+        val seed = Color(0xff4285f4)
         for (style in PaletteStyle.KnownStyles) {
-            val seed = Color(0xff4285f4)
-            val expected = seed.toDynamicScheme(isDark = true, style = style)
+            val expected = styleScheme(style, Hct.fromInt(seed.toArgb()))
             val actual = DynamicScheme(seedColor = seed, isDark = true, style = style)
-            assertEquals(expected.primaryPalette, actual.primaryPalette)
-            assertEquals(expected.secondaryPalette, actual.secondaryPalette)
-            assertEquals(expected.tertiaryPalette, actual.tertiaryPalette)
-            assertEquals(expected.errorPalette, actual.errorPalette)
+            assertEquals(expected.variant, actual.variant, style.name)
+            assertEquals(expected.specVersion, actual.specVersion, style.name)
+            assertEquals(expected.primaryPalette, actual.primaryPalette, style.name)
+            assertEquals(expected.secondaryPalette, actual.secondaryPalette, style.name)
+            assertEquals(expected.tertiaryPalette, actual.tertiaryPalette, style.name)
+            assertEquals(expected.neutralPalette, actual.neutralPalette, style.name)
+            assertEquals(expected.neutralVariantPalette, actual.neutralVariantPalette, style.name)
+            assertEquals(expected.errorPalette, actual.errorPalette, style.name)
         }
     }
 
@@ -73,6 +90,26 @@ class ConsumerContractsTest {
         assertEquals(fallback, image.themeColor(fallback = fallback))
         assertNull(image.themeColorOrNull())
         assertEquals(Color.Black, image.themeColorOrNull(filter = false))
+    }
+
+    private fun styleScheme(
+        style: PaletteStyle,
+        seed: Hct,
+    ): McuDynamicScheme {
+        val spec = ColorSpec.SpecVersion.SPEC_2025
+        val platform = McuDynamicScheme.Platform.PHONE
+        return when (style) {
+            PaletteStyle.TonalSpot -> SchemeTonalSpot(seed, true, 0.0, spec, platform)
+            PaletteStyle.Neutral -> SchemeNeutral(seed, true, 0.0, spec, platform)
+            PaletteStyle.Vibrant -> SchemeVibrant(seed, true, 0.0, spec, platform)
+            PaletteStyle.Expressive -> SchemeExpressive(seed, true, 0.0, spec, platform)
+            PaletteStyle.Rainbow -> SchemeRainbow(seed, true, 0.0, spec, platform)
+            PaletteStyle.FruitSalad -> SchemeFruitSalad(seed, true, 0.0, spec, platform)
+            PaletteStyle.Monochrome -> SchemeMonochrome(seed, true, 0.0, spec, platform)
+            PaletteStyle.Fidelity -> SchemeFidelity(seed, true, 0.0, spec, platform)
+            PaletteStyle.Content -> SchemeContent(seed, true, 0.0, spec, platform)
+            is PaletteStyle.Cmf -> SchemeCmf(listOf(seed), true, 0.0, ColorSpec.SpecVersion.SPEC_2026, platform)
+        }
     }
 
     private class SolidBitmap(

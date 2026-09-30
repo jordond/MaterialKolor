@@ -1,12 +1,12 @@
 package com.materialkolor.unstyled
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import com.composeunstyled.theme.ThemeToken
 import com.materialkolor.MaterialKolors
 import com.materialkolor.ktx.DynamicScheme
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 class ThemeValuesTest {
@@ -29,8 +29,19 @@ class ThemeValuesTest {
     }
 
     @Test
-    fun toThemeValues_lightAndDarkDiffer() {
-        assertNotEquals(lightKolors.toThemeValues(), darkKolors.toThemeValues())
+    fun toThemeValues_lightAndDarkFlipTheBackgroundAndItsContent() {
+        val light = lightKolors.toThemeValues()
+        val dark = darkKolors.toThemeValues()
+
+        for (token in listOf(MaterialKolorTokens.background, MaterialKolorTokens.surface)) {
+            assertTrue(light.getValue(token).luminance() > 0.5f, "light ${token.name}")
+            assertTrue(dark.getValue(token).luminance() < 0.5f, "dark ${token.name}")
+        }
+
+        for (token in listOf(MaterialKolorTokens.onBackground, MaterialKolorTokens.onSurface)) {
+            assertTrue(light.getValue(token).luminance() < 0.5f, "light ${token.name}")
+            assertTrue(dark.getValue(token).luminance() > 0.5f, "dark ${token.name}")
+        }
     }
 
     @Test

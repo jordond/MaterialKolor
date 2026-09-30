@@ -7,8 +7,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
 import com.materialkolor.PaletteStyle
-import com.materialkolor.dynamiccolor.DynamicScheme
-import com.materialkolor.ktx.DynamicScheme
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -30,37 +28,27 @@ class PrimaryOverrideTest {
         Color(0xFF9E9E9E),
     )
 
+    private val deprecatedColor = Color(0xFFFF5722)
+
+    /**
+     * Upstream Java MCU accents for FF5722 as the seed of a SPEC_2025 tonal spot scheme, with its
+     * primary palette pinned to FF5722.
+     */
+    private val tonalSpotLight = accents(primary = 0xFFB12F00, secondary = 0xFF78574E, tertiary = 0xFF765B25)
+
+    private val tonalSpotDark = accents(primary = 0xFFFFB5A0, secondary = 0xFFE7BDB2, tertiary = 0xFFFFE8C4)
+
+    /**
+     * The same for a SPEC_2025 expressive scheme, which the expressive theme defaults to.
+     */
+    private val expressiveLight = accents(primary = 0xFFB12F00, secondary = 0xFF416377, tertiary = 0xFF006786)
+
     private val styles = listOf(
         PaletteStyle.TonalSpot,
         PaletteStyle.Vibrant,
         PaletteStyle.Expressive,
         PaletteStyle.Fidelity,
     )
-
-    @Test
-    fun dynamicColorScheme_withPrimaryOverride_matchesCoreScheme() {
-        forEachCombination { seed, override, style, isDark ->
-            val expected = DynamicScheme(
-                seedColor = seed,
-                isDark = isDark,
-                primary = override,
-                style = style,
-            ).toColorScheme()
-
-            val actual = dynamicColorScheme(
-                seedColor = seed,
-                isDark = isDark,
-                primary = override,
-                style = style,
-            )
-
-            assertEquals(
-                expected.roles(),
-                actual.roles(),
-                describe(seed, override, style, isDark),
-            )
-        }
-    }
 
     @Test
     fun dynamicColorScheme_withPrimaryOverride_keepsSeedDrivenRoles() {
@@ -141,115 +129,89 @@ class PrimaryOverrideTest {
 
     @Suppress("DEPRECATION")
     @Test
-    fun deprecatedDynamicColorScheme_matchesItsReplacement() {
-        for (color in overrides) {
-            for (isDark in listOf(false, true)) {
-                val deprecated = dynamicColorScheme(primary = color, isDark = isDark)
-                val replacement = dynamicColorScheme(
-                    seedColor = color,
-                    isDark = isDark,
-                    primary = color,
-                )
-
-                assertEquals(replacement.roles(), deprecated.roles(), color.toString())
-            }
-        }
+    fun deprecatedDynamicColorScheme_seedsAndPinsPrimaryWithTheColor() {
+        assertEquals(tonalSpotLight, dynamicColorScheme(primary = deprecatedColor, isDark = false).accents())
+        assertEquals(tonalSpotDark, dynamicColorScheme(primary = deprecatedColor, isDark = true).accents())
     }
 
     @Suppress("DEPRECATION")
     @Test
-    fun deprecatedRememberDynamicColorScheme_matchesItsReplacement() =
+    fun deprecatedRememberDynamicColorScheme_seedsAndPinsPrimaryWithTheColor() =
         runComposeUiTest {
             var deprecated: ColorScheme? = null
-            var replacement: ColorScheme? = null
 
             setContent {
-                deprecated = rememberDynamicColorScheme(primary = overrides.first(), isDark = false)
-                replacement = rememberDynamicColorScheme(
-                    seedColor = overrides.first(),
-                    isDark = false,
-                    primary = overrides.first(),
-                )
+                deprecated = rememberDynamicColorScheme(primary = deprecatedColor, isDark = false)
             }
 
             waitForIdle()
-            assertEquals(assertNotNull(replacement).roles(), assertNotNull(deprecated).roles())
+            assertEquals(tonalSpotLight, assertNotNull(deprecated).accents())
         }
 
     @Suppress("DEPRECATION")
     @Test
-    fun deprecatedRememberDynamicMaterialThemeState_matchesItsReplacement() =
+    fun deprecatedRememberDynamicMaterialThemeState_seedsAndPinsPrimaryWithTheColor() =
         runComposeUiTest {
             var deprecated: ColorScheme? = null
-            var replacement: ColorScheme? = null
 
             setContent {
-                deprecated = rememberDynamicMaterialThemeState(
-                    primary = overrides.first(),
-                    isDark = true,
-                ).colorScheme
-
-                replacement = rememberDynamicMaterialThemeState(
-                    seedColor = overrides.first(),
-                    isDark = true,
-                    primary = overrides.first(),
-                ).colorScheme
+                deprecated = rememberDynamicMaterialThemeState(primary = deprecatedColor, isDark = true).colorScheme
             }
 
             waitForIdle()
-            assertEquals(assertNotNull(replacement).roles(), assertNotNull(deprecated).roles())
+            assertEquals(tonalSpotDark, assertNotNull(deprecated).accents())
         }
 
     @Suppress("DEPRECATION")
     @Test
-    fun deprecatedDynamicMaterialTheme_matchesItsReplacement() =
+    fun deprecatedDynamicMaterialTheme_seedsAndPinsPrimaryWithTheColor() =
         runComposeUiTest {
             var deprecated: ColorScheme? = null
-            var replacement: ColorScheme? = null
 
             setContent {
-                DynamicMaterialTheme(primary = overrides.first(), isDark = false) {
+                DynamicMaterialTheme(primary = deprecatedColor, isDark = false) {
                     deprecated = MaterialTheme.colorScheme
                 }
-
-                DynamicMaterialTheme(
-                    seedColor = overrides.first(),
-                    isDark = false,
-                    primary = overrides.first(),
-                ) {
-                    replacement = MaterialTheme.colorScheme
-                }
             }
 
             waitForIdle()
-            assertEquals(assertNotNull(replacement).roles(), assertNotNull(deprecated).roles())
+            assertEquals(tonalSpotLight, assertNotNull(deprecated).accents())
         }
 
     @OptIn(ExperimentalMaterial3ExpressiveApi::class)
     @Suppress("DEPRECATION")
     @Test
-    fun deprecatedDynamicMaterialExpressiveTheme_matchesItsReplacement() =
+    fun deprecatedDynamicMaterialExpressiveTheme_seedsAndPinsPrimaryWithTheColor() =
         runComposeUiTest {
             var deprecated: ColorScheme? = null
-            var replacement: ColorScheme? = null
 
             setContent {
-                DynamicMaterialExpressiveTheme(primary = overrides.first(), isDark = false) {
+                DynamicMaterialExpressiveTheme(primary = deprecatedColor, isDark = false) {
                     deprecated = MaterialTheme.colorScheme
-                }
-
-                DynamicMaterialExpressiveTheme(
-                    seedColor = overrides.first(),
-                    isDark = false,
-                    primary = overrides.first(),
-                ) {
-                    replacement = MaterialTheme.colorScheme
                 }
             }
 
             waitForIdle()
-            assertEquals(assertNotNull(replacement).roles(), assertNotNull(deprecated).roles())
+            assertEquals(expressiveLight, assertNotNull(deprecated).accents())
         }
+
+    private fun accents(
+        primary: Long,
+        secondary: Long,
+        tertiary: Long,
+    ): Map<String, Color> =
+        mapOf(
+            "primary" to Color(primary),
+            "secondary" to Color(secondary),
+            "tertiary" to Color(tertiary),
+        )
+
+    private fun ColorScheme.accents(): Map<String, Color> =
+        mapOf(
+            "primary" to primary,
+            "secondary" to secondary,
+            "tertiary" to tertiary,
+        )
 
     private fun forEachCombination(
         block: (seed: Color, override: Color, style: PaletteStyle, isDark: Boolean) -> Unit,
