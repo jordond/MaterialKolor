@@ -162,7 +162,7 @@ python3 -B -m unittest discover -s .github/tests -v
 | `verifyMcuApple`                              | The common fixtures pass on the iOS simulator, the iOS device framework compiles and links, and macOS compiles.                                                                                                                                                           |
 | `verifyMcuPublication`                        | Artifacts, metadata, source archives and documentation build into a temporary repository under `build/`, and an artifact-only consumer compiles against them.                                                                                                             |
 | Builder against the local engine              | A real consumer resolves `project(":material-kolor-core")`, `project(":material-kolor-material3")` and `project(":material-color-utilities")` instead of published coordinates, and still compiles and tests.                                                                                                          |
-| `.github/tests`                               | The upstream monitor classifies commits correctly against disposable Git repositories, with no network access and no external issue or comment creation.                                                                                                                  |
+| `.github/tests`                               | The upstream monitor classifies commits correctly against disposable Git repositories, with no network access.                                                                                                                                                            |
 
 The publication gate must not publish to Maven Central or deploy documentation. Source archives
 include the generated Kotlin, handwritten helpers and upstream license material exactly once.
@@ -252,6 +252,8 @@ generator, the upstream revision read from `gradle/mcu-upstream.lock.json` at ge
 the command that produced the file. Regenerate from the repository root, then format the result:
 
 ```sh
+# A cold build prints the transformer summary even under -q, so compile first.
+./gradlew :mcu-upstream:testClasses
 ./gradlew -q :mcu-upstream:printMcuRoleGoldens \
   > material-color-utilities/src/commonTest/kotlin/com/materialkolor/conformance/UpstreamRoleGoldenData.kt
 ./gradlew -q :mcu-upstream:printMcuQuantizerGoldens \
@@ -291,12 +293,30 @@ candidate pin drops `createForProduction`, that task fails before the pin is ado
 
 ## CI and the upstream monitor
 
-`.github/check-upstream` reports Java, Kotlin and license/notice changes. It classifies each
-reported commit: `upstream-source` for ordinary source changes, and `kotlin-build-scaffold` when the
-commit touches build or publishing scaffolding under upstream's `kotlin/` tree, which may indicate
-that upstream is starting its own Kotlin Multiplatform publication (see
+`.github/check-upstream` reports upstream commits that touch `kotlin/` or license and notice files.
+Java-only commits are skipped because the engine is generated from Kotlin alone. The Java reference
+still backs the JVM parity tests, and the bump pull request runs those. Each reported commit is
+classified as `upstream-source` for ordinary source changes, or `kotlin-build-scaffold` when it
+touches build or publishing scaffolding under upstream's `kotlin/` tree, which may indicate that
+upstream is starting its own Kotlin Multiplatform publication (see
 [material-color-utilities#76](https://github.com/material-foundation/material-color-utilities/pull/76)).
-Scaffold findings carry that note and a matching issue label. Without a token it prints findings,
-with a token the scheduled workflow can create deduplicated upstream issues. Its tests use
-disposable Git repositories plus stubbed `git fetch` and `curl`; they create no external issues or
-comments. Run those tests, not the scheduled workflow, when validating monitor changes.
+The script only reads. It writes the current and target revisions and counts for a workflow step,
+and a Markdown commit list for the pull request body. Its tests use disposable Git repositories plus
+a stubbed `git fetch`, with no network access. Run those tests, not the workflow, when validating
+monitor changes.
+
+`.github/workflows/upstream.yml` turns relevant upstream commits into one rolling pull request
+against `next` on the `upstream/mcu` branch. It moves the Gitlink to upstream's head, writes the lock
+from `candidateMcuUpstreamLock`, regenerates the golden fixtures in a separate commit and records
+whether the transformer accepted the new sources. CI and Builder then run on the pull request. When
+upstream moves again the branch is rewritten, unless it carries maintainer commits, in which case
+the workflow comments instead. When `next` already pins every relevant change, the workflow closes
+the pull request. It cannot refresh the ABI dumps, because `updateKotlinAbi` needs macOS. A red
+`checkKotlinAbi` on the pull request is the prompt to review the API change and push the dumps by
+hand. Merging stays a reviewed step, following [Reviewing an upstream update](#reviewing-an-upstream-update).
+
+The workflow needs an `UPSTREAM_BOT_TOKEN` repository secret, a fine-grained token with contents,
+pull requests and issues write access, because pull requests opened with `GITHUB_TOKEN` do not
+trigger other workflows. Scheduled runs fire only from the default branch, so until 6.0 lands on
+`main` run it with `gh workflow run upstream.yml --ref next`. It also runs on every push to `next`
+that changes the pin.

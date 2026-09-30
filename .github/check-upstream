@@ -3,26 +3,31 @@ set -euo pipefail
 
 CWD="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 ROOT="$(cd "$CWD"/.. >/dev/null 2>&1 && pwd)"
-REPO="jordond/MaterialKolor"
 UPSTREAM_REPO="https://github.com/material-foundation/material-color-utilities"
 SUBMODULE_PATH="$ROOT/tools/mcu-upstream/src/main"
 
 usage() {
-    echo "Usage: $0 [--token <github-token>] [--no-output]"
-    echo "  --token: GitHub token for creating issues"
+    echo "Usage: $0 [--github-output <file>] [--summary <file>] [--no-output]"
+    echo "  --github-output: append current, target, relevant and scaffold values for a workflow step"
+    echo "  --summary: write a Markdown list of the relevant upstream commits"
     echo "  --no-output: Do not output to console"
 }
 
 show_output=true
-github_token=""
+github_output=""
+summary_file=""
 while [[ $# -gt 0 ]]; do
     case $1 in
-    --token)
+    --github-output | --summary)
         if [[ $# -lt 2 || -z "$2" ]]; then
             usage >&2
             exit 1
         fi
-        github_token="$2"
+        if [[ "$1" == "--github-output" ]]; then
+            github_output="$2"
+        else
+            summary_file="$2"
+        fi
         shift 2
         ;;
     --no-output)
@@ -43,10 +48,10 @@ log() {
     fi
 }
 
-# Java remains the parity reference; Kotlin is the production input. License
-# changes outside those trees must also be reviewed before updating the pin.
+# The engine is generated from upstream's Kotlin alone, so only Kotlin and license changes need a
+# pin update. Upstream Java still backs the JVM parity tests, but the bump pull request runs those.
 relevant_files() {
-    grep -Ei '^(java|kotlin)/|(^|/)(licen[cs]es?|notices?|copying)(([._-][^/]*)?$|/)' || [[ $? == 1 ]]
+    grep -Ei '^kotlin/|(^|/)(licen[cs]es?|notices?|copying)(([._-][^/]*)?$|/)' || [[ $? == 1 ]]
 }
 
 # Build and publishing scaffolding under upstream's kotlin/ tree gets its own category: it is the
@@ -62,75 +67,42 @@ SCAFFOLD_NOTE="Build or publishing scaffolding changed under upstream's \`kotlin
 first-party Kotlin Multiplatform publication may be starting. Review whether this project should \
 keep adapting upstream sources. Reference: $UPSTREAM_REPO/pull/76."
 
+summary=""
 report_commit() {
     local commit="$1" files_changed="$2" category="$3"
-    local short_sha date full_message title issue_title issue_body api_response existing_issue payload response
-    local labels scaffold_section issue_number
+    local short_sha date title
     short_sha=$(git rev-parse --short "$commit")
     date=$(git show -s --format=%cI "$commit")
-    full_message=$(git log -1 --pretty=%B "$commit")
     title=$(git log -1 --pretty=%s "$commit")
     log "----------------------------------------" "Commit: $short_sha" "Date: $date" \
-        "Title: $title" "Category: $category" "Commit message:" "$full_message" \
+        "Title: $title" "Category: $category" "Commit message:" "$(git log -1 --pretty=%B "$commit")" \
         "Changed files:" "$files_changed"
-
-    labels=$(jq -nc '["upstream"]')
-    scaffold_section=""
     if [[ "$category" == "$SCAFFOLD_CATEGORY" ]]; then
         log "Note: $SCAFFOLD_NOTE"
-        labels=$(jq -nc --arg category "$SCAFFOLD_CATEGORY" '["upstream", $category]')
-        scaffold_section="
-### $SCAFFOLD_CATEGORY
-
-$SCAFFOLD_NOTE
-"
     fi
 
-    if [[ -z "$github_token" ]]; then
-        return
+    summary+="- [\`$short_sha\`]($UPSTREAM_REPO/commit/$commit) $title"
+    if [[ "$category" == "$SCAFFOLD_CATEGORY" ]]; then
+        summary+=" (**$SCAFFOLD_CATEGORY**)"
     fi
+    summary+=$'\n'
+    while IFS= read -r file; do
+        summary+="  - \`$file\`"$'\n'
+    done <<< "$files_changed"
+}
 
-    issue_title="[Upstream:$short_sha] $title"
-    issue_body="## Info
-
-This commit was authored at $date. You can view the commit [here]($UPSTREAM_REPO/commit/$commit).
-
-### Commit message
-$full_message
-
-### Changed files
-\`\`\`
-$files_changed
-\`\`\`
-$scaffold_section"
-    log "Checking for existing issues..."
-    api_response=$(curl --fail-with-body --silent --show-error \
-        -H "Authorization: token $github_token" \
-        "https://api.github.com/repos/$REPO/issues?state=all&labels=upstream&per_page=100")
-    existing_issue=$(jq -r --arg title "$issue_title" \
-        '.[] | select(.title == $title) | .number' <<< "$api_response")
-    if [[ -n "$existing_issue" ]]; then
-        log "Issue already exists for commit $short_sha (Issue #$existing_issue)"
-        return
+write_results() {
+    local current="$1" target="$2" relevant="$3" scaffold="$4"
+    if [[ -n "$github_output" ]]; then
+        printf 'current=%s\ntarget=%s\nrelevant=%s\nscaffold=%s\n' \
+            "$current" "$target" "$relevant" "$scaffold" >> "$github_output"
     fi
-
-    payload=$(jq -n --arg title "$issue_title" --arg body "$issue_body" --argjson labels "$labels" \
-        '{title: $title, body: $body, labels: $labels}')
-    log "Creating issue for commit $short_sha"
-    # One commit that cannot be filed must not cost the run every later commit, so the failure is
-    # reported here and the loop moves on instead of tripping `set -e`.
-    if ! response=$(curl --fail-with-body --silent --show-error -X POST \
-        -H "Authorization: token $github_token" \
-        -H "Accept: application/vnd.github.v3+json" \
-        "https://api.github.com/repos/$REPO/issues" -d "$payload"); then
-        echo "Could not create an issue for commit $short_sha; continuing with the next commit." >&2
-        return
+    if [[ -n "$summary_file" ]]; then
+        if ((scaffold > 0)); then
+            summary+=$'\n'"$SCAFFOLD_NOTE"$'\n'
+        fi
+        printf '%s' "$summary" > "$summary_file"
     fi
-    if ! issue_number=$(jq -er '.number' <<< "$response"); then
-        echo "Issue creation for commit $short_sha returned no issue number; continuing." >&2
-        return
-    fi
-    log "Created issue #$issue_number for commit $short_sha"
 }
 
 log "Checking submodule: $SUBMODULE_PATH"
@@ -157,6 +129,7 @@ log "Current commit: $(git rev-parse --short "$current_commit")" \
 commits=$(git log --reverse --pretty=format:"%H" "${current_commit}..${remote_commit}")
 if [[ -z "$commits" ]]; then
     log "No new commits found."
+    write_results "$current_commit" "$remote_commit" 0 0
     exit 0
 fi
 
@@ -176,10 +149,11 @@ while IFS= read -r commit; do
         fi
         report_commit "$commit" "$files_to_review" "$category"
     else
-        log "Skipping $(git rev-parse --short "$commit"): no Java, Kotlin, or license changes."
+        log "Skipping $(git rev-parse --short "$commit"): no Kotlin or license changes."
     fi
 done <<< "$commits"
-log "Summary: Processed $commit_count commits, $relevant_commits had Java, Kotlin, or license changes"
+log "Summary: Processed $commit_count commits, $relevant_commits had Kotlin or license changes"
 if ((scaffold_commits > 0)); then
     log "Summary: $scaffold_commits of those changed kotlin/ build scaffolding ($SCAFFOLD_CATEGORY)"
 fi
+write_results "$current_commit" "$remote_commit" "$relevant_commits" "$scaffold_commits"

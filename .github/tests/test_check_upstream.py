@@ -45,19 +45,9 @@ class UpstreamMonitorTest(unittest.TestCase):
             "curl",
             '#!/usr/bin/env python3\n'
             'import json, os, sys\n'
-            'args = sys.argv[1:]\n'
-            'request = {"tool": "curl", "args": args}\n'
-            'if "-d" in args:\n'
-            '    request["body"] = json.loads(args[args.index("-d") + 1])\n'
             'with open(os.environ["NETWORK_LOG"], "a") as stream:\n'
-            '    stream.write(json.dumps(request) + "\\n")\n'
-            'if os.environ.get("CURL_FAIL"):\n'
-            '    print("stubbed HTTP failure", file=sys.stderr)\n'
-            '    sys.exit(22)\n'
-            'if "body" not in request:\n'
-            '    print(os.environ.get("EXISTING_ISSUES", "[]"))\n'
-            '    sys.exit(0)\n'
-            'print(os.environ.get("POST_RESPONSE", json.dumps({"number": 123})))\n',
+            '    stream.write(json.dumps({"tool": "curl", "args": sys.argv[1:]}) + "\\n")\n'
+            'sys.exit(22)\n',
         )
 
     def stub(self, name, source):
@@ -101,24 +91,31 @@ class UpstreamMonitorTest(unittest.TestCase):
             return []
         return [json.loads(line) for line in self.network_log.read_text().splitlines()]
 
-    def test_java_change_is_reported_without_sending_an_issue(self):
+    def results(self, path):
+        return dict(line.split("=", 1) for line in path.read_text().splitlines())
+
+    def test_java_only_change_is_skipped(self):
         self.commit("java/hct/Hct.java", "Java update")
         result = self.run_monitor()
         self.assertEqual(0, result.returncode, result.stderr)
-        self.assertIn("java/hct/Hct.java", result.stdout)
-        self.assertFalse(any(call["tool"] == "curl" for call in self.requests()))
+        self.assertIn("no Kotlin or license changes", result.stdout)
+        self.assertIn("1 commits, 0 had Kotlin or license changes", result.stdout)
 
-    def test_unrelated_change_does_not_send_an_issue(self):
+    def test_unrelated_change_is_skipped(self):
         self.commit("typescript/hct/hct.ts", "TypeScript update")
-        result = self.run_monitor("--token", "fixture-token")
+        result = self.run_monitor()
         self.assertEqual(0, result.returncode, result.stderr)
-        self.assertFalse(any(call["tool"] == "curl" for call in self.requests()))
+        self.assertIn("0 had Kotlin or license changes", result.stdout)
 
     def test_no_new_commits(self):
-        result = self.run_monitor("--token", "fixture-token")
+        output = self.root / "github-output"
+        result = self.run_monitor("--github-output", str(output))
         self.assertEqual(0, result.returncode, result.stderr)
         self.assertIn("No new commits found", result.stdout)
-        self.assertFalse(any(call["tool"] == "curl" for call in self.requests()))
+        values = self.results(output)
+        self.assertEqual(self.base, values["current"])
+        self.assertEqual(self.base, values["target"])
+        self.assertEqual("0", values["relevant"])
 
     def test_uninitialised_submodule_fails_loudly(self):
         # An uninitialised submodule directory still lets `cd` succeed, so without
@@ -128,23 +125,30 @@ class UpstreamMonitorTest(unittest.TestCase):
         result = self.run_monitor(prepare_refs=False)
         self.assertNotEqual(0, result.returncode)
         self.assertIn("not initialised", result.stderr)
-        self.assertFalse(any(call["tool"] == "curl" for call in self.requests()))
 
-    def test_kotlin_and_license_changes_are_reported_alongside_java(self):
-        self.commit("kotlin/hct/Hct.kt", "Kotlin update")
+    def test_kotlin_and_license_changes_are_relevant_and_java_is_not(self):
+        kotlin = self.commit("kotlin/hct/Hct.kt", "Kotlin update")
         self.commit("LICENSE", "License update")
         self.commit("docs/NOTICE.txt", "Notice update")
         self.commit("java/hct/Hct.java", "Java update")
-        self.commit("README.md", "Unrelated documentation")
-        result = self.run_monitor("--token", "fixture-token")
+        head = self.commit("README.md", "Unrelated documentation")
+        output = self.root / "github-output"
+        summary = self.root / "summary.md"
+        result = self.run_monitor("--github-output", str(output), "--summary", str(summary))
         self.assertEqual(0, result.returncode, result.stderr)
-        posts = [call["body"] for call in self.requests() if "body" in call]
-        self.assertEqual(4, len(posts))
-        self.assertIn("5 commits, 4 had Java, Kotlin, or license changes", result.stdout)
-        self.assertIn("kotlin/hct/Hct.kt", posts[0]["body"])
-        self.assertIn("LICENSE", posts[1]["body"])
-        self.assertIn("docs/NOTICE.txt", posts[2]["body"])
-        self.assertIn("java/hct/Hct.java", posts[3]["body"])
+        self.assertIn("5 commits, 3 had Kotlin or license changes", result.stdout)
+        values = self.results(output)
+        self.assertEqual(self.base, values["current"])
+        # The pin moves to upstream's head even when the newest commits are irrelevant.
+        self.assertEqual(head, values["target"])
+        self.assertEqual("3", values["relevant"])
+        self.assertEqual("0", values["scaffold"])
+        text = summary.read_text()
+        self.assertIn(f"material-color-utilities/commit/{kotlin})", text)
+        for expected in ["Kotlin update", "`kotlin/hct/Hct.kt`", "`LICENSE`", "`docs/NOTICE.txt`"]:
+            self.assertIn(expected, text)
+        for unexpected in ["Java update", "Unrelated documentation", "kotlin-build-scaffold"]:
+            self.assertNotIn(unexpected, text)
 
     def test_kotlin_build_scaffold_is_reported_as_its_own_category(self):
         # Build files appearing under upstream's kotlin/ tree are the first visible sign that
@@ -152,82 +156,58 @@ class UpstreamMonitorTest(unittest.TestCase):
         # separately from ordinary source churn.
         self.commit("kotlin/build.gradle.kts", "Add Kotlin Multiplatform build")
         self.commit("kotlin/gradle/libs.versions.toml", "Add a version catalog")
-        result = self.run_monitor("--token", "fixture-token")
+        output = self.root / "github-output"
+        summary = self.root / "summary.md"
+        result = self.run_monitor("--github-output", str(output), "--summary", str(summary))
         self.assertEqual(0, result.returncode, result.stderr)
         self.assertIn("Category: kotlin-build-scaffold", result.stdout)
         self.assertIn("2 of those changed kotlin/ build scaffolding", result.stdout)
-        posts = [call["body"] for call in self.requests() if "body" in call]
-        self.assertEqual(2, len(posts))
-        for post in posts:
-            self.assertIn("kotlin-build-scaffold", post["labels"])
-            self.assertIn("kotlin-build-scaffold", post["body"])
-            self.assertIn("Kotlin Multiplatform publication may be starting", post["body"])
-            self.assertIn("material-color-utilities/pull/76", post["body"])
+        self.assertEqual("2", self.results(output)["scaffold"])
+        text = summary.read_text()
+        self.assertEqual(2, text.count("(**kotlin-build-scaffold**)"))
+        self.assertIn("Kotlin Multiplatform publication may be starting", text)
+        self.assertIn("material-color-utilities/pull/76", text)
 
     def test_ordinary_kotlin_source_change_is_not_scaffold(self):
         self.commit("kotlin/hct/Hct.kt", "Kotlin update")
         self.commit("kotlin/dynamiccolor/MaterialDynamicColors.kt", "Another Kotlin update")
-        result = self.run_monitor("--token", "fixture-token")
+        summary = self.root / "summary.md"
+        result = self.run_monitor("--summary", str(summary))
         self.assertEqual(0, result.returncode, result.stderr)
         self.assertIn("Category: upstream-source", result.stdout)
         self.assertNotIn("kotlin-build-scaffold", result.stdout)
-        posts = [call["body"] for call in self.requests() if "body" in call]
-        self.assertEqual(2, len(posts))
-        for post in posts:
-            self.assertEqual(["upstream"], post["labels"])
-            self.assertNotIn("kotlin-build-scaffold", post["body"])
+        self.assertNotIn("kotlin-build-scaffold", summary.read_text())
 
-    def test_quote_bearing_commit_message_produces_valid_json(self):
-        message = 'Fix "quoted" Java title with \u00e9'
-        self.commit("java/hct/Hct.java", message)
+    def test_quote_bearing_commit_title_is_kept_verbatim(self):
+        message = 'Fix "quoted" Kotlin title with \u00e9'
+        self.commit("kotlin/hct/Hct.kt", message)
+        summary = self.root / "summary.md"
+        result = self.run_monitor("--summary", str(summary))
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertIn(message, summary.read_text())
+
+    def test_only_git_fetch_touches_the_network(self):
+        self.commit("kotlin/hct/Hct.kt", "Kotlin update")
+        result = self.run_monitor("--summary", str(self.root / "summary.md"))
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertEqual(["git"], [call["tool"] for call in self.requests()])
+
+    def test_option_without_a_value_is_rejected(self):
+        for option in ["--github-output", "--summary"]:
+            result = self.run_monitor(option)
+            self.assertNotEqual(0, result.returncode)
+            self.assertIn("Usage:", result.stderr)
+            result = self.run_monitor(option, "")
+            self.assertNotEqual(0, result.returncode)
+            self.assertIn("Usage:", result.stderr)
+
+    def test_removed_token_option_is_rejected(self):
         result = self.run_monitor("--token", "fixture-token")
-        self.assertEqual(0, result.returncode, result.stderr)
-        posts = [call["body"] for call in self.requests() if "body" in call]
-        self.assertEqual(1, len(posts))
-        self.assertTrue(posts[0]["title"].endswith(message))
-
-    def test_existing_issue_is_not_recreated(self):
-        commit = self.commit("kotlin/hct/Hct.kt", "Kotlin update")
-        short_sha = self.git("rev-parse", "--short", commit).strip()
-        existing = [{"title": f"[Upstream:{short_sha}] Kotlin update", "number": 77}]
-        result = self.run_monitor("--token", "fixture-token", EXISTING_ISSUES=json.dumps(existing))
-        self.assertEqual(0, result.returncode, result.stderr)
-        self.assertIn("Issue #77", result.stdout)
-        self.assertFalse(any("body" in call for call in self.requests()))
-
-    def test_network_failure_fails_the_monitor(self):
-        self.commit("kotlin/hct/Hct.kt", "Kotlin update")
-        result = self.run_monitor("--token", "fixture-token", CURL_FAIL="1")
         self.assertNotEqual(0, result.returncode)
-        self.assertFalse(any("body" in call for call in self.requests()))
-
-    def test_failed_issue_creation_continues_with_the_next_commit(self):
-        # A single commit GitHub refuses must not cost the run every commit after it.
-        self.commit("kotlin/hct/Hct.kt", "Kotlin update")
-        self.commit("java/hct/Hct.java", "Java update")
-        result = self.run_monitor(
-            "--token", "fixture-token", POST_RESPONSE=json.dumps({"message": "Validation Failed"})
-        )
-        self.assertEqual(0, result.returncode, result.stderr)
-        posts = [call["body"] for call in self.requests() if "body" in call]
-        self.assertEqual(2, len(posts))
-        self.assertEqual(2, result.stderr.count("returned no issue number"))
-        self.assertIn("2 commits, 2 had Java, Kotlin, or license changes", result.stdout)
-
-    def test_token_without_a_value_is_rejected(self):
-        result = self.run_monitor("--token")
-        self.assertNotEqual(0, result.returncode)
-        self.assertIn("Usage:", result.stderr)
-        self.assertFalse(any(call["tool"] == "curl" for call in self.requests()))
-
-    def test_empty_token_is_rejected(self):
-        result = self.run_monitor("--token", "")
-        self.assertNotEqual(0, result.returncode)
-        self.assertIn("Usage:", result.stderr)
-        self.assertFalse(any(call["tool"] == "curl" for call in self.requests()))
+        self.assertIn("Unknown option", result.stderr)
 
     def test_no_output_is_quiet(self):
-        self.commit("java/hct/Hct.java", "Java update")
+        self.commit("kotlin/hct/Hct.kt", "Kotlin update")
         result = self.run_monitor("--no-output")
         self.assertEqual(0, result.returncode, result.stderr)
         self.assertEqual("", result.stdout)
