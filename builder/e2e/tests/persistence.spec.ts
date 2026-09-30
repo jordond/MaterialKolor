@@ -1,5 +1,5 @@
-import { expect, test, type Page } from '@playwright/test';
-import { reloadBuilder, wantHooks } from './builder';
+import type { Page } from '@playwright/test';
+import { expect, reloadBuilder, test } from './builder';
 import {
   button,
   LAND_TIMEOUT_MS,
@@ -22,10 +22,6 @@ import {
 
 /** The Projects panel's title in the mirror, the dialog fold. */
 const PROJECTS_DIALOG = /^Projects, dialog/;
-
-test.beforeEach(async ({ context }) => {
-  await wantHooks(context);
-});
 
 test('an edit is saved, and a reload brings back the seed and the undo that reverts it', async ({ page }) => {
   await openWorkspace(page);

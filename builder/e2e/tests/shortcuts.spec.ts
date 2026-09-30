@@ -1,5 +1,6 @@
-import { expect, test, type Locator, type Page } from '@playwright/test';
-import { clickMiddle, openBuilder, pressBareCanvas, SETTLE_MS, wantHooks } from './builder';
+import type { Locator, Page } from '@playwright/test';
+import { expect, openBuilder, test } from './builder';
+import { A11Y, focusField, openOverlay, pressBareCanvas, primaryKey } from '../fixtures/workspace';
 
 // The page's keyboard map on the real builder, read from the page's accessibility tree. Keys
 // only reach the page once it has focus, so each test first presses the bare canvas, which also
@@ -9,15 +10,9 @@ import { clickMiddle, openBuilder, pressBareCanvas, SETTLE_MS, wantHooks } from 
 // fixes to Windows. `ControlOrMeta` follows the machine that runs the test instead, so the primary
 // key here comes from the page's own user agent.
 
-const A11Y = '#cmp_a11y_root';
-
 /** The cheat sheet's line for screen reader users, `command_screen_reader_note`. */
 const SCREEN_READER_NOTE =
   'With a screen reader, single-key shortcuts reach the page in focus mode, also called forms mode, and not in browse mode.';
-
-test.beforeEach(async ({ context }) => {
-  await wantHooks(context);
-});
 
 test('after a press on the bare canvas, Space shuffles the seed', async ({ page }) => {
   await openBuilder(page);
@@ -34,7 +29,7 @@ test('l typed in the seed field sets no lock', async ({ page }) => {
   const field = await seedField(page);
   const unlocked = await lockState(page);
 
-  await clickMiddle(page, field);
+  await focusField(page, field);
   await page.keyboard.type('l');
   // The l showing in the field says the key has been handled, the page's shortcuts included.
   await expect.poll(() => seedText(page), { timeout: 10_000 }).toContain('l');
@@ -64,8 +59,8 @@ test('? opens the cheat sheet, and while it is open single keys and Space stay i
   await page.keyboard.press('Escape');
   await expect(note).toHaveCount(0, { timeout: 10_000 });
 
-  expect(await seedText(page)).toBe(seed);
-  expect(await lockState(page)).toBe(unlocked);
+  await expect.poll(() => seedText(page)).toBe(seed);
+  await expect.poll(() => lockState(page)).toBe(unlocked);
 });
 
 test('Cmd or Ctrl with K, S and O belong to the page, and K opens the palette panel', async ({ page }) => {
@@ -103,7 +98,8 @@ test('inside the palette, Cmd or Ctrl with S and O never reach the browser, and 
   // A key pressed in the search field reaches Compose a frame late on the web, too late to keep it
   // from the browser, so focus moves down into the rows first.
   await page.keyboard.press('ArrowDown');
-  await page.waitForTimeout(SETTLE_MS);
+  // Focus leaving the search field takes Compose's backing field with it.
+  await expect(page.locator('.compose-backing-field')).toHaveCount(0);
   await listenForKeys(page);
   // The poster keeps the save state in the Projects button's name, so the word itself is only the
   // toast that S raises.
@@ -202,15 +198,4 @@ async function lockState(page: Page): Promise<string> {
   const stored = await page.evaluate(() => localStorage.getItem('mk:prefs'));
   const data = stored === null ? {} : (JSON.parse(stored).data ?? {});
   return `hueLock=${data.hueLock === true}`;
-}
-
-/** `Meta` when the page's user agent names an Apple system, where it takes Cmd, else `Control`. */
-async function primaryKey(page: Page): Promise<'Meta' | 'Control'> {
-  const apple = await page.evaluate(() => /Macintosh|Mac OS|iPhone|iPad|iPod|Darwin/.test(navigator.userAgent));
-  return apple ? 'Meta' : 'Control';
-}
-
-/** The overlay the page's router last put in the history, the open panel's name. */
-async function openOverlay(page: Page): Promise<string | null> {
-  return page.evaluate(() => (history.state as { mkOverlay?: string } | null)?.mkOverlay ?? null);
 }

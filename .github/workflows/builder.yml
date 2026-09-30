@@ -132,14 +132,14 @@ jobs:
           overwrite: true
 
   e2e:
-    name: "E2E (${{ matrix.shard }}/4)"
+    name: "E2E (${{ matrix.shard }}/6)"
     needs: site
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
-        shard: [ 1, 2, 3, 4 ]
+        shard: [ 1, 2, 3, 4, 5, 6 ]
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -169,9 +169,13 @@ jobs:
           # boot.spec.ts boots a theme link from wrangler dev, the one server that writes its meta.
           npm --prefix ../worker ci
 
+      - name: No sleeps in the specs
+        working-directory: builder/e2e
+        run: npm run lint
+
       - name: Browser tests
         working-directory: builder/e2e
-        run: npm test -- --project chromium --shard ${{ matrix.shard }}/4
+        run: npm test -- --shard ${{ matrix.shard }}/6
 
       - name: Upload the Playwright report
         if: failure()

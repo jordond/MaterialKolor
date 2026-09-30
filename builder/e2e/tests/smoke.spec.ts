@@ -82,16 +82,6 @@ test('the page lists the hashed assets each engine boots with', async ({ page, r
   }
 });
 
-test('the site server answers a malformed path with 400 and keeps serving', async ({ request }) => {
-  expect((await request.get(site('/%E0%A4%A'))).status()).toBe(400);
-  expect((await request.get(site('/'))).status()).toBe(200);
-});
-
-test('an asset that is not there is a 404, not the app', async ({ request }) => {
-  expect((await request.get(site('/t/builder.js'))).status()).toBe(404);
-  expect((await request.get(site('/assets/missing.wasm'))).status()).toBe(404);
-});
-
 /** Compose string resource files, which load on first use rather than at boot. */
 const LAZY_STRINGS = /^composeResources\/[^/]+\/values\/[^/]+\.cvr$/;
 

@@ -1,5 +1,4 @@
-import { expect, test } from '@playwright/test';
-import { openBuilder, wantHooks } from './builder';
+import { expect, openBuilder, test } from './builder';
 import { button, labelled, openWorkspace, press, seedText, storedProjects } from '../fixtures/workspace';
 
 // Opening a shared link. A link opens as a theme that is not in the projects until
@@ -14,10 +13,6 @@ const SAVE = 'Save to my projects';
 
 /** An old builder link, with the query the old builder wrote. */
 const LEGACY = '/?color_seed=FF6750A4&dark_mode=true&style=Vibrant';
-
-test.beforeEach(async ({ context }) => {
-  await wantHooks(context);
-});
 
 test('a saved link opened again opens that project, not a copy', async ({ page }) => {
   await openWorkspace(page, LINK);

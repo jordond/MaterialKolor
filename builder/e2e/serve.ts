@@ -1,6 +1,10 @@
-import { createServer } from 'node:http';
+import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
+import { promisify } from 'node:util';
+import { gzip } from 'node:zlib';
+
+const gzipped = promisify(gzip);
 
 const TYPES: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
@@ -30,36 +34,29 @@ interface HeaderRule {
   headers: Record<string, string>;
 }
 
+/** The types worth compressing. Images and woff2 are compressed already. */
+const COMPRESSIBLE = new Set(['.html', '.js', '.mjs', '.wasm', '.json', '.map', '.css', '.svg', '.ttf', '.otf', '.txt', '.webmanifest']);
+
 /**
  * Serve the built site in `root` on a free local port, the way the host does.
  *
  * A path that is a file gets the file and any other path without an extension gets `index.html`, so
  * `/t/<code>` opens the app. The page loads everything from root-absolute addresses, so nothing
  * under `/t/` is ever a file. The headers in the site's `_headers` apply too, the content security
- * policy among them, except `Cache-Control`. Every answer is `no-store` so a rebuilt site is never
- * served from a cache.
+ * policy and `Cache-Control` among them, so the hashed assets are cached for good and a path with
+ * no rule of its own is `no-store`. Each run serves on a new port, so no cache outlives the build it
+ * came from. Text and wasm go out gzipped to a browser that takes it, as the host sends them.
  */
 export async function serveSite(root: string): Promise<Site> {
   const base = path.resolve(root);
   const rules = await readHeaderRules(base);
-  const server = createServer(async (request, response) => {
-    const pathname = decodePath(request.url ?? '/');
-    if (pathname === null) {
-      response.writeHead(400).end();
-      return;
-    }
-    const file = await findFile(base, pathname);
-    if (!file) {
-      response.writeHead(404).end();
-      return;
-    }
-    const body = await readFile(file);
-    response.writeHead(200, {
-      ...headersFor(rules, pathname),
-      'Content-Type': TYPES[path.extname(file)] ?? 'application/octet-stream',
-      'Cache-Control': 'no-store',
+  const bodies = new Map<string, Promise<Body>>();
+  const server = createServer((request, response) => {
+    answer(base, rules, bodies, request, response).catch((error: unknown) => {
+      console.error(`The site server failed on ${request.url}`, error);
+      if (!response.headersSent) response.writeHead(500);
+      response.end();
     });
-    response.end(body);
   });
   await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
   const address = server.address();
@@ -68,6 +65,55 @@ export async function serveSite(root: string): Promise<Site> {
     url: `http://127.0.0.1:${address.port}`,
     close: () => new Promise<void>((resolve) => server.close(() => resolve())),
   };
+}
+
+interface Body {
+  plain: Buffer;
+  gzip: Buffer | null;
+}
+
+async function answer(
+  base: string,
+  rules: HeaderRule[],
+  bodies: Map<string, Promise<Body>>,
+  request: IncomingMessage,
+  response: ServerResponse,
+): Promise<void> {
+  const pathname = decodePath(request.url ?? '/');
+  if (pathname === null) {
+    response.writeHead(400).end();
+    return;
+  }
+  const file = await findFile(base, pathname);
+  if (!file) {
+    response.writeHead(404).end();
+    return;
+  }
+  let body = bodies.get(file);
+  if (!body) {
+    body = readBody(file);
+    bodies.set(file, body);
+    body.catch(() => bodies.delete(file));
+  }
+  const { plain, gzip } = await body;
+  const acceptsGzip = /\bgzip\b/.test(String(request.headers['accept-encoding'] ?? ''));
+  const sent = gzip !== null && acceptsGzip ? gzip : plain;
+  response.writeHead(200, {
+    'Cache-Control': 'no-store',
+    ...headersFor(rules, pathname),
+    'Content-Type': TYPES[path.extname(file)] ?? 'application/octet-stream',
+    'Content-Length': String(sent.length),
+    ...(gzip === null ? {} : { Vary: 'Accept-Encoding' }),
+    ...(sent === gzip ? { 'Content-Encoding': 'gzip' } : {}),
+  });
+  response.end(sent);
+}
+
+/** The bytes of [file], and gzipped too when its type is worth it. */
+async function readBody(file: string): Promise<Body> {
+  const plain = await readFile(file);
+  const gzip = COMPRESSIBLE.has(path.extname(file)) ? await gzipped(plain) : null;
+  return { plain, gzip };
 }
 
 /** The decoded path of [url], or null when its escapes are malformed, `/%E0%A4%A` for example. */

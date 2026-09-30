@@ -1,12 +1,8 @@
-import { expect, test, type Page } from '@playwright/test';
-import { hook, openBuilder, wantHooks } from './builder';
+import type { Page } from '@playwright/test';
+import { expect, hook, openBuilder, test } from './builder';
 
 // The page around the builder, driven through the shell's test hooks. Media queries, the tab, the
 // splash and the signals that the page is going away.
-
-test.beforeEach(async ({ context }) => {
-  await wantHooks(context);
-});
 
 test.describe('environment', () => {
   test('media queries follow the system live', async ({ page }) => {

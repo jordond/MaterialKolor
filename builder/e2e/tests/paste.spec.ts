@@ -1,5 +1,5 @@
-import { expect, test, type Locator, type Page } from '@playwright/test';
-import { dispatchPaste, openBuilder, wantHooks } from './builder';
+import type { Locator, Page } from '@playwright/test';
+import { dispatchPaste, expect, openBuilder, test } from './builder';
 import { installFileMakers } from './image-files';
 
 // Text pasted with nothing editable focused on the real builder, read from the page's
@@ -17,7 +17,6 @@ const OFFER = 'Open the shared theme?';
 const DEFAULT_LINK = 'https://materialkolor.com/t/AdllOwAAAAAT';
 
 test.beforeEach(async ({ context }) => {
-  await wantHooks(context);
   await context.addInitScript(installFileMakers);
 });
 

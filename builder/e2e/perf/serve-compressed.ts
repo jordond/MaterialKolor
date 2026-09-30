@@ -6,7 +6,7 @@ import { brotliCompressSync, constants, gzipSync } from 'node:zlib';
 // The site the way the host hands it to a browser, for the perf run only. Each file goes out brotli
 // or gzip compressed by what the browser accepts, with the host's cache rules, so a throttled load
 // moves the bytes a real one would and a repeat visit comes from the cache. The e2e server in
-// `serve.ts` sends every file as it is and never lets it be cached, which suits tests and not timing.
+// `serve.ts` gzips on the fly and keeps no brotli, which suits tests and not timing.
 
 const TYPES: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',

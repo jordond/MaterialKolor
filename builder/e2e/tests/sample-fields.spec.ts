@@ -1,5 +1,6 @@
-import { expect, test, type CDPSession, type Locator, type Page } from '@playwright/test';
-import { openBuilder, wantHooks } from './builder';
+import type { CDPSession, Locator, Page } from '@playwright/test';
+import { expect, openBuilder, test } from './builder';
+import { nextFrames } from '../fixtures/workspace';
 import { boxOf, longPressAt, mirrorButton, settledBox, settledMirror, tap, type Point } from './touch';
 
 // The preview's own sample fields keep the mirror through a long press too, here the Trips note. The
@@ -23,14 +24,10 @@ const SAMPLE_REPLACEMENT = 'Porto';
  */
 const BACKING_FIELD = '.compose-backing-field';
 
-/** Long enough for a key or a scroll to reach Compose and settle. */
-const SETTLE_MS = 300;
-
 test.use({ hasTouch: true });
 
-test.beforeEach(async ({ context, browserName }) => {
+test.beforeEach(async ({ browserName }) => {
   test.skip(browserName !== 'chromium', 'The long press goes through a Chromium CDP session');
-  await wantHooks(context);
 });
 
 test('a long press on the Trips note keeps the mirror', async ({ page, context }) => {
@@ -51,7 +48,7 @@ async function longPressKeepsMirror(page: Page, cdp: CDPSession, field: Locator,
   await leaveFields(page);
   // The first touch after the mouse goes unheard in Chromium through CDP, so a tap goes first.
   await tap(cdp, await wordIn(field));
-  await page.waitForTimeout(SETTLE_MS);
+  await nextFrames(page, 3);
   // Under load the tap is sometimes heard after all, and the field it focused has to be left again.
   await leaveFields(page);
   const word = await wordIn(field);
@@ -70,7 +67,7 @@ async function longPressKeepsMirror(page: Page, cdp: CDPSession, field: Locator,
 async function leaveFields(page: Page): Promise<void> {
   for (let tab = 0; tab < 3 && (await page.locator(BACKING_FIELD).count()) > 0; tab++) {
     await page.keyboard.press('Tab');
-    await page.waitForTimeout(SETTLE_MS);
+    await nextFrames(page, 3);
   }
   await expect(page.locator(BACKING_FIELD)).toHaveCount(0);
 }
@@ -94,7 +91,7 @@ async function showOneCopy(page: Page): Promise<void> {
   await expect(page.locator('#cmp_a11y_root > *').first()).toBeAttached({ timeout: 30_000 });
   const light = await boxOf(mirrorButton(page, /^Light/));
   await page.mouse.click(light.x + light.width / 2, light.y + light.height / 2);
-  await page.waitForTimeout(SETTLE_MS);
+  await expect(mirrorButton(page, 'Light, radio, selected')).toBeAttached();
 }
 
 /** Opens the App tab, scrolls the open trip to its note, clicks into the note and types the word there. */
@@ -109,7 +106,7 @@ async function typeInTripsNote(page: Page): Promise<Locator> {
   await page.mouse.move(pane.x + pane.width / 2, pane.y + pane.height / 2);
   for (const _ of [1, 2, 3]) {
     await page.mouse.wheel(0, 400);
-    await page.waitForTimeout(SETTLE_MS);
+    await nextFrames(page);
   }
   // The note is the only text field in the app.
   return typeInto(page, page.locator(SAMPLE_FIELDS).first());
@@ -121,7 +118,6 @@ async function typeInto(page: Page, field: Locator): Promise<Locator> {
   const box = await settledBox(field);
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
   await page.keyboard.type(SAMPLE_WORD);
-  await page.waitForTimeout(SETTLE_MS);
   await expect(field).toHaveText(SAMPLE_WORD);
   return field;
 }

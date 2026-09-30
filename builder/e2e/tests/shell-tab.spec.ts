@@ -1,9 +1,10 @@
-import { expect, test, type Locator, type Page } from '@playwright/test';
-import { openBuilder, wantHooks } from './builder';
+import type { Locator, Page } from '@playwright/test';
+import { expect, openBuilder, test } from './builder';
+import { boxOf, nextFrames, settledBox } from '../fixtures/workspace';
 
 // Tab inside the canvas. Compose focus never reaches the page, so the specs type after each move and
-// read through the accessibility mirror where the text went. Keys go in one at a time with a pause,
-// so each lands after the focus move before it.
+// read through the accessibility mirror where the text went. Each key waits for the page to draw
+// after it, so it lands after the focus move before it.
 
 /** The gallery's text fields. Their labels are their text in the mirror, so they have no `aria-label`. */
 const FIELDS = '#cmp_a11y_root [contenteditable]:not([aria-label])';
@@ -18,13 +19,6 @@ const OUTLINED = 2;
  * It goes away when focus leaves every text field.
  */
 const BACKING_FIELD = '.compose-backing-field';
-
-/** Long enough for a key to reach Compose and the focus move it makes to settle. */
-const SETTLE_MS = 300;
-
-test.beforeEach(async ({ context }) => {
-  await wantHooks(context);
-});
 
 test('one Tab leaves a gallery text field', async ({ page }) => {
   // The Outlined field has no twin after it, so one Tab goes on to the Slider card. Compose drops its
@@ -57,18 +51,19 @@ for (const key of ['Tab', 'Shift+Tab']) {
 async function typeInField(page: Page, nth: number): Promise<Locator> {
   await openBuilder(page);
   await expect(page.locator('#cmp_a11y_root > *').first()).toBeAttached({ timeout: 30_000 });
-  const tab = (await page.locator('#cmp_a11y_root [aria-label^="Components, tab"]').boundingBox())!;
+  const tab = await boxOf(page.locator('#cmp_a11y_root [aria-label^="Components, tab"]'));
   await page.mouse.click(tab.x + tab.width / 2, tab.y + tab.height / 2);
+  await expect(page.locator('#cmp_a11y_root [aria-label^="Components, tab, selected"]')).toBeAttached();
   const start = page.locator(FIELDS).nth(nth);
   // The Inputs cards sit 600 px down the gallery. A fixed scroll lands there however slowly the
   // mirror follows, where scrolling until the field shows could carry it past on a busy machine.
   await page.mouse.move(tab.x + tab.width / 2, tab.y + 240);
   for (const _ of [1, 2]) {
     await page.mouse.wheel(0, 300);
-    await page.waitForTimeout(SETTLE_MS);
+    await nextFrames(page);
   }
-  await expect.poll(async () => (await start.boundingBox())?.height ?? 0, { timeout: 15_000 }).toBeGreaterThan(0);
-  const box = (await start.boundingBox())!;
+  // The scroll runs on for a few frames, and a click read off a moving box lands beside the field.
+  const box = await settledBox(start);
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
   await typeSettled(page, 'start');
   await expect(start).toHaveText('start');
@@ -79,32 +74,33 @@ async function typeInField(page: Page, nth: number): Promise<Locator> {
 async function typeInTripsNote(page: Page): Promise<Locator> {
   await openBuilder(page);
   await expect(page.locator('#cmp_a11y_root > *').first()).toBeAttached({ timeout: 30_000 });
-  const tab = (await page.locator('#cmp_a11y_root [aria-label^="App, tab"]').boundingBox())!;
+  const tab = await boxOf(page.locator('#cmp_a11y_root [aria-label^="App, tab"]'));
   await page.mouse.click(tab.x + tab.width / 2, tab.y + tab.height / 2);
   // The note closes the open trip's pane, so scrolling that pane well past it only stops at its end.
   const checkIn = page.locator('#cmp_a11y_root [role="button"]').filter({ hasText: /^Check in$/ });
-  const pane = (await checkIn.boundingBox())!;
+  const pane = await settledBox(checkIn);
   await page.mouse.move(pane.x + pane.width / 2, pane.y + pane.height / 2);
   for (const _ of [1, 2, 3]) {
     await page.mouse.wheel(0, 400);
-    await page.waitForTimeout(SETTLE_MS);
+    await nextFrames(page);
   }
   // The note is the only text field in the app, and like the gallery's its label is its text.
   const note = page.locator(FIELDS).first();
-  await expect.poll(async () => (await note.boundingBox())?.height ?? 0, { timeout: 15_000 }).toBeGreaterThan(0);
-  const box = (await note.boundingBox())!;
+  const box = await settledBox(note);
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
   await typeSettled(page, 'note');
   await expect(note).toHaveText('note');
   return note;
 }
 
+/** Presses [key], then waits for the page to draw the focus move it makes. */
 async function press(page: Page, key: string): Promise<void> {
   await page.keyboard.press(key);
-  await page.waitForTimeout(SETTLE_MS);
+  await nextFrames(page, 3);
 }
 
+/** Types [text], then waits for the page to draw what it did with it. */
 async function typeSettled(page: Page, text: string): Promise<void> {
   await page.keyboard.type(text);
-  await page.waitForTimeout(SETTLE_MS);
+  await nextFrames(page, 3);
 }
