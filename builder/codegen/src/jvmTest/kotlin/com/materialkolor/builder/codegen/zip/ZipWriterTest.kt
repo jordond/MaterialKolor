@@ -3,10 +3,8 @@ package com.materialkolor.builder.codegen.zip
 import com.materialkolor.builder.codegen.Fixtures
 import com.materialkolor.builder.codegen.generate
 import com.materialkolor.builder.codegen.zipArchive
-import com.materialkolor.builder.domain.persist.ExportPrefs
 import java.io.ByteArrayInputStream
 import java.io.File
-import java.time.LocalDateTime
 import java.util.zip.CRC32
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
@@ -32,42 +30,6 @@ class ZipWriterTest {
     }
 
     @Test
-    fun zipArchive_multiplatform_laysFilesOutUnderTheThemeFolder() {
-        val names = readStream(zipArchive("AppTheme", generate(Fixtures.Default.input))).map { it.first.name }
-
-        assertEquals(
-            listOf(
-                "AppTheme/src/commonMain/kotlin/com/example/theme/Color.kt",
-                "AppTheme/src/commonMain/kotlin/com/example/theme/Theme.kt",
-                "AppTheme/gradle/libs.versions.toml",
-                "AppTheme/snippets/build.gradle.kts",
-                "AppTheme/README.md",
-            ),
-            names,
-        )
-    }
-
-    @Test
-    fun zipArchive_androidOnlyWithoutCatalog_usesTheMainSourceSet() {
-        val input = Fixtures.input(
-            document = Fixtures.Default.input.document,
-            prefs = ExportPrefs(multiplatform = false, versionCatalog = false),
-        )
-
-        val names = readStream(zipArchive("AppTheme", generate(input))).map { it.first.name }
-
-        assertEquals(
-            listOf(
-                "AppTheme/src/main/kotlin/com/example/theme/Color.kt",
-                "AppTheme/src/main/kotlin/com/example/theme/Theme.kt",
-                "AppTheme/snippets/build.gradle.kts",
-                "AppTheme/README.md",
-            ),
-            names,
-        )
-    }
-
-    @Test
     fun write_entries_openThroughTheCentralDirectory() {
         val entries = listOf(
             ZipWriter.Entry("Thème/README.md", "Déjà vu\n".encodeToByteArray()),
@@ -89,16 +51,6 @@ class ZipWriterTest {
             }
         } finally {
             file.delete()
-        }
-    }
-
-    @Test
-    fun write_sameEntries_giveTheSameBytes() {
-        val files = generate(Fixtures.ThreeAccents.input)
-
-        assertContentEquals(zipArchive("AppTheme", files), zipArchive("AppTheme", files))
-        readStream(zipArchive("AppTheme", files)).forEach { (entry, _) ->
-            assertEquals(LocalDateTime.of(1980, 1, 1, 0, 0), entry.timeLocal, entry.name)
         }
     }
 

@@ -13,6 +13,34 @@ kotlin {
 // The golden tests compare by default. Pass -Pgolden.update=true to rewrite the goldens and their hashes instead.
 tasks.named<Test>("jvmTest") {
     systemProperty("golden.update", providers.gradleProperty("golden.update").getOrElse("false"))
+
+    val repo = rootProject.layout.projectDirectory
+    val libraryModules = listOf(
+        "material-color-utilities",
+        "material-kolor-core",
+        "material-kolor-material3",
+        "material-kolor-unstyled",
+        "material-kolor-fluent",
+        "material-kolor-palette",
+    )
+    val sourceRoots = listOf("samples", "builder/shared", "builder/kit", "builder/preview")
+    inputs
+        .files(
+            libraryModules.map { module ->
+                fileTree(repo.dir(module)) {
+                    include("api/jvm/*.api", "**/*.kt")
+                    exclude("**/build/**")
+                }
+            },
+            sourceRoots.map { root ->
+                fileTree(repo.dir(root)) {
+                    include("**/*.kt")
+                    exclude("**/build/**")
+                }
+            },
+            repo.file("README.md"),
+        ).withPropertyName("repoSources")
+        .withPathSensitivity(PathSensitivity.RELATIVE)
 }
 
 // Lays every golden case into the fixture projects of builder/codegen-check, which compiles them against the local

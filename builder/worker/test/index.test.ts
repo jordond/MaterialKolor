@@ -41,7 +41,9 @@ describe('the robots tag', () => {
     ['a code that does not read', '/t/AdllOwAAAAAU', 'no-cache'],
     ['a theme card', card, 'public, max-age=31536000, immutable'],
   ])('is noindex on %s on staging', async (_, path, cacheControl) => {
-    const response = await worker.fetch(request(path), staging, createExecutionContext());
+    const context = createExecutionContext();
+    const response = await worker.fetch(request(path), staging, context);
+    await waitOnExecutionContext(context);
     expect(response.headers.get('X-Robots-Tag')).toBe('noindex');
     expectSiteHeaders(response, cacheControl);
   });
@@ -50,7 +52,10 @@ describe('the robots tag', () => {
     const first = createExecutionContext();
     await worker.fetch(request(card), staging, first);
     await waitOnExecutionContext(first);
-    const response = await worker.fetch(request(card), staging, createExecutionContext());
+    // A miss would hand a cache write to waitUntil, which throws here and turns into the default card.
+    const pending: Promise<unknown>[] = [];
+    const response = await worker.fetch(request(card), staging, throwingContext(pending));
+    expect(pending).toHaveLength(0);
     expect(response.headers.get('X-Robots-Tag')).toBe('noindex');
     expectSiteHeaders(response, 'public, max-age=31536000, immutable');
   });

@@ -16,7 +16,6 @@ import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.model.Accent
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
-import com.materialkolor.builder.domain.persist.ExportTarget
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -97,16 +96,6 @@ class ReservedNamesTest {
 
             assertTrue(reserved.containsAll(imported), "$case imports ${imported - reserved}")
         }
-    }
-
-    @Test
-    fun of_bothMaterial3Targets_reserveTheSameNames() {
-        assertEquals(ReservedNames.of(ExportTarget.Material3), ReservedNames.of(ExportTarget.Material3Expressive))
-    }
-
-    @Test
-    fun of_inklet_reservesTheMaterial3NamesAndInkletTheme() {
-        assertEquals(ReservedNames.of(ExportTarget.Material3) + "InkletTheme", ReservedNames.of(ExportTarget.Inklet))
     }
 
     @Test

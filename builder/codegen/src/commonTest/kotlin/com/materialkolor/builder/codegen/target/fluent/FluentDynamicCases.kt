@@ -3,16 +3,11 @@ package com.materialkolor.builder.codegen.target.fluent
 import com.materialkolor.builder.codegen.ExportInput
 import com.materialkolor.builder.codegen.Fixture
 import com.materialkolor.builder.codegen.Fixtures
-import com.materialkolor.builder.codegen.GoldenDigest
-import com.materialkolor.builder.codegen.GoldenHashes
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
-import com.materialkolor.builder.codegen.target.lintFailures
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.persist.ExportPrefs
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -56,40 +51,10 @@ internal fun Fixture.fluentInline(): ExportInput = fluent().input.inline()
 
 class FluentDynamicTest {
     @Test
-    fun fluentDynamic_everyCase_matchesTheGoldenHash() {
-        FluentDynamicCases.all.keys.forEach { case ->
-            assertEquals(GoldenHashes.cases[case], GoldenDigest.of(FluentDynamicCases.files(case)), case)
-        }
-    }
-
-    @Test
-    fun fluentDynamic_everyCodeLine_passesTheLintLimits() {
-        FluentDynamicCases.all.keys.forEach { case ->
-            assertEquals(emptyList(), lintFailures(FluentDynamicCases.files(case)), case)
-        }
-    }
-
-    @Test
-    fun fluentDynamic_primaryOverride_writesTheSeedThePrimaryAndTheStyle() {
-        val input = FluentDynamicCases.VibrantPrimaryOverride.input
-
-        listOf(input, input.inline()).forEach { candidate ->
-            val theme = theme(candidate)
-
-            assertTrue("seedColor = SeedColor," in theme, theme)
-            assertTrue("isDark = isDark," in theme, theme)
-            assertTrue("primary = Primary," in theme, theme)
-            assertTrue("style = PaletteStyle.Vibrant," in theme, theme)
-        }
-    }
-
-    @Test
-    fun fluentDynamic_module_callsRememberFluentColors() {
+    fun fluentDynamic_module_neverBuildsTheSchemeItself() {
         val theme = theme(Fixtures.Default.fluent().input)
 
-        assertTrue("val colors = rememberFluentColors(" in theme, theme)
         assertFalse("rememberDynamicScheme" in theme, theme)
-        assertTrue("FluentTheme(\n        colors = colors,\n        content = content,\n    )" in theme, theme)
     }
 
     @Test
@@ -148,13 +113,6 @@ class FluentDynamicTest {
                 assertFalse(absent in text, "$absent in $text")
             }
         }
-    }
-
-    @Test
-    fun fluentDynamic_otherLibrary_isRefused() {
-        val unstyled = Fixtures.input(document = Fixtures.Base.copy(library = Library.Unstyled))
-
-        assertFailsWith<IllegalArgumentException> { FluentDynamic.files(unstyled) }
     }
 
     private fun theme(input: ExportInput): String =

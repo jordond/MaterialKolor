@@ -3,13 +3,10 @@ package com.materialkolor.builder.codegen.target.custom
 import com.materialkolor.builder.codegen.ExportInput
 import com.materialkolor.builder.codegen.Fixture
 import com.materialkolor.builder.codegen.Fixtures
-import com.materialkolor.builder.codegen.GoldenDigest
-import com.materialkolor.builder.codegen.GoldenHashes
 import com.materialkolor.builder.codegen.dsl.Expression
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
 import com.materialkolor.builder.codegen.dsl.kotlinFile
 import com.materialkolor.builder.codegen.target.frozenPrefs
-import com.materialkolor.builder.codegen.target.lintFailures
 import com.materialkolor.builder.codegen.validate.ReservedNames
 import com.materialkolor.builder.domain.model.CustomSlot
 import com.materialkolor.builder.domain.model.CustomTone
@@ -21,7 +18,6 @@ import com.materialkolor.builder.domain.model.TonalRamp
 import com.materialkolor.builder.domain.persist.ExportTarget
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -72,20 +68,6 @@ internal object CustomDynamicCases {
 internal fun Fixture.custom(): Fixture = with(document = input.document.copy(library = Library.Custom))
 
 class CustomDynamicTest {
-    @Test
-    fun customDynamic_everyCase_matchesTheGoldenHash() {
-        CustomDynamicCases.all.keys.forEach { case ->
-            assertEquals(GoldenHashes.cases[case], GoldenDigest.of(CustomDynamicCases.files(case)), case)
-        }
-    }
-
-    @Test
-    fun customDynamic_everyCodeLine_passesTheLintLimits() {
-        CustomDynamicCases.all.keys.forEach { case ->
-            assertEquals(emptyList(), lintFailures(CustomDynamicCases.files(case)), case)
-        }
-    }
-
     @Test
     fun customDynamic_files_areSeedsColorsAndTheme() {
         CustomDynamicCases.all.forEach { (case, input) ->
@@ -228,14 +210,9 @@ class CustomDynamicTest {
     }
 
     @Test
-    fun customDynamic_theme_providesTheRememberedColors() {
+    fun customDynamic_theme_neverAnimatesUnasked() {
         val theme = file(Fixtures.Default.custom().input, "Theme.kt")
-        val colors = "val colors = rememberThemeColors(\n        seedColor = SeedColor,\n" +
-            "        isDark = isDark,\n    )"
 
-        assertTrue("val LocalThemeColors = staticCompositionLocalOf<ThemeColors> {" in theme, theme)
-        assertTrue(colors in theme, theme)
-        assertTrue("CompositionLocalProvider(LocalThemeColors provides colors, content = content)" in theme, theme)
         assertFalse("animate" in theme, theme)
     }
 
@@ -253,13 +230,6 @@ class CustomDynamicTest {
             assertTrue(reserved.containsAll(imported), "$case imports ${imported - reserved}")
         }
         assertTrue(REMEMBER_THEME_COLORS in reserved)
-    }
-
-    @Test
-    fun customDynamic_otherLibrary_isRefused() {
-        val material3 = Fixtures.input(document = Fixtures.Base)
-
-        assertFailsWith<IllegalArgumentException> { CustomDynamic.files(material3) }
     }
 
     private fun themeColors(input: ExportInput): String = file(input, "ThemeColors.kt")

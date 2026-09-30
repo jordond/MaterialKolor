@@ -1,6 +1,7 @@
 package com.materialkolor.builder.codegen
 
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
+import com.materialkolor.builder.codegen.zip.Crc32
 
 /**
  * The checksum of one golden case, worked out the same way on every platform.
@@ -30,28 +31,6 @@ internal object GoldenDigest {
             .joinToString(separator = "") { (path, text) -> "$path\n$text" }
             .encodeToByteArray()
 
-        return crc32(bytes)
+        return Crc32.of(bytes).toLong() and 0xFFFFFFFFL
     }
-
-    /**
-     * The standard CRC-32, the one zip and `java.util.zip.CRC32` use.
-     */
-    fun crc32(bytes: ByteArray): Long {
-        var crc = -1
-        bytes.forEach { byte ->
-            crc = Table[(crc xor byte.toInt()) and 0xFF] xor (crc ushr 8)
-        }
-
-        return crc.inv().toLong() and 0xFFFFFFFFL
-    }
-
-    private val Table: IntArray = IntArray(256) { index ->
-        var value = index
-        repeat(8) {
-            value = if (value and 1 != 0) (value ushr 1) xor REVERSED_POLYNOMIAL else value ushr 1
-        }
-        value
-    }
-
-    private const val REVERSED_POLYNOMIAL = 0xEDB88320.toInt()
 }

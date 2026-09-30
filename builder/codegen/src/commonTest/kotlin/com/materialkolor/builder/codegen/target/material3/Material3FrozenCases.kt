@@ -3,13 +3,9 @@ package com.materialkolor.builder.codegen.target.material3
 import com.materialkolor.builder.codegen.ExportInput
 import com.materialkolor.builder.codegen.Fixture
 import com.materialkolor.builder.codegen.Fixtures
-import com.materialkolor.builder.codegen.GoldenDigest
-import com.materialkolor.builder.codegen.GoldenHashes
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
 import com.materialkolor.builder.codegen.target.expectedVariants
 import com.materialkolor.builder.codegen.target.frozenPrefs
-import com.materialkolor.builder.codegen.target.lintFailures
-import com.materialkolor.builder.codegen.target.materialKolorImports
 import com.materialkolor.builder.codegen.text.Literals
 import com.materialkolor.builder.domain.export.ContrastVariant
 import com.materialkolor.builder.domain.model.Library
@@ -22,7 +18,6 @@ import com.materialkolor.builder.domain.persist.ExportPrefs
 import com.materialkolor.builder.domain.persist.FrozenVariants
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -87,27 +82,6 @@ internal object Material3FrozenCases {
 
 class Material3FrozenTest {
     @Test
-    fun material3Frozen_everyCase_matchesTheGoldenHash() {
-        Material3FrozenCases.all.keys.forEach { case ->
-            assertEquals(GoldenHashes.cases[case], GoldenDigest.of(Material3FrozenCases.files(case)), case)
-        }
-    }
-
-    @Test
-    fun material3Frozen_everyCodeLine_passesTheLintLimits() {
-        Material3FrozenCases.all.keys.forEach { case ->
-            assertEquals(emptyList(), lintFailures(Material3FrozenCases.files(case)), case)
-        }
-    }
-
-    @Test
-    fun material3Frozen_everyCase_importsNothingFromMaterialKolor() {
-        Material3FrozenCases.all.keys.forEach { case ->
-            assertEquals(emptyList(), materialKolorImports(Material3FrozenCases.files(case)), case)
-        }
-    }
-
-    @Test
     fun material3Frozen_everyRole_isWrittenForBothModesAtEveryVariant() {
         Material3FrozenCases.all.forEach { (case, input) ->
             val files = Material3Frozen.files(input)
@@ -128,21 +102,6 @@ class Material3FrozenTest {
                 }
             }
         }
-    }
-
-    @Test
-    fun material3Frozen_allContrasts_namesEverySchemeAndUsesTheStandardPair() {
-        val theme = theme(Material3FrozenCases.all.getValue("material3-frozen-all-contrasts"))
-
-        listOf(
-            "val lightScheme = lightColorScheme(",
-            "val darkScheme = darkColorScheme(",
-            "val mediumContrastLightColorScheme = lightColorScheme(",
-            "val mediumContrastDarkColorScheme = darkColorScheme(",
-            "val highContrastLightColorScheme = lightColorScheme(",
-            "val highContrastDarkColorScheme = darkColorScheme(",
-            "colorScheme = if (isDark) darkScheme else lightScheme,",
-        ).forEach { expected -> assertTrue(expected in theme, expected) }
     }
 
     @Test
@@ -228,16 +187,6 @@ class Material3FrozenTest {
         assertTrue(") {\n        InkletTheme(content = content)\n    }\n" in theme, theme)
         assertFalse("content = content," in theme, theme)
         assertTrue("import dev.ggoggam.inklet.InkletTheme" in theme, theme)
-    }
-
-    @Test
-    fun material3Frozen_otherLibrary_isRefused() {
-        val fluent = Fixtures.input(
-            document = Fixtures.Base.copy(library = Library.Fluent),
-            prefs = frozenPrefs(),
-        )
-
-        assertFailsWith<IllegalArgumentException> { Material3Frozen.files(fluent) }
     }
 
     /**

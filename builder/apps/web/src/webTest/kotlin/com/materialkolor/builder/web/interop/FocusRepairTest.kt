@@ -13,6 +13,7 @@ import org.w3c.dom.events.FocusEvent
 import org.w3c.dom.events.FocusEventInit
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.Promise
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -23,8 +24,8 @@ import kotlin.test.assertTrue
  * Builds the shape CMP 1.12.1 gives the viewport, a shadow root holding the canvas and, while a
  * text field is focused, the hidden backing input beside it.
  *
- * The repair waits for the current task to end, so every check runs a frame later and cleans up
- * after itself there rather than in an after hook.
+ * The repair's deferred work goes into [deferred] and document focus comes from [pageFocused], so
+ * nothing depends on the browser window. Every check runs once the pending observer callbacks have.
  */
 class FocusRepairTest {
     private lateinit var viewport: HTMLElement
@@ -32,6 +33,8 @@ class FocusRepairTest {
     private lateinit var layer: HTMLElement
     private lateinit var canvas: HTMLElement
     private lateinit var field: HTMLElement
+    private val deferred = mutableListOf<() -> Unit>()
+    private var pageFocused = true
 
     @BeforeTest
     fun buildViewport() {
@@ -44,11 +47,18 @@ class FocusRepairTest {
         canvas.setAttribute("tabindex", "0")
         field = layer.backingField()
 
-        // Focusing something in the test frame gives it document focus, which the observer asks for.
-        canvas.focus()
-        dropFocus()
         countFocusCalls(canvas)
-        FocusRepair.install(viewport)
+        FocusRepair.install(
+            viewport = viewport,
+            defer = { action -> deferred += action },
+            hasDocumentFocus = { pageFocused },
+        )
+    }
+
+    @AfterTest
+    fun removeViewport() {
+        viewport.remove()
+        dropFocus()
     }
 
     @Test
@@ -67,6 +77,7 @@ class FocusRepairTest {
         return afterRepair {
             button.remove()
             assertFalse(shadow.focused == canvas)
+            assertEquals(0, focusCallsOf(canvas))
         }
     }
 
@@ -99,7 +110,6 @@ class FocusRepairTest {
     @Test
     fun aRemovalWithoutFocusOutRefocusesTheCanvas(): Promise<JsAny?> {
         field.dispatchFocusIn()
-        assertTrue(document.hasFocus(), "the test frame should hold document focus")
 
         field.remove()
 
@@ -156,17 +166,24 @@ class FocusRepairTest {
         }
     }
 
+    @Test
+    fun aRemovalWhileThePageIsInAnotherWindowLeavesFocusAlone(): Promise<JsAny?> {
+        pageFocused = false
+        field.dispatchFocusIn()
+
+        field.remove()
+
+        return afterRepair { assertEquals(0, focusCallsOf(canvas)) }
+    }
+
     /**
-     * Runs [check] once the repair has had its turn, then takes the viewport down either way.
+     * Runs [check] once the pending observer callbacks and the repair's deferred work have run.
+     * Observer callbacks were queued as microtasks before this one, so they come first.
      */
     private fun afterRepair(check: () -> Unit): Promise<JsAny?> =
-        nextFrame().then { _ ->
-            try {
-                check()
-            } finally {
-                viewport.remove()
-                dropFocus()
-            }
+        Promise<JsAny?> { resolve, _ -> resolve(null) }.then { _ ->
+            while (deferred.isNotEmpty()) deferred.removeAt(0).invoke()
+            check()
             null
         }
 

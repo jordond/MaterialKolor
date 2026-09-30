@@ -44,53 +44,67 @@ internal object FocusRepair {
 
     /**
      * Watches [viewport] for its hidden text input going away and leaving focus with nobody.
+     *
+     * [defer] runs an action once the current task is done, and [hasDocumentFocus] says whether the
+     * page holds focus. Tests pass their own to drive the repair without a real browser window.
      */
-    fun install(viewport: Element) {
-        val removals = MutationObserver { records, _ -> onChildrenChanged(records) }
-        viewport.addEventListener("focusin") { event -> watchContainer(event, removals) }
-        viewport.addEventListener("focusout", ::onFocusOut)
-    }
-
-    /**
-     * Starts watching the children of the element holding the canvas and its backing fields, once
-     * either takes focus. CMP builds its DOM once Skiko is ready, so a focused canvas or field is the
-     * first sure sign of where that element is. Observing the same element again only replaces its
-     * options.
-     */
-    private fun watchContainer(
-        event: Event,
-        removals: MutationObserver,
+    fun install(
+        viewport: Element,
+        defer: (action: () -> Unit) -> Unit = ::runAsMicrotask,
+        hasDocumentFocus: () -> Boolean = { document.hasFocus() },
     ) {
-        val container = (event.backingField() ?: event.canvasOrigin())?.parentElement ?: return
-        removals.observe(container, childChanges())
+        val watcher = Watcher(defer, hasDocumentFocus)
+        val removals = MutationObserver { records, _ -> watcher.onChildrenChanged(records) }
+        viewport.addEventListener("focusin") { event -> watcher.watchContainer(event, removals) }
+        viewport.addEventListener("focusout") { event -> watcher.onFocusOut(event) }
     }
 
-    /**
-     * The field is still in place here, so the canvas beside it is found now and focused later.
-     */
-    private fun onFocusOut(event: Event) {
-        if (event !is FocusEvent || event.relatedTarget != null) return
-        val canvas = event.backingField()?.parentElement?.canvas() ?: return
-        runAsMicrotask { refocusIfLost(canvas) }
-    }
+    private class Watcher(
+        private val defer: (action: () -> Unit) -> Unit,
+        private val hasDocumentFocus: () -> Boolean,
+    ) {
+        /**
+         * Starts watching the children of the element holding the canvas and its backing fields,
+         * once either takes focus. CMP builds its DOM once Skiko is ready, so a focused canvas or
+         * field is the first sure sign of where that element is. Observing the same element again
+         * only replaces its options.
+         */
+        fun watchContainer(
+            event: Event,
+            removals: MutationObserver,
+        ) {
+            val container = (event.backingField() ?: event.canvasOrigin())?.parentElement ?: return
+            removals.observe(container, childChanges())
+        }
 
-    /**
-     * Observer callbacks already run once the task that changed the container is done. Asking for
-     * document focus keeps a removal while the user is in another window from pulling focus here.
-     */
-    private fun onChildrenChanged(records: JsArray<MutationRecord>) {
-        if (!document.hasFocus()) return
-        val removal = (0 until records.length)
-            .mapNotNull { index -> records[index] }
-            .firstOrNull { record -> record.removedNodes.asList().any { node -> node.isBackingField() } }
-        val canvas = (removal?.target as? Element)?.canvas() ?: return
-        refocusIfLost(canvas)
-    }
+        /**
+         * The field is still in place here, so the canvas beside it is found now and focused later.
+         */
+        fun onFocusOut(event: Event) {
+            if (event !is FocusEvent || event.relatedTarget != null) return
+            val canvas = event.backingField()?.parentElement?.canvas() ?: return
+            defer { refocusIfLost(canvas) }
+        }
 
-    private fun refocusIfLost(canvas: HTMLCanvasElement) {
-        val active = document.activeElement
-        if (active != null && active != document.body) return
-        focusWithoutScroll(canvas)
+        /**
+         * Observer callbacks already run once the task that changed the container is done. Asking
+         * for document focus keeps a removal while the user is in another window from pulling focus
+         * here.
+         */
+        fun onChildrenChanged(records: JsArray<MutationRecord>) {
+            if (!hasDocumentFocus()) return
+            val removal = (0 until records.length)
+                .mapNotNull { index -> records[index] }
+                .firstOrNull { record -> record.removedNodes.asList().any { node -> node.isBackingField() } }
+            val canvas = (removal?.target as? Element)?.canvas() ?: return
+            refocusIfLost(canvas)
+        }
+
+        private fun refocusIfLost(canvas: HTMLCanvasElement) {
+            val active = document.activeElement
+            if (active != null && active != document.body) return
+            focusWithoutScroll(canvas)
+        }
     }
 
     /**
