@@ -1,8 +1,6 @@
 package com.materialkolor.builder.preview.fluent
 
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasAnyAncestor
@@ -10,29 +8,18 @@ import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.isNotEnabled
-import androidx.compose.ui.unit.IntSize
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
-import com.materialkolor.builder.domain.persist.DeviceWidth
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.engine.resolve.ThemeResult
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.preview.Chrome
 import com.materialkolor.builder.preview.ShellExpressive
-import com.materialkolor.builder.preview.canvas.DemoAppState
+import com.materialkolor.builder.preview.TripsHarness
 import com.materialkolor.builder.preview.canvas.PreviewPane
 import com.materialkolor.builder.preview.split.PaneSpec
 import com.materialkolor.builder.preview.trips.TripsDestination
-
-/**
- * The frame the dock shows each device in, the kit's screen widths at the height of a first screen.
- */
-internal val FluentFrames: Map<DeviceWidth, IntSize> = mapOf(
-    DeviceWidth.Phone to IntSize(412, 900),
-    DeviceWidth.Tablet to IntSize(840, 900),
-    DeviceWidth.Desktop to IntSize(1280, 800),
-)
 
 /**
  * A blue document that targets Fluent, so the contrast audit rates Fluent's own pairs.
@@ -71,15 +58,9 @@ internal val ScrollbarArrow: SemanticsMatcher =
         SemanticsMatcher.keyNotDefined(SemanticsProperties.ContentDescription)
 
 /**
- * The Trips app in a Fluent pane of [spec], under the shell chrome, with motion frozen.
+ * The Trips app in a Fluent pane, under the shell chrome, with motion frozen.
  */
-@Composable
-internal fun FluentHarness(
-    spec: PaneSpec,
-    state: DemoAppState,
-    width: DeviceWidth,
-    modifier: Modifier,
-) {
+internal val FluentTrips: TripsHarness = { spec, state, width, modifier ->
     CompositionLocalProvider(LocalMotionFrozen provides true) {
         Chrome(ShellExpressive) {
             PreviewPane(spec, modifier) { FluentAppEntry(spec, state, width) }

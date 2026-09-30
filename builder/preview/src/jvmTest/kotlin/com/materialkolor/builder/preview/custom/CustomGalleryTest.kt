@@ -32,18 +32,27 @@ import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.GALLERY_CARD
 import com.materialkolor.builder.preview.canvas.GalleryGroup
 import com.materialkolor.builder.preview.canvas.PreviewPane
+import com.materialkolor.builder.preview.checkCardsFillEveryGroup
+import com.materialkolor.builder.preview.checkCardsShowEnabledAndDisabled
+import com.materialkolor.builder.preview.checkFirstScreenComposesOnlyCardsInView
+import com.materialkolor.builder.preview.checkGalleryControlsDeclareRoles
+import com.materialkolor.builder.preview.checkSourcesOpenNothingAndNeverLoop
 import com.materialkolor.builder.preview.galleryCardDeclaresRoles
 import com.materialkolor.builder.preview.galleryDeclaresRoles
 import com.materialkolor.builder.preview.galleryDescendants
 import com.materialkolor.builder.preview.galleryFrame
 import com.materialkolor.builder.preview.galleryInteractive
+import com.materialkolor.builder.preview.galleryProbe
 import com.materialkolor.builder.preview.galleryRowsOnScreen
 import com.materialkolor.builder.preview.importedNames
 import com.materialkolor.builder.preview.moduleSource
 import com.materialkolor.builder.preview.on
+import com.materialkolor.builder.preview.opensAWindow
+import com.materialkolor.builder.preview.screenColors
 import com.materialkolor.builder.preview.split.LocalCompositionProbe
 import com.materialkolor.builder.preview.split.PaneSpec
 import com.materialkolor.builder.preview.sweepEveryControl
+import com.materialkolor.builder.preview.sweepWholeGallery
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContain
@@ -53,16 +62,6 @@ import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.ints.shouldBeLessThanOrEqual
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
-
-/**
- * The phone and desktop frames the gallery is checked at, at the height of a first screen.
- */
-private val GalleryFrames: List<IntSize> = listOf(IntSize(412, 900), IntSize(1280, 800))
-
-/**
- * How many columns of 280 dp cards, 16 dp apart, fit across each frame's width.
- */
-private val GalleryColumns: Map<Int, Int> = mapOf(412 to 1, 1280 to 4)
 
 /**
  * The cards whose kit control has no disabled look, or that hold nothing to press.
@@ -96,53 +95,25 @@ private val GallerySources: List<String> = listOf(
 @OptIn(ExperimentalTestApi::class)
 class CustomGalleryTest {
     @Test
-    fun cards_everyGroup_holdUniquelyNamedKitControls() {
-        CustomCards.map { card -> card.title }.distinct().size shouldBe CustomCards.size
-        GalleryGroup.entries.filter { group -> CustomCards.none { card -> card.group == group } }.shouldBeEmpty()
-    }
+    fun cards_everyGroup_holdUniquelyNamedKitControls() = checkCardsFillEveryGroup(CustomCards)
 
     @Test
     fun controls_everyCard_declareTheirOwnSlots() =
         runComposeUiTest {
             val composed = mutableSetOf<String>()
-            setContent { GalleryHarness(LightSpec, DemoAppState(), GalleryWhole, composed) }
+            setContent { CustomGalleryHarness(LightSpec, DemoAppState(), GalleryWhole, composed) }
             waitForIdle()
-            composed shouldBe CustomCards.map { card -> card.title }.toSet()
 
-            val frames = CustomCards.map { card -> galleryFrame(card.title).id }.toSet()
-            // Unmerged, since a merged node also carries the roles its children declared.
-            val controls = onAllNodes(GalleryInteractive, useUnmergedTree = true).fetchSemanticsNodes()
-            controls.shouldNotBeEmpty()
-            controls
-                .filterNot { node -> node.galleryDeclaresRoles(frames) }
-                .map { node -> node.config.toString() }
-                .shouldBeEmpty()
-            CustomCards
-                .filterNot { card -> galleryCardDeclaresRoles(card.title) }
-                .map { card -> card.title }
-                .shouldBeEmpty()
+            checkGalleryControlsDeclareRoles(CustomCards, composed)
         }
 
     @Test
     fun cards_everyControlWithADisabledLook_showItEnabledAndDisabled() =
         runComposeUiTest {
-            setContent { GalleryHarness(LightSpec, DemoAppState(), GalleryWhole) }
+            setContent { CustomGalleryHarness(LightSpec, DemoAppState(), GalleryWhole) }
             waitForIdle()
 
-            for (card in CustomCards) {
-                withClue(card.title) {
-                    val nodes = galleryFrame(card.title).galleryDescendants()
-                    val disabled = nodes.count { node -> SemanticsProperties.Disabled in node.config }
-                    val enabled = nodes.count { node ->
-                        node.galleryInteractive() && SemanticsProperties.Disabled !in node.config
-                    }
-                    if (card.title in GalleryNoDisabled) {
-                        disabled shouldBe 0
-                    } else {
-                        (enabled > 0 && disabled > 0) shouldBe true
-                    }
-                }
-            }
+            checkCardsShowEnabledAndDisabled(CustomCards, GalleryNoDisabled)
         }
 
     @Test
@@ -150,13 +121,13 @@ class CustomGalleryTest {
         runDesktopComposeUiTest(1280, 800) {
             var chromeScheme: ColorScheme? = null
             setContent {
-                GalleryHarness(LightSpec, DemoAppState(), Modifier.fillMaxSize(), onChrome = { chromeScheme = it })
+                CustomGalleryHarness(LightSpec, DemoAppState(), Modifier.fillMaxSize()) { scheme ->
+                    chromeScheme = scheme
+                }
             }
             waitForIdle()
 
-            val pixels = onRoot().captureToImage().toPixelMap().let { map ->
-                buildSet { for (x in 0 until map.width) for (y in 0 until map.height) add(map[x, y].toArgb()) }
-            }
+            val pixels = screenColors()
             val scheme = checkNotNull(chromeScheme)
             // Each pane slot beside the chrome role it would have leaked from.
             val pairs = listOf(
@@ -176,50 +147,20 @@ class CustomGalleryTest {
         }
 
     @Test
-    fun gallery_everyFirstScreen_composesOnlyTheCardsInViewAndTheirRoles() {
-        for (frame in GalleryFrames) {
-            withClue(frame) {
-                runDesktopComposeUiTest(frame.width, frame.height) {
-                    val composed = mutableSetOf<String>()
-                    setContent { GalleryHarness(LightSpec, DemoAppState(), Modifier.fillMaxSize(), composed) }
-                    waitForIdle()
-
-                    // The rows on screen and the one the list prefetches below them, and no more.
-                    val bound = (galleryRowsOnScreen(composed) + 1) * GalleryColumns.getValue(frame.width)
-                    composed.size shouldBeGreaterThan 0
-                    composed.size shouldBeLessThanOrEqual bound
-                    composed shouldNotContain CustomCards.last().title
-                    composed
-                        .filterNot { title -> galleryCardDeclaresRoles(title) }
-                        .shouldBeEmpty()
-                }
-            }
+    fun gallery_everyFirstScreen_composesOnlyTheCardsInViewAndTheirRoles() =
+        checkFirstScreenComposesOnlyCardsInView(CustomCards.last().title) { composed ->
+            CustomGalleryHarness(LightSpec, DemoAppState(), Modifier.fillMaxSize(), composed)
         }
-    }
 
     @Test
     fun gallery_everyControlPressedHoveredFocusedRightClickedAndLongPressed_opensNoPopupOrWindow() =
-        runDesktopComposeUiTest(1280, 8000) {
-            // A window the size of the whole gallery, so the pointer reaches every card and not just the first screen.
-            setContent { GalleryHarness(LightSpec, DemoAppState(), GalleryWhole) }
-            waitForIdle()
-
-            sweepEveryControl()
-        }
+        sweepWholeGallery { CustomGalleryHarness(LightSpec, DemoAppState(), GalleryWhole) }
 
     @Test
-    fun gallerySources_importNothingThatOpensAPopup() {
-        for (path in GallerySources) {
-            withClue(path) {
-                moduleSource(path)
-                    .importedNames()
-                    .filter { imported ->
-                        imported in GalleryPopupImports ||
-                            imported.startsWith("androidx.compose.ui.window.")
-                    }.shouldBeEmpty()
-            }
+    fun gallerySources_importNothingThatOpensAPopup() =
+        checkSourcesOpenNothingAndNeverLoop(GallerySources.map { path -> moduleSource(path) }) { imported ->
+            imported in GalleryPopupImports || imported.opensAWindow()
         }
-    }
 }
 
 /**
@@ -227,17 +168,14 @@ class CustomGalleryTest {
  * the chrome's own colour scheme, read outside the pane.
  */
 @Composable
-private fun GalleryHarness(
+private fun CustomGalleryHarness(
     spec: PaneSpec,
     state: DemoAppState,
     modifier: Modifier,
     composed: MutableSet<String>? = null,
     onChrome: (ColorScheme) -> Unit = {},
 ) {
-    val probe: ((String) -> Unit)? = composed?.let { titles ->
-        { where: String -> if (where.startsWith(GALLERY_CARD)) titles += where.removePrefix(GALLERY_CARD) }
-    }
-    CompositionLocalProvider(LocalMotionFrozen provides true, LocalCompositionProbe provides probe) {
+    CompositionLocalProvider(LocalMotionFrozen provides true, LocalCompositionProbe provides galleryProbe(composed)) {
         Chrome {
             onChrome(MaterialTheme.colorScheme)
             ProvideBuilderLayout(modifier = modifier) {

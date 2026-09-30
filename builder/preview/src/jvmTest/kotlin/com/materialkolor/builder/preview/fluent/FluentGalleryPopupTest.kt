@@ -3,10 +3,15 @@ package com.materialkolor.builder.preview.fluent
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import com.materialkolor.builder.preview.GalleryWhole
+import com.materialkolor.builder.preview.PaneKitImports
 import com.materialkolor.builder.preview.canvas.DemoAppState
+import com.materialkolor.builder.preview.checkSourcesOpenNothingAndNeverLoop
 import com.materialkolor.builder.preview.importedNames
+import com.materialkolor.builder.preview.isKitImportBeyond
 import com.materialkolor.builder.preview.moduleSource
+import com.materialkolor.builder.preview.opensAWindow
 import com.materialkolor.builder.preview.sweepEveryControl
+import com.materialkolor.builder.preview.sweepWholeGallery
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
@@ -57,21 +62,6 @@ private val GalleryBannedFluent: Set<String> = setOf(
 )
 
 /**
- * What the gallery may take from the kit, its motion, the fold modifiers and `InnerTextWithoutHandles`.
- */
-private val GalleryKitImports: List<String> = listOf(
-    "com.materialkolor.builder.kit.motion.",
-    "com.materialkolor.builder.kit.control.folded",
-    "com.materialkolor.builder.kit.headless.InnerTextWithoutHandles",
-)
-
-/**
- * The start of the names of the endless animation APIs. Written out whole they would trip the
- * builder's own architecture scan of this file.
- */
-private val GalleryEndlessMotion: List<String> = listOf("rememberInfinite", "infiniteRepeat")
-
-/**
  * A progress bar or ring called without a value, the endless kind.
  */
 private val EndlessProgress = Regex("""\bProgress(Bar|Ring)\((?!\s*progress\b)""")
@@ -83,27 +73,18 @@ private val EndlessProgress = Regex("""\bProgress(Bar|Ring)\((?!\s*progress\b)""
 @OptIn(ExperimentalTestApi::class)
 class FluentGalleryPopupTest {
     @Test
-    fun gallery_everyControlPressedHoveredFocusedRightClickedAndLongPressed_opensNoPopupOrWindow() =
-        runDesktopComposeUiTest(1280, 8000) {
-            // A window the size of the whole gallery, so the pointer reaches every card and not just the first screen.
-            setContent { GalleryHarness(FluentLightSpec, DemoAppState(), GalleryWhole) }
-            waitForIdle()
-
-            // A press and drag is how the slider's value tip opens, beside the tooltips of hover and focus.
-            sweepEveryControl(pressAndDrag = true)
-        }
+    fun gallery_everyControlPressedHoveredFocusedRightClickedAndLongPressed_opensNoPopupOrWindow() {
+        // A press and drag is how the slider's value tip opens, beside the tooltips of hover and focus.
+        sweepWholeGallery(pressAndDrag = true) { FluentGalleryHarness(FluentLightSpec, DemoAppState(), GalleryWhole) }
+    }
 
     @Test
     fun gallerySources_openNoPopupWindowOrPortalAndNeverLoop() {
-        for (path in GallerySources) {
-            withClue(path) {
-                val source = moduleSource(path)
+        val sources = GallerySources.map { path -> moduleSource(path) }
+        checkSourcesOpenNothingAndNeverLoop(sources) { imported -> imported.isBannedInTheGallery() }
+        for (source in sources) {
+            withClue(source.name) {
                 val text = source.readText()
-                source.importedNames().filter { imported -> imported.isBannedInTheGallery() }.shouldBeEmpty()
-                text
-                    .lines()
-                    .filter { line -> GalleryEndlessMotion.any { stem -> stem in line } }
-                    .shouldBeEmpty()
                 EndlessProgress
                     .findAll(text)
                     .map { match -> match.value }
@@ -119,8 +100,8 @@ class FluentGalleryPopupTest {
 
 private fun String.isBannedInTheGallery(): Boolean {
     val name = substringAfterLast('.')
-    return startsWith("androidx.compose.ui.window.") ||
+    return opensAWindow() ||
         GalleryPopupWords.any { word -> word in name } ||
         this in GalleryBannedFluent ||
-        (startsWith("com.materialkolor.builder.kit.") && GalleryKitImports.none { allowed -> startsWith(allowed) })
+        isKitImportBeyond(PaneKitImports)
 }
