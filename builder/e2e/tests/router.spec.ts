@@ -167,7 +167,7 @@ async function closeWithBacksHeld(page: Page, count: number): Promise<void> {
 
 /**
  * Waits for the page to draw a few frames. The router counts a pop inside the browser's `popstate`
- * handler, so a back it set off that had not landed yet has landed and been counted by then.
+ * handler, and a back it sets off lands a task or two later, so a second pop would be counted by then.
  */
 async function backSettled(page: Page): Promise<void> {
   await nextFrames(page, 3);

@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 import { expect, openBuilder, test } from './builder';
-import { A11Y, button, pressSettled } from '../fixtures/workspace';
+import { A11Y, button, nextFrames, pressSettled } from '../fixtures/workspace';
 
 // The seed's color picker with the browser's eyedropper. The eyedropper is a stand-in
 // the test resolves with a color or closes with Esc, the way browser-apis.spec.ts drives it, so the
@@ -50,8 +50,10 @@ test('an eyedropper pick lands on Done, and Esc puts the seed back', async ({ pa
   await click(page, 'Pick from screen');
   await page.waitForFunction(() => typeof (window as any).__pick === 'function');
   await page.keyboard.press('Escape');
-  // The stand-in lets go of its pick once the Esc has reached it.
+  // The stand-in lets go of its pick once the Esc has reached it, and the picker hears of that and
+  // takes Esc again on a frame after.
   await page.waitForFunction(() => (window as any).__pick === undefined);
+  await nextFrames(page, 3);
   await expect(button(page, 'Done')).toHaveCount(1);
   await page.keyboard.press('Escape');
 

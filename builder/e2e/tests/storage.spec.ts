@@ -119,20 +119,19 @@ async function settlePulse(page: Page): Promise<void> {
  */
 async function syncTabs(from: Page, to: Page): Promise<void> {
   const mark = `${Date.now()}-${Math.random()}`;
-  const heard = to.evaluate(
-    (value) =>
-      new Promise<void>((resolve) => {
-        const listen = (event: StorageEvent) => {
-          if (event.key !== 'e2e:sync' || event.newValue !== value) return;
-          window.removeEventListener('storage', listen);
-          resolve();
-        };
-        window.addEventListener('storage', listen);
-      }),
-    mark,
-  );
+  // The listener is on before the write, so the event cannot slip past it.
+  await to.evaluate((value) => {
+    (window as any).__mkSynced = new Promise<void>((resolve) => {
+      const listen = (event: StorageEvent) => {
+        if (event.key !== 'e2e:sync' || event.newValue !== value) return;
+        window.removeEventListener('storage', listen);
+        resolve();
+      };
+      window.addEventListener('storage', listen);
+    });
+  }, mark);
   await from.evaluate((value) => localStorage.setItem('e2e:sync', value), mark);
-  await heard;
+  await to.evaluate(() => (window as any).__mkSynced);
 }
 
 /** The hints in [hints] a user or a spec dismissed, leaving out the one the builder keeps by itself. */

@@ -51,13 +51,14 @@ export async function reloadBuilder(page: Page): Promise<void> {
 
 /**
  * Waits for the shell's hooks and the `mk:first-frame` mark, which the app sets once it has drawn,
- * so a press or a key after this reaches a page that is there to take it.
+ * so a press or a key after this reaches a page that is there to take it. Playwright's fake clock
+ * hides every performance entry, so a page on it waits for the hooks alone.
  */
 async function waitForReady(page: Page): Promise<void> {
   await page.waitForFunction(
     () =>
       ['route', 'addHint', 'media'].every((name) => typeof window.__mk?.[name] === 'function') &&
-      performance.getEntriesByName('mk:first-frame').length > 0,
+      ('__pwClock' in window || performance.getEntriesByName('mk:first-frame').length > 0),
   );
 }
 
