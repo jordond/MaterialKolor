@@ -1,5 +1,6 @@
 package com.materialkolor.builder.kit.widget
 
+import com.materialkolor.builder.kit.checkEach
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -93,14 +94,11 @@ internal val WidgetDocument: ThemeDocument = ThemeDocument(seed = Argb(0x6750A4)
 internal val WidgetSkins: List<Pair<String, Skin>> = ControlSkins
 
 /**
- * Runs [block] once per skin in a fresh test, with the skin's name as the clue.
+ * Runs [block] once per skin in a fresh test, then fails with every skin that failed, each by name.
  */
 @OptIn(ExperimentalTestApi::class)
-internal fun forEachWidgetSkin(block: suspend ComposeUiTest.(name: String, skin: Skin) -> Unit) {
-    for ((name, skin) in WidgetSkins) {
-        withClue(name) { runComposeUiTest { block(name, skin) } }
-    }
-}
+internal fun forEachWidgetSkin(block: suspend ComposeUiTest.(name: String, skin: Skin) -> Unit) =
+    checkEach(WidgetSkins, name = { (name, _) -> name }) { (name, skin) -> runComposeUiTest { block(name, skin) } }
 
 /**
  * A skin over [WidgetDocument], a measured layout and frozen motion.

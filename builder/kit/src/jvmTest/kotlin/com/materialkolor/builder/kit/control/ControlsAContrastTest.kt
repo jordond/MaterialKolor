@@ -19,9 +19,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.requestFocus
-import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.model.ThemeDocument
@@ -37,7 +38,7 @@ import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import io.kotest.matchers.collections.shouldBeEmpty
 import kotlin.test.Test
-import kotlin.test.assertNotNull
+import io.kotest.matchers.shouldBe
 
 private val SheetLayout = LayoutInfo.of(widthDp = 1280.dp, heightDp = 800.dp)
 
@@ -49,16 +50,13 @@ private val CompactLayout = LayoutInfo.of(widthDp = 400.dp, heightDp = 800.dp)
 @OptIn(ExperimentalTestApi::class)
 class ControlsAContrastTest {
     @Test
-    fun material3_bothModes_renderEveryControlEnabledAndDisabled() =
-        runComposeUiTest { checkSheets(Skin(SkinLibrary.Material3, expressive = false)) }
+    fun actionTokens_everySkinBothModes_meetTheirContrastMinimums() {
+        readInEverySkin { LocalBuilderTokens.current.actionPairs() }.shortfalls().shouldBeEmpty()
+    }
 
     @Test
-    fun material3Expressive_bothModes_renderEveryControlEnabledAndDisabled() =
-        runComposeUiTest { checkSheets(Skin(SkinLibrary.Material3, expressive = true)) }
-
-    @Test
-    fun custom_bothModes_renderEveryControlEnabledAndDisabled() =
-        runComposeUiTest { checkSheets(Skin(SkinLibrary.Custom, expressive = false)) }
+    fun actionSheet_everySkin_rendersEnabledDisabledAndFocusedOnAPhone() =
+        forEachSkin { _, skin -> renderSheets(skin) }
 }
 
 /**
@@ -75,40 +73,29 @@ private fun BuilderTokens.actionPairs(): List<InkPair> =
         InkPair("focus on panel", focus, panel, 3.0),
     )
 
+/**
+ * Draws every control enabled and disabled on a desktop, then the pressable ones on a phone with
+ * Share focused, where the ring and the 48 dp footprint show.
+ */
 @OptIn(ExperimentalTestApi::class)
-private fun ComposeUiTest.checkSheets(skin: Skin) {
-    val unreadable = mutableListOf<String>()
-    var isDark by mutableStateOf(false)
+private fun ComposeUiTest.renderSheets(skin: Skin) {
     var compact by mutableStateOf(false)
-    var tokens: BuilderTokens? = null
     setContent {
         val result = remember { ThemeResolver().resolve(ThemeDocument(seed = Argb(0x6750A4))) }
         CompositionLocalProvider(
             LocalMotionFrozen provides true,
             LocalLayout provides if (compact) CompactLayout else SheetLayout,
         ) {
-            SkinTestTheme(skin, result, isDark, reducedMotion = false) {
-                tokens = LocalBuilderTokens.current
+            SkinTestTheme(skin, result, isDark = false, reducedMotion = false) {
                 if (compact) CompactSheet() else ControlSheet()
             }
         }
     }
-
-    for (dark in listOf(false, true)) {
-        isDark = dark
-        waitForIdle()
-        val mode = if (dark) "dark" else "light"
-        unreadable += assertNotNull(tokens).actionPairs().shortfalls(mode)
-    }
+    onAllNodesWithText("Export").fetchSemanticsNodes().size shouldBe 2
     compact = true
-    for (dark in listOf(false, true)) {
-        isDark = dark
-        waitForIdle()
-        // Focus Share so the compact pass draws the ring as well.
-        onNodeWithText("Share").requestFocus()
-        waitForIdle()
-    }
-    unreadable.shouldBeEmpty()
+    waitForIdle()
+    onNodeWithText("Share").requestFocus()
+    onNodeWithText("Share").assertIsFocused()
 }
 
 /**

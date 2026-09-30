@@ -1,5 +1,6 @@
 package com.materialkolor.builder.kit.skin.material
 
+import com.materialkolor.builder.kit.checkEach
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -68,7 +69,7 @@ import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import java.io.File
+import com.materialkolor.builder.kit.moduleSource
 import kotlin.test.Test
 
 /**
@@ -98,11 +99,11 @@ private val CallerWidths: List<Dp?> = listOf(160.dp, 240.dp, 360.dp, 480.dp, 720
  * The files the expressive chrome is drawn in, which may never start an endless clock.
  */
 private val ChromeSources: List<String> = listOf(
-    "src/commonMain/kotlin/com/materialkolor/builder/kit/skin/material/MaterialSegmented.kt",
-    "src/commonMain/kotlin/com/materialkolor/builder/kit/skin/material/MaterialProgress.kt",
-    "src/commonMain/kotlin/com/materialkolor/builder/kit/control/BuilderSegmented.kt",
-    "src/commonMain/kotlin/com/materialkolor/builder/kit/control/FoldedToggleName.kt",
-    "src/commonMain/kotlin/com/materialkolor/builder/kit/a11y/ValueNodeName.kt",
+    "commonMain/kotlin/com/materialkolor/builder/kit/skin/material/MaterialSegmented.kt",
+    "commonMain/kotlin/com/materialkolor/builder/kit/skin/material/MaterialProgress.kt",
+    "commonMain/kotlin/com/materialkolor/builder/kit/control/BuilderSegmented.kt",
+    "commonMain/kotlin/com/materialkolor/builder/kit/control/FoldedToggleName.kt",
+    "commonMain/kotlin/com/materialkolor/builder/kit/a11y/ValueNodeName.kt",
 )
 
 /**
@@ -303,7 +304,7 @@ class MaterialExpressiveChromeTest {
     fun chromeSources_neverStartAnEndlessClock() {
         for (path in ChromeSources) {
             withClue(path) {
-                val text = File(path).readText()
+                val text = moduleSource(path).readText()
                 EndlessClockWords.filter { word -> word in text }.shouldBeEmpty()
                 // A loading indicator only with its progress, never the one that runs a clock of its own.
                 text
@@ -414,14 +415,14 @@ private enum class FoldScope {
 }
 
 /**
- * Runs [block] in a fresh test for each flavour of the Material3 skin, naming it on failure.
+ * Runs [block] in a fresh test for each flavour of the Material3 skin, then fails with every
+ * flavour that failed, each by name.
  */
 @OptIn(ExperimentalTestApi::class)
-private fun forEachFlavour(block: suspend ComposeUiTest.(skin: Skin) -> Unit) {
-    for (skin in Flavours) {
-        withClue(if (skin.expressive) "expressive" else "material3") { runComposeUiTest { block(skin) } }
+private fun forEachFlavour(block: suspend ComposeUiTest.(skin: Skin) -> Unit) =
+    checkEach(Flavours, name = { skin -> if (skin.expressive) "expressive" else "material3" }) { skin ->
+        runComposeUiTest { block(skin) }
     }
-}
 
 /**
  * The preview modes with Split chosen, tagged [RowTag].

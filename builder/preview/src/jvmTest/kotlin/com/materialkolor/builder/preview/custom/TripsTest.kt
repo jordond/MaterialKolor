@@ -1,5 +1,6 @@
 package com.materialkolor.builder.preview.custom
 
+import com.materialkolor.builder.preview.moduleSource
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
@@ -297,7 +298,7 @@ private val TripsEndlessMotion: Regex = Regex("""\b(rememberInfinite\w*Transitio
  */
 private val TripsSources: List<File>
     get() {
-        val folder = File("src/commonMain/kotlin/com/materialkolor/builder/preview/custom")
+        val folder = moduleSource("commonMain/kotlin/com/materialkolor/builder/preview/custom")
         val trips = folder.listFiles().orEmpty().filter { file -> file.name.startsWith("CustomTrip") }
         return trips.sortedBy { file -> file.name } + File(folder, "AppEntry.kt") + File(folder, "CustomColors.kt")
     }

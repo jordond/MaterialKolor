@@ -1,5 +1,12 @@
 package com.materialkolor.builder.preview.fluent
 
+import com.materialkolor.builder.preview.galleryInteractive
+import com.materialkolor.builder.preview.galleryDeclaresRoles
+import com.materialkolor.builder.preview.galleryDescendants
+import com.materialkolor.builder.preview.GalleryWhole
+import com.materialkolor.builder.preview.GalleryInteractive
+import com.materialkolor.builder.preview.galleryFrame
+import com.materialkolor.builder.preview.galleryCardDeclaresRoles
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.wrapContentSize

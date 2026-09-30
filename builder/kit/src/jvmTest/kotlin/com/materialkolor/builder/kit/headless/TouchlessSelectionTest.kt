@@ -1,5 +1,6 @@
 package com.materialkolor.builder.kit.headless
 
+import com.materialkolor.builder.kit.ShortcutKey
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -42,12 +43,6 @@ import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotBeBlank
 import java.awt.datatransfer.DataFlavor
 import kotlin.test.Test
-
-/**
- * The key held with A and C, Command on a Mac and Control everywhere else, as the desktop reads it.
- */
-private val ShortcutKey: Key =
-    if (System.getProperty("os.name").orEmpty().startsWith("Mac")) Key.MetaLeft else Key.CtrlLeft
 
 /**
  * Where overlays render in the page the code view and text over several lines swap their selection

@@ -1,5 +1,6 @@
 package com.materialkolor.builder.preview.inklet
 
+import com.materialkolor.builder.preview.pressEveryControl
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.CompositionLocalProvider
@@ -64,20 +65,7 @@ class InkletTripsTest {
                     }
                     waitForIdle()
 
-                    val pressable = onAllNodes(hasClickAction(), useUnmergedTree = true).fetchSemanticsNodes()
-                    pressable.shouldNotBeEmpty()
-                    runOnIdle {
-                        for (node in pressable) {
-                            if (SemanticsProperties.Disabled !in node.config) {
-                                node.config
-                                    .getOrNull(SemanticsActions.OnClick)
-                                    ?.action
-                                    ?.invoke()
-                            }
-                        }
-                    }
-                    waitForIdle()
-                    onAllNodes(isRoot()).assertCountEquals(1)
+                    pressEveryControl()
                 }
             }
         }

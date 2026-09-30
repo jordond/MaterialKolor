@@ -47,64 +47,9 @@ internal val GalleryChoices: List<String> = listOf(
 )
 
 /**
- * Wide enough for four columns and tall enough that every card composes.
- */
-internal val GalleryWhole: Modifier = Modifier
-    .wrapContentSize(Alignment.TopStart, unbounded = true)
-    .requiredSize(1280.dp, 8000.dp)
-
-/**
- * Anything a user can press, type into or drag.
- */
-internal val GalleryInteractive: SemanticsMatcher =
-    SemanticsMatcher("is interactive") { node -> node.galleryInteractive() }
-
-/**
- * Anything that takes keyboard focus.
- */
-internal val GalleryFocusable: SemanticsMatcher = SemanticsMatcher.keyIsDefined(SemanticsActions.RequestFocus)
-
-/**
  * A node named [name] exactly.
  */
 internal fun galleryNamed(name: String): SemanticsMatcher = hasContentDescription(name)
-
-internal fun SemanticsNode.galleryInteractive(): Boolean =
-    SemanticsActions.OnClick in config || SemanticsActions.SetText in config || SemanticsActions.SetProgress in config
-
-/**
- * Whether the node declares its colors, itself or through the control it is part of. The nearest
- * node that declares them may be an ancestor, as long as it sits inside a card and is not the card's
- * frame among [frames]. A Fluent button keeps its clickable on a row inside the part its modifier
- * reaches.
- */
-internal fun SemanticsNode.galleryDeclaresRoles(frames: Set<Int>): Boolean {
-    val holder = generateSequence(this) { node -> node.parent }.firstOrNull { node -> PreviewRoles in node.config }
-    return holder != null &&
-        holder.id !in frames &&
-        generateSequence(holder.parent) { node -> node.parent }.any { node -> node.id in frames }
-}
-
-/**
- * Every node under this one in the unmerged tree.
- */
-internal fun SemanticsNode.galleryDescendants(): List<SemanticsNode> =
-    children.flatMap { child -> listOf(child) + child.galleryDescendants() }
-
-/**
- * The frame of the card called [title], the node its title text sits in.
- */
-internal fun SemanticsNodeInteractionsProvider.galleryFrame(title: String): SemanticsNode =
-    onAllNodes(hasText(title), useUnmergedTree = true)
-        .fetchSemanticsNodes()
-        .mapNotNull { text -> text.parent }
-        .first { frame -> PreviewRoles in frame.config }
-
-/**
- * Whether anything in the card called [title] declares its colors, its frame aside.
- */
-internal fun SemanticsNodeInteractionsProvider.galleryCardDeclaresRoles(title: String): Boolean =
-    galleryFrame(title).galleryDescendants().any { node -> PreviewRoles in node.config }
 
 /**
  * Everything the gallery keeps in [DemoAppState], to tell whether anything changed.

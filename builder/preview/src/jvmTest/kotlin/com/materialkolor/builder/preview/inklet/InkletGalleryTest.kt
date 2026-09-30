@@ -1,5 +1,8 @@
 package com.materialkolor.builder.preview.inklet
 
+import com.materialkolor.builder.preview.pressEveryControl
+import com.materialkolor.builder.preview.rightClickAndLongPressEveryField
+import com.materialkolor.builder.preview.TextToolbarProbe
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.CompositionLocalProvider
@@ -58,7 +61,7 @@ class InkletGalleryTest {
     fun gallery_motionFrozen_settlesAndOpensNoPopupOrWindow() =
         runComposeUiTest {
             val composed = mutableSetOf<String>()
-            val toolbar = ToolbarProbe()
+            val toolbar = TextToolbarProbe()
             val spec = LightSpec.on(Library.Inklet)
             val state = DemoAppState()
             setContent {
@@ -80,52 +83,9 @@ class InkletGalleryTest {
             waitForIdle()
             composed shouldBe InkletCards.map { card -> card.title }.toSet()
 
-            val pressable = onAllNodes(hasClickAction(), useUnmergedTree = true).fetchSemanticsNodes()
-            pressable.shouldNotBeEmpty()
-            runOnIdle {
-                for (node in pressable) {
-                    if (SemanticsProperties.Disabled !in node.config) {
-                        node.config
-                            .getOrNull(SemanticsActions.OnClick)
-                            ?.action
-                            ?.invoke()
-                    }
-                }
-            }
-            waitForIdle()
-            onAllNodes(isRoot()).assertCountEquals(1)
-
+            pressEveryControl()
             // A word to select, so the field has a context menu and a text toolbar to open.
-            val destination = onNode(hasSetTextAction() and hasText("Destination"))
-            destination.performTextReplacement("Lisbon")
-            destination.performMouseInput { rightClick() }
-            waitForIdle()
-            onAllNodes(isRoot()).assertCountEquals(1)
-            destination.performTouchInput { longClick() }
-            waitForIdle()
-            onAllNodes(isRoot()).assertCountEquals(1)
+            rightClickAndLongPressEveryField(onAllNodes(hasSetTextAction() and hasText("Destination")), "Lisbon")
             toolbar.shown shouldBe 0
         }
-}
-
-/**
- * A text toolbar that counts how often it is asked to show, where the web's would open a popup.
- */
-private class ToolbarProbe : TextToolbar {
-    var shown: Int = 0
-        private set
-
-    override val status: TextToolbarStatus = TextToolbarStatus.Hidden
-
-    override fun showMenu(
-        rect: Rect,
-        onCopyRequested: (() -> Unit)?,
-        onPasteRequested: (() -> Unit)?,
-        onCutRequested: (() -> Unit)?,
-        onSelectAllRequested: (() -> Unit)?,
-    ) {
-        shown++
-    }
-
-    override fun hide() = Unit
 }

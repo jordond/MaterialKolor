@@ -1,5 +1,6 @@
 package com.materialkolor.builder.kit.control
 
+import com.materialkolor.builder.kit.ShortcutKey
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.getValue
@@ -49,12 +50,6 @@ private fun ComposeUiTest.handInFromOutside(write: () -> Unit) {
     mainClock.advanceTimeByFrame()
     mainClock.advanceTimeByFrame()
 }
-
-/**
- * The key that holds undo on this machine, Cmd on a Mac and Ctrl elsewhere.
- */
-private val UndoModifier: Key =
-    if (System.getProperty("os.name").orEmpty().startsWith("Mac")) Key.MetaLeft else Key.CtrlLeft
 
 @OptIn(ExperimentalTestApi::class)
 class ControlsBFieldTest {
@@ -375,7 +370,7 @@ class ControlsBFieldTest {
 
             onNodeWithTag(Field).requestFocus()
             onNodeWithTag(Field).performTextReplacement("Forest")
-            onNodeWithTag(Field).performKeyInput { withKeyDown(UndoModifier) { pressKey(Key.Z) } }
+            onNodeWithTag(Field).performKeyInput { withKeyDown(ShortcutKey) { pressKey(Key.Z) } }
             editableText(Field) shouldBe "Ocean"
             bubbled shouldNotContain Key.Z
         }

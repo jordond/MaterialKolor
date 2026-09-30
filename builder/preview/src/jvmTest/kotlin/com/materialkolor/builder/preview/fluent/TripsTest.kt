@@ -1,5 +1,6 @@
 package com.materialkolor.builder.preview.fluent
 
+import com.materialkolor.builder.preview.moduleSource
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
@@ -67,7 +68,7 @@ import io.kotest.matchers.shouldBe
 import java.io.File
 import kotlin.test.Test
 
-private const val FluentSourceDir = "src/commonMain/kotlin/com/materialkolor/builder/preview/fluent"
+private const val FluentSourceDir = "commonMain/kotlin/com/materialkolor/builder/preview/fluent"
 
 /**
  * The files of Fluent's Trips, which the gallery's sources are not.
@@ -336,7 +337,7 @@ class TripsTest {
 
     @Test
     fun tripsSources_openNothingOutsideTheLayoutAndNeverLoop() {
-        val sources = File(FluentSourceDir)
+        val sources = moduleSource(FluentSourceDir)
             .listFiles()
             .orEmpty()
             .filter { file -> file.name in TripsSources }

@@ -119,8 +119,8 @@ class PageTextToolbarTest {
             longPressField()
             tap("Paste")
             val pasted = hasSetTextAction() and hasText(Pasted, substring = true)
-            waitUntil { onAllNodes(pasted).fetchSemanticsNodes().isNotEmpty() }
             waitForIdle()
+            onNode(pasted).assertExists()
             onAllNodes(hasText("Paste")).assertCountEquals(0)
         }
 

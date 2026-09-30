@@ -1,5 +1,15 @@
 package com.materialkolor.builder.preview.unstyled
 
+import com.materialkolor.builder.preview.galleryInteractive
+import com.materialkolor.builder.preview.galleryDeclaresRoles
+import com.materialkolor.builder.preview.galleryDescendants
+import com.materialkolor.builder.preview.importedNames
+import com.materialkolor.builder.preview.GalleryWhole
+import com.materialkolor.builder.preview.GalleryInteractive
+import com.materialkolor.builder.preview.galleryFrame
+import com.materialkolor.builder.preview.galleryCardDeclaresRoles
+import com.materialkolor.builder.preview.sweepEveryControl
+import com.materialkolor.builder.preview.moduleSource
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.wrapContentSize
@@ -84,11 +94,11 @@ private val GalleryNoDisabled: Set<String> = setOf("Separators", "Scroll area", 
  * The sources every Unstyled gallery card is drawn from.
  */
 private val GallerySources: List<String> = listOf(
-    "src/commonMain/kotlin/com/materialkolor/builder/preview/unstyled/GalleryEntry.kt",
-    "src/commonMain/kotlin/com/materialkolor/builder/preview/unstyled/GalleryInputs.kt",
-    "src/commonMain/kotlin/com/materialkolor/builder/preview/unstyled/GalleryPanels.kt",
-    "src/commonMain/kotlin/com/materialkolor/builder/preview/unstyled/GalleryRoles.kt",
-    "src/commonMain/kotlin/com/materialkolor/builder/preview/unstyled/UnstyledGallery.kt",
+    "commonMain/kotlin/com/materialkolor/builder/preview/unstyled/GalleryEntry.kt",
+    "commonMain/kotlin/com/materialkolor/builder/preview/unstyled/GalleryInputs.kt",
+    "commonMain/kotlin/com/materialkolor/builder/preview/unstyled/GalleryPanels.kt",
+    "commonMain/kotlin/com/materialkolor/builder/preview/unstyled/GalleryRoles.kt",
+    "commonMain/kotlin/com/materialkolor/builder/preview/unstyled/UnstyledGallery.kt",
 )
 
 /**
@@ -205,73 +215,17 @@ class UnstyledGalleryTest {
             setContent { GalleryHarness(LightSpec, DemoAppState(), GalleryWhole) }
             waitForIdle()
 
-            val pressable = onAllNodes(hasClickAction(), useUnmergedTree = true).fetchSemanticsNodes()
-            pressable.shouldNotBeEmpty()
-            runOnIdle {
-                for (node in pressable) {
-                    if (SemanticsProperties.Disabled !in node.config) {
-                        node.config
-                            .getOrNull(SemanticsActions.OnClick)
-                            ?.action
-                            ?.invoke()
-                    }
-                }
-            }
-            waitForIdle()
-            onAllNodes(isRoot()).assertCountEquals(1)
-
-            // Hover and focus are how a tooltip opens.
-            val interactive = onAllNodes(GalleryInteractive, useUnmergedTree = true)
-            for (index in interactive.fetchSemanticsNodes().indices) {
-                withClue("Hovered control $index") {
-                    interactive[index].performMouseInput { moveTo(center) }
-                    waitForIdle()
-                    onAllNodes(isRoot()).assertCountEquals(1)
-                }
-            }
-            // The pointer leaves, so the presses below start from a fresh pointer.
-            onRoot().performMouseInput { exit() }
-            val focusable = onAllNodes(GalleryFocusable, useUnmergedTree = true)
-            val focusables = focusable.fetchSemanticsNodes().size
-            focusables shouldBeGreaterThan 0
-            for (index in 0 until focusables) {
-                withClue("Focused control $index") {
-                    focusable[index].requestFocus()
-                    waitForIdle()
-                    onAllNodes(isRoot()).assertCountEquals(1)
-                }
-            }
-
-            // A word to select, so the text field has a context menu and a text toolbar to open.
-            val fields = onAllNodes(hasSetTextAction())
-            val count = fields.fetchSemanticsNodes().size
-            count shouldBeGreaterThan 0
-            fields[0].performTextReplacement("Harbour")
-            for (index in 0 until count) {
-                withClue("Text field $index") {
-                    fields[index].performMouseInput { rightClick() }
-                    waitForIdle()
-                    onAllNodes(isRoot()).assertCountEquals(1)
-                    fields[index].performTouchInput { longClick() }
-                    waitForIdle()
-                    onAllNodes(isRoot()).assertCountEquals(1)
-                }
-            }
+            sweepEveryControl()
         }
 
     @Test
     fun gallerySources_openNoPopupWindowOrPortalAndNeverLoop() {
         for (path in GallerySources) {
             withClue(path) {
-                val source = File(path)
-                source.isFile shouldBe true
-                val lines = source.readLines().map { line -> line.trim() }
-                lines
-                    .filter { line -> line.startsWith("import ") }
-                    .map { line -> line.removePrefix("import ").substringBefore(" as ") }
-                    .filter { imported -> imported.isBannedInTheGallery() }
-                    .shouldBeEmpty()
-                lines
+                val source = moduleSource(path)
+                source.importedNames().filter { imported -> imported.isBannedInTheGallery() }.shouldBeEmpty()
+                source
+                    .readLines()
                     .filter { line -> GalleryEndlessMotion.any { stem -> stem in line } }
                     .shouldBeEmpty()
             }
@@ -402,63 +356,9 @@ private val WebValueNames: List<String> = listOf(
 )
 
 /**
- * Wide enough for four columns and tall enough that every card composes.
- */
-private val GalleryWhole: Modifier = Modifier
-    .wrapContentSize(Alignment.TopStart, unbounded = true)
-    .requiredSize(1280.dp, 8000.dp)
-
-/**
- * Anything a user can press, type into or drag.
- */
-private val GalleryInteractive: SemanticsMatcher =
-    SemanticsMatcher("is interactive") { node -> node.galleryInteractive() }
-
-/**
- * Anything that takes keyboard focus.
- */
-private val GalleryFocusable: SemanticsMatcher = SemanticsMatcher.keyIsDefined(SemanticsActions.RequestFocus)
-
-/**
  * A node named [name] exactly.
  */
 private fun named(name: String): SemanticsMatcher = hasContentDescription(name)
-
-private fun SemanticsNode.galleryInteractive(): Boolean =
-    SemanticsActions.OnClick in config || SemanticsActions.SetText in config || SemanticsActions.SetProgress in config
-
-/**
- * Whether the node declares its roles, itself or through the control it is part of. The nearest
- * node with roles may be an ancestor, as long as it sits inside a card and is not the card's frame
- * among [frames].
- */
-private fun SemanticsNode.galleryDeclaresRoles(frames: Set<Int>): Boolean {
-    val holder = generateSequence(this) { node -> node.parent }.firstOrNull { node -> PreviewRoles in node.config }
-    return holder != null &&
-        holder.id !in frames &&
-        generateSequence(holder.parent) { node -> node.parent }.any { node -> node.id in frames }
-}
-
-/**
- * Every node under this one in the unmerged tree.
- */
-private fun SemanticsNode.galleryDescendants(): List<SemanticsNode> =
-    children.flatMap { child -> listOf(child) + child.galleryDescendants() }
-
-/**
- * The frame of the card called [title], the node its title text sits in.
- */
-private fun SemanticsNodeInteractionsProvider.galleryFrame(title: String): SemanticsNode =
-    onAllNodes(hasText(title), useUnmergedTree = true)
-        .fetchSemanticsNodes()
-        .mapNotNull { text -> text.parent }
-        .first { frame -> PreviewRoles in frame.config }
-
-/**
- * Whether anything in the card called [title] declares roles, its frame aside.
- */
-private fun SemanticsNodeInteractionsProvider.galleryCardDeclaresRoles(title: String): Boolean =
-    galleryFrame(title).galleryDescendants().any { node -> PreviewRoles in node.config }
 
 private fun String.isBannedInTheGallery(): Boolean {
     val name = substringAfterLast('.')
