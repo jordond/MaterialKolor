@@ -49,7 +49,7 @@ class QuantizerCelebiTest {
     }
 
     @Test
-    fun testStability() {
+    fun testStabilityMatchesUpstream() {
         val imagePixels = intArrayOf(
             0xff050505.toInt(),
             0xff000000.toInt(),
@@ -139,9 +139,9 @@ class QuantizerCelebiTest {
 
         val count = 16
 
-        val result1 = QuantizerCelebi.quantize(imagePixels, count).toList()
-        val result2 = QuantizerCelebi.quantize(imagePixels, count).toList()
+        val expected = quantize.QuantizerCelebi.quantize(imagePixels, count).toList()
+        val actual = QuantizerCelebi.quantize(imagePixels, count).toList()
 
-        result1 shouldBe result2
+        actual shouldBe expected
     }
 }

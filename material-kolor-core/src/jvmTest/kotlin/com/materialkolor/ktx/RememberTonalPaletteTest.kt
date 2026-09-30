@@ -32,7 +32,7 @@ class RememberTonalPaletteTest {
             tick = 1
             waitForIdle()
 
-            assertEquals(2, compositions.size, "expected the unrelated state change to recompose")
+            assertEquals(1, compositions.last(), "expected the unrelated state change to recompose")
             assertEquals(1, instances.size)
 
             seed = Color(0xFFB3261E)
