@@ -12,6 +12,9 @@
 ![badge-desktop](http://img.shields.io/badge/platform-desktop-DB413D.svg?style=flat)
 ![badge-js](http://img.shields.io/badge/platform-js%2Fwasm-FDD835.svg?style=flat)
 
+> [!TIP]
+> Looking for MaterialKolor's 6.0.0 documentation? Click [here](https://github.com/jordond/MaterialKolor/tree/next)
+
 A Compose Multiplatform library for creating dynamic Material Design 3 color palettes from any
 color.
 
