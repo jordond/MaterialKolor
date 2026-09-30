@@ -7,6 +7,7 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.lifecycle.ViewModelStore
+import com.materialkolor.builder.WAIT_MILLIS
 import com.materialkolor.builder.core.platform.Paste
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.color.ContrastLevel
@@ -15,10 +16,10 @@ import com.materialkolor.builder.fakes.FakePasteInput
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import dev.stateholder.dispatcher.rememberDispatcher
 import io.kotest.matchers.shouldBe
+import kotlin.test.AfterTest
 import kotlin.test.Test
 
 private val Start = Argb(0xFFD9653B.toInt())
-private const val WAIT_MILLIS = 5_000L
 
 /**
  * The Undo on a pasted color's toast only ever undoes that color.
@@ -28,7 +29,13 @@ class PasteUndoTest {
     private val pastes = FakePasteInput()
     private val model = PasteRouter(pastes)
     private val store = ViewModelStore().apply { put("pastes", model) }
+
     private val workspace = PasteWorkspaceFake(ThemeDocument(seed = Start))
+
+    @AfterTest
+    fun tearDown() {
+        store.clear()
+    }
 
     @Test
     fun undo_whileTheColorIsStillOnTop_undoesIt() =
@@ -40,7 +47,6 @@ class PasteUndoTest {
             toast.onAction?.invoke()
 
             workspace.undos shouldBe 1
-            store.clear()
         }
 
     @Test
@@ -55,7 +61,6 @@ class PasteUndoTest {
             workspace.withdrawn shouldBe 1
             toast.onAction?.invoke()
             workspace.undos shouldBe 0
-            store.clear()
         }
 
     private fun ComposeUiTest.showHost() {

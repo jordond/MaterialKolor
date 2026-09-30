@@ -46,10 +46,14 @@ import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import kotlin.time.Clock
 
 /**
  * The builder, on whatever platform [platform] describes.
@@ -65,7 +69,13 @@ fun BuilderApp(
     motionFrozen: Boolean = false,
     awaitIdle: (suspend () -> Unit)? = null,
 ) {
-    val graph = remember(platform) { createGraphFactory<AppGraph.Factory>().create(platform) }
+    val graph = remember(platform) {
+        createGraphFactory<AppGraph.Factory>().create(
+            platform = platform,
+            scope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
+            clock = Clock.System,
+        )
+    }
     CompositionLocalProvider(
         LocalMetroViewModelFactory provides graph.metroViewModelFactory,
         LocalMotionFrozen provides motionFrozen,

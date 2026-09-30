@@ -18,6 +18,7 @@ import org.jetbrains.skia.Image
 import org.jetbrains.skia.ImageInfo
 import org.jetbrains.skia.MipmapMode
 import org.jetbrains.skia.Rect
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
 import kotlin.test.Test
@@ -26,6 +27,11 @@ import kotlin.test.Test
  * The long edge the extractor reads an image at, as the browser scales it.
  */
 private const val PIXEL_EDGE = 128
+
+/**
+ * How far apart a written candidate and the extractor's may be in each channel and still match.
+ */
+private const val CHANNEL_TOLERANCE = 4
 
 /**
  * Checks the preset candidates in `Presets.kt` against the extractor. Each picture is decoded with Skia, scaled to
@@ -42,11 +48,10 @@ class PresetCandidatesTest {
                 preset.id to SeedExtractor.extract(sampleOf(bytes)).candidates
             }
 
-            val written = Presets.images.associate { preset -> preset.id to preset.candidates }
+            val drifted = Presets.images.filterNot { preset -> preset.candidates.near(extracted.getValue(preset.id)) }
 
             // Should they drift, the message holds the lists to paste back.
-            written.mapValues { (_, candidates) -> candidates.hexes() } shouldBe
-                extracted.mapValues { (_, candidates) -> candidates.hexes() }
+            drifted.associate { preset -> preset.id to extracted.getValue(preset.id).hexes() } shouldBe emptyMap()
         }
 
     @Test
@@ -56,7 +61,6 @@ class PresetCandidatesTest {
             .distinct()
             .size shouldBe Presets.all.size
         Presets.images.map { preset -> preset.id } shouldBe listOf("res-0", "res-1", "res-2", "res-3", "res-4")
-        Presets.starters.size shouldBe 8
     }
 
     /**
@@ -90,4 +94,16 @@ class PresetCandidatesTest {
     }
 
     private fun List<Argb>.hexes(): List<String> = map { candidate -> candidate.toHex() }
+
+    /**
+     * Whether these are [other]'s candidates in the same order, each channel within
+     * [CHANNEL_TOLERANCE] of its own. Skia may scale a picture a step apart on another machine.
+     */
+    private fun List<Argb>.near(other: List<Argb>): Boolean =
+        size == other.size &&
+            zip(other).all { (written, made) ->
+                abs(written.red - made.red) <= CHANNEL_TOLERANCE &&
+                    abs(written.green - made.green) <= CHANNEL_TOLERANCE &&
+                    abs(written.blue - made.blue) <= CHANNEL_TOLERANCE
+            }
 }

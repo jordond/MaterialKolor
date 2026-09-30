@@ -17,6 +17,8 @@ import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.test.withKeyDown
+import com.materialkolor.builder.HEIGHT
+import com.materialkolor.builder.WIDTH
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.edit.PinMode
@@ -52,7 +54,7 @@ private val OnCard: SemanticsMatcher = hasAnyAncestor(hasTestTag(INSPECT_CARD_TA
 class InspectPinKeyTest {
     @Test
     fun shiftEnter_onTheFocusedFab_pinsItsCard_whosePinDispatchesSetPin_thenEscTwiceRefocusesTheToggle() =
-        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val host = CanvasHost(view = ProjectViewState())
             host.state = host.state.copy(inspect = true)
             val result = ThemeResolver().resolve(host.state.document)

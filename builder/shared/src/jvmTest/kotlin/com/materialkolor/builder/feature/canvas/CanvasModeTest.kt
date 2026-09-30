@@ -1,6 +1,5 @@
 package com.materialkolor.builder.feature.canvas
 
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.semantics.SemanticsActions
@@ -17,21 +16,21 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import com.materialkolor.builder.AppHarness
 import com.materialkolor.builder.BuilderRoot
-import com.materialkolor.builder.di.AppGraph
+import com.materialkolor.builder.HEIGHT
+import com.materialkolor.builder.WAIT_MILLIS
+import com.materialkolor.builder.WIDTH
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.domain.persist.ProjectViewState
-import com.materialkolor.builder.fakes.FakePlatform
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.withView
-import dev.zacsweers.metro.createGraphFactory
-import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import io.kotest.assertions.withClue
 import io.kotest.matchers.floats.plusOrMinus
 import io.kotest.matchers.floats.shouldBeGreaterThan
 import io.kotest.matchers.floats.shouldBeLessThan
 import io.kotest.matchers.shouldBe
+import kotlin.test.AfterTest
 import kotlin.test.Test
 
 /**
@@ -46,9 +45,16 @@ private const val SETTLE_MARGIN_MILLIS = 50L
 
 @OptIn(ExperimentalTestApi::class)
 class CanvasModeTest {
+    private val app = AppHarness()
+
+    @AfterTest
+    fun tearDown() {
+        app.close()
+    }
+
     @Test
     fun modeSwitch_underFrozenMotion_composesOneCopyAndComesBackToTheSavedHandle() =
-        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val host = CanvasHost(view = ProjectViewState(splitFraction = 0.3f))
             setContent { Canvas(host) }
             waitForIdle()
@@ -67,7 +73,7 @@ class CanvasModeTest {
 
     @Test
     fun modeSwitch_withMotion_slidesTheHandleToTheEdgeBeforeDroppingACopy() =
-        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val host = CanvasHost()
             setContent { Canvas(host, frozen = false) }
             waitForIdle()
@@ -85,7 +91,7 @@ class CanvasModeTest {
 
     @Test
     fun splitHandle_moved_savesTheFractionOnceAndStaysThere() =
-        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val host = CanvasHost()
             setContent { Canvas(host) }
             waitForIdle()
@@ -101,7 +107,7 @@ class CanvasModeTest {
 
     @Test
     fun splitHandle_savedElsewhere_movesToTheSavedFraction() =
-        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val host = CanvasHost()
             setContent { Canvas(host) }
             waitForIdle()
@@ -125,7 +131,7 @@ class CanvasModeTest {
         )
         for ((first, second) in switches) {
             withClue("${first.mode} at ${first.splitFraction} to ${second.mode} at ${second.splitFraction}") {
-                runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+                runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
                     val host = CanvasHost(view = first)
                     setContent { Canvas(host, frozen = false) }
                     waitForIdle()
@@ -147,7 +153,7 @@ class CanvasModeTest {
 
     @Test
     fun splitHandle_draggedOverSeveralFrames_savesOnceWithTheFinalFraction() =
-        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val host = CanvasHost()
             setContent { Canvas(host) }
             waitForIdle()
@@ -169,7 +175,7 @@ class CanvasModeTest {
 
     @Test
     fun splitHandle_touchDraggedAndReleased_savesAFrameLaterWithoutTheWait() =
-        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val host = CanvasHost()
             setContent { Canvas(host) }
             waitForIdle()
@@ -193,7 +199,7 @@ class CanvasModeTest {
 
     @Test
     fun splitHandle_movedByAnArrowKey_savesOnlyOnceItHasRested() =
-        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val host = CanvasHost()
             setContent { Canvas(host) }
             waitForIdle()
@@ -214,7 +220,7 @@ class CanvasModeTest {
 
     @Test
     fun splitHandle_savedElsewhereWhileASaveWaits_dropsTheWaitingSave() =
-        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val host = CanvasHost()
             setContent { Canvas(host) }
             waitForIdle()
@@ -246,20 +252,8 @@ class CanvasModeTest {
 
     @Test
     fun modeSwitch_fromTheDock_appliesAtOnceWithoutAReveal() =
-        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
-            val platform = FakePlatform()
-            val graph = createGraphFactory<AppGraph.Factory>().create(platform)
-            val owner = TestOwner()
-            setContent {
-                CompositionLocalProvider(
-                    LocalViewModelStoreOwner provides owner,
-                    LocalMetroViewModelFactory provides graph.metroViewModelFactory,
-                ) {
-                    BuilderRoot(graph)
-                }
-            }
-            waitUntil { platform.environment.splashHidden }
-            waitForIdle()
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            val graph = with(app) { bootRoot() }
             graph.session.viewState.value.mode shouldBe PreviewMode.Split
             mainClock.autoAdvance = false
 

@@ -1,7 +1,5 @@
 package com.materialkolor.builder.feature.poster
 
-import com.materialkolor.builder.domain.capability.ControlState
-import com.materialkolor.builder.domain.capability.Reason
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.edit.PinMode
 import com.materialkolor.builder.domain.model.KeyColor
@@ -13,21 +11,6 @@ import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 class CoreColorsLogicTest {
-    @Test
-    fun reasonText_everyReason_isTheStringNamedByItsKey() {
-        Reason.entries.forEach { reason -> reasonText(reason).key shouldBe reason.key }
-    }
-
-    @Test
-    fun explanation_eachState_isItsNoteOrItsReason() {
-        ControlState.Enabled().explanation shouldBe null
-        ControlState.Enabled(Reason.FluentStyleChroma).explanation shouldBe Reason.FluentStyleChroma
-        ControlState.Disabled(Reason.FluentOneRamp).explanation shouldBe Reason.FluentOneRamp
-        ControlState.Hidden(Reason.DimRolesUnexposed).explanation shouldBe Reason.DimRolesUnexposed
-        ControlState.Enabled(Reason.FluentStyleChroma).usable shouldBe true
-        ControlState.Disabled(Reason.FluentOneRamp).usable shouldBe false
-    }
-
     @Test
     fun keyColorName_sixPalettes_eachHaveTheirOwnName() {
         KeyColor.entries.map(::keyColorName).shouldBeUnique()

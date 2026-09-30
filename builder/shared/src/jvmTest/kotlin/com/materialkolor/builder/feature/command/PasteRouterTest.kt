@@ -6,6 +6,9 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
+import com.materialkolor.builder.HEIGHT
+import com.materialkolor.builder.WAIT_MILLIS
+import com.materialkolor.builder.WIDTH
 import com.materialkolor.builder.core.platform.Paste
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.link.shareLink
@@ -14,10 +17,9 @@ import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.feature.workspace.Panel
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import kotlin.test.AfterTest
 import kotlin.test.Test
 
-private const val WIDTH = 1280
-private const val HEIGHT = 800
 private val Purple = Argb(0xFF6750A4.toInt())
 private val Blue = Argb(0xFF1A73E8.toInt())
 
@@ -27,7 +29,13 @@ private val Blue = Argb(0xFF1A73E8.toInt())
 @OptIn(ExperimentalTestApi::class)
 class PasteRouterTest {
     private val harness = CommandHarness()
+
     private val platform = harness.platform
+
+    @AfterTest
+    fun tearDown() {
+        harness.close()
+    }
 
     @Test
     fun pastedHex_setsTheSeedAsOneUndoEntry_withAnUndoToast() =
@@ -36,10 +44,10 @@ class PasteRouterTest {
             val start = document()
 
             platform.pastes.paste(Paste.Text("  #6750A4\n"))
-            waitUntil { document().seed == Purple }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { document().seed == Purple }
 
             document().seedSource shouldBe SeedSource.Typed
-            waitUntil { named("Seed set to #6750A4") }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { named("Seed set to #6750A4") }
             workspaceButton("Undo").performClick()
             waitForIdle()
             document() shouldBe start
@@ -53,13 +61,13 @@ class PasteRouterTest {
             val link = shareLink(ThemeDocument.Default.copy(seed = Blue), projectName = "Blue sky").shouldNotBeNull()
 
             platform.pastes.paste(Paste.Text(link))
-            waitUntil { named("Open the shared theme?") }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { named("Open the shared theme?") }
             document().seed shouldBe ThemeDocument.Default.seed
 
             workspaceButton("Open").performClick()
 
-            waitUntil { document().seed == Blue }
-            waitUntil { harness.workspace.state.value.projectName == "Blue sky" }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { document().seed == Blue }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { harness.workspace.state.value.projectName == "Blue sky" }
         }
 
     @Test
@@ -96,7 +104,7 @@ class PasteRouterTest {
             waitForIdle()
             // A paste once the menu has closed lands, and undoing it goes straight back to the start.
             platform.pastes.paste(Paste.Text("#1A73E8"))
-            waitUntil { document().seed == Blue }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { document().seed == Blue }
 
             runOnUiThread { harness.workspace.undo() }
             waitForIdle()

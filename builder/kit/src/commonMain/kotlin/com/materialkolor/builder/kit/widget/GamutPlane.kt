@@ -56,6 +56,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import com.materialkolor.builder.domain.edit.EditPhase
+import com.materialkolor.builder.kit.a11y.KitTestApi
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.ControlState
@@ -77,6 +78,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
+import kotlin.concurrent.Volatile
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -281,17 +283,38 @@ private fun planeSpan(hue: Double): Double {
 }
 
 /**
- * The pictures of the last [KeptHues] whole hues, the most recently shown last. Only the main
- * thread reads and writes it.
+ * Forgets every plane picture kept so far, so the next plane builds its own as a first one would.
+ */
+@KitTestApi
+public fun forgetPlanePictures() {
+    KeptPictures.clear()
+}
+
+/**
+ * The pictures of the last [KeptHues] whole hues, the most recently shown last. The main thread
+ * reads and writes it, and a test clears it from its own thread in between, so every change swaps
+ * in a whole new map.
  */
 private object KeptPictures {
-    private val pictures = LinkedHashMap<Int, PlanePicture>()
+    @Volatile
+    private var pictures: Map<Int, PlanePicture> = emptyMap()
 
-    fun take(hue: Int): PlanePicture? = pictures.remove(hue)?.also { picture -> pictures[hue] = picture }
+    fun take(hue: Int): PlanePicture? {
+        val picture = pictures[hue] ?: return null
+        pictures = pictures - hue + (hue to picture)
+        return picture
+    }
 
     fun keep(picture: PlanePicture) {
-        pictures[picture.hue] = picture
-        while (pictures.size > KeptHues) pictures.remove(pictures.keys.first())
+        pictures = (pictures - picture.hue + (picture.hue to picture))
+            .entries
+            .toList()
+            .takeLast(KeptHues)
+            .associate { (hue, kept) -> hue to kept }
+    }
+
+    fun clear() {
+        pictures = emptyMap()
     }
 }
 

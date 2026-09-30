@@ -1,6 +1,5 @@
 package com.materialkolor.builder.feature.picker
 
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ComposeUiTest
@@ -15,26 +14,29 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import com.materialkolor.builder.AppHarness
 import com.materialkolor.builder.BuilderRoot
+import com.materialkolor.builder.HEIGHT
+import com.materialkolor.builder.WAIT_MILLIS
+import com.materialkolor.builder.WIDTH
 import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.model.SeedSource
-import com.materialkolor.builder.fakes.FakePlatform
-import com.materialkolor.builder.feature.canvas.TestOwner
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
-import dev.zacsweers.metro.createGraphFactory
-import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import io.kotest.matchers.shouldBe
+import kotlin.test.AfterTest
 import kotlin.test.Test
-
-private const val WIDTH = 1280
-private const val HEIGHT = 800
 
 @OptIn(ExperimentalTestApi::class)
 class ColorPickerDialogTest {
-    private val platform = FakePlatform()
+    private val app = AppHarness()
+    private val platform = app.platform
+
+    @AfterTest
+    fun tearDown() {
+        app.close()
+    }
 
     @Test
     fun seedPick_opensThePickerTitledByItsTarget() =
@@ -159,22 +161,13 @@ class ColorPickerDialogTest {
             onNodeWithText("Pick").assertIsFocused()
         }
 
-    private fun ComposeUiTest.showRoot(): AppGraph {
-        val graph = createGraphFactory<AppGraph.Factory>().create(platform)
-        val owner = TestOwner()
-        setContent {
-            CompositionLocalProvider(
-                LocalViewModelStoreOwner provides owner,
-                LocalMetroViewModelFactory provides graph.metroViewModelFactory,
-            ) {
+    private fun ComposeUiTest.showRoot(): AppGraph =
+        with(app) {
+            bootRoot { graph ->
                 val workspace: WorkspaceModel = metroViewModel()
                 BuilderRoot(graph, workspaceModel = workspace)
             }
         }
-        waitUntil { platform.environment.splashHidden }
-        waitForIdle()
-        return graph
-    }
 
     private companion object {
         val Screen = Argb(0xFF1A73E8.toInt())

@@ -16,17 +16,14 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasContentDescription
-import androidx.lifecycle.ViewModelStore
-import androidx.lifecycle.ViewModelStoreOwner
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import com.materialkolor.builder.AppHarness
+import com.materialkolor.builder.HEIGHT
 import com.materialkolor.builder.LocalThemeResult
-import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.PreviewTab
 import com.materialkolor.builder.domain.persist.ProjectViewState
 import com.materialkolor.builder.engine.resolve.ThemeResolver
-import com.materialkolor.builder.fakes.FakePlatform
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.feature.workspace.WorkspaceScreen
@@ -37,12 +34,8 @@ import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import dev.stateholder.dispatcher.Dispatcher
-import dev.zacsweers.metro.createGraphFactory
-import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 
-internal const val WIDE = 1280
 internal const val PHONE = 390
-internal const val HEIGHT = 800
 
 /**
  * The split handle, a slider named Split. The Trips app has a progress bar of its own.
@@ -118,31 +111,28 @@ internal fun Canvas(
 
 /**
  * The whole workspace over the host's state. Its overlays make their own view models, so this
- * gives them the app's factory.
+ * gives them [app]'s factory.
  */
 @OptIn(ExperimentalTestApi::class)
-internal fun ComposeUiTest.showWorkspace(host: CanvasHost) {
-    val graph = createGraphFactory<AppGraph.Factory>().create(FakePlatform())
-    val owner = TestOwner()
-    setContent {
-        CompositionLocalProvider(
-            LocalViewModelStoreOwner provides owner,
-            LocalMetroViewModelFactory provides graph.metroViewModelFactory,
-        ) {
-            Themed(host, frozen = true, probe = null) {
-                WorkspaceScreen(
-                    state = host.state,
-                    posterColors = LocalThemeResult.current.poster,
-                    toasts = rememberBuilderToastHostState(),
-                    dispatcher = host.dispatcher,
-                )
+internal fun ComposeUiTest.showWorkspace(
+    host: CanvasHost,
+    app: AppHarness,
+) {
+    with(app) {
+        createGraph()
+        setContent {
+            Provide {
+                Themed(host, frozen = true, probe = null) {
+                    WorkspaceScreen(
+                        state = host.state,
+                        posterColors = LocalThemeResult.current.poster,
+                        toasts = rememberBuilderToastHostState(),
+                        dispatcher = host.dispatcher,
+                    )
+                }
             }
         }
     }
-}
-
-internal class TestOwner : ViewModelStoreOwner {
-    override val viewModelStore: ViewModelStore = ViewModelStore()
 }
 
 /**

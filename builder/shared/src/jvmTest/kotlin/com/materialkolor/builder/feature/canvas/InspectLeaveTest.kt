@@ -15,6 +15,8 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
+import com.materialkolor.builder.HEIGHT
+import com.materialkolor.builder.WIDTH
 import com.materialkolor.builder.domain.persist.ProjectViewState
 import com.materialkolor.builder.preview.inspect.INSPECT_CARD_TAG
 import io.kotest.matchers.shouldBe
@@ -29,7 +31,7 @@ private const val PIN_ROLE = "Pin this role"
 class InspectLeaveTest {
     @Test
     fun escTwice_afterAPointerPin_leavesInspectWithItsToggleFocused() =
-        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val host = inspecting()
             setContent { Canvas(host) }
             waitForIdle()

@@ -26,6 +26,8 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
+import com.materialkolor.builder.HEIGHT
+import com.materialkolor.builder.WIDTH
 import com.materialkolor.builder.domain.audit.ColorRef
 import com.materialkolor.builder.domain.audit.ContrastPair
 import com.materialkolor.builder.domain.audit.PairKind
@@ -72,7 +74,7 @@ private val OnCard: SemanticsMatcher = hasAnyAncestor(hasTestTag(INSPECT_CARD_TA
 class InspectLayerTest {
     @Test
     fun hover_overTheTripsFab_namesItsRolesInTheModeOfTheSideUnderThePointer() =
-        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val host = inspecting()
             val result = ThemeResolver().resolve(host.state.document)
             setContent { Canvas(host) }
@@ -93,7 +95,7 @@ class InspectLayerTest {
 
     @Test
     fun click_withInspectOn_pinsTheCardAndLeavesTheAppAlone() =
-        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val host = inspecting()
             setContent { Canvas(host) }
             waitForIdle()
@@ -113,7 +115,7 @@ class InspectLayerTest {
 
     @Test
     fun pinnedCard_actionsOnTheFab_pinTheRoleJumpToKeyColorsAndShowTheRamp() =
-        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val host = inspecting()
             val result = ThemeResolver().resolve(host.state.document)
             setContent { Canvas(host) }
@@ -146,7 +148,7 @@ class InspectLayerTest {
 
     @Test
     fun pinnedCard_underFluent_hasPinThisRoleDisabled() =
-        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val host = inspecting()
             val fluent = host.state.document.copy(library = Library.Fluent)
             host.state = host.state.copy(capabilities = capabilitiesOf(fluent))
@@ -162,7 +164,7 @@ class InspectLayerTest {
 
     @Test
     fun splitHandle_withInspectOn_stillDragsAndPinsNothing() =
-        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val host = inspecting()
             setContent { Canvas(host) }
             waitForIdle()
@@ -184,7 +186,7 @@ class InspectLayerTest {
 
     @Test
     fun keyboardFocus_withInspectOn_showsTheCardAndEscUnpinsThenLeaves() =
-        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val host = inspecting()
             setContent { Canvas(host) }
             waitForIdle()
@@ -218,7 +220,7 @@ class InspectLayerTest {
 
     @Test
     fun esc_afterACardActionTookFocus_unpinsThenLeaves() =
-        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val host = inspecting()
             setContent { Canvas(host) }
             waitForIdle()

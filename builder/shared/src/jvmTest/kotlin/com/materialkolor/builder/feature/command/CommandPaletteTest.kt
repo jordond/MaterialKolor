@@ -31,6 +31,9 @@ import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.test.withKeyDown
 import androidx.compose.ui.text.input.SetComposingTextCommand
+import com.materialkolor.builder.HEIGHT
+import com.materialkolor.builder.WAIT_MILLIS
+import com.materialkolor.builder.WIDTH
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
@@ -48,16 +51,20 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
 import org.jetbrains.compose.resources.stringResource
+import kotlin.test.AfterTest
 import kotlin.test.Test
-
-private const val WIDTH = 1280
-private const val HEIGHT = 800
 
 @OptIn(ExperimentalTestApi::class, ExperimentalComposeUiApi::class)
 class CommandPaletteTest {
     private val harness = CommandHarness()
+
     private val platform = harness.platform
     private var categories: Map<CommandCategory, String> = emptyMap()
+
+    @AfterTest
+    fun tearDown() {
+        harness.close()
+    }
 
     // The category is the header over the row now, and the keys are keycaps at its end.
     @Test
@@ -124,7 +131,7 @@ class CommandPaletteTest {
             rowLabels().first() shouldBe "Use style TonalSpot"
             enter()
 
-            waitUntil { harness.graph.session.document.value.style == Style.TonalSpot }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { harness.graph.session.document.value.style == Style.TonalSpot }
             harness.workspace.state.value.panel shouldBe null
         }
 
@@ -138,7 +145,7 @@ class CommandPaletteTest {
             rowLabels().first() shouldBe "Set seed to #0B6E4F"
             enter()
 
-            waitUntil { harness.graph.session.document.value.seed == Argb(0x0B6E4F) }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { harness.graph.session.document.value.seed == Argb(0x0B6E4F) }
         }
 
     @Test
@@ -153,7 +160,7 @@ class CommandPaletteTest {
             rowLabels().first() shouldBe "Open shared theme"
             enter()
 
-            waitUntil { harness.graph.session.document.value.seed == Argb(0x8A2BE2) }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { harness.graph.session.document.value.seed == Argb(0x8A2BE2) }
         }
 
     @Test
@@ -166,7 +173,7 @@ class CommandPaletteTest {
             rowLabels().first() shouldBe "Use style Vibrant"
             enter()
 
-            waitUntil { harness.graph.session.document.value.style == Style.Vibrant }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { harness.graph.session.document.value.style == Style.Vibrant }
         }
 
     @Test
@@ -189,14 +196,14 @@ class CommandPaletteTest {
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             boot()
             runOnUiThread { harness.workspace.setPosterCollapsed(true) }
-            waitUntil { harness.workspace.state.value.preferences.posterCollapsed }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { harness.workspace.state.value.preferences.posterCollapsed }
             openPalette()
 
             search("key colors")
             rowLabels().first() shouldBe "Go to Key colors"
             enter()
 
-            waitUntil { !harness.workspace.state.value.preferences.posterCollapsed }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { !harness.workspace.state.value.preferences.posterCollapsed }
             harness.workspace.state.value.fineTune shouldBe FineTuneSection.KeyColors
         }
 
@@ -205,12 +212,14 @@ class CommandPaletteTest {
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             boot()
             runOnUiThread { harness.workspace.setPosterCollapsed(true) }
-            waitUntil { harness.workspace.state.value.preferences.posterCollapsed }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { harness.workspace.state.value.preferences.posterCollapsed }
 
             openPalette()
             search("seed")
             onNode(rowMatcher("Go to Seed")).performScrollTo().performClick()
-            waitUntil { !harness.workspace.state.value.preferences.posterCollapsed }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { !harness.workspace.state.value.preferences.posterCollapsed }
+            // The closed palette leaves the tree, and its search with it, before it opens again.
+            waitForIdle()
             harness.workspace.state.value.fineTune shouldBe null
 
             openPalette()
@@ -232,7 +241,10 @@ class CommandPaletteTest {
             onNode(rowMatcher(reduce)).assertIsNotSelected()
             onNode(rowMatcher(reduce)).performScrollTo().performClick()
 
-            waitUntil { harness.workspace.state.value.preferences.motion == MotionOverride.Reduce }
+            waitUntil(timeoutMillis = WAIT_MILLIS) {
+                harness.workspace.state.value.preferences.motion ==
+                    MotionOverride.Reduce
+            }
         }
 
     @Test
@@ -262,7 +274,7 @@ class CommandPaletteTest {
             enter()
 
             harness.workspace.state.value.panel shouldBe null
-            waitUntil { named("Saved") }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { named("Saved") }
         }
 
     @Test
@@ -273,7 +285,7 @@ class CommandPaletteTest {
             session = null
             openPalette()
             search("copy share lin")
-            waitUntil { session != null }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { session != null }
             val request = checkNotNull(session)
             runOnUiThread { request.onEditCommand(listOf(SetComposingTextCommand("k", 1))) }
             waitForIdle()
@@ -391,7 +403,9 @@ class CommandPaletteTest {
             // the poster out of the tree, so the button reads once the palette has closed.
             onNode(isRoot() and hasAnyDescendant(CommandsButton)).performKeyInput { pressKey(Key.Escape) }
             val saved = hasContentDescription(", saved", substring = true) and InWorkspace
-            waitUntil { onAllNodes(saved, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+            waitUntil(
+                timeoutMillis = WAIT_MILLIS,
+            ) { onAllNodes(saved, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
         }
 
     @Test
