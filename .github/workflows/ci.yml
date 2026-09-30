@@ -61,7 +61,7 @@ jobs:
           # artifact-only consumer verification. `tools/` covers the pinned
           # upstream checkout and the transformer alike, and the module pattern
           # picks up any new material-kolor-* module.
-          engine_paths='^(material-(color-utilities|kolor-[^/]+)/|tools/|build-logic/|gradle/|kotlin-js-store/|settings\.gradle\.kts$|build\.gradle\.kts$|gradle\.properties$|gradlew(\.bat)?$|\.github/workflows/ci\.yml$|\.github/check-upstream$|\.github/tests/)'
+          engine_paths='^(material-(color-utilities|kolor-[^/]+)/|tools/|build-logic/|gradle/|kotlin-js-store/|settings\.gradle\.kts$|build\.gradle\.kts$|gradle\.properties$|gradlew(\.bat)?$|\.github/workflows/ci\.yml$|\.github/check-upstream$|\.github/plan-upstream$|\.github/tests/)'
 
           # The macOS lane is slow, so pull requests only run it for the MCU
           # engine, its transformer and upstream pin, and this workflow. Every

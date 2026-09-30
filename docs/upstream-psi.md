@@ -162,7 +162,7 @@ python3 -B -m unittest discover -s .github/tests -v
 | `verifyMcuApple`                              | The common fixtures pass on the iOS simulator, the iOS device framework compiles and links, and macOS compiles.                                                                                                                                                           |
 | `verifyMcuPublication`                        | Artifacts, metadata, source archives and documentation build into a temporary repository under `build/`, and an artifact-only consumer compiles against them.                                                                                                             |
 | Builder against the local engine              | A real consumer resolves `project(":material-kolor-core")`, `project(":material-kolor-material3")` and `project(":material-color-utilities")` instead of published coordinates, and still compiles and tests.                                                                                                          |
-| `.github/tests`                               | The upstream monitor classifies commits correctly against disposable Git repositories, with no network access.                                                                                                                                                            |
+| `.github/tests`                               | The upstream monitor classifies commits and the planner picks the right action for the bump pull request, against disposable Git repositories with no network access.  |
 
 The publication gate must not publish to Maven Central or deploy documentation. Source archives
 include the generated Kotlin, handwritten helpers and upstream license material exactly once.
@@ -301,22 +301,37 @@ touches build or publishing scaffolding under upstream's `kotlin/` tree, which m
 upstream is starting its own Kotlin Multiplatform publication (see
 [material-color-utilities#76](https://github.com/material-foundation/material-color-utilities/pull/76)).
 The script only reads. It writes the current and target revisions and counts for a workflow step,
-and a Markdown commit list for the pull request body. Its tests use disposable Git repositories plus
-a stubbed `git fetch`, with no network access. Run those tests, not the workflow, when validating
-monitor changes.
+and a Markdown commit list for the pull request body, capped at 50 commits and 10 files each with a
+compare link for the rest. Upstream issue references in titles are rewritten to point at upstream and
+mentions are defused, and commit messages are logged with workflow commands stopped. Its tests use
+disposable Git repositories plus a stubbed `git fetch`, with no network access. Run those tests, not
+the workflow, when validating monitor changes.
 
 `.github/workflows/upstream.yml` turns relevant upstream commits into one rolling pull request
 against `next` on the `upstream/mcu` branch. It moves the Gitlink to upstream's head, writes the lock
-from `candidateMcuUpstreamLock`, regenerates the golden fixtures in a separate commit and records
-whether the transformer accepted the new sources. CI and Builder then run on the pull request. When
-upstream moves again the branch is rewritten, unless it carries maintainer commits, in which case
-the workflow comments instead. When `next` already pins every relevant change, the workflow closes
-the pull request. It cannot refresh the ABI dumps, because `updateKotlinAbi` needs macOS. A red
+from `candidateMcuUpstreamLock` and records whether the transformer accepted the new sources. When it
+did, the golden fixtures are regenerated in a separate commit. CI and Builder then run on the pull
+request. It cannot refresh the ABI dumps, because `updateKotlinAbi` needs macOS. A red
 `checkKotlinAbi` on the pull request is the prompt to review the API change and push the dumps by
 hand. Merging stays a reviewed step, following [Reviewing an upstream update](#reviewing-an-upstream-update).
 
+`.github/plan-upstream` decides what each run does with that pull request, and
+`.github/tests/test_plan_upstream.py` covers every outcome.
+
+- No open pull request opens one, unless a pull request for the same upstream revision was closed
+  without merging. Closing one by hand snoozes the bump until upstream moves again.
+- An open pull request is rewritten when upstream moves again or the pin on `next` changes under it.
+  Maintainer commits stop the rewrite and the workflow comments once instead. Merges from GitHub's
+  "Update branch" button and commits that only touch `api/` dumps do not count, so a rewrite drops
+  them and the dumps need pushing again.
+- When `next` already pins every relevant change, the pull request is closed. Its branch is deleted
+  unless it has maintainer commits.
+
 The workflow needs an `UPSTREAM_BOT_TOKEN` repository secret, a fine-grained token with contents,
 pull requests and issues write access, because pull requests opened with `GITHUB_TOKEN` do not
-trigger other workflows. Scheduled runs fire only from the default branch, so until 6.0 lands on
-`main` run it with `gh workflow run upstream.yml --ref next`. It also runs on every push to `next`
-that changes the pin.
+trigger other workflows. Only the steps that call GitHub receive it. Checkout keeps no credentials,
+so the Gradle steps that compile upstream code never see a write token. Scheduled runs fire only
+from the default branch, so until 6.0 lands on `main` run it with
+`gh workflow run upstream.yml --ref next`. It also runs on every push to `next` that changes the
+pin. When 6.0 lands on `main`, set `BASE_BRANCH` in the workflow to `main`, and expect a conflict on
+the `on:` block with the copy on `main` that stopped the 5.x schedule.

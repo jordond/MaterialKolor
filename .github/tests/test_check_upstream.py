@@ -35,20 +35,21 @@ class UpstreamMonitorTest(unittest.TestCase):
             "git",
             '#!/usr/bin/env python3\n'
             'import json, os, sys\n'
-            'if sys.argv[1:2] == ["fetch"]:\n'
+            'if sys.argv[1:2] and sys.argv[1] in ("fetch", "ls-remote", "pull", "push", "clone"):\n'
             '    with open(os.environ["NETWORK_LOG"], "a") as stream:\n'
             '        stream.write(json.dumps({"tool": "git", "args": sys.argv[1:]}) + "\\n")\n'
             '    sys.exit(0)\n'
             'os.execv(os.environ["REAL_GIT"], [os.environ["REAL_GIT"], *sys.argv[1:]])\n',
         )
-        self.stub(
-            "curl",
-            '#!/usr/bin/env python3\n'
-            'import json, os, sys\n'
-            'with open(os.environ["NETWORK_LOG"], "a") as stream:\n'
-            '    stream.write(json.dumps({"tool": "curl", "args": sys.argv[1:]}) + "\\n")\n'
-            'sys.exit(22)\n',
-        )
+        for tool in ["curl", "gh", "wget"]:
+            self.stub(
+                tool,
+                '#!/usr/bin/env python3\n'
+                'import json, os, sys\n'
+                'with open(os.environ["NETWORK_LOG"], "a") as stream:\n'
+                f'    stream.write(json.dumps({{"tool": "{tool}", "args": sys.argv[1:]}}) + "\\n")\n'
+                'sys.exit(22)\n',
+            )
 
     def stub(self, name, source):
         path = self.bin / name
@@ -60,11 +61,12 @@ class UpstreamMonitorTest(unittest.TestCase):
             [REAL_GIT, *args], cwd=self.repo, text=True, capture_output=True, check=True
         ).stdout
 
-    def commit(self, path, message):
-        file = self.repo / path
-        file.parent.mkdir(parents=True, exist_ok=True)
-        file.write_text(message + "\n")
-        self.git("add", "--", path)
+    def commit(self, path, message, *more_paths):
+        for each in (path, *more_paths):
+            file = self.repo / each
+            file.parent.mkdir(parents=True, exist_ok=True)
+            file.write_text(message + "\n")
+            self.git("add", "--", each)
         self.git("commit", "--quiet", "-m", message)
         return self.git("rev-parse", "HEAD").strip()
 
@@ -115,6 +117,7 @@ class UpstreamMonitorTest(unittest.TestCase):
         values = self.results(output)
         self.assertEqual(self.base, values["current"])
         self.assertEqual(self.base, values["target"])
+        self.assertEqual(self.git("rev-parse", "--short", self.base).strip(), values["target_short"])
         self.assertEqual("0", values["relevant"])
 
     def test_uninitialised_submodule_fails_loudly(self):
@@ -141,10 +144,13 @@ class UpstreamMonitorTest(unittest.TestCase):
         self.assertEqual(self.base, values["current"])
         # The pin moves to upstream's head even when the newest commits are irrelevant.
         self.assertEqual(head, values["target"])
+        self.assertEqual(self.git("rev-parse", "--short", head).strip(), values["target_short"])
+        self.assertEqual(self.git("rev-parse", "--short", self.base).strip(), values["current_short"])
         self.assertEqual("3", values["relevant"])
         self.assertEqual("0", values["scaffold"])
         text = summary.read_text()
         self.assertIn(f"material-color-utilities/commit/{kotlin})", text)
+        self.assertIn(f"material-color-utilities/compare/{self.base}...{head})", text)
         for expected in ["Kotlin update", "`kotlin/hct/Hct.kt`", "`LICENSE`", "`docs/NOTICE.txt`"]:
             self.assertIn(expected, text)
         for unexpected in ["Java update", "Unrelated documentation", "kotlin-build-scaffold"]:
@@ -178,19 +184,65 @@ class UpstreamMonitorTest(unittest.TestCase):
         self.assertNotIn("kotlin-build-scaffold", result.stdout)
         self.assertNotIn("kotlin-build-scaffold", summary.read_text())
 
-    def test_quote_bearing_commit_title_is_kept_verbatim(self):
-        message = 'Fix "quoted" Kotlin title with \u00e9'
+    def test_title_is_kept_verbatim_apart_from_references_and_mentions(self):
+        message = 'Fix "quoted" $(touch pwned) `tick` title with \u00e9 (#76) by @someone'
         self.commit("kotlin/hct/Hct.kt", message)
         summary = self.root / "summary.md"
         result = self.run_monitor("--summary", str(summary))
         self.assertEqual(0, result.returncode, result.stderr)
-        self.assertIn(message, summary.read_text())
+        text = summary.read_text()
+        self.assertIn('Fix "quoted" $(touch pwned) `tick` title with \u00e9', text)
+        # An upstream reference would otherwise link to this repository's issue 76 and a mention
+        # would notify the upstream author.
+        self.assertIn("(material-foundation/material-color-utilities#76)", text)
+        self.assertIn("@&#8203;someone", text)
+        self.assertFalse((self.root / "pwned").exists())
+        self.assertFalse((self.repo / "pwned").exists())
+
+    def test_commit_message_cannot_issue_workflow_commands(self):
+        self.commit("kotlin/hct/Hct.kt", "Kotlin update\n\n::error::injected")
+        result = self.run_monitor(GITHUB_ACTIONS="true")
+        self.assertEqual(0, result.returncode, result.stderr)
+        lines = result.stdout.splitlines()
+        self.assertRegex(lines[0], r"^::stop-commands::[0-9a-f]{32}$")
+        token = lines[0].split("::")[2]
+        self.assertEqual(f"::{token}::", lines[-1])
+        self.assertIn("    ::error::injected", lines)
+        self.assertNotIn("::error::injected", lines)
+
+    def test_commands_are_not_stopped_outside_actions(self):
+        self.commit("kotlin/hct/Hct.kt", "Kotlin update")
+        result = self.run_monitor(GITHUB_ACTIONS="")
+        self.assertNotIn("::stop-commands::", result.stdout)
+
+    def test_long_lag_is_capped_in_the_summary(self):
+        for index in range(53):
+            self.commit(f"kotlin/hct/Hct{index}.kt", f"Kotlin update {index}")
+        self.commit("kotlin/wide.kt", "Wide change", *[f"kotlin/wide/File{i}.kt" for i in range(12)])
+        output = self.root / "github-output"
+        summary = self.root / "summary.md"
+        result = self.run_monitor("--github-output", str(output), "--summary", str(summary))
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertEqual("54", self.results(output)["relevant"])
+        text = summary.read_text()
+        self.assertEqual(50, text.count("material-color-utilities/commit/"))
+        self.assertIn("- and 4 more commits", text)
+        self.assertIn("/compare/", text)
+
+    def test_many_files_are_capped_per_commit(self):
+        self.commit("kotlin/wide.kt", "Wide change", *[f"kotlin/wide/File{i}.kt" for i in range(12)])
+        summary = self.root / "summary.md"
+        result = self.run_monitor("--summary", str(summary))
+        self.assertEqual(0, result.returncode, result.stderr)
+        text = summary.read_text()
+        self.assertEqual(10, text.count("  - `kotlin/"))
+        self.assertIn("  - and 3 more files", text)
 
     def test_only_git_fetch_touches_the_network(self):
         self.commit("kotlin/hct/Hct.kt", "Kotlin update")
         result = self.run_monitor("--summary", str(self.root / "summary.md"))
         self.assertEqual(0, result.returncode, result.stderr)
-        self.assertEqual(["git"], [call["tool"] for call in self.requests()])
+        self.assertEqual([("git", "fetch")], [(c["tool"], c["args"][0]) for c in self.requests()])
 
     def test_option_without_a_value_is_rejected(self):
         for option in ["--github-output", "--summary"]:

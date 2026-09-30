@@ -3,12 +3,16 @@ set -euo pipefail
 
 CWD="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 ROOT="$(cd "$CWD"/.. >/dev/null 2>&1 && pwd)"
-UPSTREAM_REPO="https://github.com/material-foundation/material-color-utilities"
+UPSTREAM_SLUG="material-foundation/material-color-utilities"
+UPSTREAM_REPO="https://github.com/$UPSTREAM_SLUG"
+# Keeps a long lag inside GitHub's pull request body limit. The compare link covers the rest.
+MAX_SUMMARY_COMMITS=50
+MAX_SUMMARY_FILES=10
 SUBMODULE_PATH="$ROOT/tools/mcu-upstream/src/main"
 
 usage() {
     echo "Usage: $0 [--github-output <file>] [--summary <file>] [--no-output]"
-    echo "  --github-output: append current, target, relevant and scaffold values for a workflow step"
+    echo "  --github-output: append current, target, their short forms, relevant and scaffold values"
     echo "  --summary: write a Markdown list of the relevant upstream commits"
     echo "  --no-output: Do not output to console"
 }
@@ -48,6 +52,22 @@ log() {
     fi
 }
 
+# Upstream commit messages reach the log verbatim, so a line starting with `::` must not be read as
+# a workflow command.
+if "$show_output" && [[ "${GITHUB_ACTIONS:-}" == true ]]; then
+    resume_token=$(od -An -N16 -tx1 /dev/urandom | tr -d ' \n')
+    echo "::stop-commands::$resume_token"
+    trap 'echo "::$resume_token::"' EXIT
+fi
+
+# Upstream issue references would link to this repository's issues and mentions would notify
+# upstream authors, so both are rewritten before a title reaches the pull request body.
+markdown_title() {
+    sed -E \
+        -e "s~(^|[^[:alnum:]_/])#([0-9]+)~\\1$UPSTREAM_SLUG#\\2~g" \
+        -e 's~@([[:alnum:]_-])~@\&#8203;\1~g' <<< "$1"
+}
+
 # The engine is generated from upstream's Kotlin alone, so only Kotlin and license changes need a
 # pin update. Upstream Java still backs the JVM parity tests, but the bump pull request runs those.
 relevant_files() {
@@ -68,36 +88,53 @@ first-party Kotlin Multiplatform publication may be starting. Review whether thi
 keep adapting upstream sources. Reference: $UPSTREAM_REPO/pull/76."
 
 summary=""
+summary_commits=0
 report_commit() {
     local commit="$1" files_changed="$2" category="$3"
-    local short_sha date title
+    local short_sha date title file_count
     short_sha=$(git rev-parse --short "$commit")
     date=$(git show -s --format=%cI "$commit")
     title=$(git log -1 --pretty=%s "$commit")
     log "----------------------------------------" "Commit: $short_sha" "Date: $date" \
-        "Title: $title" "Category: $category" "Commit message:" "$(git log -1 --pretty=%B "$commit")" \
+        "Title: $title" "Category: $category" "Commit message:" \
+        "$(git log -1 --pretty=%B "$commit" | sed 's/^/    /')" \
         "Changed files:" "$files_changed"
     if [[ "$category" == "$SCAFFOLD_CATEGORY" ]]; then
         log "Note: $SCAFFOLD_NOTE"
     fi
 
-    summary+="- [\`$short_sha\`]($UPSTREAM_REPO/commit/$commit) $title"
+    summary_commits=$((summary_commits + 1))
+    if ((summary_commits > MAX_SUMMARY_COMMITS)); then
+        return
+    fi
+    summary+="- [\`$short_sha\`]($UPSTREAM_REPO/commit/$commit) $(markdown_title "$title")"
     if [[ "$category" == "$SCAFFOLD_CATEGORY" ]]; then
         summary+=" (**$SCAFFOLD_CATEGORY**)"
     fi
     summary+=$'\n'
     while IFS= read -r file; do
         summary+="  - \`$file\`"$'\n'
-    done <<< "$files_changed"
+    done < <(head -n "$MAX_SUMMARY_FILES" <<< "$files_changed")
+    file_count=$(wc -l <<< "$files_changed")
+    if ((file_count > MAX_SUMMARY_FILES)); then
+        summary+="  - and $((file_count - MAX_SUMMARY_FILES)) more files"$'\n'
+    fi
 }
 
 write_results() {
     local current="$1" target="$2" relevant="$3" scaffold="$4"
+    local current_short target_short
+    current_short=$(git rev-parse --short "$current")
+    target_short=$(git rev-parse --short "$target")
     if [[ -n "$github_output" ]]; then
-        printf 'current=%s\ntarget=%s\nrelevant=%s\nscaffold=%s\n' \
-            "$current" "$target" "$relevant" "$scaffold" >> "$github_output"
+        printf 'current=%s\ncurrent_short=%s\ntarget=%s\ntarget_short=%s\nrelevant=%s\nscaffold=%s\n' \
+            "$current" "$current_short" "$target" "$target_short" "$relevant" "$scaffold" >> "$github_output"
     fi
     if [[ -n "$summary_file" ]]; then
+        if ((summary_commits > MAX_SUMMARY_COMMITS)); then
+            summary+="- and $((summary_commits - MAX_SUMMARY_COMMITS)) more commits"$'\n'
+        fi
+        summary+=$'\n'"[Compare \`$current_short...$target_short\`]($UPSTREAM_REPO/compare/$current...$target)"$'\n'
         if ((scaffold > 0)); then
             summary+=$'\n'"$SCAFFOLD_NOTE"$'\n'
         fi

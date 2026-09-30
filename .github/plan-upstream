@@ -1,0 +1,106 @@
+#!/bin/bash
+set -euo pipefail
+
+# Decides what the upstream workflow does with the rolling bump pull request, from the monitor's
+# results, the pull requests on the bump branch and the commits already on it.
+
+usage() {
+    echo "Usage: $0 --github-output <file>"
+    echo "  Reads BASE_BRANCH, BUMP_BRANCH, BOT_EMAIL, CURRENT, TARGET, TARGET_SHORT and RELEVANT"
+    echo "  Appends number, action (none, close, notify or update), delete_branch and title"
+}
+
+github_output=""
+while [[ $# -gt 0 ]]; do
+    case $1 in
+    --github-output)
+        if [[ $# -lt 2 || -z "$2" ]]; then
+            usage >&2
+            exit 1
+        fi
+        github_output="$2"
+        shift 2
+        ;;
+    *)
+        echo "Unknown option: $1" >&2
+        usage >&2
+        exit 1
+        ;;
+    esac
+done
+for name in BASE_BRANCH BUMP_BRANCH BOT_EMAIL CURRENT TARGET TARGET_SHORT RELEVANT; do
+    if [[ -z "${!name:-}" ]]; then
+        echo "Missing $name" >&2
+        usage >&2
+        exit 1
+    fi
+done
+if [[ -z "$github_output" ]]; then
+    usage >&2
+    exit 1
+fi
+
+lock_revision() {
+    git show "$1:gradle/mcu-upstream.lock.json" | jq -r .upstreamRevision
+}
+
+# Commits a maintainer added to the bump branch. Merges from GitHub's "Update branch" button and
+# commits that only touch ABI dumps, which the pull request asks for after `updateKotlinAbi`, do not
+# count. A rewrite recreates the first and the reviewer reruns the second.
+maintainer_commits() {
+    local commit files
+    for commit in $(git rev-list --no-merges "origin/$BASE_BRANCH..origin/$BUMP_BRANCH"); do
+        if [[ $(git show -s --format=%ae "$commit") == "$BOT_EMAIL" ]]; then
+            continue
+        fi
+        files=$(git diff-tree --no-commit-id --name-only -r "$commit")
+        if grep -qvE '(^|/)api/' <<< "$files"; then
+            echo "$commit"
+        fi
+    done
+}
+
+title="fix(mcu): update upstream pin to $TARGET_SHORT"
+pull_requests=$(gh pr list --base "$BASE_BRANCH" --head "$BUMP_BRANCH" --state all --limit 100 \
+    --json number,state,title)
+number=$(jq -r 'map(select(.state == "OPEN")) | .[0].number // empty' <<< "$pull_requests")
+# A bump the maintainer closed without merging stays closed until upstream moves again.
+snoozed=$(jq -r --arg title "$title" \
+    'any(.[]; .state == "CLOSED" and .title == $title)' <<< "$pull_requests")
+
+revision=""
+base_pin=""
+edited=false
+if [[ -n "$number" ]]; then
+    git fetch --quiet origin "+refs/heads/$BUMP_BRANCH:refs/remotes/origin/$BUMP_BRANCH"
+    revision=$(lock_revision "origin/$BUMP_BRANCH")
+    base_pin=$(lock_revision "$(git merge-base "origin/$BASE_BRANCH" "origin/$BUMP_BRANCH")")
+    if [[ -n $(maintainer_commits) ]]; then
+        edited=true
+    fi
+fi
+
+action=none
+delete_branch=false
+if ((RELEVANT == 0)); then
+    if [[ -n "$number" ]]; then
+        action=close
+        # The maintainer's commits outlive the pull request.
+        if [[ "$edited" == false ]]; then
+            delete_branch=true
+        fi
+    fi
+elif [[ -n "$number" ]]; then
+    # A pin change on the base branch leaves the pull request conflicted, so it is refreshed too.
+    if [[ "$revision" != "$TARGET" || "$base_pin" != "$CURRENT" ]]; then
+        action=$([[ "$edited" == true ]] && echo notify || echo update)
+    fi
+elif [[ "$snoozed" != true ]]; then
+    action=update
+fi
+
+echo "Open pull request: ${number:-none}, pinned there: ${revision:-none}, based on: ${base_pin:-none}"
+echo "Base pin: $CURRENT, target: $TARGET, maintainer commits: $edited, closed for this target: $snoozed"
+echo "Action: $action"
+printf 'number=%s\naction=%s\ndelete_branch=%s\ntitle=%s\n' \
+    "$number" "$action" "$delete_branch" "$title" >> "$github_output"
