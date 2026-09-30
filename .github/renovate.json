@@ -17,6 +17,44 @@
     "**/__fixtures__/**",
     "builder/codegen/src/jvmTest/resources/golden/**"
   ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "MaterialKolor install snippets in the README follow the latest release on Maven Central.",
+      "managerFilePatterns": ["/^README\\.md$/"],
+      "matchStrings": [
+        "\"com\\.materialkolor:[\\w-]+:(?<currentValue>[^\"]+)\"",
+        "materialKolor = \"(?<currentValue>[^\"]+)\""
+      ],
+      "depNameTemplate": "com.materialkolor:material-color-utilities",
+      "datasourceTemplate": "maven"
+    },
+    {
+      "customType": "regex",
+      "description": "Theme library install lines in the README ride along with the version catalog bump.",
+      "managerFilePatterns": ["/^README\\.md$/"],
+      "matchStrings": [
+        "implementation\\(\"(?<depName>(?:com\\.composables|io\\.github\\.compose-fluent):[\\w-]+):(?<currentValue>[^\"]+)\"\\)"
+      ],
+      "datasourceTemplate": "maven"
+    },
+    {
+      "customType": "regex",
+      "description": "Kotlin badge in the README, grouped with the Kotlin bump.",
+      "managerFilePatterns": ["/^README\\.md$/"],
+      "matchStrings": ["badge/kotlin-v(?<currentValue>[^-]+)-blue"],
+      "depNameTemplate": "org.jetbrains.kotlin:kotlin-gradle-plugin",
+      "datasourceTemplate": "maven"
+    },
+    {
+      "customType": "regex",
+      "description": "Compose Multiplatform badge in the README, grouped with the Compose bump.",
+      "managerFilePatterns": ["/^README\\.md$/"],
+      "matchStrings": ["badge/Compose%20Multiplatform-(?<currentValue>[^-]+)-blue"],
+      "depNameTemplate": "org.jetbrains.compose:compose-gradle-plugin",
+      "datasourceTemplate": "maven"
+    }
+  ],
   "packageRules": [
     {
       "description": "Compose snapshots from the JetBrains dev repo are not release candidates.",
@@ -113,6 +151,13 @@
       "description": "Pre-release bumps like material3 alphas can change API, so they need a review.",
       "matchCurrentVersion": "/-/",
       "automerge": false
+    },
+    {
+      "description": "The README follows each MaterialKolor release without a review, majors included.",
+      "matchManagers": ["custom.regex"],
+      "matchPackageNames": ["com.materialkolor:**"],
+      "groupName": "MaterialKolor README",
+      "automerge": true
     }
   ]
 }
