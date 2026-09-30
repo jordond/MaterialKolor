@@ -28,6 +28,13 @@ class ColorTest {
     }
 
     @Test
+    fun toHex_keepsACustomPrefixAsGiven() {
+        assertEquals("0x4285F4", Color(0xFF4285F4).toHex(prefix = "0x"))
+        assertEquals("0xFF4285F4", Color(0xFF4285F4).toHex(prefix = "0x", alwaysIncludeAlpha = true))
+        assertEquals("hex:ABCDEF", Color(0xFFABCDEF).toHex(prefix = "hex:"))
+    }
+
+    @Test
     fun isLight_splitsAtHalfRelativeLuminance() {
         // Grey BB sits at 49.7 percent luminance and grey BC at 50.3 percent.
         assertFalse(Color(0xFFBBBBBB).isLight())

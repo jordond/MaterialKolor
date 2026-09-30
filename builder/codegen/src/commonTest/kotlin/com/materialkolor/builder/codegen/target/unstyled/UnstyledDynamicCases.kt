@@ -130,7 +130,7 @@ class UnstyledDynamicTest {
         assertTrue("rememberTonalPalette(seed = SuccessSeed)" in theme, theme)
         assertTrue("ThemeTokens.brand to brandPalette.toneColor(40)," in theme, theme)
         assertTrue("ThemeTokens.onBrandContainer to brandPalette.onTone(30)," in theme, theme)
-        assertTrue("warningPalette.onTone(50, ContrastThreshold.WCAG_AAA_NORMAL_TEXT)" in theme, theme)
+        assertTrue("warningPalette.onTone(50, ContrastThreshold.WcagAaaNormalText)" in theme, theme)
     }
 
     @Test

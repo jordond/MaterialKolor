@@ -66,7 +66,7 @@ public fun Color.tonalContrastRatio(other: Color): Double {
  */
 public fun Color.hasEnoughContrast(
     other: Color,
-    threshold: ContrastThreshold = ContrastThreshold.WCAG_AA_NORMAL_TEXT,
+    threshold: ContrastThreshold = ContrastThreshold.WcagAaNormalText,
 ): Boolean = contrastRatio(other) >= threshold
 
 /**
@@ -77,10 +77,10 @@ public fun Color.hasEnoughContrast(
 public enum class ContrastThreshold(
     public val threshold: Double,
 ) {
-    WCAG_AA_NORMAL_TEXT(4.5),
-    WCAG_AA_LARGE_TEXT(3.0),
-    WCAG_AAA_NORMAL_TEXT(7.0),
-    WCAG_AAA_LARGE_TEXT(4.5),
+    WcagAaNormalText(4.5),
+    WcagAaLargeText(3.0),
+    WcagAaaNormalText(7.0),
+    WcagAaaLargeText(4.5),
     ;
 
     public operator fun compareTo(value: Double): Int = threshold.compareTo(value)
