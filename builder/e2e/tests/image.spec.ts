@@ -1,5 +1,5 @@
-import { expect, test, type Locator, type Page } from '@playwright/test';
-import { openBuilder, wantHooks } from './builder';
+import type { Locator, Page } from '@playwright/test';
+import { expect, openBuilder, test } from './builder';
 import { dispatchDrag, dispatchPaste, installFileMakers } from './image-files';
 import path from 'node:path';
 import { button, press, pressFor, scrollTo, seedText, storedDocument } from '../fixtures/workspace';
@@ -18,11 +18,7 @@ const SEEDED = 'Seed taken from quadrants.png';
 /** The toast for a file that is not an image, `image_unsupported`. */
 const UNSUPPORTED = 'couldn’t be read as an image';
 
-/** Decode, extraction and the reveal, with room for a busy machine. */
-const SEED_TIMEOUT_MS = 15_000;
-
 test.beforeEach(async ({ context }) => {
-  await wantHooks(context);
   await context.addInitScript(installFileMakers);
 });
 
@@ -33,7 +29,7 @@ test('a dropped PNG seeds the theme and offers its colors as chips', async ({ pa
   await dispatchDrag(page, 'dragenter', []);
   expect(await dispatchDrag(page, 'drop', ['quadrants.png'])).toBe(true);
 
-  await expect(onPage(page, SEEDED)).toHaveCount(1, { timeout: SEED_TIMEOUT_MS });
+  await expect(onPage(page, SEEDED)).toHaveCount(1);
   await expect(onPage(page, CANDIDATES)).toHaveCount(1);
   await expect(onPage(page, 'From quadrants.png')).not.toHaveCount(0);
 });
@@ -43,7 +39,7 @@ test('a dropped file that is not an image says so and leaves the theme alone', a
 
   await dispatchDrag(page, 'drop', ['notes.txt']);
 
-  await expect(onPage(page, UNSUPPORTED)).toHaveCount(1, { timeout: SEED_TIMEOUT_MS });
+  await expect(onPage(page, UNSUPPORTED)).toHaveCount(1);
   await expect(onPage(page, CANDIDATES)).toHaveCount(0);
   await expect(onPage(page, 'From notes.txt')).toHaveCount(0);
 });
@@ -53,7 +49,7 @@ test('a pasted image seeds the theme', async ({ page }) => {
 
   expect(await dispatchPaste(page, ['quadrants.png'])).toBe(true);
 
-  await expect(onPage(page, SEEDED)).toHaveCount(1, { timeout: SEED_TIMEOUT_MS });
+  await expect(onPage(page, SEEDED)).toHaveCount(1);
   await expect(onPage(page, CANDIDATES)).toHaveCount(1);
 });
 
@@ -70,17 +66,17 @@ test('a dropped photo seeds the theme, another chip swaps it, and Match exactly 
   await openReady(page);
 
   expect(await dropPhoto(page, 'dragenter')).toBe(true);
-  await expect(onPage(page, 'Drop to pull colors from this image')).not.toHaveCount(0, { timeout: SEED_TIMEOUT_MS });
+  await expect(onPage(page, 'Drop to pull colors from this image')).not.toHaveCount(0);
   expect(await dropPhoto(page, 'drop')).toBe(true);
-  await expect(onPage(page, 'Seed taken from photo-12mp.jpg')).toHaveCount(1, { timeout: SEED_TIMEOUT_MS });
+  await expect(onPage(page, 'Seed taken from photo-12mp.jpg')).toHaveCount(1);
 
   const chips = page.locator('#cmp_a11y_root').getByRole('button', { name: /^#[0-9A-F]{6}, .*not selected$/ });
-  await expect.poll(() => chips.count(), { timeout: SEED_TIMEOUT_MS }).toBeGreaterThan(0);
+  await expect.poll(() => chips.count()).toBeGreaterThan(0);
   const chosen = ((await chips.first().getAttribute('aria-label')) ?? '').slice(0, 7);
   const poster = onPage(page, 'Seed and theme controls');
   await scrollTo(page, chips.first(), poster);
   await press(page, chips.first());
-  await expect.poll(() => seedText(page), { timeout: SEED_TIMEOUT_MS }).toBe(chosen);
+  await expect.poll(() => seedText(page)).toBe(chosen);
 
   const why = button(page, 'Why?');
   await scrollTo(page, why, poster);
@@ -90,9 +86,9 @@ test('a dropped photo seeds the theme, another chip swaps it, and Match exactly 
   const match = button(page, 'Match exactly');
   await scrollTo(page, match, explainer);
   await press(page, match);
-  await expect(explainer).toHaveCount(0, { timeout: SEED_TIMEOUT_MS });
+  await expect(explainer).toHaveCount(0);
   const pinned = async () => Object.keys(((await storedDocument(page))?.pins ?? {}) as object).length > 0;
-  await expect.poll(pinned, { timeout: SEED_TIMEOUT_MS }).toBe(true);
+  await expect.poll(pinned).toBe(true);
 });
 
 /** Fires [type] on the page with the fixture photo, fetched through [PHOTO_ROUTE]. True when the page took it. */

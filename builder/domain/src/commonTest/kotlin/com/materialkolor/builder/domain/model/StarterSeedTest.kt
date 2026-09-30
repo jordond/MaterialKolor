@@ -5,7 +5,6 @@ import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 class StarterSeedTest {
     private val names = STARTER_SEEDS.map(ColorNames::nameOf)
@@ -26,6 +25,8 @@ class StarterSeedTest {
 
     @Test
     fun starterSeed_withEveryNameTaken_picksFromAllOfThem() {
-        assertTrue(starterSeed(names.toSet(), Random(7)) in STARTER_SEEDS)
+        val picked = (0 until 200).map { attempt -> starterSeed(names.toSet(), Random(attempt)) }.toSet()
+
+        assertEquals(STARTER_SEEDS.toSet(), picked)
     }
 }

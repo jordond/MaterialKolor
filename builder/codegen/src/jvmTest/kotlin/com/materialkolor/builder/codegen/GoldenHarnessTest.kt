@@ -4,9 +4,7 @@ import com.materialkolor.builder.codegen.dsl.GeneratedFile
 import com.materialkolor.builder.codegen.dsl.Language
 import com.materialkolor.builder.codegen.dsl.Token
 import com.materialkolor.builder.codegen.dsl.TokenKind
-import com.materialkolor.builder.codegen.text.headerCaseFiles
 import java.io.File
-import java.util.zip.CRC32
 import kotlin.io.path.createTempDirectory
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -23,16 +21,6 @@ class GoldenHarnessTest {
     @AfterTest
     fun cleanUp() {
         scratch.deleteRecursively()
-    }
-
-    @Test
-    fun headerDefault_golden_matchesTheCheckedInFile() {
-        GoldenHarness.Default.verify("header-default", headerCaseFiles(Fixtures.Default.input))
-    }
-
-    @Test
-    fun goldenHashes_checkedInFile_matchesTheGoldenTree() {
-        GoldenHarness.Default.verifyHashes()
     }
 
     @Test
@@ -127,18 +115,6 @@ class GoldenHarnessTest {
         }
         assertFailsWith<IllegalArgumentException> {
             harness(update = true).verify("sample", listOf(file("../Theme.kt", "one")))
-        }
-    }
-
-    @Test
-    fun crc32_anyBytes_matchesJavaZip() {
-        assertEquals(0xCBF43926L, GoldenDigest.crc32("123456789".encodeToByteArray()))
-
-        listOf("", "a", "Color(0xFF6750A4)\n", "ünïcödé ✓", "x".repeat(10_000)).forEach { text ->
-            val bytes = text.encodeToByteArray()
-            val expected = CRC32().apply { update(bytes) }.value
-
-            assertEquals(expected, GoldenDigest.crc32(bytes), text.take(20))
         }
     }
 

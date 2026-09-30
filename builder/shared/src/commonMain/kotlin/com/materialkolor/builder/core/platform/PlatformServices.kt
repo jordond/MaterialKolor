@@ -479,6 +479,12 @@ interface Environment {
      * does nothing.
      */
     fun mark(name: String) = Unit
+
+    /**
+     * Hear whether the page's focus holder has focus, each time that changes. The web keeps it for
+     * the browser tests, which wait on it before pressing a key. Elsewhere it does nothing.
+     */
+    fun holderFocusChanged(focused: Boolean) = Unit
 }
 
 /**

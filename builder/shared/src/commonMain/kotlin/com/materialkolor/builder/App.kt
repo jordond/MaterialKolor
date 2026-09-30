@@ -3,6 +3,7 @@ package com.materialkolor.builder
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.State
@@ -20,6 +21,7 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import com.materialkolor.builder.core.platform.Environment
 import com.materialkolor.builder.core.platform.PlatformServices
 import com.materialkolor.builder.core.platform.TimingMarks
+import com.materialkolor.builder.core.resources.WholeFileResourceReader
 import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.domain.capability.forTarget
 import com.materialkolor.builder.domain.color.Argb
@@ -46,10 +48,19 @@ import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withTimeoutOrNull
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.LocalResourceReader
+import kotlin.time.Clock
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * The builder, on whatever platform [platform] describes.
@@ -65,7 +76,13 @@ fun BuilderApp(
     motionFrozen: Boolean = false,
     awaitIdle: (suspend () -> Unit)? = null,
 ) {
-    val graph = remember(platform) { createGraphFactory<AppGraph.Factory>().create(platform) }
+    val graph = remember(platform) {
+        createGraphFactory<AppGraph.Factory>().create(
+            platform = platform,
+            scope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
+            clock = Clock.System,
+        )
+    }
     CompositionLocalProvider(
         LocalMetroViewModelFactory provides graph.metroViewModelFactory,
         LocalMotionFrozen provides motionFrozen,
@@ -129,13 +146,17 @@ internal const val ShellExpressive: Boolean = true
  * @param[awaitIdle] Waits for an idle moment. With it the builder warms up the reveal a library
  * switch plays once the first frame is up. None by default, and no warm-up then.
  * @param[probe] Drawn over the workspace with the state it was handed, for tests. Nothing by default.
+ * @param[stringsWait] The longest the splash waits on the first screen's strings, so a read that
+ * never answers still lets the builder show.
  */
+@OptIn(ExperimentalResourceApi::class)
 @Composable
 internal fun BuilderRoot(
     graph: AppGraph,
     model: AppModel = metroViewModel(),
     workspaceModel: WorkspaceModel = metroViewModel(),
     awaitIdle: (suspend () -> Unit)? = null,
+    stringsWait: Duration = 2.seconds,
     probe: @Composable (state: WorkspaceModel.State) -> Unit = {},
 ) {
     val state by model.collectAsState()
@@ -145,9 +166,14 @@ internal fun BuilderRoot(
     val result by rememberThemeResult(document, graph.themeResolver, environment)
     val announcer = remember(environment) { Announcer { message -> environment.announce(message) } }
     val firstFrame = remember { CompletableDeferred<Unit>() }
+    val baseReader = LocalResourceReader.current
+    val resourceReader = remember(baseReader) { WholeFileResourceReader(baseReader) }
+    DisposableEffect(resourceReader) { onDispose { resourceReader.close() } }
 
     LaunchedEffect(model) {
         model.boot()
+        withFrameNanos {}
+        withTimeoutOrNull(stringsWait) { resourceReader.awaitFirstScreen() }
         withFrameNanos {}
         environment.hideSplash()
         environment.mark(TimingMarks.FIRST_FRAME)
@@ -157,6 +183,7 @@ internal fun BuilderRoot(
     ImageMarkEffects(environment)
 
     CompositionLocalProvider(
+        LocalResourceReader provides resourceReader,
         LocalThemeResult provides result,
         LocalThemeResolver provides graph.themeResolver,
         LocalAnnouncer provides announcer,
@@ -180,6 +207,26 @@ internal fun BuilderRoot(
         }
     }
 }
+
+/**
+ * Waits until every string the first screen asks for is in. A string that arrives can compose more
+ * that ask for their own, and those start in the frames after it, so the screen counts as in once
+ * [SettledFrames] frames in a row start no read and end with none in flight.
+ */
+private suspend fun WholeFileResourceReader.awaitFirstScreen() {
+    var settled = 0
+    while (settled < SettledFrames) {
+        val asked = partsAskedFor
+        awaitReads()
+        withFrameNanos {}
+        settled = if (partsAskedFor == asked && !isReading) settled + 1 else 0
+    }
+}
+
+/**
+ * How many quiet frames in a row the first screen's strings take to count as in.
+ */
+private const val SettledFrames = 2
 
 /**
  * Tints the browser's own chrome with the surface the shell stands on.

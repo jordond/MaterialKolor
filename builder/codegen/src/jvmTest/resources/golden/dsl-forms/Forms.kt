@@ -36,7 +36,7 @@ class ExtendedColors(
 
     fun onBrand(palette: TonalPalette): Color {
         val tone = if (isDark) 80 else 40
-        return palette.onTone(tone, ContrastThreshold.WCAG_AA_NORMAL_TEXT)
+        return palette.onTone(tone, ContrastThreshold.WcagAaNormalText)
     }
 }
 

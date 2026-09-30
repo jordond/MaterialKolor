@@ -4,35 +4,34 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.materialkolor.builder.core.platform.TimingMarks
 import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.model.SeedSource
 import com.materialkolor.builder.fakes.FakeImageHandle
-import com.materialkolor.builder.fakes.FakePlatform
-import com.materialkolor.builder.feature.canvas.TestOwner
 import com.materialkolor.builder.feature.image.QuadrantColors
 import com.materialkolor.builder.feature.image.decodedOf
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
-import dev.zacsweers.metro.createGraphFactory
-import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.shouldBe
+import kotlin.test.AfterTest
 import kotlin.test.Test
-
-private const val WIDTH = 1280
-private const val HEIGHT = 800
-private const val WAIT_MILLIS = 5_000L
 
 @OptIn(ExperimentalTestApi::class)
 class TimingMarksTest {
-    private val platform = FakePlatform()
+    private val app = AppHarness()
+    private val platform = app.platform
+
     private lateinit var workspace: WorkspaceModel
+
+    @AfterTest
+    fun tearDown() {
+        app.close()
+    }
 
     @Test
     fun boot_marksTheFirstFrameOnce_andTheFirstResolve() =
@@ -90,24 +89,18 @@ class TimingMarksTest {
     /**
      * The whole builder on fakes, booted.
      */
-    private fun ComposeUiTest.showRoot(): AppGraph {
-        val graph = createGraphFactory<AppGraph.Factory>().create(platform)
-        val owner = TestOwner()
-        setContent {
-            CompositionLocalProvider(
-                LocalViewModelStoreOwner provides owner,
-                LocalMetroViewModelFactory provides graph.metroViewModelFactory,
-                // The saving glyph turns on the frame clock, which would hold waitForIdle through the save.
-                LocalMotionFrozen provides true,
-            ) {
-                workspace = metroViewModel()
-                BuilderRoot(graph, workspaceModel = workspace)
+    private fun ComposeUiTest.showRoot(): AppGraph =
+        with(app) {
+            bootRoot { graph ->
+                CompositionLocalProvider(
+                    // The saving glyph turns on the frame clock, which would hold waitForIdle through the save.
+                    LocalMotionFrozen provides true,
+                ) {
+                    workspace = metroViewModel()
+                    BuilderRoot(graph, workspaceModel = workspace)
+                }
             }
         }
-        waitUntil { platform.environment.splashHidden }
-        waitForIdle()
-        return graph
-    }
 
     private companion object {
         val IMAGE_MARKS = listOf(TimingMarks.THUMBNAIL, TimingMarks.EXTRACT)

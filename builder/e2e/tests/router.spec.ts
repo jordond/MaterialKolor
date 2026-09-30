@@ -1,12 +1,10 @@
-import { expect, test, type Page } from '@playwright/test';
-import { hook, openBuilder, reloadBuilder, wantHooks } from './builder';
+import type { Page } from '@playwright/test';
+import { expect, hook, openBuilder, reloadBuilder, test } from './builder';
+import { openWorkspace, typeSeed } from '../fixtures/workspace';
 
 // The router behind the builder, driven through the shell's test hooks. The route read at boot and
-// the history entries overlays push and pop.
-
-test.beforeEach(async ({ context }) => {
-  await wantHooks(context);
-});
+// the history entries overlays push and pop. Then one real edit, which never moves the address or
+// adds an entry. palette.spec.ts opens a real panel into the history and goes Back out of it.
 
 test.describe('router', () => {
   test('a theme link is read at boot and home goes back in the bar without an entry', async ({ page }) => {
@@ -33,7 +31,7 @@ test.describe('router', () => {
 
     await page.evaluate(() => history.back());
     await expect.poll(() => hook(page, 'overlayPops')).toBe('1');
-    await page.waitForTimeout(250);
+    await backSettled(page, 1);
     expect(await hook(page, 'overlayPops')).toBe('1');
   });
 
@@ -112,7 +110,7 @@ test.describe('router', () => {
 
     await reloadBuilder(page);
     await expect.poll(() => historyState(page)).toBe('null');
-    await page.waitForTimeout(250);
+    await backSettled(page, 1);
     expect(await hook(page, 'overlayPops')).toBe('0');
 
     await hook(page, 'pushOverlay', 'export');
@@ -135,7 +133,7 @@ test.describe('router', () => {
         }),
     );
     await expect.poll(() => historyState(page)).toBe('null');
-    await page.waitForTimeout(250);
+    await backSettled(page, 3);
     expect(await hook(page, 'overlayPops')).toBe('1');
 
     await hook(page, 'pushOverlay', 'projects');
@@ -143,6 +141,16 @@ test.describe('router', () => {
     await page.evaluate(() => history.back());
     await expect.poll(() => hook(page, 'overlayPops')).toBe('2');
   });
+});
+
+test('an edit keeps the address at / and adds no history entry', async ({ page }) => {
+  await openWorkspace(page);
+  const entries = await historyLength(page);
+
+  await typeSeed(page, '#0B6E4F');
+
+  expect(await page.evaluate(() => location.pathname + location.search + location.hash)).toBe('/');
+  expect(await historyLength(page)).toBe(entries);
 });
 
 /** Close [count] overlays from the UI while the browser's back does nothing, so the router's backs stay pending. */
@@ -155,6 +163,15 @@ async function closeWithBacksHeld(page: Page, count: number): Promise<void> {
       delete (history as { go?: unknown }).go;
     }
   }, count);
+}
+
+/**
+ * Waits until the router has handled [moves] `popstate` events since the page loaded and has no back
+ * of its own still on the way, so any second pop would have been counted already.
+ */
+async function backSettled(page: Page, moves: number): Promise<void> {
+  await expect.poll(() => hook(page, 'routerMoves')).toBe(String(moves));
+  await expect.poll(() => hook(page, 'routerPendingBacks')).toBe('0');
 }
 
 async function historyLength(page: Page): Promise<number> {

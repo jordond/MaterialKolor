@@ -26,6 +26,7 @@ import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelStore
+import com.materialkolor.builder.WAIT_MILLIS
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.color.ContrastLevel
 import com.materialkolor.builder.domain.edit.DocumentChange
@@ -40,11 +41,16 @@ import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.kit.control.ToastDuration
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
+import com.materialkolor.builder.mainOnTestClock
 import dev.stateholder.extensions.collectAsState
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.resetMain
+import kotlin.test.AfterTest
 import kotlin.test.Test
 
 private val Seed = Argb(0xFF6750A4.toInt())
@@ -53,15 +59,21 @@ private const val READING = "Pulling colors from the image"
 private const val ADD_AGAIN = "Add the image again"
 private const val DROP = "Drop to pull colors from this image"
 private const val MOSTLY_GRAY = "This image is mostly gray, so its colors are quiet"
-private const val WAIT_MILLIS = 5_000L
 private const val ELSEWHERE = "elsewhere"
 
-@OptIn(ExperimentalTestApi::class)
+@OptIn(ExperimentalTestApi::class, ExperimentalCoroutinesApi::class)
 class ImageCandidateRowTest {
     private val images = FakeImageInput()
     private val model = ImageSeedModel(images, FakePasteInput())
     private val store = ViewModelStore().apply { put("images", model) }
+
     private val photo = FakeImageHandle("photo.png")
+
+    @AfterTest
+    fun tearDown() {
+        store.clear()
+        Dispatchers.resetMain()
+    }
 
     /**
      * The tone a chip shows until its colors resolve, read from the skin the row is drawn in.
@@ -99,7 +111,6 @@ class ImageCandidateRowTest {
             toast.message shouldBe "Seed taken from photo.png"
             toast.actionLabel shouldBe "Undo"
             toast.duration shouldBe ToastDuration.Long
-            store.clear()
         }
 
     @Test
@@ -122,7 +133,6 @@ class ImageCandidateRowTest {
             (swap.origin != null) shouldBe true
             harness.document.seed shouldBe chip
             harness.document.seedSource shouldBe source
-            store.clear()
         }
 
     @Test
@@ -139,7 +149,6 @@ class ImageCandidateRowTest {
             onNodeWithText(ADD_AGAIN).performClick()
 
             harness.actions.last() shouldBe WorkspaceAction.OpenImagePicker
-            store.clear()
         }
 
     @Test
@@ -155,7 +164,6 @@ class ImageCandidateRowTest {
 
             onNodeWithText(MOSTLY_GRAY).assertExists()
             onNodeWithText(ADD_AGAIN).assertDoesNotExist()
-            store.clear()
         }
 
     @Test
@@ -166,7 +174,6 @@ class ImageCandidateRowTest {
 
             onNodeWithText(ADD_AGAIN).assertDoesNotExist()
             onNodeWithContentDescription(READING).assertDoesNotExist()
-            store.clear()
         }
 
     @Test
@@ -183,7 +190,6 @@ class ImageCandidateRowTest {
             images.dragging.value = false
             waitForIdle()
             onNodeWithText(DROP).assertDoesNotExist()
-            store.clear()
         }
 
     @Test
@@ -196,7 +202,6 @@ class ImageCandidateRowTest {
             waitForIdle()
 
             onNodeWithText(DROP).assertDoesNotExist()
-            store.clear()
         }
 
     @Test
@@ -220,7 +225,6 @@ class ImageCandidateRowTest {
             waitForIdle()
 
             onNodeWithContentDescription(chipLabel(harness.document.seed), substring = true).assertIsFocused()
-            store.clear()
         }
 
     @Test
@@ -238,7 +242,6 @@ class ImageCandidateRowTest {
             waitForIdle()
 
             onNodeWithContentDescription(chipLabel(harness.document.seed), substring = true).assertIsFocused()
-            store.clear()
         }
 
     @Test
@@ -259,7 +262,6 @@ class ImageCandidateRowTest {
             // One frame on only the first chip has resolved again, and the rest keep what they had.
             candidates.drop(1).forEach { candidate -> chipTop(candidate) shouldNotBe placeholder }
             mainClock.autoAdvance = true
-            store.clear()
         }
 
     @Test
@@ -286,7 +288,6 @@ class ImageCandidateRowTest {
             waitForIdle()
 
             onNodeWithTag(ELSEWHERE).assertIsFocused()
-            store.clear()
         }
 
     @Test
@@ -309,7 +310,6 @@ class ImageCandidateRowTest {
 
             harness.document.seedSource shouldBe first
             onNodeWithContentDescription(chipLabel(harness.document.seed), substring = true).assertIsFocused()
-            store.clear()
         }
 
     @Test
@@ -328,7 +328,6 @@ class ImageCandidateRowTest {
             // One frame on only the first chip has resolved, and the rest wait blank.
             earlier.candidates.drop(1).forEach { candidate -> chipTop(candidate) shouldBe placeholder }
             mainClock.autoAdvance = true
-            store.clear()
         }
 
     /**
@@ -367,6 +366,7 @@ class ImageCandidateRowTest {
         picking: Boolean = false,
         elsewhere: Boolean = false,
     ) {
+        mainOnTestClock()
         showSection(harness) { context, dispatcher ->
             placeholder = LocalBuilderTokens.current.border
             val seeds by model.collectAsState()

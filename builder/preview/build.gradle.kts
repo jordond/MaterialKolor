@@ -1,4 +1,5 @@
 import com.materialkolor.convention.materialKolor
+import com.materialkolor.convention.passModuleSourcesToJvmTest
 import org.jetbrains.compose.ComposeExtension
 import org.jetbrains.compose.resources.ResourcesExtension
 
@@ -52,3 +53,5 @@ composeExtension.extensions.getByType<ResourcesExtension>().apply {
     packageOfResClass = "com.materialkolor.builder.preview.generated.resources"
     publicResClass = false
 }
+
+passModuleSourcesToJvmTest()

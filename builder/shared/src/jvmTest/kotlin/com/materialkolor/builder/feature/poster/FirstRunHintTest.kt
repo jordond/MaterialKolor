@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -32,8 +31,11 @@ import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import com.materialkolor.builder.AppHarness
 import com.materialkolor.builder.BuilderRoot
+import com.materialkolor.builder.HEIGHT
+import com.materialkolor.builder.WAIT_MILLIS
+import com.materialkolor.builder.WIDTH
 import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.domain.model.DEFAULT_SEED
 import com.materialkolor.builder.domain.model.Library
@@ -43,8 +45,6 @@ import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.domain.persist.PreviewTab
 import com.materialkolor.builder.domain.persist.StorageKeys
 import com.materialkolor.builder.engine.resolve.ThemeResolver
-import com.materialkolor.builder.fakes.FakePlatform
-import com.materialkolor.builder.feature.canvas.TestOwner
 import com.materialkolor.builder.feature.topbar.TopBarContent
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
@@ -53,16 +53,12 @@ import com.materialkolor.builder.kit.control.BuilderButton
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import dev.stateholder.dispatcher.Dispatcher
-import dev.zacsweers.metro.createGraphFactory
-import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import kotlin.test.AfterTest
 import kotlin.test.Test
-
-private const val WIDTH = 1280
-private const val HEIGHT = 800
 
 /**
  * The first run hint, word for word.
@@ -86,8 +82,15 @@ private const val NEWER_PREFS = """{"schema":999,"data":{}}"""
 
 @OptIn(ExperimentalTestApi::class)
 class FirstRunHintTest {
-    private val platform = FakePlatform()
+    private val app = AppHarness()
+    private val platform = app.platform
+
     private lateinit var workspace: WorkspaceModel
+
+    @AfterTest
+    fun tearDown() {
+        app.close()
+    }
 
     @Test
     fun firstVisit_afterBoot_landsOnTheDefaultThemeInM3WithTheAppTabInSplit() =
@@ -110,7 +113,9 @@ class FirstRunHintTest {
 
             // The hint sits at the poster's foot, under the fold at 800 tall.
             onNodeWithContentDescription("Close the hint").performScrollTo().performClick()
-            waitUntil { FIRST_RUN_HINT in workspace.state.value.preferences.dismissedHints }
+            waitUntil(
+                timeoutMillis = WAIT_MILLIS,
+            ) { FIRST_RUN_HINT in workspace.state.value.preferences.dismissedHints }
             waitForIdle()
 
             onNodeWithText(HINT).assertDoesNotExist()
@@ -283,22 +288,13 @@ class FirstRunHintTest {
     /**
      * The whole builder on fakes, booted, with [probe] drawn over the workspace every frame.
      */
-    private fun ComposeUiTest.showRoot(probe: @Composable (state: WorkspaceModel.State) -> Unit = {}): AppGraph {
-        val graph = createGraphFactory<AppGraph.Factory>().create(platform)
-        val owner = TestOwner()
-        setContent {
-            CompositionLocalProvider(
-                LocalViewModelStoreOwner provides owner,
-                LocalMetroViewModelFactory provides graph.metroViewModelFactory,
-            ) {
+    private fun ComposeUiTest.showRoot(probe: @Composable (state: WorkspaceModel.State) -> Unit = {}): AppGraph =
+        with(app) {
+            bootRoot { graph ->
                 workspace = metroViewModel()
                 BuilderRoot(graph, workspaceModel = workspace, probe = probe)
             }
         }
-        waitUntil { platform.environment.splashHidden }
-        waitForIdle()
-        return graph
-    }
 
     private fun ComposeUiTest.showTopBar(
         holder: TopBarHolder,

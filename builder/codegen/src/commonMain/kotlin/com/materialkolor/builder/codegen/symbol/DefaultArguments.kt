@@ -151,7 +151,7 @@ public object DefaultArguments {
      * The contrast `TonalPalette.onTone` aims for when an accent does not say.
      */
     public val OnToneThreshold: DefaultArgument<OnColorThreshold> =
-        DefaultArgument("threshold", OnColorThreshold.AaNormal, "ContrastThreshold.WCAG_AA_NORMAL_TEXT")
+        DefaultArgument("threshold", OnColorThreshold.AaNormal, "ContrastThreshold.WcagAaNormalText")
 
     /**
      * Whether `rememberTonalPalette` harmonizes. The library leaves the seed alone unless it is

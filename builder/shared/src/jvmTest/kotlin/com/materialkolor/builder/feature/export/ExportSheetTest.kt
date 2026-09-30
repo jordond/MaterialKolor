@@ -29,7 +29,9 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
+import com.materialkolor.builder.HEIGHT
 import com.materialkolor.builder.ShellExpressive
+import com.materialkolor.builder.WIDTH
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
 import com.materialkolor.builder.codegen.dsl.Language
 import com.materialkolor.builder.codegen.dsl.Token
@@ -57,9 +59,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlin.test.Test
-
-private const val WIDTH = 1280
-private const val HEIGHT = 800
 
 /**
  * A width under 720 dp, where the sheet folds its options.

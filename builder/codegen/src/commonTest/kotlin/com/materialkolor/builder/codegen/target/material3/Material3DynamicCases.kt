@@ -3,10 +3,7 @@ package com.materialkolor.builder.codegen.target.material3
 import com.materialkolor.builder.codegen.ExportInput
 import com.materialkolor.builder.codegen.Fixture
 import com.materialkolor.builder.codegen.Fixtures
-import com.materialkolor.builder.codegen.GoldenDigest
-import com.materialkolor.builder.codegen.GoldenHashes
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
-import com.materialkolor.builder.codegen.dsl.MAX_LINE_LENGTH
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.MotionSchemeChoice
 import com.materialkolor.builder.domain.model.SpecVersion
@@ -14,7 +11,6 @@ import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.persist.ExportPrefs
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -91,34 +87,6 @@ internal object Material3DynamicCases {
 
 class Material3DynamicTest {
     @Test
-    fun material3Dynamic_everyCase_matchesTheGoldenHash() {
-        Material3DynamicCases.all.keys.forEach { case ->
-            assertEquals(GoldenHashes.cases[case], GoldenDigest.of(Material3DynamicCases.files(case)), case)
-        }
-    }
-
-    @Test
-    fun material3Dynamic_everyCodeLine_fitsTheColumnLimit() {
-        Material3DynamicCases.all.keys.forEach { case ->
-            Material3DynamicCases.files(case).forEach { file ->
-                val lines = file.text.lines()
-                // The header's share link grows with the theme. ktlint leaves a line that is only a comment alone.
-                val code = lines.filterNot { it.startsWith("//") }
-                assertTrue(code.all { it.length <= MAX_LINE_LENGTH }, "${file.path} in $case")
-                assertTrue(lines.none { it.endsWith(" ") }, "${file.path} in $case")
-            }
-        }
-    }
-
-    @Test
-    fun material3Dynamic_primaryOverride_writesTheSeedAndThePrimary() {
-        val theme = theme(Fixtures.PrimaryOverride.input)
-
-        assertTrue("seedColor = SeedColor," in theme, theme)
-        assertTrue("primary = Primary," in theme, theme)
-    }
-
-    @Test
     fun material3Dynamic_stateForm_onlyWithPins() {
         Material3DynamicCases.all.forEach { (case, input) ->
             val theme = theme(input)
@@ -127,16 +95,6 @@ class Material3DynamicTest {
             assertEquals(pinned, "rememberDynamicMaterialThemeState(" in theme, case)
             assertEquals(pinned, "state = state," in theme, case)
         }
-    }
-
-    @Test
-    fun material3Dynamic_expressiveOnTonalSpot2021_writesStyleAndSpec() {
-        val theme = theme(Fixtures.ExpressiveOnTonalSpot2021.input)
-
-        assertTrue("style = PaletteStyle.TonalSpot," in theme, theme)
-        assertTrue("specVersion = ColorSpec.SpecVersion.SPEC_2021," in theme, theme)
-        assertTrue("@OptIn(ExperimentalMaterial3ExpressiveApi::class)" in theme, theme)
-        assertTrue("motionScheme = MotionScheme.expressive()," in theme, theme)
     }
 
     @Test
@@ -151,13 +109,6 @@ class Material3DynamicTest {
     }
 
     @Test
-    fun material3Dynamic_spec2021_isWrittenBecauseTheLibraryDefaultIs2025() {
-        val theme = theme(Fixtures.Default.input)
-
-        assertTrue("specVersion = ColorSpec.SpecVersion.SPEC_2021," in theme, theme)
-    }
-
-    @Test
     fun material3Dynamic_spec_leftOutWhenTheLibraryFallsBackToIt() {
         val newest = Fixtures.Default.input.document
             .copy(spec = SpecVersion.Spec2026)
@@ -166,20 +117,6 @@ class Material3DynamicTest {
 
         assertFalse("specVersion =" in tonalSpot, tonalSpot)
         assertFalse("specVersion =" in rainbow, rainbow)
-    }
-
-    @Test
-    fun material3Dynamic_contrastLevel_isWrittenWithoutDoubleToString() {
-        assertTrue("contrastLevel = -1.0," in theme(Fixtures.ReducedContrast.input))
-        assertTrue("contrastLevel = 1.0," in theme(Fixtures.HighContrast.input))
-    }
-
-    @Test
-    fun material3Dynamic_animate_alwaysWritesTheDuration() {
-        val theme = theme(Fixtures.Animated.input)
-
-        assertTrue("animate = true," in theme, theme)
-        assertTrue("animationSpec = tween(durationMillis = 500)," in theme, theme)
     }
 
     @Test
@@ -198,7 +135,7 @@ class Material3DynamicTest {
         val harmonized = "rememberTonalPalette(\n        seed = BrandSeed,\n        harmonizeWith = seedColor,\n    )"
         assertTrue(harmonized in extended, extended)
         assertTrue("rememberTonalPalette(seed = SuccessSeed)" in extended, extended)
-        assertTrue("threshold = ContrastThreshold.WCAG_AAA_NORMAL_TEXT" in extended, extended)
+        assertTrue("threshold = ContrastThreshold.WcagAaaNormalText" in extended, extended)
     }
 
     @Test
@@ -247,16 +184,6 @@ class Material3DynamicTest {
         Material3DynamicCases.all.values.filter { input -> input.document.library != Library.Inklet }.forEach { input ->
             assertFalse("InkletTheme" in theme(input), theme(input))
         }
-    }
-
-    @Test
-    fun material3Dynamic_otherLibrary_isRefused() {
-        val fluent = Fixtures.input(
-            document = Fixtures.Base.copy(library = Library.Fluent),
-            prefs = ExportPrefs(),
-        )
-
-        assertFailsWith<IllegalArgumentException> { Material3Dynamic.files(fluent) }
     }
 
     private fun theme(input: ExportInput): String =

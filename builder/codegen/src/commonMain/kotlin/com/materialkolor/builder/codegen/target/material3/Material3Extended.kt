@@ -236,8 +236,8 @@ internal fun thresholdExpression(threshold: OnColorThreshold): Expression {
     val contrastThreshold = ref(Symbols.ContrastThreshold)
 
     return when (threshold) {
-        OnColorThreshold.AaNormal -> contrastThreshold.member("WCAG_AA_NORMAL_TEXT")
-        OnColorThreshold.AaLarge -> contrastThreshold.member("WCAG_AA_LARGE_TEXT")
-        OnColorThreshold.Aaa -> contrastThreshold.member("WCAG_AAA_NORMAL_TEXT")
+        OnColorThreshold.AaNormal -> contrastThreshold.member("WcagAaNormalText")
+        OnColorThreshold.AaLarge -> contrastThreshold.member("WcagAaLargeText")
+        OnColorThreshold.Aaa -> contrastThreshold.member("WcagAaaNormalText")
     }
 }

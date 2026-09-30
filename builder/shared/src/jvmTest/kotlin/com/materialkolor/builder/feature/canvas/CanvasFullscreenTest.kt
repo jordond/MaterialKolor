@@ -17,19 +17,30 @@ import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.DpRect
+import com.materialkolor.builder.AppHarness
+import com.materialkolor.builder.HEIGHT
+import com.materialkolor.builder.WIDTH
 import com.materialkolor.builder.domain.persist.PreviewTab
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
+import kotlin.test.AfterTest
 import kotlin.test.Test
 
 @OptIn(ExperimentalTestApi::class)
 class CanvasFullscreenTest {
+    private val app = AppHarness()
+
+    @AfterTest
+    fun tearDown() {
+        app.close()
+    }
+
     @Test
     fun fullscreen_fromTheDock_hidesTheTopBarUntilTheExitPillBringsItBack() =
-        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val host = CanvasHost()
-            showWorkspace(host)
+            showWorkspace(host, app)
             waitForIdle()
             onNodeWithText("Export code").assertExists()
 
@@ -47,9 +58,9 @@ class CanvasFullscreenTest {
 
     @Test
     fun fullscreen_enteredAndLeftByKeyboard_movesFocusToThePillAndBackToTheButton() =
-        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val host = CanvasHost()
-            showWorkspace(host)
+            showWorkspace(host, app)
             waitForIdle()
 
             onNodeWithContentDescription("Fullscreen").requestFocus()
@@ -66,9 +77,9 @@ class CanvasFullscreenTest {
 
     @Test
     fun fullscreen_clickedInAndOut_movesNoFocus() =
-        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val host = CanvasHost()
-            showWorkspace(host)
+            showWorkspace(host, app)
             waitForIdle()
 
             onNodeWithContentDescription("Fullscreen").performClick()
@@ -86,7 +97,7 @@ class CanvasFullscreenTest {
     fun fullscreen_atCompact_keepsTheExitPillOffEveryTab() =
         runDesktopComposeUiTest(width = PHONE, height = HEIGHT) {
             val host = CanvasHost()
-            showWorkspace(host)
+            showWorkspace(host, app)
             waitForIdle()
             host.dispatcher.dispatch(WorkspaceAction.ToggleFullscreen)
             waitForIdle()

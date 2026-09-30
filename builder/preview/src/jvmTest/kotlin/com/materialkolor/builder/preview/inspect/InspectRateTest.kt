@@ -7,9 +7,10 @@ import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.model.ThemeDocument
-import com.materialkolor.builder.engine.audit.rate
+import com.materialkolor.builder.engine.audit.ContrastBadge
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.preview.material.MaterialComponent
+import io.kotest.matchers.doubles.plusOrMinus
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
@@ -23,16 +24,22 @@ class InspectRateTest {
         val refs = listOf(primary, onPrimary)
         result.audit.firstRated(refs, isDark = true) shouldBe null
 
-        val pair = ContrastPair(foreground = onPrimary, background = primary, kind = PairKind.Text)
-        result.rateOnPair(refs, isDark = true) shouldBe result.rate(pair, isDark = true)
+        val row = checkNotNull(result.rateOnPair(refs, isDark = true))
+        row.pair shouldBe ContrastPair(foreground = onPrimary, background = primary, kind = PairKind.Text)
+        row.isDark shouldBe true
+        row.ratio shouldBe (6.12 plusOrMinus 0.01)
+        row.badge shouldBe ContrastBadge.Aa
     }
 
     @Test
     fun rateOnPair_onRoleDeclaredFirst_stillRatesItOverItsRole() {
         val result = ThemeResolver().resolve(ThemeDocument(seed = Argb(0x6750A4), library = Library.Custom))
 
-        val pair = ContrastPair(foreground = onPrimary, background = primary, kind = PairKind.Text)
-        result.rateOnPair(listOf(onPrimary, primary), isDark = false) shouldBe result.rate(pair, isDark = false)
+        val row = checkNotNull(result.rateOnPair(listOf(onPrimary, primary), isDark = false))
+        row.pair shouldBe ContrastPair(foreground = onPrimary, background = primary, kind = PairKind.Text)
+        row.isDark shouldBe false
+        row.ratio shouldBe (6.08 plusOrMinus 0.01)
+        row.badge shouldBe ContrastBadge.Aa
     }
 
     @Test

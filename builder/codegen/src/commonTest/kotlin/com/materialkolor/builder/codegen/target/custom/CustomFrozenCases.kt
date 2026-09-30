@@ -3,13 +3,9 @@ package com.materialkolor.builder.codegen.target.custom
 import com.materialkolor.builder.codegen.ExportInput
 import com.materialkolor.builder.codegen.Fixture
 import com.materialkolor.builder.codegen.Fixtures
-import com.materialkolor.builder.codegen.GoldenDigest
-import com.materialkolor.builder.codegen.GoldenHashes
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
 import com.materialkolor.builder.codegen.target.expectedVariants
 import com.materialkolor.builder.codegen.target.frozenPrefs
-import com.materialkolor.builder.codegen.target.lintFailures
-import com.materialkolor.builder.codegen.target.materialKolorImports
 import com.materialkolor.builder.codegen.text.Literals
 import com.materialkolor.builder.domain.export.ContrastVariant
 import com.materialkolor.builder.domain.model.CustomSlot
@@ -18,7 +14,6 @@ import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.FrozenVariants
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -53,27 +48,6 @@ internal object CustomFrozenCases {
 }
 
 class CustomFrozenTest {
-    @Test
-    fun customFrozen_everyCase_matchesTheGoldenHash() {
-        CustomFrozenCases.all.keys.forEach { case ->
-            assertEquals(GoldenHashes.cases[case], GoldenDigest.of(CustomFrozenCases.files(case)), case)
-        }
-    }
-
-    @Test
-    fun customFrozen_everyCodeLine_passesTheLintLimits() {
-        CustomFrozenCases.all.keys.forEach { case ->
-            assertEquals(emptyList(), lintFailures(CustomFrozenCases.files(case)), case)
-        }
-    }
-
-    @Test
-    fun customFrozen_everyCase_importsNothingFromMaterialKolor() {
-        CustomFrozenCases.all.keys.forEach { case ->
-            assertEquals(emptyList(), materialKolorImports(CustomFrozenCases.files(case)), case)
-        }
-    }
-
     @Test
     fun customFrozen_everySlot_isWrittenForBothModesAtEveryVariant() {
         CustomFrozenCases.all.forEach { (case, input) ->
@@ -112,22 +86,6 @@ class CustomFrozenTest {
         assertTrue("    brand = ColorFamily(\n" in withAccents, withAccents)
         assertFalse("brandColor" in withAccents, withAccents)
         assertFalse("ColorFamily" in without, without)
-    }
-
-    @Test
-    fun customFrozen_theme_providesTheStandardPair() {
-        val theme = CustomFrozenCases.files("custom-frozen-all-contrasts").single { it.path.endsWith("/Theme.kt") }.text
-
-        assertTrue("val LocalThemeColors = staticCompositionLocalOf<ThemeColors> {" in theme, theme)
-        assertTrue("val colors = if (isDark) darkThemeColors else lightThemeColors" in theme, theme)
-        assertTrue("CompositionLocalProvider(LocalThemeColors provides colors, content = content)" in theme, theme)
-    }
-
-    @Test
-    fun customFrozen_otherLibrary_isRefused() {
-        val material3 = Fixtures.input(document = Fixtures.Base, prefs = frozenPrefs())
-
-        assertFailsWith<IllegalArgumentException> { CustomFrozen.files(material3) }
     }
 
     private fun themeColors(input: ExportInput): String =

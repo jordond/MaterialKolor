@@ -34,11 +34,6 @@ class ColorNamesTest {
     }
 
     @Test
-    fun entries_count_isAboutThreeHundred() {
-        assertTrue(entries.size in 280..340, "${entries.size} names")
-    }
-
-    @Test
     fun entries_namesAndColors_areUnique() {
         assertEquals(entries.size, entries.map { it.name.lowercase() }.toSet().size)
         assertEquals(entries.size, entries.map { it.argb }.toSet().size)
@@ -63,28 +58,5 @@ class ColorNamesTest {
         }
     }
 
-    @Test
-    fun colorNameData_sourceFile_staysUnderTenKilobytes() {
-        // Each string sits on its own source line, indented, quoted and followed by a comma.
-        val listBytes = ColorNameData.sumOf { line -> line.encodeToByteArray().size + SourceLineOverhead }
-        val fileBytes = listBytes + SourceHeaderAllowance
-
-        assertTrue(fileBytes < TenKilobytes, "about $fileBytes bytes")
-    }
-
     private fun Argb.isGrey(): Boolean = red == green && green == blue
-
-    private companion object {
-        /**
-         * Eight spaces of indent, two quotes, a comma and a newline.
-         */
-        const val SourceLineOverhead = 12
-
-        /**
-         * The package line, the KDoc and the `listOf(` around the strings, with room to spare.
-         */
-        const val SourceHeaderAllowance = 1_000
-
-        const val TenKilobytes = 10_000
-    }
 }

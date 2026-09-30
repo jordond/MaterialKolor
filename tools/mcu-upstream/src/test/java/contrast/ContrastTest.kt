@@ -137,10 +137,10 @@ class ContrastTest {
     @Test
     fun darkerUnsafe() {
         val expectedHct = hct.Hct.fromInt(COLOR1)
-        val expected = contrast.Contrast.lighterUnsafe(expectedHct.tone, 1.1)
+        val expected = contrast.Contrast.darkerUnsafe(expectedHct.tone, 1.1)
 
         val actualHct = Hct.fromInt(COLOR1)
-        val actual = Contrast.lighterUnsafe(actualHct.tone, 1.1)
+        val actual = Contrast.darkerUnsafe(actualHct.tone, 1.1)
 
         expected shouldBeExactly actual
     }

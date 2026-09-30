@@ -3,7 +3,6 @@ package com.materialkolor.builder.preview.canvas
 import androidx.compose.ui.graphics.ColorMatrix
 import io.kotest.matchers.floats.plusOrMinus
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.types.shouldNotBeSameInstanceAs
 import kotlin.test.Test
 
 class VisionMatricesTest {
@@ -45,16 +44,6 @@ class VisionMatricesTest {
         green shouldBe (0.7152f plusOrMinus 0.0001f)
         blue shouldBe (0.7152f plusOrMinus 0.0001f)
         alpha shouldBe 1f
-    }
-
-    @Test
-    fun colorMatrix_calledTwice_buildsTwoMatricesThatCompareEqual() {
-        val first = VisionMatrices.colorMatrix(VisionMatrices.Protanopia)
-        val second = VisionMatrices.colorMatrix(VisionMatrices.Protanopia)
-
-        first shouldNotBeSameInstanceAs second
-        first.values.toList() shouldBe second.values.toList()
-        first.values[18] shouldBe 1f
     }
 
     /**

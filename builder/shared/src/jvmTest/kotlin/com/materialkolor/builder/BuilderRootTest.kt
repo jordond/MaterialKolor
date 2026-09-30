@@ -1,9 +1,9 @@
 package com.materialkolor.builder
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -22,23 +22,20 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.domain.capability.forTarget
+import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
-import com.materialkolor.builder.fakes.FakePlatform
-import com.materialkolor.builder.feature.canvas.TestOwner
 import com.materialkolor.builder.feature.poster.kotlinLiteralOf
 import com.materialkolor.builder.feature.topbar.TOP_BAR_TAG
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.kit.a11y.LocalAnnouncer
-import dev.zacsweers.metro.createGraphFactory
-import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
+import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContain
@@ -46,16 +43,21 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlin.test.AfterTest
 import kotlin.test.Test
-
-private const val WIDTH = 1280
-private const val HEIGHT = 800
 
 @OptIn(ExperimentalTestApi::class)
 class BuilderRootTest {
-    private val platform = FakePlatform()
+    private val app = AppHarness()
+    private val platform = app.platform
+
     private lateinit var workspace: WorkspaceModel
     private lateinit var scope: CoroutineScope
+
+    @AfterTest
+    fun tearDown() {
+        app.close()
+    }
 
     @Test
     fun announcer_underTheRoot_readsOutThroughTheEnvironment() =
@@ -66,6 +68,15 @@ class BuilderRootTest {
             }
 
             platform.environment.announcements shouldContain "Copied Theme.kt"
+        }
+
+    @Test
+    fun themeColor_afterBoot_isThePanelTheShellStandsOn() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            var panel: Argb? = null
+            showRoot { _ -> panel = Argb(LocalBuilderTokens.current.panel.toArgb()) }
+
+            platform.environment.themeColors.last() shouldBe panel
         }
 
     @Test
@@ -215,21 +226,12 @@ class BuilderRootTest {
     /**
      * The whole builder on fakes, booted, with [probe] drawn over the workspace.
      */
-    private fun ComposeUiTest.showRoot(probe: @Composable (state: WorkspaceModel.State) -> Unit = {}): AppGraph {
-        val graph = createGraphFactory<AppGraph.Factory>().create(platform)
-        val owner = TestOwner()
-        setContent {
-            CompositionLocalProvider(
-                LocalViewModelStoreOwner provides owner,
-                LocalMetroViewModelFactory provides graph.metroViewModelFactory,
-            ) {
+    private fun ComposeUiTest.showRoot(probe: @Composable (state: WorkspaceModel.State) -> Unit = {}): AppGraph =
+        with(app) {
+            bootRoot { graph ->
                 workspace = metroViewModel()
                 scope = rememberCoroutineScope()
                 BuilderRoot(graph, workspaceModel = workspace, probe = probe)
             }
         }
-        waitUntil { platform.environment.splashHidden }
-        waitForIdle()
-        return graph
-    }
 }

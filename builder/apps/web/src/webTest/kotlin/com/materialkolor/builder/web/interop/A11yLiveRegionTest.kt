@@ -5,11 +5,17 @@ package com.materialkolor.builder.web.interop
 import kotlinx.browser.document
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.Promise
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class A11yLiveRegionTest {
+    @AfterTest
+    fun removeRegion() {
+        document.getElementById(A11yLiveRegion.ELEMENT_ID)?.remove()
+    }
+
     @Test
     fun theRegionIsCreatedOnceAsAPoliteStatusUnderTheBody() {
         val first = A11yLiveRegion.install()

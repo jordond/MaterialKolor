@@ -1,5 +1,5 @@
-import { expect, test, type Locator, type Page } from '@playwright/test';
-import { dispatchPaste, openBuilder, wantHooks } from './builder';
+import type { Locator, Page } from '@playwright/test';
+import { dispatchPaste, expect, openBuilder, test } from './builder';
 import { installFileMakers } from './image-files';
 
 // Text pasted with nothing editable focused on the real builder, read from the page's
@@ -17,7 +17,6 @@ const OFFER = 'Open the shared theme?';
 const DEFAULT_LINK = 'https://materialkolor.com/t/AdllOwAAAAAT';
 
 test.beforeEach(async ({ context }) => {
-  await wantHooks(context);
   await context.addInitScript(installFileMakers);
 });
 
@@ -26,8 +25,8 @@ test('a pasted color sets the seed and offers to undo it', async ({ page }) => {
 
   expect(await dispatchPaste(page, { text: '#6750A4' })).toBe(true);
 
-  await expect.poll(() => seedText(page), { timeout: 10_000 }).toContain('6750A4');
-  await expect(onPage(page, SEEDED)).toHaveCount(1, { timeout: 10_000 });
+  await expect.poll(() => seedText(page)).toContain('6750A4');
+  await expect(onPage(page, SEEDED)).toHaveCount(1);
   await expect(onPage(page, 'Undo')).not.toHaveCount(0);
 });
 
@@ -36,7 +35,7 @@ test('a pasted share link offers to open the theme', async ({ page }) => {
 
   expect(await dispatchPaste(page, { text: DEFAULT_LINK })).toBe(true);
 
-  await expect(onPage(page, OFFER)).toHaveCount(1, { timeout: 10_000 });
+  await expect(onPage(page, OFFER)).toHaveCount(1);
   await expect(onPage(page, 'Open')).not.toHaveCount(0);
 });
 

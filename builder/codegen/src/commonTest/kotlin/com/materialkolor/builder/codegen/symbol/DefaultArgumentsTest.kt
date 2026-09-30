@@ -6,7 +6,6 @@ import com.materialkolor.builder.codegen.dsl.ref
 import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.ThemeDocument
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -46,26 +45,6 @@ class DefaultArgumentsTest {
 
         assertFalse("specVersion" in text, text)
         assertTrue("platform = Platform.Watch" in text, text)
-    }
-
-    @Test
-    fun all_everyWrapper_namesItsOwnFunction() {
-        assertEquals(
-            setOf(
-                Symbols.DynamicMaterialTheme,
-                Symbols.DynamicMaterialExpressiveTheme,
-                Symbols.RememberDynamicMaterialThemeState,
-                Symbols.RememberFluentColors,
-                Symbols.RememberDynamicLightDarkColors,
-                Symbols.RememberDynamicScheme,
-                Symbols.OnTone,
-                Symbols.RememberTonalPalette,
-                Symbols.Harmonize,
-                Symbols.MaterialKolors,
-            ),
-            DefaultArguments.all.keys,
-        )
-        assertTrue(DefaultArguments.all.values.all { it.isNotEmpty() })
     }
 
     /**

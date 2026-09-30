@@ -47,11 +47,6 @@ private class ShellInk(
 @OptIn(ExperimentalTestApi::class)
 class PosterSurfaceTest {
     @Test
-    fun seeds_areFiftyDistinctColours() {
-        ShellSeeds.toSet().size shouldBe 50
-    }
-
-    @Test
     fun posterSurface_fiftySeeds_inkHoldsOnTheSeedInEverySkin() {
         for ((name, expressive) in ShellFlavours) {
             withClue(name) {

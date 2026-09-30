@@ -1,34 +1,14 @@
 package com.materialkolor.builder.preview.custom
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.graphics.toPixelMap
-import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.SemanticsMatcher
-import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
-import androidx.compose.ui.test.assertCountEquals
-import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasClickAction
-import androidx.compose.ui.test.hasSetTextAction
-import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onRoot
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.audit.ColorRef
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.model.Accent
@@ -41,65 +21,58 @@ import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.preview.Chrome
+import com.materialkolor.builder.preview.DeviceFrames
 import com.materialkolor.builder.preview.LightSpec
+import com.materialkolor.builder.preview.TripsHarness
+import com.materialkolor.builder.preview.TripsNaming
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.PreviewPane
+import com.materialkolor.builder.preview.checkSourcesOpenNothingAndNeverLoop
+import com.materialkolor.builder.preview.checkTripsControlsDeclareRoles
 import com.materialkolor.builder.preview.inspect.PreviewRoles
+import com.materialkolor.builder.preview.moduleSource
+import com.materialkolor.builder.preview.opensAWindow
+import com.materialkolor.builder.preview.refsOnScreen
+import com.materialkolor.builder.preview.screenColors
 import com.materialkolor.builder.preview.split.PaneSpec
-import com.materialkolor.builder.preview.trips.OfflineMapsSwitch
-import com.materialkolor.builder.preview.trips.PackingItem
-import com.materialkolor.builder.preview.trips.TripFilter
 import com.materialkolor.builder.preview.trips.Trips
+import com.materialkolor.builder.preview.walkTripsControls
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContain
-import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
 import java.io.File
 import kotlin.test.Test
 
-@OptIn(ExperimentalTestApi::class)
-class TripsTest {
-    @Test
-    fun controls_everyDeviceWidth_declareTheirOwnSlots() {
-        for ((width, frame) in TripsFrames) {
-            withClue(width) {
-                runComposeUiTest {
-                    setContent {
-                        TripsHarness(
-                            spec = LightSpec,
-                            state = DemoAppState(),
-                            width = width,
-                            // Tall enough that every lazy item composes, wider than the window on desktop.
-                            modifier = Modifier
-                                .wrapContentSize(Alignment.TopStart, unbounded = true)
-                                .requiredSize(frame.width.dp, 2400.dp),
-                        )
-                    }
-
-                    // Unmerged, since a merged node also carries the slots its children declared.
-                    val controls = onAllNodes(hasClickAction() or hasSetTextAction(), useUnmergedTree = true)
-                        .fetchSemanticsNodes()
-                    controls.shouldNotBeEmpty()
-                    controls
-                        .filterNot { node -> node.tripsDeclaresSlots() }
-                        .map { node -> node.config.toString() }
-                        .shouldBeEmpty()
-                }
+/**
+ * The Trips app in a Custom pane, under the red chrome, with motion frozen.
+ */
+private val CustomTrips: TripsHarness = { spec, state, width, modifier ->
+    CompositionLocalProvider(LocalMotionFrozen provides true) {
+        Chrome {
+            ProvideBuilderLayout(modifier = modifier) {
+                PreviewPane(spec, Modifier.fillMaxSize()) { CustomAppEntry(spec, state, width) }
             }
         }
     }
+}
+
+@OptIn(ExperimentalTestApi::class)
+class CustomTripsTest {
+    @Test
+    fun controls_everyDeviceWidth_declareTheirOwnSlots() =
+        checkTripsControlsDeclareRoles(CustomTrips, LightSpec) { node -> node.tripsDeclaresSlots() }
 
     @Test
     fun slots_everyDeviceWidthFirstScreen_showWhatF20AsksWithOrWithoutAccents() {
-        for ((width, frame) in TripsFrames) {
+        for ((width, frame) in DeviceFrames) {
             for (spec in listOf(LightSpec, AccentLightSpec)) {
                 withClue("$width ${spec.accentCount} accents") {
                     runDesktopComposeUiTest(frame.width, frame.height) {
-                        setContent { TripsHarness(spec, DemoAppState(), width, Modifier.fillMaxSize()) }
+                        setContent { CustomTrips(spec, DemoAppState(), width, Modifier.fillMaxSize()) }
 
-                        val refs = tripsRefsOnScreen()
+                        val refs = refsOnScreen()
                         val slots = refs.filterIsInstance<ColorRef.OfSlot>().map { ref -> ref.slot }.toSet()
                         TripsFamilies
                             .filterValues { family -> family.none { slot -> slot in slots } }
@@ -121,13 +94,11 @@ class TripsTest {
         for (spec in listOf(AccentLightSpec, AccentDarkSpec)) {
             withClue(spec.label) {
                 runDesktopComposeUiTest(1280, 800) {
-                    setContent { TripsHarness(spec, DemoAppState(), DeviceWidth.Desktop, Modifier.fillMaxSize()) }
+                    setContent { CustomTrips(spec, DemoAppState(), DeviceWidth.Desktop, Modifier.fillMaxSize()) }
 
-                    val accents = tripsRefsOnScreen().filterIsInstance<ColorRef.OfAccent>().map { ref -> ref.slot }
+                    val accents = refsOnScreen().filterIsInstance<ColorRef.OfAccent>().map { ref -> ref.slot }
                     accents.map { slot -> slot.index }.toSet() shouldBe Trips.indices.toSet()
-                    val pixels = onRoot().captureToImage().toPixelMap().let { map ->
-                        buildSet { for (x in 0 until map.width) for (y in 0 until map.height) add(map[x, y].toArgb()) }
-                    }
+                    val pixels = screenColors()
                     // The fills, since text and glyph edges blend into what they sit on.
                     for (slot in accents.filter { slot -> slot.part == AccentPart.Container }.toSet()) {
                         withClue(slot) {
@@ -144,64 +115,18 @@ class TripsTest {
     @Test
     fun controls_clicked_openTheTripFilterTheListTickTheChecklistAndTurnOfflineMapsOn() =
         runComposeUiTest {
-            val state = DemoAppState()
-            setContent { TripsHarness(LightSpec, state, DeviceWidth.Tablet, Modifier.size(840.dp, 900.dp)) }
-
-            onNode(hasClickAction() and hasText("Kyoto, Japan")).performClick()
-            waitForIdle()
-            state.selectedItem shouldBe 1
-            onAllNodesWithText("Kyoto, Japan").assertCountEquals(2)
-            onNodeWithText("Nothing planned yet").assertExists()
-
-            onNode(hasClickAction() and hasText("Shared")).performClick()
-            waitForIdle()
-            state.tabIndex shouldBe TripFilter.Shared.ordinal
-            onAllNodes(hasClickAction() and hasText("Kyoto, Japan")).assertCountEquals(0)
-            onAllNodes(hasClickAction() and hasText("Lisbon, Portugal")).assertCountEquals(1)
-
-            onNode(hasClickAction() and hasText("Past")).performClick()
-            waitForIdle()
-            onNodeWithText("No past trips yet").assertExists()
-
-            onNode(hasClickAction() and hasText(PackingItem.Passports.label))
-                .performSemanticsAction(SemanticsActions.OnClick)
-            waitForIdle()
-            state.isChecked(PackingItem.Passports.key) shouldBe true
-            onNodeWithText("1 of 3").assertExists()
-
-            onNode(hasClickAction() and hasText("Turn on")).performSemanticsAction(SemanticsActions.OnClick)
-            waitForIdle()
-            state.isOn(OfflineMapsSwitch) shouldBe true
-            onAllNodesWithText("Turn on").assertCountEquals(0)
+            walkTripsControls(CustomTrips, LightSpec, TripsNaming.Text, height = 900, checklist = hasClickAction())
         }
 
     @Test
     fun tripsSources_importNothingThatOpensAPopupOrLoops() {
         val sources = TripsSources
         sources.size shouldBeGreaterThanOrEqual 4
-        for (source in sources) {
-            withClue(source.name) {
-                val lines = source.readLines().map { line -> line.trim() }
-                lines
-                    .filter { line -> line.startsWith("import ") }
-                    .map { line -> line.removePrefix("import ").substringBefore(" as ") }
-                    .filter { imported ->
-                        imported in TripsPopupImports || imported.startsWith("androidx.compose.ui.window.")
-                    }.shouldBeEmpty()
-                lines.filter { line -> TripsEndlessMotion.containsMatchIn(line) }.shouldBeEmpty()
-            }
+        checkSourcesOpenNothingAndNeverLoop(sources) { imported ->
+            imported in TripsPopupImports || imported.opensAWindow()
         }
     }
 }
-
-/**
- * The frame the dock shows each device in, the kit's screen widths at the height of a first screen.
- */
-private val TripsFrames: Map<DeviceWidth, IntSize> = mapOf(
-    DeviceWidth.Phone to IntSize(412, 900),
-    DeviceWidth.Tablet to IntSize(840, 900),
-    DeviceWidth.Desktop to IntSize(1280, 800),
-)
 
 /**
  * The blue preview document with eight accents, twice as many as there are trips.
@@ -287,17 +212,11 @@ private val TripsPopupImports: List<String> = listOf(
 )
 
 /**
- * A call that loops for ever, an infinite transition or an infinite repeat. The names are
- * split by a wildcard so the builder's architecture scan does not read this pattern as a call.
- */
-private val TripsEndlessMotion: Regex = Regex("""\b(rememberInfinite\w*Transition|infinite\w*Repeatable)\b""")
-
-/**
  * The sources the app is drawn from, its entry, its colors and every CustomTrip file.
  */
 private val TripsSources: List<File>
     get() {
-        val folder = File("src/commonMain/kotlin/com/materialkolor/builder/preview/custom")
+        val folder = moduleSource("commonMain/kotlin/com/materialkolor/builder/preview/custom")
         val trips = folder.listFiles().orEmpty().filter { file -> file.name.startsWith("CustomTrip") }
         return trips.sortedBy { file -> file.name } + File(folder, "AppEntry.kt") + File(folder, "CustomColors.kt")
     }
@@ -316,34 +235,4 @@ private fun SemanticsNode.tripsDeclaresSlots(): Boolean {
     if (PreviewRoles in config) return true
     val holder = generateSequence(parent) { node -> node.parent }.firstOrNull { node -> PreviewRoles in node.config }
     return holder != null && holder.config[PreviewRoles] in TripsGroupRefs
-}
-
-/**
- * Every slot and accent declared by a node that shows at least partly on screen.
- */
-private fun SemanticsNodeInteractionsProvider.tripsRefsOnScreen(): List<ColorRef> {
-    val screen = onRoot().fetchSemanticsNode().boundsInRoot
-    return onAllNodes(SemanticsMatcher.keyIsDefined(PreviewRoles), useUnmergedTree = true)
-        .fetchSemanticsNodes()
-        .filter { node -> node.boundsInRoot.overlaps(screen) }
-        .flatMap { node -> node.config[PreviewRoles] }
-}
-
-/**
- * The Trips app in a Custom pane of [spec], under the red chrome, with motion frozen.
- */
-@Composable
-private fun TripsHarness(
-    spec: PaneSpec,
-    state: DemoAppState,
-    width: DeviceWidth,
-    modifier: Modifier,
-) {
-    CompositionLocalProvider(LocalMotionFrozen provides true) {
-        Chrome {
-            ProvideBuilderLayout(modifier = modifier) {
-                PreviewPane(spec, Modifier.fillMaxSize()) { CustomAppEntry(spec, state, width) }
-            }
-        }
-    }
 }

@@ -1,17 +1,17 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import { expect, test, type Page } from '@playwright/test';
-import { reloadBuilder, site, wantHooks } from './builder';
+import type { Page } from '@playwright/test';
+import { expect, reloadBuilder, site, test } from './builder';
 import { readZip } from '../fixtures/zip';
 import {
   A11Y,
   button,
-  LAND_TIMEOUT_MS,
   labelled,
   onPage,
   openWorkspace,
   press,
   pressFor,
+  pressSettled,
   pressKeyFor,
   typeInto,
   typeSeed,
@@ -30,17 +30,13 @@ const GOLDEN = path.resolve(__dirname, '../../codegen/src/jvmTest/resources/gold
 /** The files of [GOLDEN], by their path under it. */
 const GOLDEN_FILES = ['src/commonMain/kotlin/com/example/theme/Color.kt', 'src/commonMain/kotlin/com/example/theme/Theme.kt'];
 
-test.beforeEach(async ({ context }) => {
-  await wantHooks(context);
-});
-
 test('Download zip holds every file the sheet shows, its Kotlin as the golden has it', async ({ page }) => {
   // WebKit raises the download too. The zip starts inside the press, as Safari asks.
   await openSheet(page);
   const tabs = await fileTabs(page);
 
   const download = page.waitForEvent('download');
-  await press(page, button(page, 'Download zip'));
+  await pressSettled(page, button(page, 'Download zip'));
   const zip = readZip(readFileSync((await (await download).path())!));
 
   expect([...zip.keys()].map((name) => path.posix.basename(name)).sort()).toEqual([...tabs].sort());
@@ -70,7 +66,7 @@ test('the package stays across a seed change, a reload and a new project', async
 
   await pressKeyFor(page, 'p', button(page, 'New project'));
   await pressFor(page, button(page, 'New project'), labelled(page, 'Projects, '));
-  await expect(onPage(page, /^Projects, dialog/)).toHaveCount(0, { timeout: LAND_TIMEOUT_MS });
+  await expect(onPage(page, /^Projects, dialog/)).toHaveCount(0);
   await openSheet(page);
   await expect.poll(() => textOf(page, 'Package name')).toBe('com.acme.app');
 });
@@ -84,7 +80,7 @@ async function openSheet(page: Page): Promise<void> {
 
 async function closeSheet(page: Page): Promise<void> {
   await press(page, button(page, 'Close'));
-  await expect(onPage(page, EXPORT_DIALOG)).toHaveCount(0, { timeout: LAND_TIMEOUT_MS });
+  await expect(onPage(page, EXPORT_DIALOG)).toHaveCount(0);
 }
 
 /** The file names on the sheet's tabs. */

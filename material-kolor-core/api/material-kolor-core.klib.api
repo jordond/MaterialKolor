@@ -7,10 +7,10 @@
 
 // Library unique name: <MaterialKolor:material-kolor-core>
 final enum class com.materialkolor.ktx/ContrastThreshold : kotlin/Enum<com.materialkolor.ktx/ContrastThreshold> { // com.materialkolor.ktx/ContrastThreshold|null[0]
-    enum entry WCAG_AAA_LARGE_TEXT // com.materialkolor.ktx/ContrastThreshold.WCAG_AAA_LARGE_TEXT|null[0]
-    enum entry WCAG_AAA_NORMAL_TEXT // com.materialkolor.ktx/ContrastThreshold.WCAG_AAA_NORMAL_TEXT|null[0]
-    enum entry WCAG_AA_LARGE_TEXT // com.materialkolor.ktx/ContrastThreshold.WCAG_AA_LARGE_TEXT|null[0]
-    enum entry WCAG_AA_NORMAL_TEXT // com.materialkolor.ktx/ContrastThreshold.WCAG_AA_NORMAL_TEXT|null[0]
+    enum entry WcagAaLargeText // com.materialkolor.ktx/ContrastThreshold.WcagAaLargeText|null[0]
+    enum entry WcagAaNormalText // com.materialkolor.ktx/ContrastThreshold.WcagAaNormalText|null[0]
+    enum entry WcagAaaLargeText // com.materialkolor.ktx/ContrastThreshold.WcagAaaLargeText|null[0]
+    enum entry WcagAaaNormalText // com.materialkolor.ktx/ContrastThreshold.WcagAaaNormalText|null[0]
 
     final val entries // com.materialkolor.ktx/ContrastThreshold.entries|#static{}entries[0]
         final fun <get-entries>(): kotlin.enums/EnumEntries<com.materialkolor.ktx/ContrastThreshold> // com.materialkolor.ktx/ContrastThreshold.entries.<get-entries>|<get-entries>#static(){}[0]
@@ -144,7 +144,7 @@ final class com.materialkolor/MaterialKolors { // com.materialkolor/MaterialKolo
     final fun error(): androidx.compose.ui.graphics/Color // com.materialkolor/MaterialKolors.error|error(){}[0]
     final fun errorContainer(): androidx.compose.ui.graphics/Color // com.materialkolor/MaterialKolors.errorContainer|errorContainer(){}[0]
     final fun errorPaletteKeyColor(): androidx.compose.ui.graphics/Color // com.materialkolor/MaterialKolors.errorPaletteKeyColor|errorPaletteKeyColor(){}[0]
-    final fun highestSurface(com.materialkolor.dynamiccolor/DynamicScheme): androidx.compose.ui.graphics/Color // com.materialkolor/MaterialKolors.highestSurface|highestSurface(com.materialkolor.dynamiccolor.DynamicScheme){}[0]
+    final fun highestSurface(): androidx.compose.ui.graphics/Color // com.materialkolor/MaterialKolors.highestSurface|highestSurface(){}[0]
     final fun inverseOnSurface(): androidx.compose.ui.graphics/Color // com.materialkolor/MaterialKolors.inverseOnSurface|inverseOnSurface(){}[0]
     final fun inversePrimary(): androidx.compose.ui.graphics/Color // com.materialkolor/MaterialKolors.inversePrimary|inversePrimary(){}[0]
     final fun inverseSurface(): androidx.compose.ui.graphics/Color // com.materialkolor/MaterialKolors.inverseSurface|inverseSurface(){}[0]

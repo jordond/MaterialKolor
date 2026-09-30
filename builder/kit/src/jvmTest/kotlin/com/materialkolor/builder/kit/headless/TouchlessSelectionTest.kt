@@ -29,6 +29,7 @@ import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.withKeyDown
 import androidx.compose.ui.unit.dp
+import com.materialkolor.builder.kit.ShortcutKey
 import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.widget.CodeScrollTag
 import com.materialkolor.builder.kit.widget.CodeView
@@ -42,12 +43,6 @@ import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotBeBlank
 import java.awt.datatransfer.DataFlavor
 import kotlin.test.Test
-
-/**
- * The key held with A and C, Command on a Mac and Control everywhere else, as the desktop reads it.
- */
-private val ShortcutKey: Key =
-    if (System.getProperty("os.name").orEmpty().startsWith("Mac")) Key.MetaLeft else Key.CtrlLeft
 
 /**
  * Where overlays render in the page the code view and text over several lines swap their selection

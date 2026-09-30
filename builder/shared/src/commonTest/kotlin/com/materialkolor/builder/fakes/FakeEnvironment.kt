@@ -7,6 +7,8 @@ import com.materialkolor.builder.domain.link.SITE_ORIGIN
 import com.materialkolor.builder.domain.persist.DeviceWidth
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
+import kotlin.concurrent.Volatile
 
 /**
  * An [Environment] a test can set, that remembers what the builder asked of it.
@@ -24,48 +26,62 @@ internal class FakeEnvironment(
     /**
      * The width a new project frames its preview at, a tablet unless a test says otherwise.
      */
+    @Volatile
     override var defaultDeviceWidth: DeviceWidth = DeviceWidth.Tablet
 
     /**
      * What the eye dropper picks next, null for a cancel.
      */
+    @Volatile
     var screenColor: Argb? = null
 
     /**
      * Whether the platform agrees to keep stored data.
      */
+    @Volatile
     var persistGranted: Boolean = true
 
     /**
      * How many times persistent storage was asked for.
      */
-    var persistRequests: Int = 0
-        private set
+    val persistRequests: Int
+        get() = persistRequestsKept.value
+
+    private val persistRequestsKept = MutableStateFlow(0)
 
     /**
      * Whether the boot splash was removed.
      */
+    @Volatile
     var splashHidden: Boolean = false
         private set
 
     /**
      * Every browser chrome tint, oldest first.
      */
-    val themeColors: MutableList<Argb> = mutableListOf()
+    val themeColors: List<Argb>
+        get() = themeColorsKept.value
+
+    private val themeColorsKept = MutableStateFlow<List<Argb>>(emptyList())
 
     /**
      * Every splash written, oldest first.
      */
-    val splashes: MutableList<BootSplash> = mutableListOf()
+    val splashes: List<BootSplash>
+        get() = splashesKept.value
+
+    private val splashesKept = MutableStateFlow<List<BootSplash>>(emptyList())
 
     /**
      * How many times the eye dropper was opened.
      */
-    var screenPicks: Int = 0
-        private set
+    val screenPicks: Int
+        get() = screenPicksKept.value
+
+    private val screenPicksKept = MutableStateFlow(0)
 
     override suspend fun pickScreenColor(): Argb? {
-        screenPicks++
+        screenPicksKept.update { picks -> picks + 1 }
         return screenColor
     }
 
@@ -74,21 +90,22 @@ internal class FakeEnvironment(
     }
 
     override fun setThemeColor(argb: Argb) {
-        themeColors += argb
+        themeColorsKept.update { kept -> kept + argb }
     }
 
     override fun writeSplash(splash: BootSplash) {
-        splashes += splash
+        splashesKept.update { kept -> kept + splash }
     }
 
     override suspend fun requestPersist(): Boolean {
-        persistRequests++
+        persistRequestsKept.update { requests -> requests + 1 }
         return persistGranted
     }
 
     /**
      * The project this tab has open, as a reload would find it.
      */
+    @Volatile
     var tabProject: String? = null
 
     override fun readTabProject(): String? = tabProject
@@ -105,10 +122,13 @@ internal class FakeEnvironment(
     /**
      * Everything read out to a screen reader, oldest first.
      */
-    val announcements: MutableList<String> = mutableListOf()
+    val announcements: List<String>
+        get() = announcementsKept.value
+
+    private val announcementsKept = MutableStateFlow<List<String>>(emptyList())
 
     override fun announce(message: String) {
-        announcements += message
+        announcementsKept.update { kept -> kept + message }
     }
 
     override val browser: String = FAKE_BROWSER
@@ -116,24 +136,31 @@ internal class FakeEnvironment(
     /**
      * Every path the page was asked to reload at, oldest first.
      */
-    val reloads: MutableList<String> = mutableListOf()
+    val reloads: List<String>
+        get() = reloadsKept.value
+
+    private val reloadsKept = MutableStateFlow<List<String>>(emptyList())
 
     override fun reload(path: String) {
-        reloads += path
+        reloadsKept.update { kept -> kept + path }
     }
 
     /**
      * Whether a reload loads anything, true as on the web.
      */
+    @Volatile
     override var canReload: Boolean = true
 
     /**
      * Every timing mark left, oldest first.
      */
-    val marks: MutableList<String> = mutableListOf()
+    val marks: List<String>
+        get() = marksKept.value
+
+    private val marksKept = MutableStateFlow<List<String>>(emptyList())
 
     override fun mark(name: String) {
-        marks += name
+        marksKept.update { kept -> kept + name }
     }
 }
 

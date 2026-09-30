@@ -11,15 +11,16 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
+import com.materialkolor.builder.HEIGHT
+import com.materialkolor.builder.WAIT_MILLIS
+import com.materialkolor.builder.WIDTH
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.feature.canvas.VisionSimulation
 import com.materialkolor.builder.feature.topbar.LibraryChoice
 import io.kotest.matchers.shouldBe
+import kotlin.test.AfterTest
 import kotlin.test.Test
-
-private const val WIDTH = 1280
-private const val HEIGHT = 800
 
 /**
  * V opens the dock's Vision menu, and a held B shows the canvas in grayscale.
@@ -27,6 +28,11 @@ private const val HEIGHT = 800
 @OptIn(ExperimentalTestApi::class)
 class DockKeysTest {
     private val harness = CommandHarness()
+
+    @AfterTest
+    fun tearDown() {
+        harness.close()
+    }
 
     /**
      * With overlays in the page, as the web draws them, where the menu takes focus into its rows.
@@ -54,12 +60,14 @@ class DockKeysTest {
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             with(harness) { show() }
             keys { pressKey(Key.Three) }
-            waitUntil { harness.workspace.state.value.document.library == Library.Unstyled }
+            waitUntil(
+                timeoutMillis = WAIT_MILLIS,
+            ) { harness.workspace.state.value.document.library == Library.Unstyled }
             waitForIdle()
             val seed = harness.graph.session.document.value.seed
 
             keys { pressKey(Key.Spacebar) }
-            waitUntil { harness.graph.session.document.value.seed != seed }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { harness.graph.session.document.value.seed != seed }
             keys { pressKey(Key.V) }
 
             harness.workspace.state.value.visionMenuOpen shouldBe true
@@ -103,6 +111,6 @@ class DockKeysTest {
             harness.platform.environment.pageHides
                 .tryEmit(Unit)
 
-            waitUntil { !harness.workspace.state.value.grayscaleHeld }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { !harness.workspace.state.value.grayscaleHeld }
         }
 }

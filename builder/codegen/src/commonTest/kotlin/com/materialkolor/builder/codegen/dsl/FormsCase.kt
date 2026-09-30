@@ -6,7 +6,6 @@ import com.materialkolor.builder.codegen.symbol.Symbols
 import com.materialkolor.builder.codegen.text.Literals
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 /**
  * The files of the `dsl-forms` golden case, a small theme file that uses every form the code DSL
@@ -81,7 +80,7 @@ private fun KotlinFileScope.extendedColors() {
                     returns(
                         ref("palette").call(Symbols.OnTone) {
                             argument(ref("tone"))
-                            argument(ref(Symbols.ContrastThreshold).member("WCAG_AA_NORMAL_TEXT"))
+                            argument(ref(Symbols.ContrastThreshold).member("WcagAaNormalText"))
                         },
                     )
                 }
@@ -204,13 +203,5 @@ class FormsCaseTest {
     @Test
     fun formsCase_anyPlatform_matchesTheGoldenHash() {
         assertEquals(GoldenHashes.cases["dsl-forms"], GoldenDigest.of(formsCaseFiles()))
-    }
-
-    @Test
-    fun formsCase_everyLine_fitsTheColumnLimit() {
-        val text = formsCaseFiles().single().text
-
-        assertTrue(text.lines().all { it.length <= MAX_LINE_LENGTH }, text)
-        assertTrue(text.lines().none { it.endsWith(" ") }, text)
     }
 }

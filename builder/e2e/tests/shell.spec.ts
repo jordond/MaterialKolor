@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { site } from './builder';
+import { networkQuietFor } from '../fixtures/timing';
 import { BOOT_TIMEOUT_MS, seedField } from '../fixtures/workspace';
 
 // The static shell around the app. boot.js picks the engine and colors the splash before any app
@@ -208,7 +209,7 @@ for (const [engine, route, binaries] of [
     const requests = collectRequests(page);
     await page.goto(site(route));
     await expect(page.locator('#splash')).toHaveCount(0, { timeout: BOOT_TIMEOUT_MS });
-    await settle(requests);
+    await networkQuietFor(requests);
 
     expect(await page.locator('link[rel="preload"]').count()).toBe(0);
     const assets = await readAssets(page);
@@ -229,7 +230,7 @@ test.describe('error overlay', () => {
     await page.goto(site('/'));
     await expect(page.locator('#splash')).toHaveCount(0, { timeout: 30_000 });
     await page.evaluate(() => {
-      setTimeout(() => {
+      queueMicrotask(() => {
         throw new Error('Thrown by the shell spec');
       });
     });
@@ -489,16 +490,3 @@ function collectRequests(page: Page): string[] {
   return requests;
 }
 
-/** Waits until no new request has gone out for two seconds, or fifteen seconds have passed. */
-async function settle(requests: unknown[]): Promise<void> {
-  const deadline = Date.now() + 15_000;
-  let seen = requests.length;
-  let quietSince = Date.now();
-  while (Date.now() < deadline && Date.now() - quietSince < 2_000) {
-    await new Promise((resolve) => setTimeout(resolve, 250));
-    if (requests.length !== seen) {
-      seen = requests.length;
-      quietSince = Date.now();
-    }
-  }
-}

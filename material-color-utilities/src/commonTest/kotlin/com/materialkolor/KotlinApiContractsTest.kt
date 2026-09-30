@@ -28,7 +28,7 @@ class KotlinApiContractsTest {
         assertFalse(color.isBackground)
         assertEquals(50.0, color.tone(scheme))
         assertEquals(50.0, DynamicColor.getInitialToneFromBackground()(scheme))
-        color.getHct(scheme)
+        assertEquals(scheme.primaryPalette.tone(50), color.getHct(scheme).toInt())
         val same = DynamicColor(name = "custom", palette = palette, tone = color.tone)
         assertNotSame(color, same)
         assertEquals(color, same)

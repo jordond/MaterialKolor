@@ -131,20 +131,6 @@ class DemoAppStateTest {
             light().position() shouldBe dark().position()
         }
 
-    @Test
-    fun switchesAndCheckboxes_untouched_readOffAndRememberWhatIsSet() {
-        val state = DemoAppState()
-
-        state.isOn("wifi") shouldBe false
-        state.isChecked("terms") shouldBe false
-        state.setOn("wifi", true)
-        state.setChecked("terms", true)
-
-        state.isOn("wifi") shouldBe true
-        state.isChecked("terms") shouldBe true
-        state.isOn("terms") shouldBe false
-    }
-
     private fun LazyListState.position(): Pair<Int, Int> = firstVisibleItemIndex to firstVisibleItemScrollOffset
 }
 

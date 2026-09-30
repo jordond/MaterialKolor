@@ -47,9 +47,9 @@ val AppTheme = buildThemeV2 {
             ThemeTokens.successContainer to successPalette.toneColor(90),
             ThemeTokens.onSuccessContainer to successPalette.onTone(90),
             ThemeTokens.warning to warningPalette.toneColor(50),
-            ThemeTokens.onWarning to warningPalette.onTone(50, ContrastThreshold.WCAG_AAA_NORMAL_TEXT),
+            ThemeTokens.onWarning to warningPalette.onTone(50, ContrastThreshold.WcagAaaNormalText),
             ThemeTokens.warningContainer to warningPalette.toneColor(95),
-            ThemeTokens.onWarningContainer to warningPalette.onTone(95, ContrastThreshold.WCAG_AAA_NORMAL_TEXT),
+            ThemeTokens.onWarningContainer to warningPalette.onTone(95, ContrastThreshold.WcagAaaNormalText),
         )
     }
 
@@ -65,9 +65,9 @@ val AppTheme = buildThemeV2 {
                 ThemeTokens.successContainer to successPalette.toneColor(30),
                 ThemeTokens.onSuccessContainer to successPalette.onTone(30),
                 ThemeTokens.warning to warningPalette.toneColor(70),
-                ThemeTokens.onWarning to warningPalette.onTone(70, ContrastThreshold.WCAG_AAA_NORMAL_TEXT),
+                ThemeTokens.onWarning to warningPalette.onTone(70, ContrastThreshold.WcagAaaNormalText),
                 ThemeTokens.warningContainer to warningPalette.toneColor(20),
-                ThemeTokens.onWarningContainer to warningPalette.onTone(20, ContrastThreshold.WCAG_AAA_NORMAL_TEXT),
+                ThemeTokens.onWarningContainer to warningPalette.onTone(20, ContrastThreshold.WcagAaaNormalText),
             )
         }
     }

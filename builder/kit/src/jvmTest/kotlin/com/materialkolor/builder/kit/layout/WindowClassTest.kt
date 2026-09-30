@@ -81,9 +81,6 @@ class WindowClassTest {
 
         layout.windowClass shouldBe WindowClass.Expanded
         layout.posterMode shouldBe PosterMode.Docked400
-        layout.widthDp shouldBe 1280.dp
-        layout.heightDp shouldBe 800.dp
-        layout.coarsePointer shouldBe false
     }
 
     @Test

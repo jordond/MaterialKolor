@@ -16,7 +16,7 @@ import kotlin.test.assertTrue
  * seed. These tests are what keeps that true if the tones are ever edited.
  */
 class FluentContrastTest {
-    private val aa = ContrastThreshold.WCAG_AA_NORMAL_TEXT.threshold
+    private val aa = ContrastThreshold.WcagAaNormalText.threshold
 
     private val seeds = listOf(
         Color(0xFF0078D4),

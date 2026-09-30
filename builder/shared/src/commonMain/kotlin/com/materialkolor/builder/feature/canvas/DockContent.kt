@@ -17,6 +17,7 @@ import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
 import com.materialkolor.builder.domain.persist.DeviceWidth
 import com.materialkolor.builder.domain.persist.PreviewMode
+import com.materialkolor.builder.feature.command.LocalShortcutFocus
 import com.materialkolor.builder.feature.poster.handFocusTo
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
@@ -55,7 +56,9 @@ import org.jetbrains.compose.resources.stringResource
  * order, so Inspect shows as a glyph alone and the mode switch drops the glyphs. Fullscreen leaves
  * through the floating exit instead of the dock. While the keyboard is in use, focus comes back to
  * the Fullscreen button when fullscreen ends, since the exit that held it is gone, and to the Inspect
- * toggle when Inspect ends, since the preview that held it lets go. A pointer leaves the focus alone.
+ * toggle when Inspect ends, since the preview that held it lets go. A pointer leaves the focus alone,
+ * and so does either ending while the page's focus holder has it, as it does after the F or I
+ * shortcut, so the next shortcut still reaches the page.
  */
 @Composable
 internal fun DockContent(
@@ -66,12 +69,13 @@ internal fun DockContent(
     val compact = LocalLayout.current.windowClass == WindowClass.Compact
     val modes = PreviewMode.entries.associateWith { mode -> stringResource(mode.title) }
     val inputModes = LocalInputModeManager.current
+    val shortcutFocus = LocalShortcutFocus.current
     val fullscreenButton = remember { FocusRequester() }
     val wasFullscreen = remember { mutableStateOf(state.fullscreen) }
 
     LaunchedEffect(state.fullscreen) {
         val ended = wasFullscreen.value && !state.fullscreen
-        if (ended) inputModes.handFocusTo(fullscreenButton)
+        if (ended && shortcutFocus?.holderFocused != true) inputModes.handFocusTo(fullscreenButton)
         wasFullscreen.value = state.fullscreen
     }
 
@@ -79,7 +83,7 @@ internal fun DockContent(
     val wasInspecting = remember { mutableStateOf(state.inspect) }
     LaunchedEffect(state.inspect) {
         val ended = wasInspecting.value && !state.inspect
-        if (ended) inputModes.handFocusTo(inspectToggle)
+        if (ended && shortcutFocus?.holderFocused != true) inputModes.handFocusTo(inspectToggle)
         wasInspecting.value = state.inspect
     }
 
@@ -145,7 +149,8 @@ internal fun DockContent(
 /**
  * The floating pill that leaves fullscreen and brings the poster and the top bar back. While
  * the keyboard is in use it takes focus as it arrives, since the Fullscreen button that had it is
- * gone.
+ * gone. It leaves focus alone when the page's focus holder has it, as it does after the F shortcut,
+ * so the next shortcut still reaches the page.
  */
 @Composable
 internal fun FullscreenExit(
@@ -153,8 +158,9 @@ internal fun FullscreenExit(
     modifier: Modifier = Modifier,
 ) {
     val inputModes = LocalInputModeManager.current
+    val shortcutFocus = LocalShortcutFocus.current
     val pill = remember { FocusRequester() }
-    LaunchedEffect(pill) { inputModes.handFocusTo(pill) }
+    LaunchedEffect(pill) { if (shortcutFocus?.holderFocused != true) inputModes.handFocusTo(pill) }
     BuilderButton(
         onClick = { dispatcher.dispatch(WorkspaceAction.ToggleFullscreen) },
         label = stringResource(Res.string.canvas_fullscreen_exit),

@@ -20,7 +20,7 @@ public final class com/materialkolor/MaterialKolors {
 	public final fun error-0d7_KjU ()J
 	public final fun errorContainer-0d7_KjU ()J
 	public final fun errorPaletteKeyColor-0d7_KjU ()J
-	public final fun highestSurface-vNxB06k (Lcom/materialkolor/dynamiccolor/DynamicScheme;)J
+	public final fun highestSurface-0d7_KjU ()J
 	public final fun inverseOnSurface-0d7_KjU ()J
 	public final fun inversePrimary-0d7_KjU ()J
 	public final fun inverseSurface-0d7_KjU ()J
@@ -221,10 +221,10 @@ public final class com/materialkolor/ktx/ContrastKt {
 }
 
 public final class com/materialkolor/ktx/ContrastThreshold : java/lang/Enum {
-	public static final field WCAG_AAA_LARGE_TEXT Lcom/materialkolor/ktx/ContrastThreshold;
-	public static final field WCAG_AAA_NORMAL_TEXT Lcom/materialkolor/ktx/ContrastThreshold;
-	public static final field WCAG_AA_LARGE_TEXT Lcom/materialkolor/ktx/ContrastThreshold;
-	public static final field WCAG_AA_NORMAL_TEXT Lcom/materialkolor/ktx/ContrastThreshold;
+	public static final field WcagAaLargeText Lcom/materialkolor/ktx/ContrastThreshold;
+	public static final field WcagAaNormalText Lcom/materialkolor/ktx/ContrastThreshold;
+	public static final field WcagAaaLargeText Lcom/materialkolor/ktx/ContrastThreshold;
+	public static final field WcagAaaNormalText Lcom/materialkolor/ktx/ContrastThreshold;
 	public final fun compareTo (D)I
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public final fun getThreshold ()D

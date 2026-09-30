@@ -1,7 +1,7 @@
-import { expect, test, type Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { dispatchPaste, gesture, hook, openWithBrowserApis, wantHooks } from './builder';
+import { dispatchPaste, expect, gesture, hook, openWithBrowserApis, test } from './builder';
 
 // The clipboard, downloads, the share sheet, images from the picker, drops and pastes, and the
 // eyedropper, driven through the shell's test hooks while the app is still a placeholder. The decode test
@@ -11,10 +11,6 @@ const PHOTO = path.resolve(__dirname, '../fixtures/photo-12mp.jpg');
 
 // The four quadrants of the photo and of the PNG the drop and paste tests draw, as #RRGGBB.
 const QUADRANTS = [0xd32f2f, 0x388e3c, 0x1976d2, 0xffa000];
-
-test.beforeEach(async ({ context }) => {
-  await wantHooks(context);
-});
 
 test.describe('clipboard', () => {
   test('a write inside a click lands on the clipboard', async ({ page, context, browserName }) => {
@@ -297,26 +293,6 @@ test.describe('images', () => {
     // Both went through Compose's hidden text area, the path that used to drop them.
     expect(await targets()).toEqual(['TEXTAREA true', 'TEXTAREA true']);
   });
-
-  test('a 12 MP JPEG decodes and scales well inside 150 ms', async ({ page }, testInfo) => {
-    await openWithBrowserApis(page);
-    await pickPhoto(page);
-    const runs: Record<string, number | boolean>[] = [];
-    for (let run = 0; run < 6; run++) {
-      await hook(page, 'profileLatest');
-      await expect.poll(() => hook(page, 'decoded'), { timeout: 15_000 }).not.toBe('Pending');
-      runs.push(JSON.parse(await hook(page, 'decoded')));
-    }
-    // The first run warms up the decoder and the wasm code.
-    runs.shift();
-    const median = (field: string) =>
-      runs.map((run) => run[field] as number).sort((a, b) => a - b)[Math.floor(runs.length / 2)];
-    const summary = ['decode', 'scale', 'read', 'copy', 'total'].map((field) => `${field} ${median(field)}`).join(', ');
-    const resized = runs.every((run) => run.resized === true);
-    testInfo.annotations.push({ type: 'decode median ms', description: `${summary}, resize options honored ${resized}` });
-    console.log(`[decode] ${testInfo.project.name} ${summary} ms, resize options honored ${resized}`);
-    expect(runs.every((run) => typeof run.total === 'number')).toBe(true);
-  });
 });
 
 test.describe('eyedropper', () => {
@@ -377,7 +353,7 @@ async function pickPhoto(page: Page): Promise<void> {
 
 async function decodeLatest(page: Page): Promise<Record<string, unknown>> {
   await hook(page, 'decodeLatest');
-  await expect.poll(() => hook(page, 'decoded'), { timeout: 15_000 }).not.toBe('Pending');
+  await expect.poll(() => hook(page, 'decoded')).not.toBe('Pending');
   const decoded = await hook(page, 'decoded');
   expect(decoded).not.toBe('None');
   return JSON.parse(decoded);

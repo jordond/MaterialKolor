@@ -12,6 +12,8 @@ import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.dp
+import com.materialkolor.builder.HEIGHT
+import com.materialkolor.builder.WIDTH
 import com.materialkolor.builder.domain.persist.DeviceWidth
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.domain.persist.PreviewTab
@@ -33,7 +35,7 @@ private const val MEDIUM = 700
 class CanvasAreaTest {
     @Test
     fun tabs_eachPicked_composeOnlyTheVisibleTab() =
-        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val host = CanvasHost()
             val composed = mutableListOf<PreviewTab>()
             setContent { Canvas(host, probe = { tab -> composed += tab }) }
@@ -53,7 +55,7 @@ class CanvasAreaTest {
 
     @Test
     fun tabs_arrowKeys_moveAlongTheCanvasTabs() =
-        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val host = CanvasHost()
             val composed = mutableListOf<PreviewTab>()
             setContent { Canvas(host, probe = { tab -> composed += tab }) }
@@ -78,7 +80,7 @@ class CanvasAreaTest {
 
     @Test
     fun appState_isSharedByTheLightAndDarkCopiesAndOutlivesATabSwitch() =
-        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val host = CanvasHost()
             setContent { Canvas(host) }
             waitForIdle()
@@ -124,7 +126,7 @@ class CanvasAreaTest {
 
     @Test
     fun deviceWidth_onAWideWindow_isOfferedAndPicked() =
-        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val host = CanvasHost()
             setContent { Canvas(host) }
             waitForIdle()
@@ -150,7 +152,7 @@ class CanvasAreaTest {
 
     @Test
     fun vision_picked_isDispatchedAndLabelledOnTheDock() =
-        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val host = CanvasHost()
             setContent { Canvas(host) }
             waitForIdle()
@@ -168,7 +170,7 @@ class CanvasAreaTest {
 
     @Test
     fun inspect_toggled_dispatchesSetInspect() =
-        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val host = CanvasHost()
             setContent { Canvas(host) }
             waitForIdle()

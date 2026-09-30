@@ -2,6 +2,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { createServer } from 'node:net';
 import path from 'node:path';
+import { pauseBeforeServerCheck } from './timing';
 
 // The Worker in front of the site, run by `wrangler dev` for the specs that need what only it
 // serves, the per-theme link meta of `/t/<code>`. Everything else runs on the global setup's server.
@@ -44,7 +45,7 @@ export async function startWorker(): Promise<Worker> {
       await stop(child);
       throw new Error(`wrangler dev did not come up:\n${output}`);
     }
-    await new Promise((resolve) => setTimeout(resolve, 250));
+    await pauseBeforeServerCheck();
   }
   return { url, stop: () => stop(child) };
 }

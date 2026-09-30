@@ -365,9 +365,9 @@ private fun TonalPalette.accentColors(
  */
 private fun OnColorThreshold.referenceThreshold(): ContrastThreshold =
     when (this) {
-        OnColorThreshold.AaNormal -> ContrastThreshold.WCAG_AA_NORMAL_TEXT
-        OnColorThreshold.AaLarge -> ContrastThreshold.WCAG_AA_LARGE_TEXT
-        OnColorThreshold.Aaa -> ContrastThreshold.WCAG_AAA_NORMAL_TEXT
+        OnColorThreshold.AaNormal -> ContrastThreshold.WcagAaNormalText
+        OnColorThreshold.AaLarge -> ContrastThreshold.WcagAaLargeText
+        OnColorThreshold.Aaa -> ContrastThreshold.WcagAaaNormalText
     }
 
 private fun DynamicScheme.ramp(ramp: TonalRamp): TonalPalette =

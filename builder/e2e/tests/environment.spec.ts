@@ -1,12 +1,8 @@
-import { expect, test, type Page } from '@playwright/test';
-import { hook, openBuilder, wantHooks } from './builder';
+import type { Page } from '@playwright/test';
+import { expect, hook, openBuilder, test } from './builder';
 
 // The page around the builder, driven through the shell's test hooks. Media queries, the tab, the
 // splash and the signals that the page is going away.
-
-test.beforeEach(async ({ context }) => {
-  await wantHooks(context);
-});
 
 test.describe('environment', () => {
   test('media queries follow the system live', async ({ page }) => {
@@ -51,13 +47,23 @@ test.describe('environment', () => {
       splash.id = 'splash';
       document.body.appendChild(splash);
     });
-    // Read the opacity in the same turn as the hook. The fade takes 200 ms, and a second round trip
-    // can take longer than that on a busy machine, by which time the splash is gone.
-    const opacity = await page.evaluate(() => {
+    // Read the fade in the same turn as the hook. The fade takes 200 ms, and a second round trip can
+    // take longer than that on a busy machine, by which time the splash is gone. A press while it
+    // fades reaches the canvas, and the canvas takes keys from the start of the fade, since the page
+    // is ready for input by then.
+    const fading = await page.evaluate(() => {
+      (document.activeElement as HTMLElement | null)?.blur();
       window.__mk!.hideSplash('');
-      return document.getElementById('splash')?.style.opacity;
+      const splash = document.getElementById('splash');
+      const pressed = document.elementFromPoint(innerWidth / 2, innerHeight / 2);
+      const host = document.activeElement;
+      return {
+        opacity: splash?.style.opacity,
+        pressesSplash: pressed === splash,
+        focused: (host?.shadowRoot?.activeElement ?? host)?.tagName,
+      };
     });
-    expect(opacity).toBe('0');
+    expect(fading).toEqual({ opacity: '0', pressesSplash: false, focused: 'CANVAS' });
     await expect.poll(() => page.evaluate(() => document.getElementById('splash') === null)).toBe(true);
     expect(
       await page.evaluate(() => {

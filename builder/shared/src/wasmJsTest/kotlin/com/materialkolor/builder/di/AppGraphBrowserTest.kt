@@ -31,11 +31,15 @@ import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import io.kotest.matchers.collections.shouldHaveAtLeastSize
 import io.kotest.matchers.types.shouldBeSameInstanceAs
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlin.test.Test
+import kotlin.time.Clock
 
 /**
  * The app graph keeps one view model across recompositions in the browser too. Runs in headless
@@ -47,25 +51,30 @@ class AppGraphBrowserTest {
     @Test
     fun metroViewModel_acrossRecompositionsInTheBrowser_keepsOneModel() =
         runComposeUiTest {
-            val graph = createGraphFactory<AppGraph.Factory>().create(TestPlatform)
-            val tick = mutableIntStateOf(0)
-            val seen = mutableListOf<AppModel>()
-            setContent {
-                CompositionLocalProvider(LocalMetroViewModelFactory provides graph.metroViewModelFactory) {
-                    val model = metroViewModel<AppModel>()
-                    seen += model
-                    BasicText("tick ${tick.intValue}")
+            val scope = CoroutineScope(Job())
+            try {
+                val graph = createGraphFactory<AppGraph.Factory>().create(TestPlatform, scope, Clock.System)
+                val tick = mutableIntStateOf(0)
+                val seen = mutableListOf<AppModel>()
+                setContent {
+                    CompositionLocalProvider(LocalMetroViewModelFactory provides graph.metroViewModelFactory) {
+                        val model = metroViewModel<AppModel>()
+                        seen += model
+                        BasicText("tick ${tick.intValue}")
+                    }
                 }
-            }
 
-            repeat(2) {
-                tick.intValue++
-                awaitIdle()
-            }
+                repeat(2) {
+                    tick.intValue++
+                    awaitIdle()
+                }
 
-            onNodeWithText("tick 2").assertExists()
-            seen shouldHaveAtLeastSize 3
-            seen.forEach { model -> model shouldBeSameInstanceAs seen.first() }
+                onNodeWithText("tick 2").assertExists()
+                seen shouldHaveAtLeastSize 3
+                seen.forEach { model -> model shouldBeSameInstanceAs seen.first() }
+            } finally {
+                scope.cancel()
+            }
         }
 }
 

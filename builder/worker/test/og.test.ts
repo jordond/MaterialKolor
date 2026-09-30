@@ -8,6 +8,19 @@ import { BAD_CODES, expectSiteHeaders, vector, vectors } from './support';
 const ORIGIN = 'https://materialkolor.test';
 const IMMUTABLE = 'public, max-age=31536000, immutable';
 const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+const CARD_LABELS = [
+  'default',
+  'style Monochrome',
+  'three accents',
+  'non ascii project name',
+  'longest project name',
+  'every section at once',
+  'material3 expressive',
+  'library Unstyled',
+  'library Fluent',
+  'library Custom',
+  'library Inklet',
+];
 
 describe('/og/<code>.png', () => {
   it('draws a 1200 by 630 PNG with the site headers, cached for good', async () => {
@@ -18,8 +31,17 @@ describe('/og/<code>.png', () => {
     expectCard(new Uint8Array(await response.arrayBuffer()));
   });
 
-  it.each(vectors.map((vector) => [vector.label, vector] as const))('draws the card for %s', async (_, vector) => {
-    expectCard(await renderCard(decodeShareCode(vector.code)!));
+  it('draws a different card for each distinct theme and each library', async () => {
+    const cards = await Promise.all(CARD_LABELS.map((label) => renderCard(decodeShareCode(vector(label).code)!)));
+    cards.forEach(expectCard);
+    const digests = await Promise.all(cards.map(digestOf));
+    expect(new Set(digests).size).toBe(CARD_LABELS.length);
+  });
+
+  it('draws the default card for a code that pins every role, since the card shows no pins', async () => {
+    const pinned = await renderCard(decodeShareCode(vector('every role pinned').code)!);
+    expectCard(pinned);
+    expect(pinned).toEqual(await renderCard(decodeShareCode(vector('default').code)!));
   });
 
   it('draws the same bytes for the same code', async () => {
@@ -57,4 +79,10 @@ function expectCard(png: Uint8Array): void {
   expect([...png.subarray(0, 8)]).toEqual(PNG_SIGNATURE);
   const header = new DataView(png.buffer, png.byteOffset + 16, 8);
   expect([header.getUint32(0), header.getUint32(4)]).toEqual([1200, 630]);
+  expect(new TextDecoder().decode(png.subarray(png.length - 8, png.length - 4))).toBe('IEND');
+}
+
+async function digestOf(png: Uint8Array): Promise<string> {
+  const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', png));
+  return [...digest].map((byte) => byte.toString(16).padStart(2, '0')).join('');
 }

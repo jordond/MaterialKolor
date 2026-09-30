@@ -42,12 +42,30 @@ import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.persist.DeviceWidth
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
+import com.materialkolor.builder.preview.DeviceFrames
+import com.materialkolor.builder.preview.GalleryInteractive
+import com.materialkolor.builder.preview.GalleryWhole
+import com.materialkolor.builder.preview.InspectingPane
 import com.materialkolor.builder.preview.ShellExpressive
 import com.materialkolor.builder.preview.canvas.ComponentsTab
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.GalleryGroup
 import com.materialkolor.builder.preview.canvas.PreviewPane
 import com.materialkolor.builder.preview.canvas.choice
+import com.materialkolor.builder.preview.checkCardsFillEveryGroup
+import com.materialkolor.builder.preview.checkCardsShowEnabledAndDisabled
+import com.materialkolor.builder.preview.checkGalleryControlsDeclareRoles
+import com.materialkolor.builder.preview.checkInspectCardSwallowsPress
+import com.materialkolor.builder.preview.checkInspectPins
+import com.materialkolor.builder.preview.checkNameFlips
+import com.materialkolor.builder.preview.checkNamesAreTheLabelsAlone
+import com.materialkolor.builder.preview.checkWebNames
+import com.materialkolor.builder.preview.galleryCardDeclaresRoles
+import com.materialkolor.builder.preview.galleryDeclaresRoles
+import com.materialkolor.builder.preview.galleryDescendants
+import com.materialkolor.builder.preview.galleryFrame
+import com.materialkolor.builder.preview.galleryInteractive
+import com.materialkolor.builder.preview.galleryNamed
 import com.materialkolor.builder.preview.inspect.INSPECT_CARD_TAG
 import com.materialkolor.builder.preview.inspect.Inspecting
 import com.materialkolor.builder.preview.inspect.OnCard
@@ -72,14 +90,11 @@ private val GalleryNoDisabled: Set<String> = setOf("Tabs", "Info bar", "Progress
 @OptIn(ExperimentalTestApi::class)
 class FluentGalleryTest {
     @Test
-    fun cards_everyGroup_holdUniquelyNamedCards() {
-        FluentCards.map { card -> card.title }.distinct().size shouldBe FluentCards.size
-        GalleryGroup.entries.filter { group -> FluentCards.none { card -> card.group == group } }.shouldBeEmpty()
-    }
+    fun cards_everyGroup_holdUniquelyNamedCards() = checkCardsFillEveryGroup(FluentCards)
 
     @Test
     fun controls_everyDeviceWidthBothModes_declareTheirOwnRoles() {
-        for ((width, frame) in FluentFrames) {
+        for ((width, frame) in DeviceFrames) {
             for (spec in listOf(FluentLightSpec, FluentDarkSpec)) {
                 withClue("$width ${spec.label}") {
                     runComposeUiTest {
@@ -88,24 +103,10 @@ class FluentGalleryTest {
                         val whole = Modifier
                             .wrapContentSize(Alignment.TopStart, unbounded = true)
                             .requiredSize(frame.width.dp, 12000.dp)
-                        setContent { GalleryHarness(spec, DemoAppState(), whole, composed) }
+                        setContent { FluentGalleryHarness(spec, DemoAppState(), whole, composed) }
                         waitForIdle()
-                        composed shouldBe FluentCards.map { card -> card.title }.toSet()
 
-                        val frames = FluentCards.map { card -> galleryFrame(card.title).id }.toSet()
-                        // Unmerged, since a merged node also carries the roles its children declared.
-                        val controls = onAllNodes(GalleryInteractive, useUnmergedTree = true)
-                            .fetchSemanticsNodes()
-                            .filterNot { node -> UnderAnOverlay.matches(node) }
-                        controls.shouldNotBeEmpty()
-                        controls
-                            .filterNot { node -> node.galleryDeclaresRoles(frames) }
-                            .map { node -> node.config.toString() }
-                            .shouldBeEmpty()
-                        FluentCards
-                            .filterNot { card -> galleryCardDeclaresRoles(card.title) }
-                            .map { card -> card.title }
-                            .shouldBeEmpty()
+                        checkGalleryControlsDeclareRoles(FluentCards, composed, ignored = UnderAnOverlay)
                     }
                 }
             }
@@ -116,7 +117,7 @@ class FluentGalleryTest {
     fun accentControls_everyOneDeclared_resolveToARowOfTheAudit() =
         runComposeUiTest {
             val state = DemoAppState().apply { setOn(FluentGalleryKeys.Wifi, true) }
-            setContent { GalleryHarness(FluentLightSpec, state, GalleryWhole) }
+            setContent { FluentGalleryHarness(FluentLightSpec, state, GalleryWhole) }
             waitForIdle()
 
             val declared = onAllNodes(SemanticsMatcher.keyIsDefined(PreviewRoles), useUnmergedTree = true)
@@ -153,32 +154,17 @@ class FluentGalleryTest {
     @Test
     fun cards_everyControlWithADisabledLook_showItEnabledAndDisabled() =
         runComposeUiTest {
-            setContent { GalleryHarness(FluentLightSpec, DemoAppState(), GalleryWhole) }
+            setContent { FluentGalleryHarness(FluentLightSpec, DemoAppState(), GalleryWhole) }
             waitForIdle()
 
-            for (card in FluentCards) {
-                withClue(card.title) {
-                    val nodes = galleryFrame(card.title).galleryDescendants().filterNot { node ->
-                        UnderAnOverlay.matches(node)
-                    }
-                    val disabled = nodes.count { node -> SemanticsProperties.Disabled in node.config }
-                    val enabled = nodes.count { node ->
-                        node.galleryInteractive() && SemanticsProperties.Disabled !in node.config
-                    }
-                    if (card.title in GalleryNoDisabled) {
-                        disabled shouldBe 0
-                    } else {
-                        (enabled > 0 && disabled > 0) shouldBe true
-                    }
-                }
-            }
+            checkCardsShowEnabledAndDisabled(FluentCards, GalleryNoDisabled, ignored = UnderAnOverlay)
         }
 
     @Test
     fun controls_clickedOnce_changeTheSharedState() =
         runComposeUiTest {
             val state = DemoAppState()
-            setContent { GalleryHarness(FluentLightSpec, state, GalleryWhole) }
+            setContent { FluentGalleryHarness(FluentLightSpec, state, GalleryWhole) }
             waitForIdle()
 
             for (name in listOf("Bold", "Email me updates", "Express", "Wi-Fi", "Week", "Shared", "Photos", "Sent")) {
@@ -222,7 +208,7 @@ class FluentGalleryTest {
     fun slider_setProgressAndArrowKeys_moveTheSharedStop() =
         runComposeUiTest {
             val state = DemoAppState()
-            setContent { GalleryHarness(FluentLightSpec, state, GalleryWhole) }
+            setContent { FluentGalleryHarness(FluentLightSpec, state, GalleryWhole) }
             waitForIdle()
             val volume = onNode(galleryNamed("Volume") and isEnabled(), useUnmergedTree = true)
             state.choice(FluentGalleryKeys.Volume, 11, default = 6) shouldBe 6
@@ -246,11 +232,11 @@ class FluentGalleryTest {
 
     @Test
     fun screens_everyDeviceWidthBothModes_layOutTheirColumnsAndRender() {
-        for ((width, frame) in FluentFrames) {
+        for ((width, frame) in DeviceFrames) {
             withClue(width) {
                 runDesktopComposeUiTest(frame.width, frame.height) {
                     var spec by mutableStateOf(FluentLightSpec)
-                    setContent { GalleryHarness(spec, DemoAppState(), Modifier.fillMaxSize()) }
+                    setContent { FluentGalleryHarness(spec, DemoAppState(), Modifier.fillMaxSize()) }
 
                     for (mode in listOf(FluentLightSpec, FluentDarkSpec)) {
                         spec = mode
@@ -274,43 +260,27 @@ class FluentGalleryTest {
     fun names_onTheWeb_foldTheStateOfEveryKindOfControl() =
         runComposeUiTest {
             val state = DemoAppState()
-            setContent { GalleryHarness(FluentLightSpec, state, GalleryWhole, webFolds = true) }
+            setContent { FluentGalleryHarness(FluentLightSpec, state, GalleryWhole, webFolds = true) }
             waitForIdle()
 
-            for (name in WebNames) withClue(name) { onNode(galleryNamed(name), useUnmergedTree = true).assertExists() }
+            checkWebNames(WebNames)
 
-            onNode(galleryNamed("Shipping details, collapsed"), useUnmergedTree = true)
-                .performSemanticsAction(SemanticsActions.OnClick)
-            waitForIdle()
+            checkNameFlips("Shipping details, collapsed", "Shipping details, expanded")
             state.isOn(FluentGalleryKeys.Details) shouldBe true
-            onNode(galleryNamed("Shipping details, expanded"), useUnmergedTree = true).assertExists()
             onNodeWithText("12 Harbour Street").assertExists()
 
-            onNode(
-                galleryNamed("Wi-Fi, switch, off"),
-                useUnmergedTree = true,
-            ).performSemanticsAction(SemanticsActions.OnClick)
-            waitForIdle()
-            onNode(galleryNamed("Wi-Fi, switch, on"), useUnmergedTree = true).assertExists()
+            checkNameFlips("Wi-Fi, switch, off", "Wi-Fi, switch, on")
         }
 
     @Test
     fun names_offTheWeb_areTheLabelsAlone() =
         runComposeUiTest {
-            setContent { GalleryHarness(FluentLightSpec, DemoAppState(), GalleryWhole) }
+            setContent { FluentGalleryHarness(FluentLightSpec, DemoAppState(), GalleryWhole) }
             waitForIdle()
 
-            val labels =
-                listOf("Bold", "Email me updates", "Standard", "Wi-Fi", "Day", "Shipping details", "Recent", "Inbox")
-            for (name in labels) {
-                withClue(name) {
-                    onAllNodes(galleryNamed(name), useUnmergedTree = true).fetchSemanticsNodes().shouldNotBeEmpty()
-                }
-            }
-            onAllNodes(hasContentDescription(", ", substring = true), useUnmergedTree = true)
-                .fetchSemanticsNodes()
-                .map { node -> node.config.getOrNull(SemanticsProperties.ContentDescription) }
-                .shouldBeEmpty()
+            checkNamesAreTheLabelsAlone(
+                listOf("Bold", "Email me updates", "Standard", "Wi-Fi", "Day", "Shipping details", "Recent", "Inbox"),
+            )
         }
 
     @Test
@@ -318,40 +288,20 @@ class FluentGalleryTest {
         runComposeUiTest {
             val state = DemoAppState().apply { setOn(FluentGalleryKeys.Wifi, true) }
             setContent {
-                CompositionLocalProvider(LocalMotionFrozen provides true) {
-                    Inspecting(
-                        shown = PreviewMode.Light,
-                        split = remember { SplitState() },
-                        expressive = ShellExpressive,
-                    ) {
-                        PreviewPane(FluentLightSpec, Modifier.fillMaxSize()) { ComponentsTab(FluentLightSpec, state) }
-                    }
+                InspectingPane {
+                    PreviewPane(FluentLightSpec, Modifier.fillMaxSize()) { ComponentsTab(FluentLightSpec, state) }
                 }
             }
             waitForIdle()
             onAllNodes(hasScrollToNodeAction()).onFirst().performScrollToNode(hasText("Toggle switch"))
             waitForIdle()
-            val before = state.gallerySnapshot()
 
-            onNode(galleryNamed("Wi-Fi") and isEnabled(), useUnmergedTree = true).performClick()
-            waitForIdle()
-            onNodeWithTag(INSPECT_CARD_TAG).assertExists()
-            onNode(OnCard and hasText("onAccentPrimary", substring = true)).assertExists()
-            onNode(OnCard and hasText("primary", substring = true)).assertExists()
-            state.gallerySnapshot() shouldBe before
-
-            // Press the card where a control of the gallery lies under it.
-            val card = onNodeWithTag(INSPECT_CARD_TAG).fetchSemanticsNode().boundsInRoot
-            val under = onAllNodes(hasClickAction() and SemanticsMatcher.keyIsDefined(PreviewRoles))
-                .fetchSemanticsNodes()
-                .map { node -> node.boundsInRoot }
-                .filter { bounds -> bounds.overlaps(card) }
-            under.shouldNotBeEmpty()
-            val press = card.intersect(under.first()).center
-            onRoot().performTouchInput { click(press) }
-            waitForIdle()
-            state.gallerySnapshot() shouldBe before
-            onNodeWithTag(INSPECT_CARD_TAG).assertExists()
+            checkInspectPins(
+                target = onNode(galleryNamed("Wi-Fi") and isEnabled(), useUnmergedTree = true),
+                tokens = listOf(hasText("onAccentPrimary", substring = true), hasText("primary", substring = true)),
+                snapshot = { state.fluentGallerySnapshot() },
+            )
+            checkInspectCardSwallowsPress { state.fluentGallerySnapshot() }
         }
 }
 

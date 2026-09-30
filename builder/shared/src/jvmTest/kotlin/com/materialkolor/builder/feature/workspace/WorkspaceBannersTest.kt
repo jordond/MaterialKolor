@@ -22,12 +22,10 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModelStore
-import androidx.lifecycle.ViewModelStoreOwner
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import com.materialkolor.builder.AppHarness
 import com.materialkolor.builder.BuilderRoot
+import com.materialkolor.builder.WAIT_MILLIS
 import com.materialkolor.builder.core.session.ProjectRef
-import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.domain.link.RoutePath
 import com.materialkolor.builder.domain.link.ShareCodec
 import com.materialkolor.builder.domain.model.ThemeDocument
@@ -42,10 +40,9 @@ import com.materialkolor.builder.kit.a11y.LocalAnnouncer
 import com.materialkolor.builder.kit.control.BuilderButton
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
-import dev.zacsweers.metro.createGraphFactory
-import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
+import kotlin.test.AfterTest
 import kotlin.test.Test
 
 private const val CONFLICT = "This project changed in another tab"
@@ -146,6 +143,13 @@ private val NO_RELOAD_CASES = listOf(
 
 @OptIn(ExperimentalTestApi::class)
 class WorkspaceBannersTest {
+    private val app = AppHarness()
+
+    @AfterTest
+    fun tearDown() {
+        app.close()
+    }
+
     @Test
     fun cases_coverEveryBanner() {
         CASES.map { case -> case.banner } shouldBe WorkspaceBanner.entries
@@ -311,7 +315,9 @@ class WorkspaceBannersTest {
     fun root_unknownPath_saysSoOnceAndDismissPutsItAway() =
         runComposeUiTest {
             showRoot(FakePlatform(router = FakeRouter(RoutePath.parse("/nope", query = ""))))
-            waitUntil { onAllNodes(hasText(UNKNOWN_PATH)).fetchSemanticsNodes().isNotEmpty() }
+            waitUntil(
+                timeoutMillis = WAIT_MILLIS,
+            ) { onAllNodes(hasText(UNKNOWN_PATH)).fetchSemanticsNodes().isNotEmpty() }
             onAllNodes(hasText(UNKNOWN_PATH)).assertCountEquals(1)
 
             onNodeWithText("Dismiss").performClick()
@@ -325,7 +331,9 @@ class WorkspaceBannersTest {
         runComposeUiTest {
             val code = ShareCodec.encode(ThemeDocument.Default.copy(themeName = "Harbour"))
             showRoot(FakePlatform(router = FakeRouter(RoutePath.parse("/t/$code", query = ""))))
-            waitUntil { onAllNodes(hasText(UNSAVED_THEME)).fetchSemanticsNodes().isNotEmpty() }
+            waitUntil(
+                timeoutMillis = WAIT_MILLIS,
+            ) { onAllNodes(hasText(UNSAVED_THEME)).fetchSemanticsNodes().isNotEmpty() }
 
             onAllNodes(hasText(UNSAVED_THEME)).assertCountEquals(1)
         }
@@ -336,7 +344,9 @@ class WorkspaceBannersTest {
             val platform = FakePlatform()
             platform.environment.storageAvailable = false
             showRoot(platform)
-            waitUntil { onAllNodes(hasText(STORAGE_UNAVAILABLE)).fetchSemanticsNodes().isNotEmpty() }
+            waitUntil(
+                timeoutMillis = WAIT_MILLIS,
+            ) { onAllNodes(hasText(STORAGE_UNAVAILABLE)).fetchSemanticsNodes().isNotEmpty() }
 
             onNodeWithContentDescription("Close").performClick()
             waitForIdle()
@@ -393,21 +403,7 @@ class WorkspaceBannersTest {
     }
 
     private fun ComposeUiTest.showRoot(platform: FakePlatform) {
-        val graph = createGraphFactory<AppGraph.Factory>().create(platform)
-        val owner = TestOwner()
-        setContent {
-            CompositionLocalProvider(
-                LocalViewModelStoreOwner provides owner,
-                LocalMetroViewModelFactory provides graph.metroViewModelFactory,
-            ) {
-                BuilderRoot(graph)
-            }
-        }
-        waitUntil { platform.environment.splashHidden }
-    }
-
-    private class TestOwner : ViewModelStoreOwner {
-        override val viewModelStore: ViewModelStore = ViewModelStore()
+        with(app) { bootRoot(platform = platform) }
     }
 }
 

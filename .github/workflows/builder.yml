@@ -169,9 +169,18 @@ jobs:
           # boot.spec.ts boots a theme link from wrangler dev, the one server that writes its meta.
           npm --prefix ../worker ci
 
+      - name: No sleeps in the specs
+        working-directory: builder/e2e
+        run: npm run lint
+
       - name: Browser tests
         working-directory: builder/e2e
-        run: npm test -- --project chromium --shard ${{ matrix.shard }}/4
+        run: npm test -- --shard ${{ matrix.shard }}/4
+
+      - name: List flaky tests
+        if: always()
+        working-directory: builder/e2e
+        run: node flaky-summary.mjs
 
       - name: Upload the Playwright report
         if: failure()

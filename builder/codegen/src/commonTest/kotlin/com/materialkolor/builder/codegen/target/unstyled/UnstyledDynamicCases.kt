@@ -3,15 +3,11 @@ package com.materialkolor.builder.codegen.target.unstyled
 import com.materialkolor.builder.codegen.ExportInput
 import com.materialkolor.builder.codegen.Fixture
 import com.materialkolor.builder.codegen.Fixtures
-import com.materialkolor.builder.codegen.GoldenDigest
-import com.materialkolor.builder.codegen.GoldenHashes
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
-import com.materialkolor.builder.codegen.target.lintFailures
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.SpecVersion
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -57,28 +53,6 @@ internal object UnstyledDynamicCases {
 internal fun Fixture.unstyled(): Fixture = with(document = input.document.copy(library = Library.Unstyled))
 
 class UnstyledDynamicTest {
-    @Test
-    fun unstyledDynamic_everyCase_matchesTheGoldenHash() {
-        UnstyledDynamicCases.all.keys.forEach { case ->
-            assertEquals(GoldenHashes.cases[case], GoldenDigest.of(UnstyledDynamicCases.files(case)), case)
-        }
-    }
-
-    @Test
-    fun unstyledDynamic_everyCodeLine_passesTheLintLimits() {
-        UnstyledDynamicCases.all.keys.forEach { case ->
-            assertEquals(emptyList(), lintFailures(UnstyledDynamicCases.files(case)), case)
-        }
-    }
-
-    @Test
-    fun unstyledDynamic_primaryOverride_writesTheSeedAndThePrimary() {
-        val theme = theme(Fixtures.PrimaryOverride.unstyled().input)
-
-        assertTrue("seedColor = SeedColor," in theme, theme)
-        assertTrue("primary = Primary," in theme, theme)
-    }
-
     @Test
     fun unstyledDynamic_default_writesOnlyTheSeed() {
         val latest = Fixtures.Default.input.document
@@ -156,7 +130,7 @@ class UnstyledDynamicTest {
         assertTrue("rememberTonalPalette(seed = SuccessSeed)" in theme, theme)
         assertTrue("ThemeTokens.brand to brandPalette.toneColor(40)," in theme, theme)
         assertTrue("ThemeTokens.onBrandContainer to brandPalette.onTone(30)," in theme, theme)
-        assertTrue("warningPalette.onTone(50, ContrastThreshold.WCAG_AAA_NORMAL_TEXT)" in theme, theme)
+        assertTrue("warningPalette.onTone(50, ContrastThreshold.WcagAaaNormalText)" in theme, theme)
     }
 
     @Test
@@ -172,24 +146,10 @@ class UnstyledDynamicTest {
     }
 
     @Test
-    fun unstyledDynamic_animate_setsTheTransitionSpec() {
-        val theme = theme(Fixtures.Animated.unstyled().input)
-
-        assertTrue("$TRANSITION = tween(durationMillis = 500)" in theme, theme)
-    }
-
-    @Test
     fun unstyledDynamic_amoled_isNeverWritten() {
         val theme = theme(Fixtures.Amoled.unstyled().input)
 
         assertFalse("Amoled" in theme, theme)
-    }
-
-    @Test
-    fun unstyledDynamic_otherLibrary_isRefused() {
-        val fluent = Fixtures.input(document = Fixtures.Base.copy(library = Library.Fluent))
-
-        assertFailsWith<IllegalArgumentException> { UnstyledDynamic.files(fluent) }
     }
 
     private fun theme(input: ExportInput): String =

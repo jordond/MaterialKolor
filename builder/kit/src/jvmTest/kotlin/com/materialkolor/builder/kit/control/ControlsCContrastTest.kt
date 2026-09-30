@@ -22,6 +22,8 @@ import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.unit.dp
@@ -32,9 +34,10 @@ import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.skin.headless.OverlayStyle
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
+import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldNotBeEmpty
 import kotlin.test.Test
-import kotlin.test.assertNotNull
 
 private const val TooltipAnchorTag = "tooltip-anchor"
 
@@ -52,40 +55,46 @@ private enum class Overlay {
 @OptIn(ExperimentalTestApi::class)
 class ControlsCContrastTest {
     @Test
-    fun overlays_everySkinBothModes_renderReadably() = forEachSkin { _, skin -> checkOverlays(skin) }
+    fun overlayTokens_everySkinBothModes_meetTheirContrastMinimums() {
+        readInEverySkin { overlayStyle(LocalSkin.current.library).inkPairs(LocalBuilderTokens.current) }
+            .shortfalls()
+            .shouldBeEmpty()
+    }
+
+    @Test
+    fun overlays_everySkin_openEachInTurnOverThePage() = forEachSkin { _, skin -> openOverlays(skin) }
 }
 
+/**
+ * What each overlay shows once it is open.
+ */
+private val OverlayContent: Map<Overlay, String> = mapOf(
+    Overlay.Menu to "Duplicate",
+    Overlay.Dialog to "This removes the project from this browser.",
+    Overlay.SidePanel to "Sunset",
+    Overlay.Sheet to "Kotlin",
+)
+
+/**
+ * Opens each overlay in turn over the page and checks it shows its content, then closes them all
+ * and focuses the tooltip's anchor.
+ */
 @OptIn(ExperimentalTestApi::class)
-private fun ComposeUiTest.checkOverlays(skin: Skin) {
-    val unreadable = mutableListOf<String>()
-    var isDark by mutableStateOf(false)
+private fun ComposeUiTest.openOverlays(skin: Skin) {
     var overlay by mutableStateOf(Overlay.Menu)
-    var seen: Pair<OverlayStyle, BuilderTokens>? = null
     val toasts = BuilderToastHostState()
     toasts.show("Theme saved", duration = ToastDuration.Indefinite)
     toasts.show("Pin removed", actionLabel = "Undo", duration = ToastDuration.Indefinite) {}
-    setContent {
-        ControlsHarness(skin, isDark) {
-            seen = overlayStyle(LocalSkin.current.library) to LocalBuilderTokens.current
-            OverlayScene(overlay, toasts)
-        }
-    }
+    setContent { ControlsHarness(skin) { OverlayScene(overlay, toasts) } }
 
-    for (dark in listOf(false, true)) {
-        isDark = dark
-        val mode = if (dark) "dark" else "light"
-        for (step in Overlay.entries) {
-            overlay = step
-            waitForIdle()
-            if (step == Overlay.Page) {
-                onNodeWithTag(TooltipAnchorTag, useUnmergedTree = true).requestFocus()
-                waitForIdle()
-            }
-        }
-        val (style, tokens) = assertNotNull(seen)
-        unreadable += style.inkPairs(tokens).shortfalls(mode)
+    for (step in Overlay.entries) {
+        overlay = step
+        waitForIdle()
+        val content = OverlayContent[step] ?: continue
+        withClue(step) { onAllNodes(hasText(content), useUnmergedTree = true).fetchSemanticsNodes().shouldNotBeEmpty() }
     }
-    unreadable.shouldBeEmpty()
+    onNodeWithTag(TooltipAnchorTag, useUnmergedTree = true).requestFocus()
+    onNodeWithTag(TooltipAnchorTag, useUnmergedTree = true).assertIsFocused()
 }
 
 /**

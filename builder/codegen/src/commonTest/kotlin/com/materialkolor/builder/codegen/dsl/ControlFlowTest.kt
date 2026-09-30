@@ -262,11 +262,11 @@ class ControlFlowTest {
     fun memberCall_onAReceiver_writesTheCallAfterTheDot() {
         val onTone = ref("palette").call(Symbols.OnTone) {
             argument(Literals.int(40))
-            argument(ref(Symbols.ContrastThreshold).member("WCAG_AA_NORMAL_TEXT"))
+            argument(ref(Symbols.ContrastThreshold).member("WcagAaNormalText"))
         }
 
         assertEquals("val x = MotionScheme.expressive()", written(ref(Symbols.MotionScheme).call("expressive")))
-        assertEquals("val x = palette.onTone(40, ContrastThreshold.WCAG_AA_NORMAL_TEXT)", written(onTone))
+        assertEquals("val x = palette.onTone(40, ContrastThreshold.WcagAaNormalText)", written(onTone))
         assertEquals(
             "val x = seed.harmonize(seedColor)",
             written(ref("seed").call(Symbols.Harmonize) { argument(ref("seedColor")) }),

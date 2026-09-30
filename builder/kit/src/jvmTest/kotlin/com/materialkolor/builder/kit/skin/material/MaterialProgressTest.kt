@@ -29,7 +29,7 @@ import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.skin.SkinLibrary
 import io.kotest.assertions.withClue
-import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.floats.shouldBeGreaterThan
 import io.kotest.matchers.floats.shouldBeLessThan
 import io.kotest.matchers.ints.shouldBeGreaterThan
@@ -77,7 +77,7 @@ class MaterialProgressTest {
             }
             // A semantics block that read the moving phase would be rebuilt into a new configuration.
             withClue("semantics configurations over five frames") {
-                configs.distinctBy { config -> System.identityHashCode(config) } shouldHaveSize 1
+                configs.filterNot { config -> config === configs.first() }.shouldBeEmpty()
             }
             configs.first()[SemanticsProperties.ProgressBarRangeInfo] shouldBe ProgressBarRangeInfo.Indeterminate
         }

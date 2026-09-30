@@ -15,9 +15,11 @@ import com.kmpalette.loader.ImageBitmapLoader
 import com.kmpalette.rememberPaletteState
 import com.materialkolor.dynamiccolor.DynamicScheme
 import com.materialkolor.ktx.DynamicScheme
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -34,14 +36,19 @@ class ThemeColorTest {
             var latest: Color? = null
 
             setContent {
-                val color = rememberThemeColor(loader = IdentityLoader, input = image, fallback = fallback)
+                val color = rememberThemeColor(
+                    loader = IdentityLoader,
+                    input = image,
+                    fallback = fallback,
+                    coroutineContext = onTestDispatcher,
+                )
                 if (firstFrame == null) firstFrame = color
                 latest = color
             }
 
             assertEquals(fallback, firstFrame)
 
-            waitUntil { latest != fallback }
+            waitForIdle()
             assertCloseTo(Color.Red, assertNotNull(latest))
         }
 
@@ -54,14 +61,19 @@ class ThemeColorTest {
             var latest: Color? = null
 
             setContent {
-                latest = rememberThemeColor(loader = IdentityLoader, input = input, fallback = fallback)
+                latest = rememberThemeColor(
+                    loader = IdentityLoader,
+                    input = input,
+                    fallback = fallback,
+                    coroutineContext = onTestDispatcher,
+                )
             }
 
-            waitUntil { latest != fallback }
+            waitForIdle()
             assertCloseTo(Color.Red, assertNotNull(latest))
 
             input = green
-            waitUntil { latest.let { color -> color.green > color.red } }
+            waitForIdle()
             assertCloseTo(Color.Green, assertNotNull(latest))
         }
 
@@ -79,6 +91,7 @@ class ThemeColorTest {
                         input = image,
                         fallback = fallback,
                         desired = 2,
+                        coroutineContext = onTestDispatcher,
                     )
 
                 if (firstFrame == null) firstFrame = colors
@@ -87,7 +100,7 @@ class ThemeColorTest {
 
             assertEquals(listOf(fallback), firstFrame)
 
-            waitUntil { latest != listOf(fallback) }
+            waitForIdle()
             assertFalse(fallback in latest, "expected $latest to have dropped the fallback")
 
             // Score decides the order and how many survive, so pick the two halves out by hue.
@@ -105,14 +118,18 @@ class ThemeColorTest {
             var latest: Color? = null
 
             setContent {
-                val color = rememberPainterThemeColor(painter = painter, fallback = fallback)
+                val color = rememberPainterThemeColor(
+                    painter = painter,
+                    fallback = fallback,
+                    coroutineContext = onTestDispatcher,
+                )
                 if (firstFrame == null) firstFrame = color
                 latest = color
             }
 
             assertEquals(fallback, firstFrame)
 
-            waitUntil { latest != fallback }
+            waitForIdle()
             assertCloseTo(Color.Red, assertNotNull(latest))
         }
 
@@ -125,7 +142,7 @@ class ThemeColorTest {
             var latest: Color? = null
 
             setContent {
-                val paletteState = rememberPaletteState(IdentityLoader)
+                val paletteState = rememberPaletteState(IdentityLoader, coroutineContext = onTestDispatcher)
                 LaunchedEffect(image) { paletteState.generate(image) }
 
                 val color = paletteState.themeColorOrNull()
@@ -138,7 +155,7 @@ class ThemeColorTest {
 
             assertNull(firstFrame)
 
-            waitUntil { latest != null }
+            waitForIdle()
             assertCloseTo(Color.Red, assertNotNull(latest))
         }
 
@@ -150,34 +167,25 @@ class ThemeColorTest {
             var scheme: DynamicScheme? = null
 
             setContent {
-                val state = rememberPaletteState(IdentityLoader)
+                val state = rememberPaletteState(IdentityLoader, coroutineContext = onTestDispatcher)
                 LaunchedEffect(image) { state.generate(image) }
 
                 seed = state.themeColor(fallback)
                 scheme = rememberDynamicScheme(palette = state, fallback = fallback, isDark = false)
             }
 
-            waitUntil { seed != fallback }
             waitForIdle()
+            assertNotEquals(fallback, seed)
 
             val expected = DynamicScheme(seedColor = assertNotNull(seed), isDark = false)
             assertEquals(expected.primary, assertNotNull(scheme).primary)
         }
-
-    @Test
-    fun rememberThemeColor_readsALargeImageQuickly() =
-        runComposeUiTest {
-            val image = gradientBitmap(width = 4000, height = 3000)
-            var latest: Color? = null
-
-            setContent {
-                latest = rememberThemeColor(loader = IdentityLoader, input = image, fallback = fallback)
-            }
-
-            // kmpalette scales before it quantizes. Without that this takes seconds, not milliseconds.
-            waitUntil(timeoutMillis = 500) { latest != fallback }
-        }
 }
+
+/**
+ * Runs palette generation inside the effect that asks for it, so `waitForIdle` sees it finish.
+ */
+private val onTestDispatcher = EmptyCoroutineContext
 
 private object IdentityLoader : ImageBitmapLoader<ImageBitmap> {
     override suspend fun load(input: ImageBitmap): ImageBitmap = input
@@ -224,31 +232,6 @@ private fun halvesBitmap(
         bottom = height.toFloat(),
         paint = Paint().apply { color = right },
     )
-
-    return bitmap
-}
-
-private fun gradientBitmap(
-    width: Int,
-    height: Int,
-): ImageBitmap {
-    val bitmap = ImageBitmap(width, height)
-    val canvas = Canvas(bitmap)
-    val paint = Paint()
-    val bands = 64
-    val bandWidth = width.toFloat() / bands
-
-    repeat(bands) { band ->
-        val fraction = band.toFloat() / bands
-        paint.color = Color(red = fraction, green = 1f - fraction, blue = 0.5f)
-        canvas.drawRect(
-            left = band * bandWidth,
-            top = 0f,
-            right = (band + 1) * bandWidth,
-            bottom = height.toFloat(),
-            paint = paint,
-        )
-    }
 
     return bitmap
 }

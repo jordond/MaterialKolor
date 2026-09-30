@@ -40,6 +40,7 @@ import com.materialkolor.builder.domain.model.KeyColor
 import com.materialkolor.builder.engine.mapping.toColor
 import com.materialkolor.builder.engine.resolve.RampSet
 import com.materialkolor.builder.engine.resolve.ThemeResolver
+import com.materialkolor.builder.kit.ShortcutKey
 import com.materialkolor.builder.kit.control.contrast
 import com.materialkolor.builder.kit.control.shouldClearTheTrack
 import com.materialkolor.builder.kit.control.shouldRingAllTheWayRound
@@ -63,12 +64,6 @@ import kotlin.test.Test
  * The least contrast a focus line needs against what it sits on and against its halo.
  */
 private const val LineContrast = 3.0
-
-/**
- * The key held with C to copy, Command on a Mac and Control everywhere else, as the desktop reads it.
- */
-private val CopyModifierKey: Key =
-    if (System.getProperty("os.name").orEmpty().startsWith("Mac")) Key.MetaLeft else Key.CtrlLeft
 
 /**
  * The widgets ring when Tab lands on them, in every skin, with the ring standing 3 to 1 from what
@@ -219,7 +214,7 @@ class WidgetFocusRingTest {
             waitForIdle()
             val code = onNodeWithTag(CodeScrollTag)
             code.assertIsFocused()
-            code.performKeyInput { withKeyDown(CopyModifierKey) { pressKey(Key.C) } }
+            code.performKeyInput { withKeyDown(ShortcutKey) { pressKey(Key.C) } }
             waitForIdle()
             val copied = clipboard.text.shouldNotBeNull()
             copied.shouldNotBeBlank()

@@ -26,7 +26,7 @@ class TonalPaletteOnToneTest {
                 val background = palette.toneColor(tone)
                 val content = palette.onTone(tone)
                 assertTrue(
-                    actual = content.hasEnoughContrast(background, ContrastThreshold.WCAG_AA_NORMAL_TEXT),
+                    actual = content.hasEnoughContrast(background, ContrastThreshold.WcagAaNormalText),
                     message = "seed=$seed tone=$tone ratio=${content.contrastRatio(background)}",
                 )
             }
@@ -41,9 +41,9 @@ class TonalPaletteOnToneTest {
         // not, which is what the fallback test below covers.
         for (tone in listOf(0, 10, 90, 100)) {
             val background = palette.toneColor(tone)
-            val content = palette.onTone(tone, ContrastThreshold.WCAG_AAA_NORMAL_TEXT)
+            val content = palette.onTone(tone, ContrastThreshold.WcagAaaNormalText)
             assertTrue(
-                actual = content.hasEnoughContrast(background, ContrastThreshold.WCAG_AAA_NORMAL_TEXT),
+                actual = content.hasEnoughContrast(background, ContrastThreshold.WcagAaaNormalText),
                 message = "tone=$tone ratio=${content.contrastRatio(background)}",
             )
         }
@@ -77,7 +77,7 @@ class TonalPaletteOnToneTest {
 
         // No tone in a 0 to 100 ramp reaches 7:1 against a mid tone in either direction, so the
         // nearer end of the ramp wins.
-        assertEquals(palette.toneColor(0), palette.onTone(50, ContrastThreshold.WCAG_AAA_NORMAL_TEXT))
-        assertEquals(palette.toneColor(100), palette.onTone(49, ContrastThreshold.WCAG_AAA_NORMAL_TEXT))
+        assertEquals(palette.toneColor(0), palette.onTone(50, ContrastThreshold.WcagAaaNormalText))
+        assertEquals(palette.toneColor(100), palette.onTone(49, ContrastThreshold.WcagAaaNormalText))
     }
 }

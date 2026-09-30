@@ -1,5 +1,6 @@
-import { expect, test, type Page } from '@playwright/test';
-import { openBuilder, wantHooks } from './builder';
+import type { Page } from '@playwright/test';
+import { expect, openBuilder, test } from './builder';
+import { button, onPage, pressSettled } from '../fixtures/workspace';
 
 // The boot notices, read from the page's accessibility tree and dismissed by clicking their buttons
 // where Compose draws them. Boot has already opened the builder under each one, and the address bar
@@ -19,13 +20,6 @@ const NEWER_LINK = '/t/Ag';
 
 /** No build wrote this, so the code reads as corrupt. */
 const CORRUPT_LINK = '/t/abc123';
-
-/** Long enough for a click to reach Compose and what it changes to settle. */
-const SETTLE_MS = 300;
-
-test.beforeEach(async ({ context }) => {
-  await wantHooks(context);
-});
 
 test.describe('errors', () => {
   test('an unknown path says so, puts / back and goes on Dismiss', async ({ page }) => {
@@ -63,20 +57,7 @@ test.describe('errors', () => {
   });
 });
 
-/** Whatever in the page's accessibility tree holds [text]. */
-function onPage(page: Page, text: string) {
-  return page.locator('#cmp_a11y_root').getByText(text);
-}
-
-function button(page: Page, name: string) {
-  return page.locator('#cmp_a11y_root').getByRole('button', { name, exact: true });
-}
-
-/** Clicks the first button called [name] where Compose draws it. */
+/** Clicks the first button called [name] once the banner that holds it has come in. */
 async function click(page: Page, name: string): Promise<void> {
-  const target = button(page, name).first();
-  await expect.poll(async () => (await target.boundingBox())?.height ?? 0, { timeout: 15_000 }).toBeGreaterThan(0);
-  const box = (await target.boundingBox())!;
-  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-  await page.waitForTimeout(SETTLE_MS);
+  await pressSettled(page, button(page, name));
 }

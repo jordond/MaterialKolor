@@ -1,9 +1,13 @@
 package com.materialkolor.convention
 
 import org.gradle.api.Project
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.testing.AbstractTestTask
+import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.withType
+import org.gradle.process.CommandLineArgumentProvider
 import org.jetbrains.kotlin.compose.compiler.gradle.ComposeCompilerGradlePluginExtension
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -41,7 +45,7 @@ internal fun Project.configureBuilderModule(runtime: BuilderWebRuntime) {
 
         wasmJs {
             when (runtime) {
-                BuilderWebRuntime.NodeJs -> nodejs()
+                BuilderWebRuntime.NodeJs -> nodejs { testTask { useMocha { timeout = MOCHA_TIMEOUT } } }
                 BuilderWebRuntime.Browser -> browser()
             }
         }
@@ -50,7 +54,7 @@ internal fun Project.configureBuilderModule(runtime: BuilderWebRuntime) {
         // hierarchy template adds the shared webMain and webTest source sets.
         js {
             when (runtime) {
-                BuilderWebRuntime.NodeJs -> nodejs()
+                BuilderWebRuntime.NodeJs -> nodejs { testTask { useMocha { timeout = MOCHA_TIMEOUT } } }
                 BuilderWebRuntime.Browser -> browser()
             }
         }
@@ -64,20 +68,32 @@ internal fun Project.configureBuilderModule(runtime: BuilderWebRuntime) {
     }
 
     configureTestTimeout()
+    configureTestHeap()
 }
+
+private const val MOCHA_TIMEOUT = "60s"
 
 /**
  * Fails a builder test task that runs far past its normal time instead of letting it hang.
  *
- * The slowest suite, shared's jvmTest, takes about 80 seconds, so five minutes means a test that
- * never goes idle, not a slow machine. Pass `-Pbuilder.testTimeoutMinutes=<n>` to change it.
- * It targets every test task, so the node and Karma runs of the web targets are covered as well
- * as jvmTest.
+ * The slowest suite, shared's jvmTest, takes about three and a half minutes locally and about ten
+ * on CI, which passes `-Pbuilder.testTimeoutMinutes=20`. Pass the same property to change the ten
+ * minute default. It targets every test task, so the node and Karma runs of the web targets are
+ * covered as well as jvmTest.
  */
 private fun Project.configureTestTimeout() {
-    val minutes = providers.gradleProperty("builder.testTimeoutMinutes").map(String::toLong).orElse(5L)
+    val minutes = providers.gradleProperty("builder.testTimeoutMinutes").map(String::toLong).orElse(10L)
     tasks.withType<AbstractTestTask>().configureEach {
         timeout.set(minutes.map(Duration::ofMinutes))
+    }
+}
+
+/**
+ * Sets the maximum heap of every builder JVM test task.
+ */
+private fun Project.configureTestHeap() {
+    tasks.withType<Test>().configureEach {
+        maxHeapSize = "2g"
     }
 }
 
@@ -104,5 +120,18 @@ internal fun Project.configureBuilderCompose() {
         sourceSets.jvmTest.dependencies {
             implementation(kotlin("test"))
         }
+    }
+}
+
+/**
+ * Hands this module's `src` folder to its jvmTest as the `builder.sourceDir` system property and
+ * declares the folder as an input of the task.
+ */
+fun Project.passModuleSourcesToJvmTest() {
+    val sources = layout.projectDirectory.dir("src")
+    tasks.named<Test>("jvmTest").configure {
+        inputs.dir(sources).withPathSensitivity(PathSensitivity.RELATIVE).withPropertyName("moduleSources")
+        val path = sources.asFile.absolutePath
+        jvmArgumentProviders.add(CommandLineArgumentProvider { listOf("-Dbuilder.sourceDir=$path") })
     }
 }

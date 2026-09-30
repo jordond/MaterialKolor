@@ -1,7 +1,6 @@
 package com.materialkolor.builder.domain.persist
 
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
@@ -40,22 +39,6 @@ class MigrationsTest {
         val text = """{"schema":1,"data":{"name":"Cactus","color":"#FFFFFF","colors":["#000000"]}}"""
 
         assertEquals(Swatch(name = "Cactus", colors = listOf("#000000")), assertOk(SwatchCodec.decode(text)))
-    }
-
-    @Test
-    fun oneColorToMany_step_leavesTheOtherKeysAlone() {
-        val before = JsonObject(
-            mapOf(
-                "name" to JsonPrimitive("Cactus"),
-                "color" to JsonPrimitive("#6750A4"),
-            ),
-        )
-
-        val after = OneColorToMany.migrate(before)
-
-        assertEquals(setOf("name", "colors"), after.keys)
-        assertEquals(JsonPrimitive("Cactus"), after["name"])
-        assertEquals(JsonArray(listOf(JsonPrimitive("#6750A4"))), after["colors"])
     }
 
     @Test

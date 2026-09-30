@@ -77,6 +77,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
+import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -281,25 +282,13 @@ private fun planeSpan(hue: Double): Double {
 }
 
 /**
- * The pictures of the last [KeptHues] whole hues, the most recently shown last. Only the main
- * thread reads and writes it.
- */
-private object KeptPictures {
-    private val pictures = LinkedHashMap<Int, PlanePicture>()
-
-    fun take(hue: Int): PlanePicture? = pictures.remove(hue)?.also { picture -> pictures[hue] = picture }
-
-    fun keep(picture: PlanePicture) {
-        pictures[picture.hue] = picture
-        while (pictures.size > KeptHues) pictures.remove(pictures.keys.first())
-    }
-}
-
-/**
  * The picture a plane shows, which trails the hue. The last one stays up until the next is ready.
+ * Each picture not kept builds on [builder], which defaults to `Dispatchers.Default`.
  */
 @Stable
-internal class PlanePictures {
+internal class PlanePictures(
+    private val builder: CoroutineContext = Dispatchers.Default,
+) {
     var shown: PlanePicture? by mutableStateOf(null)
         private set
 
@@ -315,7 +304,7 @@ internal class PlanePictures {
     suspend fun follow(hue: () -> Double) {
         snapshotFlow { hue().roundToInt().mod(HueSlots) }.collectLatest { whole ->
             shown = KeptPictures.take(whole)
-                ?: withContext(Dispatchers.Default) { planePicture(whole) }.also(KeptPictures::keep)
+                ?: withContext(builder) { planePicture(whole) }.also(KeptPictures::keep)
         }
     }
 }
@@ -466,11 +455,6 @@ private const val ToneTop: Int = 100
  */
 private const val SamplesAcross: Int = 64
 private const val SamplesUp: Int = 44
-
-/**
- * How many whole hues keep their picture.
- */
-private const val KeptHues: Int = 48
 
 /**
  * How far past the widest chroma of a hue the plane runs, so the sRGB shape never touches its side.

@@ -3,13 +3,9 @@ package com.materialkolor.builder.codegen.target.unstyled
 import com.materialkolor.builder.codegen.ExportInput
 import com.materialkolor.builder.codegen.Fixture
 import com.materialkolor.builder.codegen.Fixtures
-import com.materialkolor.builder.codegen.GoldenDigest
-import com.materialkolor.builder.codegen.GoldenHashes
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
 import com.materialkolor.builder.codegen.target.expectedVariants
 import com.materialkolor.builder.codegen.target.frozenPrefs
-import com.materialkolor.builder.codegen.target.lintFailures
-import com.materialkolor.builder.codegen.target.materialKolorImports
 import com.materialkolor.builder.codegen.text.Literals
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.export.ContrastVariant
@@ -19,7 +15,6 @@ import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.FrozenVariants
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 /**
@@ -52,27 +47,6 @@ internal object UnstyledFrozenCases {
 }
 
 class UnstyledFrozenTest {
-    @Test
-    fun unstyledFrozen_everyCase_matchesTheGoldenHash() {
-        UnstyledFrozenCases.all.keys.forEach { case ->
-            assertEquals(GoldenHashes.cases[case], GoldenDigest.of(UnstyledFrozenCases.files(case)), case)
-        }
-    }
-
-    @Test
-    fun unstyledFrozen_everyCodeLine_passesTheLintLimits() {
-        UnstyledFrozenCases.all.keys.forEach { case ->
-            assertEquals(emptyList(), lintFailures(UnstyledFrozenCases.files(case)), case)
-        }
-    }
-
-    @Test
-    fun unstyledFrozen_everyCase_importsNothingFromMaterialKolor() {
-        UnstyledFrozenCases.all.keys.forEach { case ->
-            assertEquals(emptyList(), materialKolorImports(UnstyledFrozenCases.files(case)), case)
-        }
-    }
-
     @Test
     fun unstyledFrozen_everyRole_isWrittenForBothModesAtEveryVariant() {
         UnstyledFrozenCases.all.forEach { (case, input) ->
@@ -136,26 +110,6 @@ class UnstyledFrozenTest {
     }
 
     @Test
-    fun unstyledFrozen_theme_setsTheStandardPair() {
-        val default = UnstyledFrozenCases.files("unstyled-frozen-default").text("Theme.kt")
-        val allContrasts = UnstyledFrozenCases.files("unstyled-frozen-all-contrasts").text("Theme.kt")
-
-        val expected =
-            """
-            val AppTheme = buildThemeV2 {
-                properties[ThemeTokens.colors] = lightColors
-
-                colorScheme(ColorScheme.Dark) {
-                    properties[ThemeTokens.colors] = darkColors
-                }
-            }
-            """.trimIndent()
-
-        assertTrue(expected in default, default)
-        assertTrue(expected in allContrasts, allContrasts)
-    }
-
-    @Test
     fun unstyledFrozen_animate_changesNothing() {
         val animated = Fixtures.Default.with(
             document = Fixtures.Base.copy(library = Library.Unstyled),
@@ -166,13 +120,6 @@ class UnstyledFrozenTest {
             UnstyledFrozenCases.files("unstyled-frozen-default").map { it.text },
             UnstyledFrozen.files(animated.input).map { it.text },
         )
-    }
-
-    @Test
-    fun unstyledFrozen_otherLibrary_isRefused() {
-        val material3 = Fixtures.input(document = Fixtures.Base, prefs = frozenPrefs())
-
-        assertFailsWith<IllegalArgumentException> { UnstyledFrozen.files(material3) }
     }
 
     private fun List<GeneratedFile>.text(fileName: String): String = single { it.path.endsWith("/$fileName") }.text

@@ -1,5 +1,6 @@
 package com.materialkolor.builder.codegen
 
+import com.materialkolor.builder.codegen.dsl.GeneratedFile
 import com.materialkolor.builder.codegen.target.SnippetsCases
 import com.materialkolor.builder.codegen.target.custom.CustomDynamicCases
 import com.materialkolor.builder.codegen.target.custom.CustomFrozenCases
@@ -13,6 +14,15 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
+ * One cases object, its cases by case name and the files it writes for each.
+ */
+internal class CaseSource(
+    val name: String,
+    val cases: Map<String, ExportInput>,
+    val files: (case: String) -> List<GeneratedFile>,
+)
+
+/**
  * Every golden case that is a whole export, by case name, gathered from the cases object of each
  * target and from the snippets.
  *
@@ -23,25 +33,27 @@ internal object GoldenCases {
     /**
      * The cases objects, each by the name the test failures use.
      */
-    private val sources: Map<String, Map<String, ExportInput>> = mapOf(
-        "Material3DynamicCases" to Material3DynamicCases.all,
-        "Material3FrozenCases" to Material3FrozenCases.all,
-        "UnstyledDynamicCases" to UnstyledDynamicCases.all,
-        "UnstyledFrozenCases" to UnstyledFrozenCases.all,
-        "FluentDynamicCases" to FluentDynamicCases.all,
-        "FluentFrozenCases" to FluentFrozenCases.all,
-        "CustomDynamicCases" to CustomDynamicCases.all,
-        "CustomFrozenCases" to CustomFrozenCases.all,
-        "SnippetsCases" to SnippetsCases.all,
+    val sources: List<CaseSource> = listOf(
+        CaseSource("Material3DynamicCases", Material3DynamicCases.all, Material3DynamicCases::files),
+        CaseSource("Material3FrozenCases", Material3FrozenCases.all, Material3FrozenCases::files),
+        CaseSource("UnstyledDynamicCases", UnstyledDynamicCases.all, UnstyledDynamicCases::files),
+        CaseSource("UnstyledFrozenCases", UnstyledFrozenCases.all, UnstyledFrozenCases::files),
+        CaseSource("FluentDynamicCases", FluentDynamicCases.all, FluentDynamicCases::files),
+        CaseSource("FluentFrozenCases", FluentFrozenCases.all, FluentFrozenCases::files),
+        CaseSource("CustomDynamicCases", CustomDynamicCases.all, CustomDynamicCases::files),
+        CaseSource("CustomFrozenCases", CustomFrozenCases.all, CustomFrozenCases::files),
+        CaseSource("SnippetsCases", SnippetsCases.all, SnippetsCases::files),
     )
 
     /**
      * Every export case, by case name.
      */
     val exports: Map<String, ExportInput> = buildMap {
-        sources.forEach { (source, cases) ->
-            cases.forEach { (case, input) ->
-                require(put(case, input) == null) { "Golden case $case appears twice, the second time in $source" }
+        sources.forEach { source ->
+            source.cases.forEach { (case, input) ->
+                require(
+                    put(case, input) == null,
+                ) { "Golden case $case appears twice, the second time in ${source.name}" }
             }
         }
     }
@@ -70,5 +82,16 @@ class GoldenHashesTest {
         val known = GoldenCases.exports.keys + GoldenCases.parts
 
         assertEquals(emptySet(), known - GoldenHashes.cases.keys, "cases with no golden hash")
+    }
+
+    @Test
+    fun goldenHashes_everyExportCase_matchesItsHash() {
+        val mismatched = GoldenCases.sources.flatMap { source ->
+            source.cases.keys
+                .filter { case -> GoldenHashes.cases[case] != GoldenDigest.of(source.files(case)) }
+                .map { case -> "$case in ${source.name}" }
+        }
+
+        assertEquals(emptyList(), mismatched, "cases whose files no longer match their golden hash")
     }
 }

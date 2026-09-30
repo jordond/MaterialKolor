@@ -1,14 +1,16 @@
 package com.materialkolor.builder.feature.topbar
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -16,11 +18,11 @@ import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
-import androidx.lifecycle.ViewModelStore
-import androidx.lifecycle.ViewModelStoreOwner
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import com.materialkolor.builder.AppHarness
 import com.materialkolor.builder.BuilderRoot
+import com.materialkolor.builder.HEIGHT
 import com.materialkolor.builder.ShellExpressive
+import com.materialkolor.builder.WAIT_MILLIS
 import com.materialkolor.builder.core.session.HistoryState
 import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.domain.edit.ChangeKind
@@ -34,16 +36,14 @@ import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.Appearance
 import com.materialkolor.builder.domain.persist.Preferences
 import com.materialkolor.builder.engine.resolve.ThemeResolver
-import com.materialkolor.builder.fakes.FakePlatform
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.feature.workspace.workspaceStateOf
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import dev.stateholder.dispatcher.rememberDispatcher
-import dev.zacsweers.metro.createGraphFactory
-import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import io.kotest.matchers.shouldBe
+import kotlin.test.AfterTest
 import kotlin.test.Test
 
 private const val M3_EXPRESSIVE = "M3 Expressive"
@@ -57,7 +57,6 @@ private const val REDO_EXPRESSIVE = "Redo library change to M3 Expressive"
  * A desktop window wide enough for the segmented switcher in every skin, beside the full actions.
  */
 private const val WIDTH = 1600
-private const val HEIGHT = 800
 
 /**
  * The frames a reveal may take from the click to the change. The host records the old frame in the
@@ -68,6 +67,13 @@ private const val REVEAL_FRAMES = 3
 
 @OptIn(ExperimentalTestApi::class)
 class TopBarContentTest {
+    private val app = AppHarness()
+
+    @AfterTest
+    fun tearDown() {
+        app.close()
+    }
+
     @Test
     fun undoButton_afterAStyleChange_namesTheChangeInItsTooltipWithoutTheRawStyleName() =
         runComposeUiTest {
@@ -91,6 +97,8 @@ class TopBarContentTest {
             waitForIdle()
 
             onNodeWithText("Undo style change").assertExists()
+            onAllNodesWithText("Vibrant", substring = true, useUnmergedTree = true).assertCountEquals(0)
+            onAllNodesWithContentDescription("Vibrant", substring = true, useUnmergedTree = true).assertCountEquals(0)
         }
 
     @Test
@@ -207,22 +215,7 @@ class TopBarContentTest {
     /**
      * The whole builder on fakes, booted, with its graph so a test can read the session.
      */
-    private fun ComposeUiTest.showRoot(): AppGraph {
-        val platform = FakePlatform()
-        val graph = createGraphFactory<AppGraph.Factory>().create(platform)
-        val owner = TestOwner()
-        setContent {
-            CompositionLocalProvider(
-                LocalViewModelStoreOwner provides owner,
-                LocalMetroViewModelFactory provides graph.metroViewModelFactory,
-            ) {
-                BuilderRoot(graph)
-            }
-        }
-        waitUntil { platform.environment.splashHidden }
-        waitForIdle()
-        return graph
-    }
+    private fun ComposeUiTest.showRoot(): AppGraph = with(app) { bootRoot() }
 
     /**
      * Moves the theme onto the 2021 spec, which a pick of M3 Expressive moves to 2025.
@@ -240,8 +233,4 @@ class TopBarContentTest {
         document: ThemeDocument,
         history: HistoryState,
     ): WorkspaceModel.State = workspaceStateOf(document = document, history = history)
-
-    private class TestOwner : ViewModelStoreOwner {
-        override val viewModelStore: ViewModelStore = ViewModelStore()
-    }
 }
