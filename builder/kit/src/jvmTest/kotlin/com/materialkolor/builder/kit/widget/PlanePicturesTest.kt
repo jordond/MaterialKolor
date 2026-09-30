@@ -5,11 +5,14 @@ import androidx.compose.runtime.snapshots.Snapshot
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import kotlin.coroutines.CoroutineContext
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -29,13 +32,10 @@ class PlanePicturesTest {
     @Test
     fun follow_buildsTheWholeHuesPictureOnItsBuilder_andKeepsIt() =
         runTest {
-            val builder = StandardTestDispatcher()
-            val pictures = PlanePictures(builder)
+            val pictures = PlanePictures(StandardTestDispatcher(testScheduler))
             val following = launch { pictures.follow { 40.4 } }
-            runCurrent()
             pictures.shown.shouldBeNull()
 
-            builder.scheduler.runCurrent()
             runCurrent()
 
             pictures.shown?.hue shouldBe 40
@@ -46,7 +46,7 @@ class PlanePicturesTest {
     @Test
     fun follow_aHueThatMovesOnBeforeItsPictureIsBuilt_neverGetsOne() =
         runTest {
-            val builder = StandardTestDispatcher()
+            val builder = HeldBuilder()
             val pictures = PlanePictures(builder)
             val hue = mutableDoubleStateOf(40.0)
             val following = launch { pictures.follow { hue.doubleValue } }
@@ -55,7 +55,7 @@ class PlanePicturesTest {
             hue.doubleValue = 80.0
             Snapshot.sendApplyNotifications()
             runCurrent()
-            builder.scheduler.runCurrent()
+            builder.runHeld()
             runCurrent()
 
             pictures.shown?.hue shouldBe 80
@@ -68,7 +68,7 @@ class PlanePicturesTest {
         runTest {
             val kept = planePicture(120)
             KeptPictures.keep(kept)
-            val pictures = PlanePictures(StandardTestDispatcher())
+            val pictures = PlanePictures(HeldBuilder())
             val following = launch { pictures.follow { 120.0 } }
 
             runCurrent()
@@ -76,4 +76,26 @@ class PlanePicturesTest {
             pictures.shown shouldBeSameInstanceAs kept
             following.cancel()
         }
+}
+
+/**
+ * Holds every build handed to it until the test runs them, on the test's own thread, so a test
+ * chooses what the main thread does while a picture is building.
+ */
+private class HeldBuilder : CoroutineDispatcher() {
+    private val held = ArrayDeque<Runnable>()
+
+    override fun dispatch(
+        context: CoroutineContext,
+        block: Runnable,
+    ) {
+        held.addLast(block)
+    }
+
+    /**
+     * Runs every build held so far, oldest first.
+     */
+    fun runHeld() {
+        while (held.isNotEmpty()) held.removeFirst().run()
+    }
 }
