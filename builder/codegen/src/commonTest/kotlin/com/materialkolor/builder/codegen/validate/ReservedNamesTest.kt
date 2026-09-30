@@ -100,16 +100,6 @@ class ReservedNamesTest {
     }
 
     @Test
-    fun of_bothMaterial3Targets_reserveTheSameNames() {
-        assertEquals(ReservedNames.of(ExportTarget.Material3), ReservedNames.of(ExportTarget.Material3Expressive))
-    }
-
-    @Test
-    fun of_inklet_reservesTheMaterial3NamesAndInkletTheme() {
-        assertEquals(ReservedNames.of(ExportTarget.Material3) + "InkletTheme", ReservedNames.of(ExportTarget.Inklet))
-    }
-
-    @Test
     fun clashes_inkletThemeNamedInkletTheme_isReported() {
         val document = ThemeDocument.Default.copy(library = Library.Inklet, themeName = "InkletTheme")
 

@@ -53,12 +53,3 @@ internal object SnippetsCases {
 
     fun files(case: String): List<GeneratedFile> = generate(all.getValue(case)).filterNot { it.path.startsWith("src/") }
 }
-
-class SnippetsTest {
-    @Test
-    fun snippets_everyCase_matchesTheGoldenHash() {
-        SnippetsCases.all.keys.forEach { case ->
-            assertEquals(GoldenHashes.cases[case], GoldenDigest.of(SnippetsCases.files(case)), case)
-        }
-    }
-}

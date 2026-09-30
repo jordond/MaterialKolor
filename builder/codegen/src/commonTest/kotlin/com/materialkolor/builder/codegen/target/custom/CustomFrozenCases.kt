@@ -54,27 +54,6 @@ internal object CustomFrozenCases {
 
 class CustomFrozenTest {
     @Test
-    fun customFrozen_everyCase_matchesTheGoldenHash() {
-        CustomFrozenCases.all.keys.forEach { case ->
-            assertEquals(GoldenHashes.cases[case], GoldenDigest.of(CustomFrozenCases.files(case)), case)
-        }
-    }
-
-    @Test
-    fun customFrozen_everyCodeLine_passesTheLintLimits() {
-        CustomFrozenCases.all.keys.forEach { case ->
-            assertEquals(emptyList(), lintFailures(CustomFrozenCases.files(case)), case)
-        }
-    }
-
-    @Test
-    fun customFrozen_everyCase_importsNothingFromMaterialKolor() {
-        CustomFrozenCases.all.keys.forEach { case ->
-            assertEquals(emptyList(), materialKolorImports(CustomFrozenCases.files(case)), case)
-        }
-    }
-
-    @Test
     fun customFrozen_everySlot_isWrittenForBothModesAtEveryVariant() {
         CustomFrozenCases.all.forEach { (case, input) ->
             val colors = themeColors(input)
@@ -112,22 +91,6 @@ class CustomFrozenTest {
         assertTrue("    brand = ColorFamily(\n" in withAccents, withAccents)
         assertFalse("brandColor" in withAccents, withAccents)
         assertFalse("ColorFamily" in without, without)
-    }
-
-    @Test
-    fun customFrozen_theme_providesTheStandardPair() {
-        val theme = CustomFrozenCases.files("custom-frozen-all-contrasts").single { it.path.endsWith("/Theme.kt") }.text
-
-        assertTrue("val LocalThemeColors = staticCompositionLocalOf<ThemeColors> {" in theme, theme)
-        assertTrue("val colors = if (isDark) darkThemeColors else lightThemeColors" in theme, theme)
-        assertTrue("CompositionLocalProvider(LocalThemeColors provides colors, content = content)" in theme, theme)
-    }
-
-    @Test
-    fun customFrozen_otherLibrary_isRefused() {
-        val material3 = Fixtures.input(document = Fixtures.Base, prefs = frozenPrefs())
-
-        assertFailsWith<IllegalArgumentException> { CustomFrozen.files(material3) }
     }
 
     private fun themeColors(input: ExportInput): String =

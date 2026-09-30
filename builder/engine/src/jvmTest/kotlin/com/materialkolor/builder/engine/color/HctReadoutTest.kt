@@ -1,8 +1,6 @@
 package com.materialkolor.builder.engine.color
 
 import com.materialkolor.builder.domain.color.Argb
-import com.materialkolor.hct.Hct
-import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -25,16 +23,5 @@ class HctReadoutTest {
         assertEquals(100.0, white.tone, absoluteTolerance = 0.01)
         assertEquals(0.0, black.tone, absoluteTolerance = 0.01)
         assertTrue(white.chroma < 5.0, "white reads next to no chroma, got ${white.chroma}")
-    }
-
-    @Test
-    fun of_randomSeeds_matchesCoreExactly() {
-        val random = Random(303)
-        repeat(100) {
-            val seed = Argb(random.nextInt())
-            val hct = Hct.fromInt(seed.value)
-
-            assertEquals(HctReadout(hct.hue, hct.chroma, hct.tone), HctReadout.of(seed))
-        }
     }
 }

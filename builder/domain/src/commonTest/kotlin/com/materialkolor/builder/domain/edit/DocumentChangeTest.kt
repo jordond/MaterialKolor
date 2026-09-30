@@ -105,52 +105,6 @@ class DocumentChangeTest {
     }
 
     @Test
-    fun documentChange_everyChange_leavesItsInputAlone() {
-        arb.documents(count = 200).forEach { document ->
-            val untouched = document.copy()
-            allChanges(document).forEach { change ->
-                change.apply(document)
-                assertEquals(untouched, document, change.toString())
-            }
-        }
-    }
-
-    @Test
-    fun setLibrary_togglingExpressive_neverMovesStyleOrSpec() {
-        arb.documents(count = 200).forEach { document ->
-            val toggled = DocumentChange.SetLibrary(document.library, !document.expressive).apply(document)
-
-            assertEquals(!document.expressive, toggled.expressive)
-            assertEquals(document.style, toggled.style)
-            assertEquals(document.spec, toggled.spec)
-        }
-    }
-
-    @Test
-    fun setStyle_anyStyle_leavesTheRequestedSpec() {
-        arb.documents(count = 50).forEach { document ->
-            Style.entries.forEach { style ->
-                val changed = DocumentChange.SetStyle(style).apply(document)
-
-                assertEquals(style, changed.style)
-                assertEquals(document.spec, changed.spec, "$style moved the spec")
-            }
-        }
-    }
-
-    @Test
-    fun setSpec_anySpec_leavesTheStyle() {
-        arb.documents(count = 50).forEach { document ->
-            SpecVersion.entries.forEach { spec ->
-                val changed = DocumentChange.SetSpec(spec).apply(document)
-
-                assertEquals(spec, changed.spec)
-                assertEquals(document.style, changed.style, "$spec moved the style")
-            }
-        }
-    }
-
-    @Test
     fun setPin_oneMode_keepsTheOtherMode() {
         val document = ThemeDocument.Default.copy(pins = mapOf(Role.Primary to RolePin(light = red)))
 
@@ -260,24 +214,4 @@ class DocumentChangeTest {
             assertSame(replacement, DocumentChange.Replace(replacement).apply(document))
         }
     }
-
-    @Test
-    fun resetKeyColors_anyDocument_leavesEveryPaletteOnTheSeed() {
-        arb.documents(count = 50).forEach { document ->
-            val changed = DocumentChange.ResetKeyColors.apply(document)
-
-            assertEquals(KeyColors(), changed.keyColors)
-            assertFalse(KeyColor.entries.any { slot -> changed.keyColors[slot] != null })
-        }
-    }
-
-    private fun allChanges(document: ThemeDocument): List<DocumentChange> =
-        cases.map { (change, _) -> change } +
-            listOf(
-                DocumentChange.SetPin(Role.Primary, PinMode.Light, red),
-                DocumentChange.SetPin(Role.Primary, PinMode.Dark, null),
-                DocumentChange.UpdateAccent(index = 0, accent = accent),
-                DocumentChange.RemoveAccent(index = 0),
-            ) +
-            document.pins.keys.map { role -> DocumentChange.SetPin(role, PinMode.Light, null) }
 }

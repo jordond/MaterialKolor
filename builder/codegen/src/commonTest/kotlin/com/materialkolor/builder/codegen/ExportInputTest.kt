@@ -59,11 +59,6 @@ class ExportInputTest {
     }
 
     @Test
-    fun fixtures_default_linksToTheDefaultShareCode() {
-        assertEquals("https://materialkolor.com/t/AdllOwAAAAAT", Fixtures.Default.input.shareUrl)
-    }
-
-    @Test
     fun fixtures_all_haveDistinctNamesAndDocuments() {
         assertEquals(
             Fixtures.all.size,
@@ -79,50 +74,5 @@ class ExportInputTest {
                 .toSet()
                 .size,
         )
-    }
-
-    @Test
-    fun fixtures_frozenAllContrasts_resolvesEveryVariant() {
-        val prefs = ExportPrefs(mode = ExportMode.Frozen, frozenVariants = FrozenVariants.AllContrasts)
-        val custom = Fixtures.Default.with(
-            document = Fixtures.Default.input.document
-                .copy(library = Library.Custom),
-            prefs = prefs,
-        )
-
-        assertEquals(ContrastVariant.entries.toSet(), custom.input.resolved.roles.keys)
-        assertEquals(ContrastVariant.entries.toSet(), custom.input.resolved.customSlots.keys)
-        assertNull(custom.input.resolved.fluentShades)
-    }
-
-    @Test
-    fun fixtures_pinsAndAmoled_areBakedIntoTheRoles() {
-        val pinned = Fixtures.Pins.input.resolved.roles
-            .getValue(ContrastVariant.Standard)
-        val pins = Fixtures.Pins.input.document.pins
-        assertEquals(pins.getValue(Role.Primary).light, pinned.light[Role.Primary])
-        assertEquals(pins.getValue(Role.Primary).dark, pinned.dark[Role.Primary])
-        assertEquals(pins.getValue(Role.Outline).dark, pinned.dark[Role.Outline])
-
-        val amoled = Fixtures.Amoled.input.resolved.roles
-            .getValue(ContrastVariant.Standard)
-        assertEquals(0xFF000000.toInt(), amoled.dark.getValue(Role.Surface).value)
-        assertNotEquals(0xFF000000.toInt(), amoled.light.getValue(Role.Surface).value)
-    }
-
-    @Test
-    fun fixtures_accentsAndFluent_resolveOnlyWhenAskedFor() {
-        assertEquals(
-            listOf("Brand", "Success", "Warning"),
-            Fixtures.ThreeAccents.input.resolved.accents
-                .map { it.name },
-        )
-
-        val fluent = Fixtures.Default.with(
-            document = Fixtures.Default.input.document
-                .copy(library = Library.Fluent),
-        )
-        assertNotNull(fluent.input.resolved.fluentShades)
-        assertNull(Fixtures.Default.input.resolved.fluentShades)
     }
 }

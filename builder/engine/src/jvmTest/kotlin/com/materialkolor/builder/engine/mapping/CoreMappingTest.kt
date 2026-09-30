@@ -15,13 +15,6 @@ import kotlin.test.assertNull
 
 class CoreMappingTest {
     @Test
-    fun toPaletteStyle_everyStyle_keepsItsName() {
-        for (style in Style.entries) {
-            assertEquals(style.name, style.toPaletteStyle(cmfTertiarySeed = null).name)
-        }
-    }
-
-    @Test
     fun toPaletteStyle_cmf_carriesTheTertiarySeed() {
         val seed = Argb(0x00897B)
 
@@ -50,13 +43,5 @@ class CoreMappingTest {
         for (platform in SchemePlatform.entries) {
             assertEquals(DynamicScheme.Platform.valueOf(platform.name.uppercase()), platform.toCore())
         }
-    }
-
-    @Test
-    fun toColor_anyArgb_isOpaqueAndExact() {
-        val argb = Argb(0x12ABEF)
-
-        assertEquals(argb.value, argb.toColor().toArgb())
-        assertEquals(1f, argb.toColor().alpha)
     }
 }

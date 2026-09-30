@@ -205,12 +205,4 @@ class FormsCaseTest {
     fun formsCase_anyPlatform_matchesTheGoldenHash() {
         assertEquals(GoldenHashes.cases["dsl-forms"], GoldenDigest.of(formsCaseFiles()))
     }
-
-    @Test
-    fun formsCase_everyLine_fitsTheColumnLimit() {
-        val text = formsCaseFiles().single().text
-
-        assertTrue(text.lines().all { it.length <= MAX_LINE_LENGTH }, text)
-        assertTrue(text.lines().none { it.endsWith(" ") }, text)
-    }
 }

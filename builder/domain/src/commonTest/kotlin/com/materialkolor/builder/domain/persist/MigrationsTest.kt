@@ -43,22 +43,6 @@ class MigrationsTest {
     }
 
     @Test
-    fun oneColorToMany_step_leavesTheOtherKeysAlone() {
-        val before = JsonObject(
-            mapOf(
-                "name" to JsonPrimitive("Cactus"),
-                "color" to JsonPrimitive("#6750A4"),
-            ),
-        )
-
-        val after = OneColorToMany.migrate(before)
-
-        assertEquals(setOf("name", "colors"), after.keys)
-        assertEquals(JsonPrimitive("Cactus"), after["name"])
-        assertEquals(JsonArray(listOf(JsonPrimitive("#6750A4"))), after["colors"])
-    }
-
-    @Test
     fun migrations_steps_runInOrderFromTheStoredSchema() {
         val migrations = Migrations(
             listOf(

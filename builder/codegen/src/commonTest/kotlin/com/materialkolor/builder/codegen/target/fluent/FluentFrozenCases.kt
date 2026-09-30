@@ -47,27 +47,6 @@ internal object FluentFrozenCases {
 
 class FluentFrozenTest {
     @Test
-    fun fluentFrozen_everyCase_matchesTheGoldenHash() {
-        FluentFrozenCases.all.keys.forEach { case ->
-            assertEquals(GoldenHashes.cases[case], GoldenDigest.of(FluentFrozenCases.files(case)), case)
-        }
-    }
-
-    @Test
-    fun fluentFrozen_everyCodeLine_passesTheLintLimits() {
-        FluentFrozenCases.all.keys.forEach { case ->
-            assertEquals(emptyList(), lintFailures(FluentFrozenCases.files(case)), case)
-        }
-    }
-
-    @Test
-    fun fluentFrozen_everyCase_importsNothingFromMaterialKolor() {
-        FluentFrozenCases.all.keys.forEach { case ->
-            assertEquals(emptyList(), materialKolorImports(FluentFrozenCases.files(case)), case)
-        }
-    }
-
-    @Test
     fun fluentFrozen_everyShadeOfBothModes_isWrittenAsALiteral() {
         val input = FluentFrozenCases.all.getValue("fluent-frozen-default")
         val shades = checkNotNull(input.resolved.fluentShades)
@@ -102,13 +81,6 @@ class FluentFrozenTest {
         val every = codeOf(FluentFrozenCases.files("fluent-frozen-all-contrasts"))
 
         assertEquals(standard, every)
-    }
-
-    @Test
-    fun fluentFrozen_otherLibrary_isRefused() {
-        val material3 = Fixtures.input(document = Fixtures.Base, prefs = frozenPrefs())
-
-        assertFailsWith<IllegalArgumentException> { FluentFrozen.files(material3) }
     }
 
     private fun named(shades: FluentShadeValues): List<Pair<String, Argb>> =

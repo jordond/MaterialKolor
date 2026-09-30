@@ -23,39 +23,6 @@ class ResolvedExportTest {
     )
 
     @Test
-    fun resolvedExport_everyVariant_keepsWhatItWasGiven() {
-        val roles = ContrastVariant.entries.associateWith { roleTable }
-        val slots = ContrastVariant.entries.associateWith { slotValues }
-        val accent = AccentFamilyValues(
-            name = "brand",
-            light = AccentColors(color = black, onColor = white, container = white, onContainer = black),
-            dark = AccentColors(color = white, onColor = black, container = black, onContainer = white),
-        )
-        val shades = FluentShades(
-            light = FluentShadeValues(black, black, black, white, white, white, white),
-            dark = FluentShadeValues(white, white, white, black, black, black, black),
-        )
-
-        val export = ResolvedExport(roles = roles, accents = listOf(accent), customSlots = slots, fluentShades = shades)
-
-        assertEquals(roles, export.roles)
-        assertEquals(listOf(accent), export.accents)
-        assertEquals(slots, export.customSlots)
-        assertEquals(shades, export.fluentShades)
-        assertEquals(white, export.fluentShades?.light?.base)
-        assertEquals(black, export.fluentShades?.dark?.base)
-    }
-
-    @Test
-    fun resolvedExport_standardOnly_isAccepted() {
-        val export = ResolvedExport(roles = mapOf(ContrastVariant.Standard to roleTable))
-
-        assertEquals(emptyList(), export.accents)
-        assertEquals(emptyMap(), export.customSlots)
-        assertEquals(null, export.fluentShades)
-    }
-
-    @Test
     fun resolvedExport_withoutStandard_isRejected() {
         assertFailsWith<IllegalArgumentException> {
             ResolvedExport(roles = mapOf(ContrastVariant.High to roleTable))

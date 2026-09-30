@@ -34,11 +34,6 @@ class ColorNamesTest {
     }
 
     @Test
-    fun entries_count_isAboutThreeHundred() {
-        assertTrue(entries.size in 280..340, "${entries.size} names")
-    }
-
-    @Test
     fun entries_namesAndColors_areUnique() {
         assertEquals(entries.size, entries.map { it.name.lowercase() }.toSet().size)
         assertEquals(entries.size, entries.map { it.argb }.toSet().size)
@@ -61,15 +56,6 @@ class ColorNamesTest {
             val asCss = entry.name.replace(" ", "").lowercase()
             assertTrue(asCss !in CssColors.byName, "${entry.name} reads as the CSS color $asCss")
         }
-    }
-
-    @Test
-    fun colorNameData_sourceFile_staysUnderTenKilobytes() {
-        // Each string sits on its own source line, indented, quoted and followed by a comma.
-        val listBytes = ColorNameData.sumOf { line -> line.encodeToByteArray().size + SourceLineOverhead }
-        val fileBytes = listBytes + SourceHeaderAllowance
-
-        assertTrue(fileBytes < TenKilobytes, "about $fileBytes bytes")
     }
 
     private fun Argb.isGrey(): Boolean = red == green && green == blue

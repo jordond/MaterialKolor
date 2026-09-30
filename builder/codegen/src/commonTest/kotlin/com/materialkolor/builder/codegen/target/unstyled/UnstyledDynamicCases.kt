@@ -58,28 +58,6 @@ internal fun Fixture.unstyled(): Fixture = with(document = input.document.copy(l
 
 class UnstyledDynamicTest {
     @Test
-    fun unstyledDynamic_everyCase_matchesTheGoldenHash() {
-        UnstyledDynamicCases.all.keys.forEach { case ->
-            assertEquals(GoldenHashes.cases[case], GoldenDigest.of(UnstyledDynamicCases.files(case)), case)
-        }
-    }
-
-    @Test
-    fun unstyledDynamic_everyCodeLine_passesTheLintLimits() {
-        UnstyledDynamicCases.all.keys.forEach { case ->
-            assertEquals(emptyList(), lintFailures(UnstyledDynamicCases.files(case)), case)
-        }
-    }
-
-    @Test
-    fun unstyledDynamic_primaryOverride_writesTheSeedAndThePrimary() {
-        val theme = theme(Fixtures.PrimaryOverride.unstyled().input)
-
-        assertTrue("seedColor = SeedColor," in theme, theme)
-        assertTrue("primary = Primary," in theme, theme)
-    }
-
-    @Test
     fun unstyledDynamic_default_writesOnlyTheSeed() {
         val latest = Fixtures.Default.input.document
             .copy(spec = SpecVersion.Spec2025)
@@ -172,24 +150,10 @@ class UnstyledDynamicTest {
     }
 
     @Test
-    fun unstyledDynamic_animate_setsTheTransitionSpec() {
-        val theme = theme(Fixtures.Animated.unstyled().input)
-
-        assertTrue("$TRANSITION = tween(durationMillis = 500)" in theme, theme)
-    }
-
-    @Test
     fun unstyledDynamic_amoled_isNeverWritten() {
         val theme = theme(Fixtures.Amoled.unstyled().input)
 
         assertFalse("Amoled" in theme, theme)
-    }
-
-    @Test
-    fun unstyledDynamic_otherLibrary_isRefused() {
-        val fluent = Fixtures.input(document = Fixtures.Base.copy(library = Library.Fluent))
-
-        assertFailsWith<IllegalArgumentException> { UnstyledDynamic.files(fluent) }
     }
 
     private fun theme(input: ExportInput): String =

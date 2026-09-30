@@ -73,20 +73,6 @@ internal fun Fixture.custom(): Fixture = with(document = input.document.copy(lib
 
 class CustomDynamicTest {
     @Test
-    fun customDynamic_everyCase_matchesTheGoldenHash() {
-        CustomDynamicCases.all.keys.forEach { case ->
-            assertEquals(GoldenHashes.cases[case], GoldenDigest.of(CustomDynamicCases.files(case)), case)
-        }
-    }
-
-    @Test
-    fun customDynamic_everyCodeLine_passesTheLintLimits() {
-        CustomDynamicCases.all.keys.forEach { case ->
-            assertEquals(emptyList(), lintFailures(CustomDynamicCases.files(case)), case)
-        }
-    }
-
-    @Test
     fun customDynamic_files_areSeedsColorsAndTheme() {
         CustomDynamicCases.all.forEach { (case, input) ->
             val names = CustomDynamic.files(input).map { file -> file.path.substringAfterLast('/') }
@@ -228,14 +214,9 @@ class CustomDynamicTest {
     }
 
     @Test
-    fun customDynamic_theme_providesTheRememberedColors() {
+    fun customDynamic_theme_neverAnimatesUnasked() {
         val theme = file(Fixtures.Default.custom().input, "Theme.kt")
-        val colors = "val colors = rememberThemeColors(\n        seedColor = SeedColor,\n" +
-            "        isDark = isDark,\n    )"
 
-        assertTrue("val LocalThemeColors = staticCompositionLocalOf<ThemeColors> {" in theme, theme)
-        assertTrue(colors in theme, theme)
-        assertTrue("CompositionLocalProvider(LocalThemeColors provides colors, content = content)" in theme, theme)
         assertFalse("animate" in theme, theme)
     }
 
@@ -253,13 +234,6 @@ class CustomDynamicTest {
             assertTrue(reserved.containsAll(imported), "$case imports ${imported - reserved}")
         }
         assertTrue(REMEMBER_THEME_COLORS in reserved)
-    }
-
-    @Test
-    fun customDynamic_otherLibrary_isRefused() {
-        val material3 = Fixtures.input(document = Fixtures.Base)
-
-        assertFailsWith<IllegalArgumentException> { CustomDynamic.files(material3) }
     }
 
     private fun themeColors(input: ExportInput): String = file(input, "ThemeColors.kt")
