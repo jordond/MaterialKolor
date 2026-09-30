@@ -68,15 +68,18 @@ export async function boxOf(target: Locator, timeout?: number): Promise<Box> {
 }
 
 /**
- * How many frames in a row a box has to hold still to count as laid out, about 1.2 s at 60 fps,
- * longer than the mirror's longest wait before it syncs. A page starved of frames takes longer.
+ * How many animation frames in a row a box has to hold still to count as laid out, about 1.2 s at
+ * 60 fps, longer than the mirror's longest wait before it syncs. A page starved of frames takes
+ * longer, and a tab in the background gets none.
  */
 const STILL_FRAMES = 72;
 
 /**
  * The box of [target] once it is laid out, when it has a height and has held still for
- * `STILL_FRAMES` drawn frames. A scroll, a docked panel or a dialog that is still moving moves the
- * mirror's box with it, and a press read off the box before then lands beside it.
+ * `STILL_FRAMES` of the browser's animation frames, which tick whether or not Compose drew. A
+ * scroll, a docked panel or a dialog that is still moving moves the mirror's box with it, and a
+ * press read off the box before then lands beside it. Pass a longer [timeout] where frames come
+ * slowly.
  */
 export async function settledBox(target: Locator, timeout?: number): Promise<Box> {
   const page = target.page();
@@ -85,7 +88,7 @@ export async function settledBox(target: Locator, timeout?: number): Promise<Box
   await expect
     .poll(
       async () => {
-        const frame = await framesDrawn(page);
+        const frame = await animationFrames(page);
         const box = await target.boundingBox();
         if (box === null || box.height === 0 || frame < since) {
           last = null;
@@ -105,10 +108,10 @@ export async function settledBox(target: Locator, timeout?: number): Promise<Box
 }
 
 /**
- * How many frames the page has drawn since the count started. The first call starts it, and it
- * stops once nothing has asked for five seconds, so the next call starts again from nothing.
+ * How many animation frames the browser has run since the count started. The first call starts it,
+ * and it stops once nothing has asked for five seconds, so the next call starts again from nothing.
  */
-async function framesDrawn(page: Page): Promise<number> {
+async function animationFrames(page: Page): Promise<number> {
   return page.evaluate(() => {
     const host = window as unknown as { __mkFrames?: { count: number; askedAt: number } };
     let frames = host.__mkFrames;

@@ -2,16 +2,13 @@ import { readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-// Fails when a spec or fixture sleeps, with `waitForTimeout` or a `setTimeout` that resolves a
-// promise. A test waits on something the page shows, stores or draws, never on the clock. The
-// holds that are part of a gesture or a quiet window live in fixtures/timing.ts under names that
-// say what the time means, and only those are allowed. The perf and preview runs measure time and
-// are left out.
+// Fails when a spec or fixture calls `waitForTimeout`, or `setTimeout` outside the named holds in
+// fixtures/timing.ts. The perf and preview runs are not checked.
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const CHECKED = ['tests', 'fixtures'];
 const WAIT_FOR_TIMEOUT = /\bwaitForTimeout\s*\(/;
-const SLEEP = /\bsetTimeout\s*\(\s*(?:resolve\b|\(\)\s*=>\s*resolve\s*\()/;
+const SLEEP = /\bsetTimeout\s*\(/;
 const TIMING = 'fixtures/timing.ts';
 const TIMED_HOLDS = new Set(['holdFingerDown', 'holdBetweenTouches', 'networkQuietFor', 'pauseBeforeServerCheck']);
 
@@ -23,7 +20,7 @@ for (const folder of CHECKED) {
     readFileSync(file, 'utf8')
       .split('\n')
       .forEach((line, index) => {
-        const declared = /^(?:export\s+)?(?:async\s+)?function\s+(\w+)/.exec(line);
+        const declared = /^(?:export\s+)?(?:async\s+)?(?:function|const|let|var|class|type|interface)\s+(\w+)/.exec(line);
         if (declared) inside = declared[1];
         const allowed = relative === TIMING && TIMED_HOLDS.has(inside);
         if (WAIT_FOR_TIMEOUT.test(line) || (SLEEP.test(line) && !allowed)) {

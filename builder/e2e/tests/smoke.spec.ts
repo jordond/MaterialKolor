@@ -49,7 +49,7 @@ for (const [engine, route] of [
     await page.goto(site(route));
     await expect(page.locator('#cmp_a11y_root > *').first()).toBeAttached({ timeout: 30_000 });
     await page.waitForLoadState('networkidle');
-    // Fonts and strings are asked for after the first frame, which can be after networkidle.
+    // Fonts are asked for after the first frame, which can be after networkidle.
     await networkQuietFor(responses);
 
     const counted = firstVisitFiles(engine);
@@ -62,9 +62,7 @@ for (const [engine, route] of [
     expect(fetched.filter((file) => !counted(file)), 'loaded at boot but not counted').toEqual([]);
     const root = process.env.MK_E2E_SITE_DIR;
     if (!root) throw new Error('MK_E2E_SITE_DIR is not set, the global setup did not run');
-    // String files load when a screen first reads them, so some load later than boot. They stay
-    // counted, which only makes the total stricter, and only this direction skips them.
-    const unfetched = siteFiles(root).filter((file) => counted(file) && !LAZY_STRINGS.test(file) && !fetched.includes(file));
+    const unfetched = siteFiles(root).filter((file) => counted(file) && !fetched.includes(file));
     expect(unfetched, 'counted but not loaded at boot').toEqual([]);
   });
 }
@@ -96,9 +94,6 @@ test('the server answers the way the host does', async ({ request }) => {
   expect(response.headers()['vary']).toBe('Accept-Encoding');
   expect(response.headers()['cache-control']).toBe('public, max-age=31536000, immutable');
 });
-
-/** Compose string resource files, which load on first use rather than at boot. */
-const LAZY_STRINGS = /^composeResources\/[^/]+\/values\/[^/]+\.cvr$/;
 
 function collectErrors(page: Page): string[] {
   const errors: string[] = [];

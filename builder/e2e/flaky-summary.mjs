@@ -1,7 +1,7 @@
 import { appendFileSync, existsSync, readFileSync } from 'node:fs';
 
 // Lists the tests in results.json, the JSON reporter's output, that failed and then passed on their
-// retry. A flaky test passes the run, so the CI job's summary is where it shows.
+// retry, in the CI job's step summary.
 
 const results = 'results.json';
 if (!existsSync(results)) process.exit(0);

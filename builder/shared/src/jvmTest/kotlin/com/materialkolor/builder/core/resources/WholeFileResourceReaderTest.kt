@@ -74,6 +74,31 @@ class WholeFileResourceReaderTest {
             reader.awaitReads()
         }
 
+    @Test
+    fun partPastTheEndOfTheFile_failsNamingTheFile() =
+        runTest {
+            val reader = readerOn(FakeReader())
+
+            val failure = shouldThrow<IllegalArgumentException> { reader.readPart(STRINGS, offset = 7, size = 3) }
+
+            failure.message shouldBe "$STRINGS has 9 bytes, not the 3 at 7 asked for"
+            reader.readPart(STRINGS, offset = 7, size = 2).decodeToString() shouldBe "hi"
+        }
+
+    @Test
+    fun close_cancelsThePartInFlight() =
+        runTest {
+            val reader = readerOn(FakeReader(CompletableDeferred()))
+            val part = launch { reader.readPart(STRINGS, offset = 0, size = 3) }
+            runCurrent()
+
+            reader.close()
+            runCurrent()
+
+            part.isCancelled shouldBe true
+            reader.isReading shouldBe false
+        }
+
     private fun TestScope.readerOn(base: ResourceReader): WholeFileResourceReader =
         WholeFileResourceReader(base, scope = CoroutineScope(SupervisorJob() + StandardTestDispatcher(testScheduler)))
 

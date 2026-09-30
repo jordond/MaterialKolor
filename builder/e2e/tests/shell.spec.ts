@@ -230,7 +230,7 @@ test.describe('error overlay', () => {
     await page.goto(site('/'));
     await expect(page.locator('#splash')).toHaveCount(0, { timeout: 30_000 });
     await page.evaluate(() => {
-      setTimeout(() => {
+      queueMicrotask(() => {
         throw new Error('Thrown by the shell spec');
       });
     });

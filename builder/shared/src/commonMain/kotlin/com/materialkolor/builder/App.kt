@@ -3,6 +3,7 @@ package com.materialkolor.builder
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.State
@@ -167,6 +168,7 @@ internal fun BuilderRoot(
     val firstFrame = remember { CompletableDeferred<Unit>() }
     val baseReader = LocalResourceReader.current
     val resourceReader = remember(baseReader) { WholeFileResourceReader(baseReader) }
+    DisposableEffect(resourceReader) { onDispose { resourceReader.close() } }
 
     LaunchedEffect(model) {
         model.boot()
@@ -207,15 +209,24 @@ internal fun BuilderRoot(
 }
 
 /**
- * Waits until every string the first screen asks for is in, frame after frame, since a string that
- * arrives can compose more that ask for their own.
+ * Waits until every string the first screen asks for is in. A string that arrives can compose more
+ * that ask for their own, and those start in the frames after it, so the screen counts as in once
+ * [SettledFrames] frames in a row start no read and end with none in flight.
  */
 private suspend fun WholeFileResourceReader.awaitFirstScreen() {
-    do {
+    var settled = 0
+    while (settled < SettledFrames) {
+        val asked = partsAskedFor
         awaitReads()
         withFrameNanos {}
-    } while (isReading)
+        settled = if (partsAskedFor == asked && !isReading) settled + 1 else 0
+    }
 }
+
+/**
+ * How many quiet frames in a row the first screen's strings take to count as in.
+ */
+private const val SettledFrames = 2
 
 /**
  * Tints the browser's own chrome with the surface the shell stands on.
