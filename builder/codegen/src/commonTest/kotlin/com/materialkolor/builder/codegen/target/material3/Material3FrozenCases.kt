@@ -3,13 +3,9 @@ package com.materialkolor.builder.codegen.target.material3
 import com.materialkolor.builder.codegen.ExportInput
 import com.materialkolor.builder.codegen.Fixture
 import com.materialkolor.builder.codegen.Fixtures
-import com.materialkolor.builder.codegen.GoldenDigest
-import com.materialkolor.builder.codegen.GoldenHashes
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
 import com.materialkolor.builder.codegen.target.expectedVariants
 import com.materialkolor.builder.codegen.target.frozenPrefs
-import com.materialkolor.builder.codegen.target.lintFailures
-import com.materialkolor.builder.codegen.target.materialKolorImports
 import com.materialkolor.builder.codegen.text.Literals
 import com.materialkolor.builder.domain.export.ContrastVariant
 import com.materialkolor.builder.domain.model.Library
@@ -22,7 +18,6 @@ import com.materialkolor.builder.domain.persist.ExportPrefs
 import com.materialkolor.builder.domain.persist.FrozenVariants
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 

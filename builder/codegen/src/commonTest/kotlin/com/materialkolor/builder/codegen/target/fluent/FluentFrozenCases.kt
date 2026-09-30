@@ -2,12 +2,8 @@ package com.materialkolor.builder.codegen.target.fluent
 
 import com.materialkolor.builder.codegen.ExportInput
 import com.materialkolor.builder.codegen.Fixtures
-import com.materialkolor.builder.codegen.GoldenDigest
-import com.materialkolor.builder.codegen.GoldenHashes
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
 import com.materialkolor.builder.codegen.target.frozenPrefs
-import com.materialkolor.builder.codegen.target.lintFailures
-import com.materialkolor.builder.codegen.target.materialKolorImports
 import com.materialkolor.builder.codegen.text.Literals
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.export.FluentShadeValues
@@ -18,7 +14,6 @@ import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.FrozenVariants
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 /**

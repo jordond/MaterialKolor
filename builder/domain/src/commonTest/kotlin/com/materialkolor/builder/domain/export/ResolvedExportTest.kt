@@ -4,7 +4,6 @@ import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.model.CustomSlot
 import com.materialkolor.builder.domain.model.Role
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class ResolvedExportTest {

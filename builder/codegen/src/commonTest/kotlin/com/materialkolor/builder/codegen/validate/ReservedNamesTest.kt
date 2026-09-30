@@ -16,7 +16,6 @@ import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.model.Accent
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
-import com.materialkolor.builder.domain.persist.ExportTarget
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

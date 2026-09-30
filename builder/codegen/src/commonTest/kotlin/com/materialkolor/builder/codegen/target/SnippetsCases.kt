@@ -2,16 +2,12 @@ package com.materialkolor.builder.codegen.target
 
 import com.materialkolor.builder.codegen.ExportInput
 import com.materialkolor.builder.codegen.Fixtures
-import com.materialkolor.builder.codegen.GoldenDigest
-import com.materialkolor.builder.codegen.GoldenHashes
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
 import com.materialkolor.builder.codegen.generate
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.ExportMode
 import com.materialkolor.builder.domain.persist.ExportPrefs
-import kotlin.test.Test
-import kotlin.test.assertEquals
 
 /**
  * The golden cases of the dependency snippets and the readme, by case name.

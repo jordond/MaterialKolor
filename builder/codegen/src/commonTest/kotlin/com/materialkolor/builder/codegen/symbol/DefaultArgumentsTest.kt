@@ -6,7 +6,6 @@ import com.materialkolor.builder.codegen.dsl.ref
 import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.ThemeDocument
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 

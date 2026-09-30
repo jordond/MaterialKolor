@@ -3,15 +3,11 @@ package com.materialkolor.builder.codegen.target.unstyled
 import com.materialkolor.builder.codegen.ExportInput
 import com.materialkolor.builder.codegen.Fixture
 import com.materialkolor.builder.codegen.Fixtures
-import com.materialkolor.builder.codegen.GoldenDigest
-import com.materialkolor.builder.codegen.GoldenHashes
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
-import com.materialkolor.builder.codegen.target.lintFailures
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.SpecVersion
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 

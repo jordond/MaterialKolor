@@ -1,18 +1,11 @@
 package com.materialkolor.builder.codegen
 
-import com.materialkolor.builder.domain.export.ContrastVariant
 import com.materialkolor.builder.domain.model.Library
-import com.materialkolor.builder.domain.model.Role
-import com.materialkolor.builder.domain.persist.ExportMode
 import com.materialkolor.builder.domain.persist.ExportPrefs
 import com.materialkolor.builder.domain.persist.ExportTarget
-import com.materialkolor.builder.domain.persist.FrozenVariants
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertNotEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 
 class ExportInputTest {
     @Test

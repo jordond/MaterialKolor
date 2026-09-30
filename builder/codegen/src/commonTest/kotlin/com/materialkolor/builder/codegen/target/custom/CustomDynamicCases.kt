@@ -3,13 +3,10 @@ package com.materialkolor.builder.codegen.target.custom
 import com.materialkolor.builder.codegen.ExportInput
 import com.materialkolor.builder.codegen.Fixture
 import com.materialkolor.builder.codegen.Fixtures
-import com.materialkolor.builder.codegen.GoldenDigest
-import com.materialkolor.builder.codegen.GoldenHashes
 import com.materialkolor.builder.codegen.dsl.Expression
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
 import com.materialkolor.builder.codegen.dsl.kotlinFile
 import com.materialkolor.builder.codegen.target.frozenPrefs
-import com.materialkolor.builder.codegen.target.lintFailures
 import com.materialkolor.builder.codegen.validate.ReservedNames
 import com.materialkolor.builder.domain.model.CustomSlot
 import com.materialkolor.builder.domain.model.CustomTone
@@ -21,7 +18,6 @@ import com.materialkolor.builder.domain.model.TonalRamp
 import com.materialkolor.builder.domain.persist.ExportTarget
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 

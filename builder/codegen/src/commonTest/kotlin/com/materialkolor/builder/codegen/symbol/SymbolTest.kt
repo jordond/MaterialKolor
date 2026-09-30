@@ -1,7 +1,6 @@
 package com.materialkolor.builder.codegen.symbol
 
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 

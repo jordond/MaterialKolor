@@ -6,7 +6,6 @@ import com.materialkolor.builder.codegen.symbol.Symbols
 import com.materialkolor.builder.codegen.text.Literals
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 /**
  * The files of the `dsl-forms` golden case, a small theme file that uses every form the code DSL

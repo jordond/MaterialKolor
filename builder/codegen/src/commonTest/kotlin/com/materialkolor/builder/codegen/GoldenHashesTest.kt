@@ -51,7 +51,9 @@ internal object GoldenCases {
     val exports: Map<String, ExportInput> = buildMap {
         sources.forEach { source ->
             source.cases.forEach { (case, input) ->
-                require(put(case, input) == null) { "Golden case $case appears twice, the second time in ${source.name}" }
+                require(
+                    put(case, input) == null,
+                ) { "Golden case $case appears twice, the second time in ${source.name}" }
             }
         }
     }
