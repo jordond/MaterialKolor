@@ -20,6 +20,7 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import com.materialkolor.builder.core.platform.Environment
 import com.materialkolor.builder.core.platform.PlatformServices
 import com.materialkolor.builder.core.platform.TimingMarks
+import com.materialkolor.builder.core.resources.WholeFileResourceReader
 import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.domain.capability.forTarget
 import com.materialkolor.builder.domain.color.Argb
@@ -53,6 +54,9 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withTimeoutOrNull
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.LocalResourceReader
 import kotlin.time.Clock
 
 /**
@@ -140,6 +144,7 @@ internal const val ShellExpressive: Boolean = true
  * switch plays once the first frame is up. None by default, and no warm-up then.
  * @param[probe] Drawn over the workspace with the state it was handed, for tests. Nothing by default.
  */
+@OptIn(ExperimentalResourceApi::class)
 @Composable
 internal fun BuilderRoot(
     graph: AppGraph,
@@ -155,9 +160,15 @@ internal fun BuilderRoot(
     val result by rememberThemeResult(document, graph.themeResolver, environment)
     val announcer = remember(environment) { Announcer { message -> environment.announce(message) } }
     val firstFrame = remember { CompletableDeferred<Unit>() }
+    val baseReader = LocalResourceReader.current
+    val resourceReader = remember(baseReader) { WholeFileResourceReader(baseReader) }
 
     LaunchedEffect(model) {
         model.boot()
+        withFrameNanos {}
+        // The splash stays up until the strings the first screen asked for are in and drawn.
+        withTimeoutOrNull(STRINGS_WAIT_MILLIS) { resourceReader.awaitReads() }
+        withFrameNanos {}
         withFrameNanos {}
         environment.hideSplash()
         environment.mark(TimingMarks.FIRST_FRAME)
@@ -167,6 +178,7 @@ internal fun BuilderRoot(
     ImageMarkEffects(environment)
 
     CompositionLocalProvider(
+        LocalResourceReader provides resourceReader,
         LocalThemeResult provides result,
         LocalThemeResolver provides graph.themeResolver,
         LocalAnnouncer provides announcer,
@@ -190,6 +202,12 @@ internal fun BuilderRoot(
         }
     }
 }
+
+/**
+ * The longest the splash waits on the first screen's strings, so a read that never answers still
+ * lets the builder show.
+ */
+private const val STRINGS_WAIT_MILLIS = 2_000L
 
 /**
  * Tints the browser's own chrome with the surface the shell stands on.

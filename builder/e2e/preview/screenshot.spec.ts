@@ -14,13 +14,24 @@ const OUT = process.env.MK_PR_SCREENSHOT ?? path.join(process.env.MK_E2E_SITE_DI
  */
 const NAMED_PROJECTS = '#cmp_a11y_root [aria-label^="Projects, "]';
 
+/** The poster's contrast levels, the last strings on the poster to arrive. */
+const CONTRAST_LEVELS = ['Reduced', 'Standard', 'Medium', 'High'];
+
 test('the builder at this commit', async ({ page }) => {
   // A staging build may carry an analytics token. A screenshot is not a visit.
   await page.route('https://static.cloudflareinsights.com/**', (route) => route.abort());
 
   await page.goto(site('/'));
   await expect(page.locator(NAMED_PROJECTS).first()).toBeAttached({ timeout: 60_000 });
-  // Let the first frames settle, the splash fade and the fonts among them.
-  await page.waitForTimeout(1_500);
+  for (const level of CONTRAST_LEVELS) {
+    await expect(page.locator(`#cmp_a11y_root [aria-label^="${level}, radio"]`), level).toHaveCount(1);
+  }
+  await page.waitForFunction(() => performance.getEntriesByName('mk:first-frame').length > 0);
+  // The splash fades out and then leaves the page.
+  await expect(page.locator('#splash')).toHaveCount(0);
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+    for (let frame = 0; frame < 3; frame++) await new Promise(requestAnimationFrame);
+  });
   await page.screenshot({ path: OUT });
 });
