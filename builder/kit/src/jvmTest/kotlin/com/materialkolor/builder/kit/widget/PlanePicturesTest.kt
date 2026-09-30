@@ -10,6 +10,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlin.coroutines.CoroutineContext
@@ -49,18 +50,17 @@ class PlanePicturesTest {
             val builder = HeldBuilder()
             val pictures = PlanePictures(builder)
             val hue = mutableDoubleStateOf(40.0)
-            val following = launch { pictures.follow { hue.doubleValue } }
-            runCurrent()
+            whileFollowing(pictures, builder, hue = { hue.doubleValue }) {
+                runCurrent()
+                builder.holding shouldBe true
 
-            hue.doubleValue = 80.0
-            Snapshot.sendApplyNotifications()
-            runCurrent()
-            builder.runHeld()
-            runCurrent()
+                hue.doubleValue = 80.0
+                Snapshot.sendApplyNotifications()
+                settle(builder)
 
-            pictures.shown?.hue shouldBe 80
-            KeptPictures.take(40).shouldBeNull()
-            following.cancel()
+                pictures.shown?.hue shouldBe 80
+                KeptPictures.take(40).shouldBeNull()
+            }
         }
 
     @Test
@@ -68,13 +68,14 @@ class PlanePicturesTest {
         runTest {
             val kept = planePicture(120)
             KeptPictures.keep(kept)
-            val pictures = PlanePictures(HeldBuilder())
-            val following = launch { pictures.follow { 120.0 } }
+            val builder = HeldBuilder()
+            val pictures = PlanePictures(builder)
+            whileFollowing(pictures, builder, hue = { 120.0 }) {
+                runCurrent()
 
-            runCurrent()
-
-            pictures.shown shouldBeSameInstanceAs kept
-            following.cancel()
+                builder.holding shouldBe false
+                pictures.shown shouldBeSameInstanceAs kept
+            }
         }
 }
 
@@ -84,6 +85,12 @@ class PlanePicturesTest {
  */
 private class HeldBuilder : CoroutineDispatcher() {
     private val held = ArrayDeque<Runnable>()
+
+    /**
+     * Whether a build is waiting for [runHeld].
+     */
+    val holding: Boolean
+        get() = held.isNotEmpty()
 
     override fun dispatch(
         context: CoroutineContext,
@@ -97,5 +104,37 @@ private class HeldBuilder : CoroutineDispatcher() {
      */
     fun runHeld() {
         while (held.isNotEmpty()) held.removeFirst().run()
+    }
+}
+
+/**
+ * Runs [check] while [pictures] follows [hue]. Afterwards, passed or not, it stops following and
+ * runs what [builder] still holds, so a cancelled build does not keep the test waiting on it.
+ */
+@OptIn(ExperimentalCoroutinesApi::class)
+private inline fun TestScope.whileFollowing(
+    pictures: PlanePictures,
+    builder: HeldBuilder,
+    noinline hue: () -> Double,
+    check: () -> Unit,
+) {
+    val following = launch { pictures.follow(hue) }
+    try {
+        check()
+    } finally {
+        following.cancel()
+        settle(builder)
+    }
+}
+
+/**
+ * Runs the main thread's work and every build [builder] holds, turn about, until neither has any.
+ */
+@OptIn(ExperimentalCoroutinesApi::class)
+private fun TestScope.settle(builder: HeldBuilder) {
+    runCurrent()
+    while (builder.holding) {
+        builder.runHeld()
+        runCurrent()
     }
 }
