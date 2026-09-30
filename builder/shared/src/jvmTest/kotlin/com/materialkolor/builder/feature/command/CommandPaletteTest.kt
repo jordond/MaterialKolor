@@ -1,36 +1,17 @@
 package com.materialkolor.builder.feature.command
 
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.platform.PlatformTextInputMethodRequest
 import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.SemanticsMatcher
-import androidx.compose.ui.test.SemanticsNodeInteraction
-import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotEnabled
-import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
-import androidx.compose.ui.test.hasAnyAncestor
-import androidx.compose.ui.test.hasAnyDescendant
-import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
-import androidx.compose.ui.test.hasSetTextAction
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
-import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.test.pressKey
-import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
-import androidx.compose.ui.test.withKeyDown
-import androidx.compose.ui.text.input.SetComposingTextCommand
 import com.materialkolor.builder.HEIGHT
 import com.materialkolor.builder.WAIT_MILLIS
 import com.materialkolor.builder.WIDTH
@@ -46,26 +27,12 @@ import com.materialkolor.builder.domain.persist.MotionOverride
 import com.materialkolor.builder.domain.persist.PreviewTab
 import com.materialkolor.builder.feature.canvas.RampTarget
 import com.materialkolor.builder.feature.workspace.FineTuneSection
-import com.materialkolor.builder.feature.workspace.Panel
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import io.kotest.matchers.string.shouldContain
-import org.jetbrains.compose.resources.stringResource
-import kotlin.test.AfterTest
 import kotlin.test.Test
 
 @OptIn(ExperimentalTestApi::class, ExperimentalComposeUiApi::class)
-class CommandPaletteTest {
-    private val harness = CommandHarness()
-
-    private val platform = harness.platform
-    private var categories: Map<CommandCategory, String> = emptyMap()
-
-    @AfterTest
-    fun tearDown() {
-        harness.close()
-    }
-
+internal class CommandPaletteTest : PaletteTestBase() {
     // The category is the header over the row now, and the keys are keycaps at its end.
     @Test
     fun everyCommand_listsUnderItsCategoryWithItsKeys_andADisabledOneWithItsReason() =
@@ -248,22 +215,6 @@ class CommandPaletteTest {
         }
 
     @Test
-    fun enterOnCopyShareLink_writesBeforeTheKeyHandlerReturns() =
-        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            boot()
-            openPalette()
-            search("copy share link")
-            rowLabels().first() shouldBe "Copy share link"
-            // No frame and no task runs after the key, so only a write started inside it lands.
-            mainClock.autoAdvance = false
-
-            field().performKeyInput { pressKey(Key.Enter) }
-
-            platform.clipboard.texts.size shouldBe 1
-            platform.clipboard.texts.single() shouldContain "/t/"
-        }
-
-    @Test
     fun saveNow_stillSaysSaved_afterThePaletteHasGone() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             boot()
@@ -275,137 +226,6 @@ class CommandPaletteTest {
 
             harness.workspace.state.value.panel shouldBe null
             waitUntil(timeoutMillis = WAIT_MILLIS) { named("Saved") }
-        }
-
-    @Test
-    fun enterWhileAnInputMethodComposes_runsNothing() =
-        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            var session: PlatformTextInputMethodRequest? = null
-            with(harness) { show(onTextInput = { request -> session = request }, probe = { categories() }) }
-            session = null
-            openPalette()
-            search("copy share lin")
-            waitUntil(timeoutMillis = WAIT_MILLIS) { session != null }
-            val request = checkNotNull(session)
-            runOnUiThread { request.onEditCommand(listOf(SetComposingTextCommand("k", 1))) }
-            waitForIdle()
-            request.value().composition shouldNotBe null
-            rowLabels().first() shouldBe "Copy share link"
-
-            field().performKeyInput { pressKey(Key.Enter) }
-            waitForIdle()
-
-            platform.clipboard.texts shouldBe emptyList()
-            harness.workspace.state.value.panel shouldBe Panel.Palette
-        }
-
-    @Test
-    fun esc_throwsTheSearchAway_thenCloses() =
-        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            boot()
-            openPalette()
-            search("zzz")
-            rowLabels() shouldBe emptyList()
-
-            field().performKeyInput { pressKey(Key.Escape) }
-            waitForIdle()
-            harness.workspace.state.value.panel shouldBe Panel.Palette
-            rowLabels().first() shouldBe harness.commands.first { command -> command.id != "palette" }.label
-            field().performKeyInput { pressKey(Key.Escape) }
-            waitForIdle()
-
-            harness.workspace.state.value.panel shouldBe null
-        }
-
-    @Test
-    fun downAndUp_moveBetweenTheFieldAndTheRows() =
-        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            boot()
-            openPalette()
-            search("shuffle")
-            val shuffle = harness.command("shuffle").label
-
-            field().performKeyInput { pressKey(Key.DirectionDown) }
-            waitForIdle()
-            onNode(rowMatcher(shuffle)).assertIsFocused()
-            onNode(rowMatcher(shuffle)).performKeyInput { pressKey(Key.DirectionUp) }
-            waitForIdle()
-
-            field().assertIsFocused()
-        }
-
-    @Test
-    fun closing_handsFocusBackToCommands_whenItsButtonOpenedIt() =
-        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            boot()
-            val commands = onNode(
-                hasClickAction() and hasContentDescription("Command palette") and !InPalette,
-            )
-            commands.performClick()
-            waitForIdle()
-            harness.workspace.state.value.panel shouldBe Panel.Palette
-
-            field().performKeyInput { pressKey(Key.Escape) }
-            waitForIdle()
-
-            harness.workspace.state.value.panel shouldBe null
-            commands.assertIsFocused()
-        }
-
-    @Test
-    fun closing_handsFocusBackToThePage_whenCtrlKOpenedIt() =
-        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            boot()
-            keys { withKeyDown(Key.CtrlLeft) { pressKey(Key.K) } }
-            harness.workspace.state.value.panel shouldBe Panel.Palette
-
-            field().performKeyInput { pressKey(Key.Escape) }
-            waitForIdle()
-            harness.workspace.state.value.panel shouldBe null
-            onNode(hasClickAction() and hasContentDescription("Command palette")).assertIsNotFocused()
-            val seed = harness.graph.session.document.value.seed
-            keys { pressKey(Key.Spacebar) }
-
-            harness.graph.session.document.value.seed shouldNotBe seed
-        }
-
-    /**
-     * On the desktop the palette is a window of its own, so the page's holder keeps focus in the
-     * page's window, the way it does on the web in the frames before the palette takes focus.
-     */
-    @Test
-    fun esc_thatReachesThePage_closesThePalette() =
-        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            boot()
-            keys { withKeyDown(Key.CtrlLeft) { pressKey(Key.K) } }
-            harness.workspace.state.value.panel shouldBe Panel.Palette
-
-            onNode(isRoot() and hasAnyDescendant(CommandsButton)).performKeyInput { pressKey(Key.Escape) }
-            waitForIdle()
-
-            harness.workspace.state.value.panel shouldBe null
-        }
-
-    @Test
-    fun ctrlSInsideThePalette_saves_andCtrlO_leavesItOpen() =
-        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            boot()
-            openPalette()
-
-            field().performKeyInput { withKeyDown(Key.CtrlLeft) { pressKey(Key.O) } }
-            waitForIdle()
-            harness.workspace.state.value.panel shouldBe Panel.Palette
-            field().performKeyInput { withKeyDown(Key.CtrlLeft) { pressKey(Key.S) } }
-            waitForIdle()
-
-            harness.workspace.state.value.panel shouldBe Panel.Palette
-            // The poster's Projects button carries the save state now, and the open palette keeps
-            // the poster out of the tree, so the button reads once the palette has closed.
-            onNode(isRoot() and hasAnyDescendant(CommandsButton)).performKeyInput { pressKey(Key.Escape) }
-            val saved = hasContentDescription(", saved", substring = true) and InWorkspace
-            waitUntil(
-                timeoutMillis = WAIT_MILLIS,
-            ) { onAllNodes(saved, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
         }
 
     @Test
@@ -445,65 +265,4 @@ class CommandPaletteTest {
             harness.workspace.state.value.panel shouldBe null
             harness.workspace.state.value.visionMenuOpen shouldBe true
         }
-
-    private fun ComposeUiTest.boot() {
-        with(harness) { show(probe = { categories() }) }
-    }
-
-    @Composable
-    private fun categories() {
-        categories = CommandCategory.entries.associateWith { category -> stringResource(category.title) }
-    }
-
-    private fun ComposeUiTest.openPalette() {
-        runOnUiThread { harness.workspace.openPanel(Panel.Palette) }
-        waitForIdle()
-    }
-
-    private fun ComposeUiTest.field(): SemanticsNodeInteraction = onNode(hasSetTextAction() and InPalette)
-
-    private fun ComposeUiTest.search(text: String) {
-        field().requestFocus()
-        field().performTextInput(text)
-        waitForIdle()
-    }
-
-    private fun ComposeUiTest.enter() {
-        field().performKeyInput { pressKey(Key.Enter) }
-        waitForIdle()
-    }
-
-    /**
-     * The palette's rows, top first, by their labels.
-     */
-    private fun ComposeUiTest.rowLabels(): List<String> =
-        onAllNodes(PaletteRow)
-            .fetchSemanticsNodes()
-            .sortedBy { node -> node.positionInRoot.y }
-            .map { node ->
-                node.config[SemanticsProperties.Text]
-                    .first()
-                    .text
-            }
-
-    private fun rowMatcher(
-        label: String,
-        supporting: String? = null,
-    ): SemanticsMatcher {
-        val labelled = PaletteRow and hasText(label)
-        return if (supporting == null) labelled else labelled and hasText(supporting)
-    }
 }
-
-private val InPalette: SemanticsMatcher = hasAnyAncestor(
-    SemanticsMatcher.expectValue(SemanticsProperties.PaneTitle, "Command palette"),
-)
-
-private val PaletteRow: SemanticsMatcher =
-    hasClickAction() and InPalette and !hasSetTextAction() and !hasText("Close") and !hasContentDescription("Close")
-
-/**
- * The top bar's Commands button, which only the page's own window holds.
- */
-private val CommandsButton: SemanticsMatcher =
-    hasClickAction() and hasContentDescription("Command palette") and !InPalette

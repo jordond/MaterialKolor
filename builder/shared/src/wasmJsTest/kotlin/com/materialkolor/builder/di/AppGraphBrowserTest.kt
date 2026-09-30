@@ -52,26 +52,29 @@ class AppGraphBrowserTest {
     fun metroViewModel_acrossRecompositionsInTheBrowser_keepsOneModel() =
         runComposeUiTest {
             val scope = CoroutineScope(Job())
-            val graph = createGraphFactory<AppGraph.Factory>().create(TestPlatform, scope, Clock.System)
-            val tick = mutableIntStateOf(0)
-            val seen = mutableListOf<AppModel>()
-            setContent {
-                CompositionLocalProvider(LocalMetroViewModelFactory provides graph.metroViewModelFactory) {
-                    val model = metroViewModel<AppModel>()
-                    seen += model
-                    BasicText("tick ${tick.intValue}")
+            try {
+                val graph = createGraphFactory<AppGraph.Factory>().create(TestPlatform, scope, Clock.System)
+                val tick = mutableIntStateOf(0)
+                val seen = mutableListOf<AppModel>()
+                setContent {
+                    CompositionLocalProvider(LocalMetroViewModelFactory provides graph.metroViewModelFactory) {
+                        val model = metroViewModel<AppModel>()
+                        seen += model
+                        BasicText("tick ${tick.intValue}")
+                    }
                 }
-            }
 
-            repeat(2) {
-                tick.intValue++
-                awaitIdle()
-            }
+                repeat(2) {
+                    tick.intValue++
+                    awaitIdle()
+                }
 
-            onNodeWithText("tick 2").assertExists()
-            seen shouldHaveAtLeastSize 3
-            seen.forEach { model -> model shouldBeSameInstanceAs seen.first() }
-            scope.cancel()
+                onNodeWithText("tick 2").assertExists()
+                seen shouldHaveAtLeastSize 3
+                seen.forEach { model -> model shouldBeSameInstanceAs seen.first() }
+            } finally {
+                scope.cancel()
+            }
         }
 }
 

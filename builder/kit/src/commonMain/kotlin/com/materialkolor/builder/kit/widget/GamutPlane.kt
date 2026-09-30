@@ -56,7 +56,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import com.materialkolor.builder.domain.edit.EditPhase
-import com.materialkolor.builder.kit.a11y.KitTestApi
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.ControlState
@@ -78,7 +77,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
-import kotlin.concurrent.Volatile
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -283,42 +281,6 @@ private fun planeSpan(hue: Double): Double {
 }
 
 /**
- * Forgets every plane picture kept so far, so the next plane builds its own as a first one would.
- */
-@KitTestApi
-public fun forgetPlanePictures() {
-    KeptPictures.clear()
-}
-
-/**
- * The pictures of the last [KeptHues] whole hues, the most recently shown last. The main thread
- * reads and writes it, and a test clears it from its own thread in between, so every change swaps
- * in a whole new map.
- */
-private object KeptPictures {
-    @Volatile
-    private var pictures: Map<Int, PlanePicture> = emptyMap()
-
-    fun take(hue: Int): PlanePicture? {
-        val picture = pictures[hue] ?: return null
-        pictures = pictures - hue + (hue to picture)
-        return picture
-    }
-
-    fun keep(picture: PlanePicture) {
-        pictures = (pictures - picture.hue + (picture.hue to picture))
-            .entries
-            .toList()
-            .takeLast(KeptHues)
-            .associate { (hue, kept) -> hue to kept }
-    }
-
-    fun clear() {
-        pictures = emptyMap()
-    }
-}
-
-/**
  * The picture a plane shows, which trails the hue. The last one stays up until the next is ready.
  */
 @Stable
@@ -489,11 +451,6 @@ private const val ToneTop: Int = 100
  */
 private const val SamplesAcross: Int = 64
 private const val SamplesUp: Int = 44
-
-/**
- * How many whole hues keep their picture.
- */
-private const val KeptHues: Int = 48
 
 /**
  * How far past the widest chroma of a hue the plane runs, so the sRGB shape never touches its side.

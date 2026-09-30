@@ -129,6 +129,26 @@ class PrimaryOverrideTest {
 
     @Suppress("DEPRECATION")
     @Test
+    fun deprecatedDynamicColorScheme_everyStyle_matchesItsReplacement() {
+        for (style in PaletteStyle.KnownStyles) {
+            for (color in overrides) {
+                for (isDark in listOf(false, true)) {
+                    val deprecated = dynamicColorScheme(primary = color, isDark = isDark, style = style)
+                    val replacement = dynamicColorScheme(
+                        seedColor = color,
+                        isDark = isDark,
+                        primary = color,
+                        style = style,
+                    )
+
+                    assertEquals(replacement.roles(), deprecated.roles(), "style=$style color=$color isDark=$isDark")
+                }
+            }
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    @Test
     fun deprecatedDynamicColorScheme_seedsAndPinsPrimaryWithTheColor() {
         assertEquals(tonalSpotLight, dynamicColorScheme(primary = deprecatedColor, isDark = false).accents())
         assertEquals(tonalSpotDark, dynamicColorScheme(primary = deprecatedColor, isDark = true).accents())

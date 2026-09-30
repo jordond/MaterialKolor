@@ -37,6 +37,20 @@ import kotlin.test.Test
 @OptIn(ExperimentalTestApi::class)
 class TabMovesFocusTest {
     @Test
+    fun tab_inABareMultiLineField_typesATab() =
+        runComposeUiTest {
+            var text by mutableStateOf("")
+            setContent { Between { MultiLineField(text, { typed -> text = typed }, Modifier) } }
+
+            focusField()
+            onNode(hasSetTextAction()).performKeyInput { pressKey(Key.Tab) }
+            waitForIdle()
+
+            text shouldBe "\t"
+            onNode(hasSetTextAction()).assertIsFocused()
+        }
+
+    @Test
     fun tab_inAMultiLineFieldUsingIt_movesOnWithoutTyping() =
         runComposeUiTest {
             var text by mutableStateOf("")

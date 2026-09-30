@@ -12,6 +12,7 @@ import com.materialkolor.material3.fields
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
 class ColorSchemeTest {
@@ -49,11 +50,15 @@ class ColorSchemeTest {
             mainClock.advanceTimeByFrame()
             mainClock.advanceTimeBy(80)
 
-            val midFlight = requireNotNull(result)
-            assertNotEquals(lightScheme.primary, midFlight.primary)
-            assertNotEquals(darkScheme.primary, midFlight.primary)
-            assertNotEquals(lightScheme.surface, midFlight.surface)
-            assertNotEquals(darkScheme.surface, midFlight.surface)
+            val light = lightScheme.fields()
+            val dark = darkScheme.fields()
+            val midFlight = requireNotNull(result).fields()
+            val moving = light.keys.filter { name -> light[name] != dark[name] }
+            assertTrue(moving.size > 1)
+            for (name in moving) {
+                assertNotEquals(light[name], midFlight[name], "$name is still light mid-flight")
+                assertNotEquals(dark[name], midFlight[name], "$name is already dark mid-flight")
+            }
 
             mainClock.autoAdvance = true
             waitForIdle()
