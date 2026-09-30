@@ -1,7 +1,6 @@
 package com.materialkolor.builder.feature.topbar
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.input.key.Key
@@ -32,21 +31,18 @@ import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModelStore
-import androidx.lifecycle.ViewModelStoreOwner
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import com.materialkolor.builder.AppHarness
 import com.materialkolor.builder.BuilderRoot
+import com.materialkolor.builder.HEIGHT
+import com.materialkolor.builder.WAIT_MILLIS
 import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.domain.edit.EditPhase
-import com.materialkolor.builder.fakes.FakePlatform
 import com.materialkolor.builder.feature.command.InWorkspace
 import com.materialkolor.builder.kit.a11y.KitTestApi
 import com.materialkolor.builder.kit.a11y.ProvideOverlaysInTreeForTest
 import com.materialkolor.builder.kit.a11y.ProvideWebFoldsForTest
 import com.materialkolor.builder.kit.layout.LayoutInfo
 import com.materialkolor.builder.kit.layout.WindowClass
-import dev.zacsweers.metro.createGraphFactory
-import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.floats.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.longs.shouldBeGreaterThan
@@ -56,9 +52,8 @@ import kotlinx.coroutines.runBlocking
 import java.io.File
 import javax.imageio.ImageIO
 import kotlin.math.roundToInt
+import kotlin.test.AfterTest
 import kotlin.test.Test
-
-private const val HEIGHT = 800
 
 /** How long a dropdown pick may take to reach the document, its menu's exit included. */
 private const val PICK_TIMEOUT_MS = 5_000L
@@ -80,6 +75,13 @@ private val InSwitcher: SemanticsMatcher =
 
 @OptIn(ExperimentalTestApi::class, KitTestApi::class)
 class CompactMediumTopBarTest {
+    private val app = AppHarness()
+
+    @AfterTest
+    fun tearDown() {
+        app.close()
+    }
+
     @Test
     fun at360_everySkin_fitsAndMeetsTheTouchTargets() = checkEverySkin(width = 360)
 
@@ -342,25 +344,13 @@ class CompactMediumTopBarTest {
         folds: Boolean = true,
         inTree: Boolean = false,
     ): AppGraph {
-        val platform = FakePlatform()
-        val graph = createGraphFactory<AppGraph.Factory>().create(platform)
-        val owner = TestOwner()
-        setContent {
-            CompositionLocalProvider(
-                LocalViewModelStoreOwner provides owner,
-                LocalMetroViewModelFactory provides graph.metroViewModelFactory,
-            ) {
+        val graph = with(app) {
+            bootRoot { graph ->
                 val root = @Composable { BuilderRoot(graph) }
                 val named = @Composable { if (folds) ProvideWebFoldsForTest(root) else root() }
                 if (inTree) ProvideOverlaysInTreeForTest(named) else named()
             }
         }
-        waitUntil { platform.environment.splashHidden }
-        waitForIdle()
         return graph
-    }
-
-    private class TestOwner : ViewModelStoreOwner {
-        override val viewModelStore: ViewModelStore = ViewModelStore()
     }
 }

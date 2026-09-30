@@ -12,8 +12,8 @@ import kotlin.test.Test
  *
  * Gradle already keeps UI libraries out of the modules that do not declare them. This catches what
  * slips through anyway, a scheme built outside the engine, browser interop outside the web shell,
- * `Dispatchers.IO`, an animation that would keep running while the tab sleeps, or a public
- * declaration in shared or an app.
+ * `Dispatchers.IO`, an animation that would keep running while the tab sleeps, a public declaration
+ * in shared or an app, or a JVM test waiting on the default timeout.
  */
 class ArchitectureTest {
     @Test
@@ -155,6 +155,36 @@ class ArchitectureTest {
         )
 
         scan(listOf(file)).shouldBeEmpty()
+    }
+
+    @Test
+    fun scan_waitUntilOnItsDefaultTimeoutInAJvmTest_reportsEachCall() {
+        val file = planted(
+            "kit/src/jvmTest",
+            """
+            waitUntil { session != null }
+            waitUntil("the toast") { shown }
+            waitUntil(
+                timeoutMillis = WAIT_MILLIS,
+            ) { shown }
+            """,
+        )
+
+        scan(listOf(file)).map { violation -> violation.rule } shouldBe List(3) { ArchitectureRule.WaitTimeout }
+    }
+
+    @Test
+    fun scan_waitUntilWithItsOwnTimeoutOrOutsideAJvmTest_passes() {
+        val test = planted(
+            "shared/src/jvmTest",
+            """
+            waitUntil(timeoutMillis = WAIT_MILLIS) { platform.environment.splashHidden }
+            waitUntil("the toast", timeoutMillis = 10_000) { shown }
+            """,
+        )
+        val common = planted("shared/src/commonTest", "waitUntil { shown }")
+
+        scan(listOf(test, common)).shouldBeEmpty()
     }
 
     @Test
@@ -326,6 +356,15 @@ internal enum class ArchitectureRule(
     InfiniteAnimation(
         pattern = Regex("""\b(rememberInfiniteTransition|infiniteRepeatable)\b"""),
         appliesTo = { file -> file.path != LOOP_PHASE_PATH },
+    ),
+
+    /**
+     * A Compose test on the JVM names the time it waits for a condition, on the same line as the
+     * call. The one second default runs out on a busy machine long before the test's clock does.
+     */
+    WaitTimeout(
+        pattern = Regex("""\bwaitUntil\s*(?:\{|\((?![^)]*\btimeoutMillis\b))"""),
+        appliesTo = { file -> file.sourceSet == "jvmTest" },
     ),
 
     /**

@@ -1,6 +1,5 @@
 package com.materialkolor.builder.feature.image
 
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasText
@@ -8,26 +7,28 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import com.materialkolor.builder.AppHarness
 import com.materialkolor.builder.BuilderRoot
+import com.materialkolor.builder.HEIGHT
+import com.materialkolor.builder.WAIT_MILLIS
+import com.materialkolor.builder.WIDTH
 import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.domain.model.SeedSource
 import com.materialkolor.builder.fakes.FakeImageHandle
-import com.materialkolor.builder.fakes.FakePlatform
-import com.materialkolor.builder.feature.canvas.TestOwner
-import dev.zacsweers.metro.createGraphFactory
-import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import kotlin.test.AfterTest
 import kotlin.test.Test
-
-private const val WIDTH = 1280
-private const val HEIGHT = 800
-private const val WAIT_MILLIS = 5_000L
 
 @OptIn(ExperimentalTestApi::class)
 class ImagePickTest {
-    private val platform = FakePlatform()
+    private val app = AppHarness()
+    private val platform = app.platform
+
+    @AfterTest
+    fun tearDown() {
+        app.close()
+    }
 
     @Test
     fun uploadImage_opensThePickerBeforeTheClickReturns() =
@@ -87,18 +88,11 @@ class ImagePickTest {
      * The whole builder on fakes, booted.
      */
     private fun ComposeUiTest.showRoot(): AppGraph {
-        val graph = createGraphFactory<AppGraph.Factory>().create(platform)
-        val owner = TestOwner()
-        setContent {
-            CompositionLocalProvider(
-                LocalViewModelStoreOwner provides owner,
-                LocalMetroViewModelFactory provides graph.metroViewModelFactory,
-            ) {
+        val graph = with(app) {
+            bootRoot { graph ->
                 BuilderRoot(graph)
             }
         }
-        waitUntil { platform.environment.splashHidden }
-        waitForIdle()
         return graph
     }
 

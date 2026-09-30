@@ -15,30 +15,26 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.performKeyInput
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import com.materialkolor.builder.AppHarness
 import com.materialkolor.builder.BuilderRoot
-import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.fakes.FakePlatform
 import com.materialkolor.builder.feature.canvas.DEVICE_SCREEN_TAG
-import com.materialkolor.builder.feature.canvas.TestOwner
 import com.materialkolor.builder.feature.history.LocalSwatchReadProbe
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.kit.a11y.KitTestApi
 import com.materialkolor.builder.kit.a11y.ProvideOverlaysInTreeForTest
 import dev.stateholder.dispatcher.rememberDispatcher
-import dev.zacsweers.metro.createGraphFactory
-import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 
 /**
  * The whole builder on fakes, booted, with the command registry of every composition in [commands].
+ * Each test class that uses one calls [close] from its `@AfterTest`.
  */
 @OptIn(ExperimentalTestApi::class, KitTestApi::class)
 internal class CommandHarness(
-    val platform: FakePlatform = FakePlatform(),
-) {
+    platform: FakePlatform = FakePlatform(),
+) : AppHarness(platform) {
     lateinit var workspace: WorkspaceModel
-    lateinit var graph: AppGraph
     var commands: List<Command> = emptyList()
 
     /**
@@ -61,16 +57,12 @@ internal class CommandHarness(
         inTree: Boolean = false,
         swatchReads: (() -> Unit)? = null,
     ) {
-        graph = createGraphFactory<AppGraph.Factory>().create(platform)
-        val owner = TestOwner()
         val watcher = PlatformTextInputInterceptor { request, nextHandler ->
             onTextInput(request)
             nextHandler.startInputMethod(request)
         }
-        setContent {
+        bootRoot { graph ->
             CompositionLocalProvider(
-                LocalViewModelStoreOwner provides owner,
-                LocalMetroViewModelFactory provides graph.metroViewModelFactory,
                 LocalRegistryBuilds provides registryBuilds,
                 LocalSwatchReadProbe provides swatchReads,
             ) {
@@ -88,8 +80,6 @@ internal class CommandHarness(
                 }
             }
         }
-        waitUntil { platform.environment.splashHidden }
-        waitForIdle()
     }
 }
 

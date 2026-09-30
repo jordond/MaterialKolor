@@ -20,6 +20,9 @@ import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
+import com.materialkolor.builder.HEIGHT
+import com.materialkolor.builder.WAIT_MILLIS
+import com.materialkolor.builder.WIDTH
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
@@ -36,10 +39,8 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import kotlin.test.AfterTest
 import kotlin.test.Test
-
-private const val WIDTH = 1280
-private const val HEIGHT = 800
 
 /**
  * How many times the drag under the open list moves the seed, one move every other frame.
@@ -69,6 +70,11 @@ private const val SHIFT_FRAMES = 6
 @OptIn(ExperimentalTestApi::class)
 class TimelineTest {
     private val harness = CommandHarness()
+
+    @AfterTest
+    fun tearDown() {
+        harness.close()
+    }
 
     @Test
     fun timeline_keysOpenMoveAndApply_staysOpenAndEscReturnsFocus() =
@@ -103,14 +109,18 @@ class TimelineTest {
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             boot()
             runOnUiThread { harness.workspace.edit(LibraryChoice.Unstyled.change, EditPhase.Discrete) }
-            waitUntil { harness.workspace.state.value.document.library == Library.Unstyled }
+            waitUntil(
+                timeoutMillis = WAIT_MILLIS,
+            ) { harness.workspace.state.value.document.library == Library.Unstyled }
             waitForIdle()
 
             keys { pressKey(Key.H) }
             focusedRow().assertIsSelected().assert(hasText("Library change to Unstyled"))
             keys { pressKey(Key.DirectionDown) }
             keys { pressKey(Key.Enter) }
-            waitUntil { harness.workspace.state.value.document.library == Library.Material3 }
+            waitUntil(
+                timeoutMillis = WAIT_MILLIS,
+            ) { harness.workspace.state.value.document.library == Library.Material3 }
             waitForIdle()
 
             harness.workspace.state.value.panel shouldBe Panel.History
@@ -122,7 +132,7 @@ class TimelineTest {
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             boot()
             runOnUiThread { harness.workspace.pickLibrary(LibraryChoice.M3Expressive) }
-            waitUntil { harness.workspace.state.value.document.style == Style.Expressive }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { harness.workspace.state.value.document.style == Style.Expressive }
             waitForIdle()
 
             keys { pressKey(Key.H) }
@@ -147,7 +157,9 @@ class TimelineTest {
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             boot()
             runOnUiThread { harness.workspace.edit(LibraryChoice.Unstyled.change, EditPhase.Discrete) }
-            waitUntil { harness.workspace.state.value.document.library == Library.Unstyled }
+            waitUntil(
+                timeoutMillis = WAIT_MILLIS,
+            ) { harness.workspace.state.value.document.library == Library.Unstyled }
             waitForIdle()
 
             // A busy page can take the key on any frame of the switch, so Esc goes in after each
@@ -220,10 +232,10 @@ class TimelineTest {
             .fetchSemanticsNodes()
             .size shouldBe if (historyInBar) 1 else 0
         runOnUiThread { harness.workspace.edit(LibraryChoice.Fluent.change, EditPhase.Discrete) }
-        waitUntil { harness.workspace.state.value.document.library == Library.Fluent }
+        waitUntil(timeoutMillis = WAIT_MILLIS) { harness.workspace.state.value.document.library == Library.Fluent }
         waitForIdle()
         runOnUiThread { harness.workspace.undo() }
-        waitUntil { harness.workspace.state.value.document.library == Library.Material3 }
+        waitUntil(timeoutMillis = WAIT_MILLIS) { harness.workspace.state.value.document.library == Library.Material3 }
         waitForIdle()
 
         keys { pressKey(Key.H) }
@@ -234,7 +246,7 @@ class TimelineTest {
         focusedRow().performKeyInput { pressKey(Key.DirectionUp) }
         waitForIdle()
         focusedRow().assert(hasText("Library change to Fluent")).performKeyInput { pressKey(Key.Enter) }
-        waitUntil { harness.workspace.state.value.document.library == Library.Fluent }
+        waitUntil(timeoutMillis = WAIT_MILLIS) { harness.workspace.state.value.document.library == Library.Fluent }
         waitForIdle()
 
         harness.workspace.state.value.panel shouldBe Panel.History

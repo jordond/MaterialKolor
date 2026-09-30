@@ -29,6 +29,9 @@ import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.test.withKeyDown
 import androidx.compose.ui.text.input.SetComposingTextCommand
+import com.materialkolor.builder.HEIGHT
+import com.materialkolor.builder.WAIT_MILLIS
+import com.materialkolor.builder.WIDTH
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.persist.DeviceWidth
@@ -41,15 +44,19 @@ import com.materialkolor.builder.feature.workspace.ShuffleLock
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
+import kotlin.test.AfterTest
 import kotlin.test.Test
-
-private const val WIDTH = 1280
-private const val HEIGHT = 800
 
 @OptIn(ExperimentalTestApi::class, ExperimentalComposeUiApi::class)
 class ShortcutsTest {
     private val harness = CommandHarness()
+
     private val platform = harness.platform
+
+    @AfterTest
+    fun tearDown() {
+        harness.close()
+    }
 
     @Test
     fun space_afterBootWithNothingFocused_shuffles() =
@@ -76,7 +83,10 @@ class ShortcutsTest {
             )
             keysToChoices.forEach { (key, choice) ->
                 keys { pressKey(key) }
-                waitUntil { LibraryChoice.of(harness.graph.session.document.value) == choice }
+                waitUntil(timeoutMillis = WAIT_MILLIS) {
+                    LibraryChoice.of(harness.graph.session.document.value) ==
+                        choice
+                }
 
                 runOnUiThread { harness.workspace.undo() }
                 waitForIdle()
@@ -171,7 +181,7 @@ class ShortcutsTest {
             waitForIdle()
 
             keys { withKeyDown(Key.CtrlLeft) { pressKey(Key.S) } }
-            waitUntil { named("Saved") }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { named("Saved") }
             keys { withKeyDown(Key.CtrlLeft) { pressKey(Key.O) } }
             harness.workspace.state.value.panel shouldBe Panel.Projects
             // An open panel owns the keyboard, so the field takes focus again before Ctrl+K.
@@ -263,7 +273,7 @@ class ShortcutsTest {
             var session: PlatformTextInputMethodRequest? = null
             with(harness) { show(onTextInput = { request -> session = request }) }
             onAllNodes(hasSetTextAction()).onFirst().requestFocus()
-            waitUntil { session != null }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { session != null }
 
             typeEverySingleKeyChangesNothing {
                 val request = checkNotNull(session)
@@ -299,7 +309,7 @@ class ShortcutsTest {
             val hint = hasText(reason)
             // The poster's Shuffle reads it out all along, once it has caught up with the locks.
             val shuffleSaysWhy = hasContentDescription(reason, substring = true)
-            waitUntil { onAllNodes(shuffleSaysWhy).fetchSemanticsNodes().isNotEmpty() }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { onAllNodes(shuffleSaysWhy).fetchSemanticsNodes().isNotEmpty() }
             val before = onAllNodes(hint, useUnmergedTree = true).fetchSemanticsNodes().size
             val seed = seed()
 
@@ -345,7 +355,7 @@ class ShortcutsTest {
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             boot()
             runOnUiThread { harness.command("singleKeys").run() }
-            waitUntil { !harness.workspace.state.value.preferences.singleKeyShortcuts }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { !harness.workspace.state.value.preferences.singleKeyShortcuts }
             val seed = seed()
 
             keys { pressKey(Key.Spacebar) }

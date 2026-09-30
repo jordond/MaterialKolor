@@ -10,16 +10,17 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.test.withKeyDown
+import com.materialkolor.builder.HEIGHT
+import com.materialkolor.builder.WAIT_MILLIS
+import com.materialkolor.builder.WIDTH
 import com.materialkolor.builder.feature.export.ExportModel
 import com.materialkolor.builder.feature.export.ExportOutcome
 import com.materialkolor.builder.feature.workspace.Panel
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import kotlin.test.AfterTest
 import kotlin.test.Test
-
-private const val WIDTH = 1280
-private const val HEIGHT = 800
 
 /**
  * C and Shift+C inside the export sheet copy its files, from inside the key press.
@@ -27,7 +28,13 @@ private const val HEIGHT = 800
 @OptIn(ExperimentalTestApi::class)
 class ExportSheetKeysTest {
     private val harness = CommandHarness()
+
     private lateinit var export: ExportModel
+
+    @AfterTest
+    fun tearDown() {
+        harness.close()
+    }
 
     @Test
     fun c_copiesThePickedFileBeforeTheHandlerReturns() =
@@ -55,7 +62,7 @@ class ExportSheetKeysTest {
     private fun ComposeUiTest.openSheet(): ExportOutcome.Ready {
         with(harness) { show(probe = { export = metroViewModel() }) }
         runOnUiThread { harness.workspace.openPanel(Panel.Export) }
-        waitUntil { named("Copy all") }
+        waitUntil(timeoutMillis = WAIT_MILLIS) { named("Copy all") }
         waitForIdle()
         return export.outcome().shouldBeInstanceOf<ExportOutcome.Ready>()
     }

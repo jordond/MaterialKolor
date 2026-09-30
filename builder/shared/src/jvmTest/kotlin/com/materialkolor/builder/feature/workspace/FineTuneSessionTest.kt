@@ -3,17 +3,17 @@ package com.materialkolor.builder.feature.workspace
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.lifecycle.viewModelScope
+import com.materialkolor.builder.HEIGHT
+import com.materialkolor.builder.WAIT_MILLIS
+import com.materialkolor.builder.WIDTH
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.feature.command.CommandHarness
 import com.materialkolor.builder.kit.layout.PosterMode
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.launch
+import kotlin.test.AfterTest
 import kotlin.test.Test
-
-private const val WIDTH = 1280
-private const val HEIGHT = 800
-private const val WAIT_MILLIS = 5_000L
 
 /**
  * The Fine-tune sheet is session state on the workspace, which nothing saves. Collapsing the poster,
@@ -22,6 +22,11 @@ private const val WAIT_MILLIS = 5_000L
 @OptIn(ExperimentalTestApi::class)
 class FineTuneSessionTest {
     private val harness = CommandHarness()
+
+    @AfterTest
+    fun tearDown() {
+        harness.close()
+    }
 
     @Test
     fun openFineTune_opensAtTheSection_orAtTheLocksWithNone_andLeavesTheProjectAlone() =

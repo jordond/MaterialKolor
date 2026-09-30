@@ -27,11 +27,11 @@ import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModelStore
-import androidx.lifecycle.ViewModelStoreOwner
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import com.materialkolor.builder.AppHarness
 import com.materialkolor.builder.BuilderRoot
+import com.materialkolor.builder.HEIGHT
 import com.materialkolor.builder.ShellExpressive
+import com.materialkolor.builder.WAIT_MILLIS
 import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.edit.DocumentChange
@@ -40,7 +40,6 @@ import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.SeedSource
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.resolve.ThemeResolver
-import com.materialkolor.builder.fakes.FakePlatform
 import com.materialkolor.builder.feature.command.InWorkspace
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.workspaceStateOf
@@ -48,13 +47,10 @@ import com.materialkolor.builder.kit.layout.LayoutInfo
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import dev.stateholder.dispatcher.rememberDispatcher
-import dev.zacsweers.metro.createGraphFactory
-import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
+import kotlin.test.AfterTest
 import kotlin.test.Test
-
-private const val HEIGHT = 800
 
 /**
  * Wide enough for the segmented switcher in every skin.
@@ -85,6 +81,13 @@ private val InSwitcher: SemanticsMatcher = hasAnyAncestor(hasTestTag(LIBRARY_SWI
  */
 @OptIn(ExperimentalTestApi::class)
 class TopBarFitTest {
+    private val app = AppHarness()
+
+    @AfterTest
+    fun tearDown() {
+        app.close()
+    }
+
     @Test
     fun at1280_everySkin_keepsMoreOptionsWholeAndNothingOverlaps() = checkEverySkin(width = 1280)
 
@@ -351,24 +354,15 @@ class TopBarFitTest {
      * hears each time the switcher measures its segmented row.
      */
     private fun ComposeUiTest.showRoot(fitProbe: (() -> Unit)? = null): AppGraph {
-        val platform = FakePlatform()
-        val graph = createGraphFactory<AppGraph.Factory>().create(platform)
-        val owner = TestOwner()
-        setContent {
-            CompositionLocalProvider(
-                LocalViewModelStoreOwner provides owner,
-                LocalMetroViewModelFactory provides graph.metroViewModelFactory,
-                LocalSwitcherFitProbe provides fitProbe,
-            ) {
-                BuilderRoot(graph)
+        val graph = with(app) {
+            bootRoot { graph ->
+                CompositionLocalProvider(
+                    LocalSwitcherFitProbe provides fitProbe,
+                ) {
+                    BuilderRoot(graph)
+                }
             }
         }
-        waitUntil { platform.environment.splashHidden }
-        waitForIdle()
         return graph
-    }
-
-    private class TestOwner : ViewModelStoreOwner {
-        override val viewModelStore: ViewModelStore = ViewModelStore()
     }
 }

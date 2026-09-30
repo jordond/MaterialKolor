@@ -19,19 +19,27 @@ import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
+import com.materialkolor.builder.HEIGHT
 import com.materialkolor.builder.domain.persist.ExportMode
 import com.materialkolor.builder.kit.layout.PosterMode
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.shouldBe
+import kotlin.test.AfterTest
 import kotlin.test.Test
 
 @OptIn(ExperimentalTestApi::class)
 class ActionRegistryTest {
+    private val harness = CommandHarness()
+
+    @AfterTest
+    fun tearDown() {
+        harness.close()
+    }
+
     @Test
     fun expanded_listsEveryShortcutOnce() =
         runDesktopComposeUiTest(width = 1280, height = HEIGHT) {
-            val harness = CommandHarness()
             with(harness) { show() }
 
             val shortcuts = harness.commands.mapNotNull { command -> command.shortcut }
@@ -47,7 +55,6 @@ class ActionRegistryTest {
     @Test
     fun medium_findsEachCommandsControlWhereTheRegistrySays() =
         runDesktopComposeUiTest(width = 800, height = HEIGHT) {
-            val harness = CommandHarness()
             with(harness) { show() }
             // Below 840 dp the poster starts as the rail, so the walk opens it over the canvas first.
             runOnUiThread { harness.workspace.setPosterCollapsed(false, PosterMode.Rail72) }
@@ -60,7 +67,6 @@ class ActionRegistryTest {
     @Test
     fun compact_findsEachCommandsControlWhereTheRegistrySaysButTheDeviceWidths() =
         runDesktopComposeUiTest(width = 400, height = HEIGHT) {
-            val harness = CommandHarness()
             with(harness) { show() }
             val ids = harness.commands.map { command -> command.id }
 
@@ -77,7 +83,6 @@ class ActionRegistryTest {
     fun medium_topBarCommandsAtEachWidth_sitWhereTheRegistrySays() {
         for (width in listOf(600, 720, 840, 1024)) {
             runDesktopComposeUiTest(width = width, height = HEIGHT) {
-                val harness = CommandHarness()
                 with(harness) { show() }
                 val topBar = harness.commands.filter { command ->
                     command.id in TOP_BAR_IDS || command.id.startsWith("library.")
@@ -206,8 +211,6 @@ class ActionRegistryTest {
         waitForIdle()
     }
 }
-
-private const val HEIGHT = 800
 
 /**
  * The top bar's overflow button, which opens most of the menu sites.

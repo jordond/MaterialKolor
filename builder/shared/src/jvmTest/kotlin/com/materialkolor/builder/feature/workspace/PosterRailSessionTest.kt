@@ -1,6 +1,5 @@
 package com.materialkolor.builder.feature.workspace
 
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
@@ -10,19 +9,17 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import com.materialkolor.builder.AppHarness
 import com.materialkolor.builder.BuilderRoot
+import com.materialkolor.builder.HEIGHT
+import com.materialkolor.builder.WAIT_MILLIS
 import com.materialkolor.builder.core.platform.InMemoryStoreFactory
 import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.fakes.FakePlatform
-import com.materialkolor.builder.feature.canvas.TestOwner
-import dev.zacsweers.metro.createGraphFactory
-import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import io.kotest.matchers.shouldBe
+import kotlin.test.AfterTest
 import kotlin.test.Test
-
-private const val HEIGHT = 800
 
 /**
  * The rail's button, which opens the poster.
@@ -40,6 +37,13 @@ private const val COLLAPSE = "Collapse the poster"
  */
 @OptIn(ExperimentalTestApi::class)
 class PosterRailSessionTest {
+    private val app = AppHarness()
+
+    @AfterTest
+    fun tearDown() {
+        app.close()
+    }
+
     private lateinit var workspace: WorkspaceModel
 
     @Test
@@ -75,7 +79,7 @@ class PosterRailSessionTest {
 
             shows(COLLAPSE) shouldBe true
             onAllNodes(button(COLLAPSE)).onFirst().performClick()
-            waitUntil { workspace.state.value.preferences.posterCollapsed }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { workspace.state.value.preferences.posterCollapsed }
             waitForIdle()
 
             shows(OPEN) shouldBe true
@@ -83,7 +87,7 @@ class PosterRailSessionTest {
         }
         runDesktopComposeUiTest(width = 900, height = HEIGHT) {
             showRoot(stores)
-            waitUntil { workspace.state.value.preferences.posterCollapsed }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { workspace.state.value.preferences.posterCollapsed }
             waitForIdle()
 
             shows(OPEN) shouldBe true
@@ -101,19 +105,12 @@ class PosterRailSessionTest {
      */
     private fun ComposeUiTest.showRoot(stores: InMemoryStoreFactory): AppGraph {
         val platform = FakePlatform(stores = stores)
-        val graph = createGraphFactory<AppGraph.Factory>().create(platform)
-        val owner = TestOwner()
-        setContent {
-            CompositionLocalProvider(
-                LocalViewModelStoreOwner provides owner,
-                LocalMetroViewModelFactory provides graph.metroViewModelFactory,
-            ) {
+        val graph = with(app) {
+            bootRoot(platform = platform) { graph ->
                 workspace = metroViewModel()
                 BuilderRoot(graph, workspaceModel = workspace)
             }
         }
-        waitUntil { platform.environment.splashHidden }
-        waitForIdle()
         return graph
     }
 }

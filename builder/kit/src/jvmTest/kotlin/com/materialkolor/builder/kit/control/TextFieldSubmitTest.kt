@@ -70,7 +70,8 @@ class TextFieldSubmitTest {
             onNodeWithTag(Field).performKeyInput { pressKey(Key.Enter) }
             submits shouldBe listOf("tsp", "tsp")
 
-            waitUntil { session != null }
+            // t-2
+            waitUntil(timeoutMillis = 10_000) { session != null }
             val request = checkNotNull(session)
             runOnUiThread { request.onEditCommand(listOf(SetComposingTextCommand("ka", 1))) }
             waitForIdle()

@@ -1,6 +1,5 @@
 package com.materialkolor.builder.feature.poster
 
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ComposeUiTest
@@ -14,26 +13,23 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import com.materialkolor.builder.AppHarness
 import com.materialkolor.builder.BuilderRoot
+import com.materialkolor.builder.HEIGHT
+import com.materialkolor.builder.WAIT_MILLIS
+import com.materialkolor.builder.WIDTH
 import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.model.SeedSource
-import com.materialkolor.builder.fakes.FakePlatform
-import com.materialkolor.builder.feature.canvas.TestOwner
 import com.materialkolor.builder.feature.workspace.FineTuneSection
 import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
-import dev.zacsweers.metro.createGraphFactory
-import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import io.kotest.matchers.shouldBe
+import kotlin.test.AfterTest
 import kotlin.test.Test
-
-private const val WIDTH = 1280
-private const val HEIGHT = 800
 
 /**
  * A seed whose primary comes out calmer, so the poster shows the explainer line and its Why.
@@ -49,8 +45,15 @@ private const val SHARE_TITLE = "Share this theme"
  */
 @OptIn(ExperimentalTestApi::class)
 class PosterFocusTest {
-    private val platform = FakePlatform()
+    private val app = AppHarness()
+    private val platform = app.platform
+
     private lateinit var workspace: WorkspaceModel
+
+    @AfterTest
+    fun tearDown() {
+        app.close()
+    }
 
     @Test
     fun explainer_openedOverACollapsedPoster_shows() =
@@ -88,7 +91,7 @@ class PosterFocusTest {
     fun projectsDrawer_openedFromTheHeader_escHandsFocusBackToIt() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             showRoot()
-            waitUntil { projectName().isNotBlank() }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { projectName().isNotBlank() }
             val projects = onNodeWithContentDescription("Projects, ${projectName()}, ", substring = true)
 
             projects.performSemanticsAction(SemanticsActions.OnClick)
@@ -164,7 +167,7 @@ class PosterFocusTest {
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             platform.environment.storageAvailable = false
             showRoot()
-            waitUntil { projectName().isNotBlank() }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { projectName().isNotBlank() }
             val projects = onNodeWithContentDescription("Projects, ${projectName()}, ", substring = true)
 
             projects.performSemanticsAction(SemanticsActions.OnClick)
@@ -183,7 +186,7 @@ class PosterFocusTest {
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             platform.environment.storageAvailable = false
             showRoot()
-            waitUntil { projectName().isNotBlank() }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { projectName().isNotBlank() }
             onNodeWithContentDescription("Projects, ${projectName()}, ", substring = true)
                 .performSemanticsAction(SemanticsActions.OnClick)
             waitForIdle()
@@ -204,7 +207,7 @@ class PosterFocusTest {
 
     private fun ComposeUiTest.collapsePoster() {
         runOnUiThread { workspace.setPosterCollapsed(true) }
-        waitUntil { workspace.state.value.preferences.posterCollapsed }
+        waitUntil(timeoutMillis = WAIT_MILLIS) { workspace.state.value.preferences.posterCollapsed }
         waitForIdle()
     }
 
@@ -217,19 +220,12 @@ class PosterFocusTest {
      * The whole builder on fakes, booted.
      */
     private fun ComposeUiTest.showRoot(): AppGraph {
-        val graph = createGraphFactory<AppGraph.Factory>().create(platform)
-        val owner = TestOwner()
-        setContent {
-            CompositionLocalProvider(
-                LocalViewModelStoreOwner provides owner,
-                LocalMetroViewModelFactory provides graph.metroViewModelFactory,
-            ) {
+        val graph = with(app) {
+            bootRoot { graph ->
                 workspace = metroViewModel()
                 BuilderRoot(graph, workspaceModel = workspace)
             }
         }
-        waitUntil { platform.environment.splashHidden }
-        waitForIdle()
         return graph
     }
 }

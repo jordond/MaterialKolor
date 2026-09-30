@@ -27,17 +27,18 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import com.materialkolor.builder.AppHarness
 import com.materialkolor.builder.BuildKonfig
 import com.materialkolor.builder.BuilderRoot
+import com.materialkolor.builder.HEIGHT
+import com.materialkolor.builder.WAIT_MILLIS
+import com.materialkolor.builder.WIDTH
 import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.domain.link.shareLink
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.MotionOverride
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.fakes.FAKE_BROWSER
-import com.materialkolor.builder.fakes.FakePlatform
-import com.materialkolor.builder.feature.canvas.TestOwner
 import com.materialkolor.builder.feature.poster.InfoTopic
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.kit.a11y.KitTestApi
@@ -46,8 +47,6 @@ import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.motion.LocalReducedMotion
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.token.ShippedFont
-import dev.zacsweers.metro.createGraphFactory
-import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -55,10 +54,8 @@ import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldStartWith
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.getString
+import kotlin.test.AfterTest
 import kotlin.test.Test
-
-private const val WIDTH = 1280
-private const val HEIGHT = 800
 
 /**
  * The first line of both OFL texts, under the copyright lines.
@@ -72,10 +69,17 @@ private val BUILDER_VERSION_LINE = "Builder ${BuildKonfig.BUILDER_VERSION}"
 
 @OptIn(ExperimentalTestApi::class, KitTestApi::class)
 class AboutHostTest {
-    private val platform = FakePlatform()
+    private val app = AppHarness()
+    private val platform = app.platform
+
     private val opened = mutableListOf<String>()
     private var reducedMotion: Boolean? = null
     private lateinit var workspace: WorkspaceModel
+
+    @AfterTest
+    fun tearDown() {
+        app.close()
+    }
 
     @Test
     fun about_opened_namesBothVersions() =
@@ -106,7 +110,9 @@ class AboutHostTest {
             openFromMore("About")
 
             onNodeWithText("Bricolage Grotesque").performScrollTo().performClick()
-            waitUntil { onAllNodesWithText(OFL_HEADING, substring = true).fetchSemanticsNodes().isNotEmpty() }
+            waitUntil(timeoutMillis = WAIT_MILLIS) {
+                onAllNodesWithText(OFL_HEADING, substring = true).fetchSemanticsNodes().isNotEmpty()
+            }
 
             onNodeWithText("Copyright 2022 The Bricolage Grotesque Project Authors", substring = true).assertExists()
         }
@@ -187,9 +193,9 @@ class AboutHostTest {
 
             chooseMotion("System", MotionOverride.System, reduced = true)
             platform.environment.reducedMotion.value = false
-            waitUntil { reducedMotion == false }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { reducedMotion == false }
             platform.environment.reducedMotion.value = true
-            waitUntil { reducedMotion == true }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { reducedMotion == true }
         }
 
     @Test
@@ -255,7 +261,10 @@ class AboutHostTest {
         reduced: Boolean,
     ) {
         onNodeWithText(label).performScrollTo().performClick()
-        waitUntil { workspace.state.value.preferences.motion == motion && reducedMotion == reduced }
+        waitUntil(timeoutMillis = WAIT_MILLIS) {
+            workspace.state.value.preferences.motion == motion &&
+                reducedMotion == reduced
+        }
         waitForIdle()
         reducedMotion shouldBe reduced
     }
@@ -270,29 +279,25 @@ class AboutHostTest {
      * opens. With [webKeyboard] it keeps to the web's keyboard habits, the way it does in a browser.
      */
     private fun ComposeUiTest.showRoot(webKeyboard: Boolean = false): AppGraph {
-        val graph = createGraphFactory<AppGraph.Factory>().create(platform)
-        val owner = TestOwner()
         val uriHandler = object : UriHandler {
             override fun openUri(uri: String) {
                 opened += uri
             }
         }
-        setContent {
-            CompositionLocalProvider(
-                LocalViewModelStoreOwner provides owner,
-                LocalMetroViewModelFactory provides graph.metroViewModelFactory,
-                LocalUriHandler provides uriHandler,
-            ) {
-                workspace = metroViewModel()
-                if (webKeyboard) {
-                    ProvideWebKeyboardForTest { Root(graph) }
-                } else {
-                    Root(graph)
+        val graph = with(app) {
+            bootRoot { graph ->
+                CompositionLocalProvider(
+                    LocalUriHandler provides uriHandler,
+                ) {
+                    workspace = metroViewModel()
+                    if (webKeyboard) {
+                        ProvideWebKeyboardForTest { Root(graph) }
+                    } else {
+                        Root(graph)
+                    }
                 }
             }
         }
-        waitUntil { platform.environment.splashHidden }
-        waitForIdle()
         return graph
     }
 

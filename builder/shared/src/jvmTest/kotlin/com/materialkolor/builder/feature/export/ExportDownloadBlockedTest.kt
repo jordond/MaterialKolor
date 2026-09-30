@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import com.materialkolor.builder.ShellExpressive
+import com.materialkolor.builder.WAIT_MILLIS
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
 import com.materialkolor.builder.codegen.dsl.Language
 import com.materialkolor.builder.codegen.dsl.Token
@@ -82,7 +83,7 @@ class ExportDownloadBlockedTest {
             waitForIdle()
 
             onNodeWithText("Download zip").performClick()
-            waitUntil { toasts.isNotEmpty() }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { toasts.isNotEmpty() }
 
             toasts shouldBe listOf("Could not save the zip")
             files.saved shouldBe emptyList()

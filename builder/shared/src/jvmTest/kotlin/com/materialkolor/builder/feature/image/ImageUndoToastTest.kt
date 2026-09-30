@@ -7,6 +7,7 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.lifecycle.ViewModelStore
+import com.materialkolor.builder.WAIT_MILLIS
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.color.ContrastLevel
 import com.materialkolor.builder.domain.model.ThemeDocument
@@ -14,26 +15,37 @@ import com.materialkolor.builder.fakes.FakeImageHandle
 import com.materialkolor.builder.fakes.FakeImageInput
 import com.materialkolor.builder.fakes.FakePasteInput
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
+import com.materialkolor.builder.mainOnTestClock
 import dev.stateholder.dispatcher.rememberDispatcher
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.resetMain
+import kotlin.test.AfterTest
 import kotlin.test.Test
 
 private val Start = Argb(0xFF6750A4.toInt())
-private const val WAIT_MILLIS = 5_000L
 
 /**
  * The Undo on an image seed's toast only ever undoes that seed, and the toast goes once the
  * document has moved on.
  */
-@OptIn(ExperimentalTestApi::class)
+@OptIn(ExperimentalTestApi::class, ExperimentalCoroutinesApi::class)
 class ImageUndoToastTest {
     private val images = FakeImageInput()
     private val model = ImageSeedModel(images, FakePasteInput())
     private val store = ViewModelStore().apply { put("images", model) }
+
     private val photo = FakeImageHandle("photo.png")
     private val other = FakeImageHandle("other.png")
     private val workspace = ToastWorkspace(ThemeDocument(seed = Start))
+
+    @AfterTest
+    fun tearDown() {
+        store.clear()
+        Dispatchers.resetMain()
+    }
 
     init {
         images.decoded[photo] = decodedOf(QuadrantColors)
@@ -49,7 +61,6 @@ class ImageUndoToastTest {
             toast.press()
 
             workspace.undos shouldBe 1
-            store.clear()
         }
 
     @Test
@@ -64,7 +75,6 @@ class ImageUndoToastTest {
             toast.withdrawn shouldBe true
             toast.press()
             workspace.undos shouldBe 0
-            store.clear()
         }
 
     @Test
@@ -81,7 +91,6 @@ class ImageUndoToastTest {
             workspace.undos shouldBe 0
             newer.press()
             workspace.undos shouldBe 1
-            store.clear()
         }
 
     @Test
@@ -96,7 +105,6 @@ class ImageUndoToastTest {
             toast.withdrawn shouldBe true
             toast.press()
             workspace.undos shouldBe 0
-            store.clear()
         }
 
     @Test
@@ -116,10 +124,10 @@ class ImageUndoToastTest {
             again.actionLabel.shouldBeNull()
             again.onAction.shouldBeNull()
             workspace.undos shouldBe 0
-            store.clear()
         }
 
     private fun ComposeUiTest.showHost() {
+        mainOnTestClock()
         setContent {
             val dispatcher = rememberDispatcher<WorkspaceAction> { action -> workspace.dispatch(action) }
             ImageHostContent(
