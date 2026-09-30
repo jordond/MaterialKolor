@@ -44,9 +44,10 @@ internal class FakeEnvironment(
     /**
      * How many times persistent storage was asked for.
      */
-    @Volatile
-    var persistRequests: Int = 0
-        private set
+    val persistRequests: Int
+        get() = persistRequestsKept.value
+
+    private val persistRequestsKept = MutableStateFlow(0)
 
     /**
      * Whether the boot splash was removed.
@@ -74,12 +75,13 @@ internal class FakeEnvironment(
     /**
      * How many times the eye dropper was opened.
      */
-    @Volatile
-    var screenPicks: Int = 0
-        private set
+    val screenPicks: Int
+        get() = screenPicksKept.value
+
+    private val screenPicksKept = MutableStateFlow(0)
 
     override suspend fun pickScreenColor(): Argb? {
-        screenPicks++
+        screenPicksKept.update { picks -> picks + 1 }
         return screenColor
     }
 
@@ -96,7 +98,7 @@ internal class FakeEnvironment(
     }
 
     override suspend fun requestPersist(): Boolean {
-        persistRequests++
+        persistRequestsKept.update { requests -> requests + 1 }
         return persistGranted
     }
 

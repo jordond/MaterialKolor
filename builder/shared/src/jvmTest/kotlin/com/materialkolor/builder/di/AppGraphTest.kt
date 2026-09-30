@@ -15,6 +15,7 @@ import com.materialkolor.builder.feature.workspace.AppModel
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import io.kotest.matchers.collections.shouldHaveAtLeastSize
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeSameInstanceAs
 import kotlin.test.AfterTest
 import kotlin.test.Test
 
@@ -26,6 +27,14 @@ class AppGraphTest {
     fun tearDown() {
         app.close()
     }
+
+    @Test
+    fun themeResolver_readTwice_isOneInstance() =
+        runComposeUiTest {
+            val graph = with(app) { createGraph() }
+
+            graph.themeResolver shouldBeSameInstanceAs graph.themeResolver
+        }
 
     @Test
     fun metroViewModel_acrossRecompositions_keepsOneModel() =

@@ -1,4 +1,5 @@
 import com.materialkolor.convention.materialKolor
+import com.materialkolor.convention.passModuleSourcesToJvmTest
 import org.jetbrains.compose.ComposeExtension
 import org.jetbrains.compose.resources.ResourcesExtension
 
@@ -42,14 +43,4 @@ composeExtension.extensions.getByType<ResourcesExtension>().apply {
     publicResClass = false
 }
 
-abstract class ModuleSources : CommandLineArgumentProvider {
-    @get:InputDirectory
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val dir: DirectoryProperty
-
-    override fun asArguments(): List<String> = listOf("-Dbuilder.sourceDir=${dir.get().asFile.absolutePath}")
-}
-
-tasks.named<Test>("jvmTest") {
-    jvmArgumentProviders += objects.newInstance<ModuleSources>().apply { dir = layout.projectDirectory.dir("src") }
-}
+passModuleSourcesToJvmTest()
