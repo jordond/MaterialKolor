@@ -162,7 +162,7 @@ python3 -B -m unittest discover -s .github/tests -v
 | `verifyMcuApple`                              | The common fixtures pass on the iOS simulator, the iOS device framework compiles and links, and macOS compiles.                                                                                                                                                           |
 | `verifyMcuPublication`                        | Artifacts, metadata, source archives and documentation build into a temporary repository under `build/`, and an artifact-only consumer compiles against them.                                                                                                             |
 | Builder against the local engine              | A real consumer resolves `project(":material-kolor-core")`, `project(":material-kolor-material3")` and `project(":material-color-utilities")` instead of published coordinates, and still compiles and tests.                                                                                                          |
-| `.github/tests`                               | The upstream monitor classifies commits and the planner picks the right action for the bump pull request, against disposable Git repositories with no network access.  |
+| `.github/tests`                               | The upstream scripts classify commits, plan, bump and publish correctly against disposable Git repositories, with no network access.  |
 
 The publication gate must not publish to Maven Central or deploy documentation. Source archives
 include the generated Kotlin, handwritten helpers and upstream license material exactly once.
@@ -293,45 +293,58 @@ candidate pin drops `createForProduction`, that task fails before the pin is ado
 
 ## CI and the upstream monitor
 
-`.github/check-upstream` reports upstream commits that touch `kotlin/` or license and notice files.
-Java-only commits are skipped because the engine is generated from Kotlin alone. The Java reference
-still backs the JVM parity tests, and the bump pull request runs those. Each reported commit is
-classified as `upstream-source` for ordinary source changes, or `kotlin-build-scaffold` when it
-touches build or publishing scaffolding under upstream's `kotlin/` tree, which may indicate that
-upstream is starting its own Kotlin Multiplatform publication (see
+The upstream scripts live in `.github/scripts/`, and `.github/tests/` covers each one against
+disposable Git repositories with no network access. Run those tests, not the workflow, when changing
+them.
+
+`check-upstream` reports upstream commits that touch `kotlin/` or license and notice files. Java-only
+commits are skipped because the engine is generated from Kotlin alone. The Java reference still backs
+the JVM parity tests, and the bump pull request runs those. Each reported commit is classified as
+`upstream-source`, or `kotlin-build-scaffold` when it touches build or publishing scaffolding under
+upstream's `kotlin/` tree, which may indicate that upstream is starting its own Kotlin Multiplatform
+publication (see
 [material-color-utilities#76](https://github.com/material-foundation/material-color-utilities/pull/76)).
-The script only reads. It writes the current and target revisions and counts for a workflow step,
-and a Markdown commit list for the pull request body, capped at 50 commits and 10 files each with a
-compare link for the rest. Upstream issue references in titles are rewritten to point at upstream and
-mentions are defused, and commit messages are logged with workflow commands stopped. Its tests use
-disposable Git repositories plus a stubbed `git fetch`, with no network access. Run those tests, not
-the workflow, when validating monitor changes.
+It fetches upstream over HTTPS by URL, because `.gitmodules` records an SSH remote a runner cannot
+use. The script only reads. It writes the current and target revisions and counts for a workflow
+step, and a Markdown commit list for the pull request body, capped at 50 commits, 10 files per
+commit, 120 characters per title and 40,000 characters overall, with a compare link for the rest.
+Upstream issue references are rewritten to point at upstream, mentions are defused, and commit
+messages are logged with workflow commands stopped.
 
 `.github/workflows/upstream.yml` turns relevant upstream commits into one rolling pull request
-against `next` on the `upstream/mcu` branch. It moves the Gitlink to upstream's head, writes the lock
-from `candidateMcuUpstreamLock` and records whether the transformer accepted the new sources. When it
-did, the golden fixtures are regenerated in a separate commit. CI and Builder then run on the pull
-request. It cannot refresh the ABI dumps, because `updateKotlinAbi` needs macOS. A red
-`checkKotlinAbi` on the pull request is the prompt to review the API change and push the dumps by
-hand. Merging stays a reviewed step, following [Reviewing an upstream update](#reviewing-an-upstream-update).
+against `next` on the `upstream/mcu` branch, in two jobs.
 
-`.github/plan-upstream` decides what each run does with that pull request, and
-`.github/tests/test_plan_upstream.py` covers every outcome.
+1. `prepare` holds no write token, because it runs upstream code through Gradle. `plan-upstream`
+   picks the action. `bump-upstream` moves the Gitlink to upstream's head, writes the lock from
+   `candidateMcuUpstreamLock` and checks the transform. When the transform passes it regenerates the
+   golden fixtures in a separate commit. The new commits leave the job as a Git bundle.
+2. `publish` starts from a fresh checkout that never ran upstream code. `publish-upstream` pushes
+   the bundle under a lease and opens, updates, closes or comments on the pull request. The token
+   reaches Git only as an HTTP header through the environment.
+
+CI and Builder then run on the pull request. The bot cannot refresh the ABI dumps, because
+`updateKotlinAbi` needs macOS. A red `checkKotlinAbi` is the prompt to review the API change and push
+the dumps by hand. Merging stays a reviewed step, following
+[Reviewing an upstream update](#reviewing-an-upstream-update).
+
+`plan-upstream` decides the action as follows.
 
 - No open pull request opens one, unless a pull request for the same upstream revision was closed
   without merging. Closing one by hand snoozes the bump until upstream moves again.
 - An open pull request is rewritten when upstream moves again or the pin on `next` changes under it.
   Maintainer commits stop the rewrite and the workflow comments once instead. Merges from GitHub's
-  "Update branch" button and commits that only touch `api/` dumps do not count, so a rewrite drops
-  them and the dumps need pushing again.
+  "Update branch" button and commits that only touch ABI dumps (`<module>/api/**/*.api`) do not
+  count, so a rewrite drops them and the dumps need pushing again.
 - When `next` already pins every relevant change, the pull request is closed. Its branch is deleted
   unless it has maintainer commits.
+- A branch with maintainer commits and no open pull request is left alone. Delete it to resume.
+- Pull requests from forks that happen to use the same branch name are ignored.
 
 The workflow needs an `UPSTREAM_BOT_TOKEN` repository secret, a fine-grained token with contents,
 pull requests and issues write access, because pull requests opened with `GITHUB_TOKEN` do not
-trigger other workflows. Only the steps that call GitHub receive it. Checkout keeps no credentials,
-so the Gradle steps that compile upstream code never see a write token. Scheduled runs fire only
-from the default branch, so until 6.0 lands on `main` run it with
-`gh workflow run upstream.yml --ref next`. It also runs on every push to `next` that changes the
-pin. When 6.0 lands on `main`, set `BASE_BRANCH` in the workflow to `main`, and expect a conflict on
-the `on:` block with the copy on `main` that stopped the 5.x schedule.
+trigger other workflows. Scheduled runs fire only from the default branch, so until 6.0 lands on
+`main` run it with `gh workflow run upstream.yml --ref next`. It also runs on every push to `next`
+that changes the pin. When 6.0 lands on `main`, change `BASE_BRANCH` and the hard-coded
+`on.push.branches` entry in the workflow to `main`, drop the `--ref next` hint from its comment and
+from this section, and expect a conflict on the `on:` block with the copy on `main` that stopped the
+5.x schedule.

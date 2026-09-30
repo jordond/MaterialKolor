@@ -6,7 +6,7 @@ on:
   schedule:
     - cron: "0 3 * * *"
   workflow_dispatch:
-  # A pin change on next can leave the open bump pull request stale or already merged.
+  # A pin change on the base branch can leave the open bump pull request stale or already merged.
   push:
     branches:
       - next
@@ -20,7 +20,8 @@ concurrency:
 permissions:
   contents: read
 
-# When 6.0 lands on main, point BASE_BRANCH at main and drop the stopped schedule there.
+# When 6.0 lands on main, set BASE_BRANCH and the push branch above to main, and drop the stopped
+# schedule and the `--ref next` hint.
 env:
   BASE_BRANCH: next
   BUMP_BRANCH: upstream/mcu
@@ -28,24 +29,29 @@ env:
   BOT_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
 
 jobs:
-  bump:
-    name: "Update the upstream pin"
+  # Runs upstream code through Gradle, so it holds no write token.
+  prepare:
+    name: "Prepare the upstream bump"
     if: github.repository == 'jordond/MaterialKolor'
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      action: ${{ steps.plan.outputs.action }}
+      number: ${{ steps.plan.outputs.number }}
+      delete_branch: ${{ steps.plan.outputs.delete_branch }}
+      title: ${{ steps.plan.outputs.title }}
+      expected: ${{ steps.plan.outputs.expected }}
+      current: ${{ steps.check.outputs.current }}
+      current_short: ${{ steps.check.outputs.current_short }}
+      target: ${{ steps.check.outputs.target }}
+      target_short: ${{ steps.check.outputs.target_short }}
+      base: ${{ steps.bump.outputs.base }}
+      transform: ${{ steps.bump.outputs.transform }}
+      goldens: ${{ steps.bump.outputs.goldens }}
     steps:
-      # Pull requests opened with GITHUB_TOKEN do not trigger CI or Builder, so a fine-grained
-      # token with contents, pull requests and issues write access opens them instead. Only the
-      # steps that talk to GitHub see it, never the Gradle steps that run upstream code.
-      - name: Require the bot token
-        env:
-          GH_TOKEN: ${{ secrets.UPSTREAM_BOT_TOKEN }}
-        run: |
-          if [ -z "$GH_TOKEN" ]; then
-            echo "::error::Add an UPSTREAM_BOT_TOKEN repository secret with contents, pull requests and issues write access."
-            exit 1
-          fi
-
       - name: Checkout project
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -56,51 +62,17 @@ jobs:
 
       - name: Check upstream for Kotlin changes
         id: check
-        run: ./.github/check-upstream --github-output "$GITHUB_OUTPUT" --summary "$RUNNER_TEMP/upstream-commits.md"
+        run: ./.github/scripts/check-upstream --github-output "$GITHUB_OUTPUT" --summary "$RUNNER_TEMP/bump/upstream-commits.md"
 
       - name: Plan the pull request
         id: plan
         env:
-          GH_TOKEN: ${{ secrets.UPSTREAM_BOT_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
           CURRENT: ${{ steps.check.outputs.current }}
           TARGET: ${{ steps.check.outputs.target }}
           TARGET_SHORT: ${{ steps.check.outputs.target_short }}
           RELEVANT: ${{ steps.check.outputs.relevant }}
-        run: ./.github/plan-upstream --github-output "$GITHUB_OUTPUT"
-
-      - name: Close the caught-up pull request
-        if: steps.plan.outputs.action == 'close'
-        env:
-          GH_TOKEN: ${{ secrets.UPSTREAM_BOT_TOKEN }}
-          NUMBER: ${{ steps.plan.outputs.number }}
-          DELETE_BRANCH: ${{ steps.plan.outputs.delete_branch }}
-        run: |
-          if [ "$DELETE_BRANCH" = true ]; then
-            gh pr close "$NUMBER" --delete-branch \
-              --comment "\`$BASE_BRANCH\` already pins every upstream Kotlin and license change, so this bump is no longer needed."
-          else
-            gh pr close "$NUMBER" \
-              --comment "\`$BASE_BRANCH\` already pins every upstream Kotlin and license change, so this bump is no longer needed. The branch has maintainer commits, so it was kept."
-          fi
-
-      - name: Tell the maintainer the bump is stale
-        if: steps.plan.outputs.action == 'notify'
-        env:
-          GH_TOKEN: ${{ secrets.UPSTREAM_BOT_TOKEN }}
-          NUMBER: ${{ steps.plan.outputs.number }}
-          TARGET: ${{ steps.check.outputs.target }}
-          CURRENT: ${{ steps.check.outputs.current }}
-          TARGET_SHORT: ${{ steps.check.outputs.target_short }}
-        run: |
-          set -euo pipefail
-          marker="<!-- upstream-target:$TARGET base:$CURRENT -->"
-          comments=$(gh pr view "$NUMBER" --json comments --jq '.comments[].body')
-          if grep -qF "$marker" <<< "$comments"; then
-            exit 0
-          fi
-          gh pr comment "$NUMBER" --body "Upstream is now at \`$TARGET_SHORT\`, or the pin on \`$BASE_BRANCH\` changed. This branch has maintainer commits, so it was not rewritten. Update the pin here by hand, or close this pull request and delete the branch so the next run opens a fresh one.
-
-          $marker"
+        run: ./.github/scripts/plan-upstream --github-output "$GITHUB_OUTPUT"
 
       - name: Setup Java
         if: steps.plan.outputs.action == 'update'
@@ -113,100 +85,62 @@ jobs:
         if: steps.plan.outputs.action == 'update'
         uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
 
-      - name: Move the pin and lock
+      - name: Move the pin, transform and regenerate fixtures
+        id: bump
         if: steps.plan.outputs.action == 'update'
         env:
           TARGET: ${{ steps.check.outputs.target }}
-          TITLE: ${{ steps.plan.outputs.title }}
-        run: |
-          set -euo pipefail
-          git config user.name "$BOT_NAME"
-          git config user.email "$BOT_EMAIL"
-          git switch --quiet -C "$BUMP_BRANCH"
-          git -C tools/mcu-upstream/src/main checkout --quiet --detach "$TARGET"
-          ./gradlew candidateMcuUpstreamLock
-          # The candidate is pretty-printed with four spaces, the tracked lock with two.
-          jq --indent 2 . build/mcu-upstream.lock.candidate.json > gradle/mcu-upstream.lock.json
-          git add tools/mcu-upstream/src/main gradle/mcu-upstream.lock.json
-          git commit --quiet -m "$TITLE"
-
-      - name: Transform the new sources
-        id: transform
-        if: steps.plan.outputs.action == 'update'
-        continue-on-error: true
-        run: ./gradlew :material-color-utilities:generateMcuSources
-
-      # The golden generators compile against the adapted library, so they only run on a clean
-      # transform and a transform failure is reported as the cause.
-      - name: Regenerate golden fixtures
-        id: goldens
-        if: steps.plan.outputs.action == 'update' && steps.transform.outcome == 'success'
-        continue-on-error: true
-        env:
           TARGET_SHORT: ${{ steps.check.outputs.target_short }}
-        run: |
-          set -euo pipefail
-          fixtures=material-color-utilities/src/commonTest/kotlin/com/materialkolor/conformance
-          # A cold build prints the transformer summary even under -q, so compile before printing.
-          ./gradlew :mcu-upstream:testClasses
-          # Written aside first so a failed generator cannot leave a truncated fixture behind.
-          ./gradlew -q :mcu-upstream:printMcuRoleGoldens > "$RUNNER_TEMP/UpstreamRoleGoldenData.kt"
-          ./gradlew -q :mcu-upstream:printMcuQuantizerGoldens > "$RUNNER_TEMP/UpstreamQuantizerGoldenData.kt"
-          mv "$RUNNER_TEMP/UpstreamRoleGoldenData.kt" "$RUNNER_TEMP/UpstreamQuantizerGoldenData.kt" "$fixtures/"
-          ./gradlew :material-color-utilities:spotlessApply
-          git add "$fixtures"
-          git commit --quiet -m "test(mcu): regenerate golden fixtures for upstream $TARGET_SHORT"
+          TITLE: ${{ steps.plan.outputs.title }}
+        run: ./.github/scripts/bump-upstream --github-output "$GITHUB_OUTPUT" --bundle "$RUNNER_TEMP/bump/bump.bundle"
 
-      - name: Reset fixtures after a failed regeneration
-        if: steps.plan.outputs.action == 'update' && steps.goldens.outcome == 'failure'
-        run: git checkout -- material-color-utilities/src/commonTest
-
-      - name: Open or update the pull request
+      - name: Upload the bump
         if: steps.plan.outputs.action == 'update'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: upstream-bump
+          path: ${{ runner.temp }}/bump/
+          retention-days: 1
+          if-no-files-found: error
+
+  # Holds the write token in a fresh checkout that never ran upstream code. Pull requests opened
+  # with GITHUB_TOKEN do not trigger CI or Builder, hence the fine-grained token.
+  publish:
+    name: "Publish the upstream bump"
+    needs: prepare
+    if: needs.prepare.outputs.action != 'none'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.prepare.outputs.base || env.BASE_BRANCH }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Download the bump
+        if: needs.prepare.outputs.action == 'update'
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: upstream-bump
+          path: ${{ runner.temp }}/bump
+
+      - name: Update the pull request
         env:
           GH_TOKEN: ${{ secrets.UPSTREAM_BOT_TOKEN }}
-          NUMBER: ${{ steps.plan.outputs.number }}
-          TITLE: ${{ steps.plan.outputs.title }}
-          CURRENT_SHORT: ${{ steps.check.outputs.current_short }}
-          TARGET_SHORT: ${{ steps.check.outputs.target_short }}
-          GOLDENS: ${{ steps.goldens.outcome }}
-          TRANSFORM: ${{ steps.transform.outcome }}
+          ACTION: ${{ needs.prepare.outputs.action }}
+          NUMBER: ${{ needs.prepare.outputs.number }}
+          DELETE_BRANCH: ${{ needs.prepare.outputs.delete_branch }}
+          TITLE: ${{ needs.prepare.outputs.title }}
+          EXPECTED: ${{ needs.prepare.outputs.expected }}
+          CURRENT: ${{ needs.prepare.outputs.current }}
+          CURRENT_SHORT: ${{ needs.prepare.outputs.current_short }}
+          TARGET: ${{ needs.prepare.outputs.target }}
+          TARGET_SHORT: ${{ needs.prepare.outputs.target_short }}
+          TRANSFORM: ${{ needs.prepare.outputs.transform }}
+          GOLDENS: ${{ needs.prepare.outputs.goldens }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          set -euo pipefail
-          if [ "$TRANSFORM" = success ]; then
-            transform="The transformer adapted the new sources."
-          else
-            transform="**The transformer failed on the new sources.** A rule or shape expectation needs updating, see the [workflow run]($RUN_URL)."
-          fi
-          case "$GOLDENS" in
-            success) goldens="Golden fixtures were regenerated from the raw upstream Kotlin in their own commit, so any color change shows up in that diff." ;;
-            skipped) goldens="Golden fixtures were not regenerated because the transform failed. Regenerate them once it passes." ;;
-            *) goldens="**Golden fixture regeneration failed**, see the [workflow run]($RUN_URL)." ;;
-          esac
-          body="$RUNNER_TEMP/body.md"
-          {
-            echo "Moves the material-color-utilities pin from \`$CURRENT_SHORT\` to \`$TARGET_SHORT\`."
-            echo
-            echo "## Upstream Kotlin and license changes"
-            echo
-            cat "$RUNNER_TEMP/upstream-commits.md"
-            echo
-            echo "## Status"
-            echo
-            echo "- $transform"
-            echo "- $goldens"
-            echo "- A red \`checkKotlinAbi\` means the public API moved. Review it against docs/upstream-psi.md, then run \`./gradlew updateKotlinAbi\` on macOS and push to this branch. When upstream moves again the bot rewrites the branch and drops those dump commits, so push them again."
-          } > "$body"
-
-          # Checkout did not keep credentials, so the push authenticates here. The lease expects the
-          # branch exactly as the checkout saw it, or absent when it did not exist yet.
-          expected=$(git rev-parse -q --verify "refs/remotes/origin/$BUMP_BRANCH" || true)
-          git push --force-with-lease="refs/heads/$BUMP_BRANCH:$expected" \
-            "https://x-access-token:$GH_TOKEN@github.com/$GITHUB_REPOSITORY.git" "HEAD:refs/heads/$BUMP_BRANCH"
-          if [ -n "$NUMBER" ]; then
-            gh pr edit "$NUMBER" --title "$TITLE" --body-file "$body"
-          else
-            gh pr create --base "$BASE_BRANCH" --head "$BUMP_BRANCH" --title "$TITLE" \
-              --body-file "$body" --label upstream
-          fi
+          ./.github/scripts/publish-upstream \
+            --bundle "$RUNNER_TEMP/bump/bump.bundle" --summary "$RUNNER_TEMP/bump/upstream-commits.md"

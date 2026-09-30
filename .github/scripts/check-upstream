@@ -2,12 +2,15 @@
 set -euo pipefail
 
 CWD="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
-ROOT="$(cd "$CWD"/.. >/dev/null 2>&1 && pwd)"
+ROOT="$(cd "$CWD"/../.. >/dev/null 2>&1 && pwd)"
 UPSTREAM_SLUG="material-foundation/material-color-utilities"
 UPSTREAM_REPO="https://github.com/$UPSTREAM_SLUG"
-# Keeps a long lag inside GitHub's pull request body limit. The compare link covers the rest.
+# Keeps a long lag well inside GitHub's 65,536 character pull request body limit. The compare link
+# covers the rest.
 MAX_SUMMARY_COMMITS=50
 MAX_SUMMARY_FILES=10
+MAX_SUMMARY_CHARACTERS=40000
+MAX_TITLE_CHARACTERS=120
 SUBMODULE_PATH="$ROOT/tools/mcu-upstream/src/main"
 
 usage() {
@@ -61,11 +64,25 @@ if "$show_output" && [[ "${GITHUB_ACTIONS:-}" == true ]]; then
 fi
 
 # Upstream issue references would link to this repository's issues and mentions would notify
-# upstream authors, so both are rewritten before a title reaches the pull request body.
+# upstream authors, so both are rewritten before upstream text reaches the pull request body.
+defuse_mentions() {
+    sed -E 's~@([[:alnum:]_-])~@\&#8203;\1~g' <<< "$1"
+}
+
 markdown_title() {
-    sed -E \
+    local title="$1"
+    if ((${#title} > MAX_TITLE_CHARACTERS)); then
+        title="${title:0:MAX_TITLE_CHARACTERS}..."
+    fi
+    defuse_mentions "$(sed -E \
         -e "s~(^|[^[:alnum:]_/])#([0-9]+)~\\1$UPSTREAM_SLUG#\\2~g" \
-        -e 's~@([[:alnum:]_-])~@\&#8203;\1~g' <<< "$1"
+        -e "s~(^|[^[:alnum:]_/-])GH-([0-9]+)~\\1$UPSTREAM_SLUG#\\2~g" <<< "$title")"
+}
+
+# File names go inside a code span, where mentions and references stay inert, so only a backtick
+# that would end the span early is replaced.
+markdown_path() {
+    tr '`' "'" <<< "$1"
 }
 
 # The engine is generated from upstream's Kotlin alone, so only Kotlin and license changes need a
@@ -89,6 +106,7 @@ keep adapting upstream sources. Reference: $UPSTREAM_REPO/pull/76."
 
 summary=""
 summary_commits=0
+omitted_commits=0
 report_commit() {
     local commit="$1" files_changed="$2" category="$3"
     local short_sha date title file_count
@@ -104,7 +122,8 @@ report_commit() {
     fi
 
     summary_commits=$((summary_commits + 1))
-    if ((summary_commits > MAX_SUMMARY_COMMITS)); then
+    if ((summary_commits > MAX_SUMMARY_COMMITS || ${#summary} > MAX_SUMMARY_CHARACTERS)); then
+        omitted_commits=$((omitted_commits + 1))
         return
     fi
     summary+="- [\`$short_sha\`]($UPSTREAM_REPO/commit/$commit) $(markdown_title "$title")"
@@ -113,7 +132,7 @@ report_commit() {
     fi
     summary+=$'\n'
     while IFS= read -r file; do
-        summary+="  - \`$file\`"$'\n'
+        summary+="  - \`$(markdown_path "$file")\`"$'\n'
     done < <(head -n "$MAX_SUMMARY_FILES" <<< "$files_changed")
     file_count=$(wc -l <<< "$files_changed")
     if ((file_count > MAX_SUMMARY_FILES)); then
@@ -131,13 +150,14 @@ write_results() {
             "$current" "$current_short" "$target" "$target_short" "$relevant" "$scaffold" >> "$github_output"
     fi
     if [[ -n "$summary_file" ]]; then
-        if ((summary_commits > MAX_SUMMARY_COMMITS)); then
-            summary+="- and $((summary_commits - MAX_SUMMARY_COMMITS)) more commits"$'\n'
+        if ((omitted_commits > 0)); then
+            summary+="- and $omitted_commits more commits"$'\n'
         fi
         summary+=$'\n'"[Compare \`$current_short...$target_short\`]($UPSTREAM_REPO/compare/$current...$target)"$'\n'
         if ((scaffold > 0)); then
             summary+=$'\n'"$SCAFFOLD_NOTE"$'\n'
         fi
+        mkdir -p "$(dirname "$summary_file")"
         printf '%s' "$summary" > "$summary_file"
     fi
 }
@@ -153,11 +173,13 @@ if [[ ! -e "$SUBMODULE_PATH/.git" ]]; then
 fi
 cd "$SUBMODULE_PATH"
 log "Fetching latest changes from remote..."
+# `.gitmodules` records an SSH URL, which a runner without SSH keys cannot use, so the fetch names
+# the public HTTPS repository and fills the usual remote-tracking refs itself.
+fetch_args=(--quiet --prune "$UPSTREAM_REPO.git" "+refs/heads/*:refs/remotes/origin/*")
 if [[ $(git rev-parse --is-shallow-repository) == true ]]; then
-    git fetch --quiet origin --prune --unshallow
-else
-    git fetch --quiet origin --prune
+    fetch_args=(--unshallow "${fetch_args[@]}")
 fi
+git fetch "${fetch_args[@]}"
 
 current_commit=$(git rev-parse HEAD)
 remote_commit=$(git rev-parse --verify origin/main 2>/dev/null || git rev-parse --verify origin/master)

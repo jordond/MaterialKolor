@@ -1,0 +1,143 @@
+#!/bin/bash
+set -euo pipefail
+
+# Carries out the planned action on the rolling bump pull request. This is the only upstream script
+# that holds the write token, so it runs in a fresh checkout that has never run upstream code.
+
+usage() {
+    echo "Usage: $0 [--bundle <file>] [--summary <file>]"
+    echo "  Reads GH_TOKEN, ACTION, BASE_BRANCH, BUMP_BRANCH and NUMBER for every action"
+    echo "  close also reads DELETE_BRANCH"
+    echo "  notify also reads TARGET, CURRENT and TARGET_SHORT"
+    echo "  update also reads TITLE, EXPECTED, CURRENT_SHORT, TARGET_SHORT, TRANSFORM, GOLDENS and RUN_URL,"
+    echo "  and needs --bundle and --summary"
+}
+
+bundle=""
+summary=""
+while [[ $# -gt 0 ]]; do
+    case $1 in
+    --bundle | --summary)
+        if [[ $# -lt 2 || -z "$2" ]]; then
+            usage >&2
+            exit 1
+        fi
+        if [[ "$1" == "--bundle" ]]; then
+            bundle="$2"
+        else
+            summary="$2"
+        fi
+        shift 2
+        ;;
+    *)
+        echo "Unknown option: $1" >&2
+        usage >&2
+        exit 1
+        ;;
+    esac
+done
+
+require() {
+    local name
+    for name in "$@"; do
+        if [[ -z "${!name:-}" ]]; then
+            echo "Missing $name" >&2
+            usage >&2
+            exit 1
+        fi
+    done
+}
+
+close_pull_request() {
+    require NUMBER DELETE_BRANCH
+    local comment="\`$BASE_BRANCH\` already pins every upstream Kotlin and license change, so this bump is no longer needed."
+    if [[ "$DELETE_BRANCH" == true ]]; then
+        gh pr close "$NUMBER" --delete-branch --comment "$comment"
+    else
+        gh pr close "$NUMBER" --comment "$comment The branch has maintainer commits, so it was kept."
+    fi
+}
+
+notify_pull_request() {
+    require NUMBER TARGET CURRENT TARGET_SHORT
+    local marker="<!-- upstream-target:$TARGET base:$CURRENT -->" comments
+    comments=$(gh pr view "$NUMBER" --json comments --jq '.comments[].body')
+    if grep -qF "$marker" <<< "$comments"; then
+        echo "Pull request #$NUMBER already has a comment for this target and base."
+        return
+    fi
+    gh pr comment "$NUMBER" --body "Upstream is now at \`$TARGET_SHORT\`, or the pin on \`$BASE_BRANCH\` changed. \
+This branch has maintainer commits, so it was not rewritten. Update the pin here by hand, or close this \
+pull request and delete the branch so the next run opens a fresh one.
+
+$marker"
+}
+
+write_body() {
+    local transform_status goldens_status
+    if [[ "$TRANSFORM" == success ]]; then
+        transform_status="The transformer adapted the new sources."
+    else
+        transform_status="**The transformer failed on the new sources.** A rule or shape expectation needs updating, see the [workflow run]($RUN_URL)."
+    fi
+    case "$GOLDENS" in
+    success) goldens_status="Golden fixtures were regenerated from the raw upstream Kotlin in their own commit, so any color change shows up in that diff." ;;
+    skipped) goldens_status="Golden fixtures were not regenerated because the transform failed. Regenerate them once it passes." ;;
+    *) goldens_status="**Golden fixture regeneration failed**, see the [workflow run]($RUN_URL)." ;;
+    esac
+    echo "Moves the material-color-utilities pin from \`$CURRENT_SHORT\` to \`$TARGET_SHORT\`."
+    echo
+    echo "## Upstream Kotlin and license changes"
+    echo
+    cat "$summary"
+    echo
+    echo "## Status"
+    echo
+    echo "- $transform_status"
+    echo "- $goldens_status"
+    echo "- A red \`checkKotlinAbi\` means the public API moved. Review it against docs/upstream-psi.md, then run \`./gradlew updateKotlinAbi\` on macOS and push to this branch. When upstream moves again the bot rewrites the branch and drops those dump commits, so push them again."
+}
+
+update_pull_request() {
+    require TITLE CURRENT_SHORT TARGET_SHORT TRANSFORM GOLDENS RUN_URL
+    if [[ -z "$bundle" || -z "$summary" ]]; then
+        usage >&2
+        exit 1
+    fi
+    local body authorization
+    body=$(mktemp)
+    write_body > "$body"
+
+    git fetch --quiet "$bundle" "+refs/heads/$BUMP_BRANCH:refs/heads/$BUMP_BRANCH"
+    # The token travels as a header through the environment, never in a URL or on a command line.
+    # The lease expects the branch exactly as planning saw it, or absent when it did not exist yet.
+    authorization=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 | tr -d '\n')
+    GIT_CONFIG_COUNT=1 \
+        GIT_CONFIG_KEY_0="http.https://github.com/.extraheader" \
+        GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $authorization" \
+        git push --quiet --force-with-lease="refs/heads/$BUMP_BRANCH:${EXPECTED:-}" \
+        origin "refs/heads/$BUMP_BRANCH:refs/heads/$BUMP_BRANCH"
+
+    if [[ -n "${NUMBER:-}" ]]; then
+        gh pr edit "$NUMBER" --title "$TITLE" --body-file "$body"
+    else
+        gh pr create --base "$BASE_BRANCH" --head "$BUMP_BRANCH" --title "$TITLE" \
+            --body-file "$body" --label upstream
+    fi
+}
+
+if [[ -z "${GH_TOKEN:-}" ]]; then
+    echo "::error::Add an UPSTREAM_BOT_TOKEN repository secret with contents, pull requests and issues write access." >&2
+    exit 1
+fi
+require ACTION BASE_BRANCH BUMP_BRANCH
+case "$ACTION" in
+close) close_pull_request ;;
+notify) notify_pull_request ;;
+update) update_pull_request ;;
+none) ;;
+*)
+    echo "Unknown action: $ACTION" >&2
+    exit 1
+    ;;
+esac

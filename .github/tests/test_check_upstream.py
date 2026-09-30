@@ -9,7 +9,7 @@ import tempfile
 import unittest
 
 
-SCRIPT = Path(__file__).resolve().parents[1] / "check-upstream"
+SCRIPT = Path(__file__).resolve().parents[1] / "scripts/check-upstream"
 REAL_GIT = shutil.which("git")
 
 
@@ -20,8 +20,8 @@ class UpstreamMonitorTest(unittest.TestCase):
         self.root = Path(self.temporary.name)
         self.repo = self.root / "tools/mcu-upstream/src/main"
         self.repo.mkdir(parents=True)
-        self.script = self.root / ".github/check-upstream"
-        self.script.parent.mkdir()
+        self.script = self.root / ".github/scripts/check-upstream"
+        self.script.parent.mkdir(parents=True)
         shutil.copyfile(SCRIPT, self.script)
         self.git("init", "--quiet", "-b", "main")
         self.git("config", "user.email", "fixture@example.invalid")
@@ -199,16 +199,47 @@ class UpstreamMonitorTest(unittest.TestCase):
         self.assertFalse((self.root / "pwned").exists())
         self.assertFalse((self.repo / "pwned").exists())
 
+    def test_gh_references_and_long_titles_are_tamed(self):
+        self.commit("kotlin/hct/Hct.kt", "Fix GH-12 " + "x" * 200)
+        summary = self.root / "summary.md"
+        result = self.run_monitor("--summary", str(summary))
+        self.assertEqual(0, result.returncode, result.stderr)
+        text = summary.read_text()
+        self.assertIn("Fix material-foundation/material-color-utilities#12 ", text)
+        self.assertIn("x..." , text)
+        self.assertNotIn("x" * 120, text)
+
+    def test_backtick_in_a_file_name_cannot_end_the_code_span(self):
+        self.commit("kotlin/odd`@someone`.kt", "Kotlin update")
+        summary = self.root / "summary.md"
+        result = self.run_monitor("--summary", str(summary))
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertIn("  - `kotlin/odd'@someone'.kt`", summary.read_text())
+
+    def test_summary_stays_inside_the_character_budget(self):
+        for index in range(45):
+            self.commit(f"kotlin/c{index}/a.kt", f"Kotlin update {index}",
+                        *[f"kotlin/c{index}/{'d' * 90}{i}.kt" for i in range(9)])
+        summary = self.root / "summary.md"
+        result = self.run_monitor("--summary", str(summary))
+        self.assertEqual(0, result.returncode, result.stderr)
+        text = summary.read_text()
+        self.assertLess(len(text), 45000)
+        self.assertRegex(text, r"- and \d+ more commits")
+
     def test_commit_message_cannot_issue_workflow_commands(self):
         self.commit("kotlin/hct/Hct.kt", "Kotlin update\n\n::error::injected")
         result = self.run_monitor(GITHUB_ACTIONS="true")
         self.assertEqual(0, result.returncode, result.stderr)
         lines = result.stdout.splitlines()
+        # The runner trims leading whitespace before parsing commands, so only the stop and resume
+        # pair around the message protects it.
         self.assertRegex(lines[0], r"^::stop-commands::[0-9a-f]{32}$")
         token = lines[0].split("::")[2]
         self.assertEqual(f"::{token}::", lines[-1])
-        self.assertIn("    ::error::injected", lines)
-        self.assertNotIn("::error::injected", lines)
+        injected = lines.index("    ::error::injected")
+        self.assertLess(0, injected)
+        self.assertLess(injected, len(lines) - 1)
 
     def test_commands_are_not_stopped_outside_actions(self):
         self.commit("kotlin/hct/Hct.kt", "Kotlin update")
@@ -243,6 +274,9 @@ class UpstreamMonitorTest(unittest.TestCase):
         result = self.run_monitor("--summary", str(self.root / "summary.md"))
         self.assertEqual(0, result.returncode, result.stderr)
         self.assertEqual([("git", "fetch")], [(c["tool"], c["args"][0]) for c in self.requests()])
+        # The submodule's SSH remote is unusable on a runner, so the fetch names HTTPS itself.
+        self.assertIn("https://github.com/material-foundation/material-color-utilities.git",
+                      self.requests()[0]["args"])
 
     def test_option_without_a_value_is_rejected(self):
         for option in ["--github-output", "--summary"]:

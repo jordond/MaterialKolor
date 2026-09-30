@@ -1,0 +1,99 @@
+#!/bin/bash
+set -euo pipefail
+
+# Moves the upstream pin on the bump branch, writes the lock, checks the transform and regenerates
+# the golden fixtures, then bundles the new commits for the publishing job. It runs upstream code
+# through Gradle, so it must never see a write token.
+
+CWD="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+ROOT="$(cd "$CWD"/../.. >/dev/null 2>&1 && pwd)"
+SUBMODULE="tools/mcu-upstream/src/main"
+FIXTURES="material-color-utilities/src/commonTest/kotlin/com/materialkolor/conformance"
+
+usage() {
+    echo "Usage: $0 --github-output <file> --bundle <file>"
+    echo "  Reads BUMP_BRANCH, BOT_NAME, BOT_EMAIL, TARGET, TARGET_SHORT and TITLE"
+    echo "  Appends base, transform (success or failure) and goldens (success, failure or skipped)"
+}
+
+github_output=""
+bundle=""
+while [[ $# -gt 0 ]]; do
+    case $1 in
+    --github-output | --bundle)
+        if [[ $# -lt 2 || -z "$2" ]]; then
+            usage >&2
+            exit 1
+        fi
+        if [[ "$1" == "--github-output" ]]; then
+            github_output="$2"
+        else
+            bundle="$2"
+        fi
+        shift 2
+        ;;
+    *)
+        echo "Unknown option: $1" >&2
+        usage >&2
+        exit 1
+        ;;
+    esac
+done
+for name in BUMP_BRANCH BOT_NAME BOT_EMAIL TARGET TARGET_SHORT TITLE; do
+    if [[ -z "${!name:-}" ]]; then
+        echo "Missing $name" >&2
+        usage >&2
+        exit 1
+    fi
+done
+if [[ -z "$github_output" || -z "$bundle" ]]; then
+    usage >&2
+    exit 1
+fi
+
+cd "$ROOT"
+base=$(git rev-parse HEAD)
+git config user.name "$BOT_NAME"
+git config user.email "$BOT_EMAIL"
+git switch --quiet -C "$BUMP_BRANCH"
+
+git -C "$SUBMODULE" checkout --quiet --detach "$TARGET"
+./gradlew candidateMcuUpstreamLock
+# The candidate is pretty-printed with four spaces, the tracked lock with two.
+jq --indent 2 . build/mcu-upstream.lock.candidate.json > gradle/mcu-upstream.lock.json
+git add "$SUBMODULE" gradle/mcu-upstream.lock.json
+git commit --quiet -m "$TITLE"
+
+# Each command is checked by hand because `set -e` does not apply inside a function called as an
+# `if` condition.
+regenerate_goldens() {
+    local scratch
+    scratch=$(mktemp -d)
+    # A cold build prints the transformer summary even under -q, so compile before printing.
+    ./gradlew :mcu-upstream:testClasses || return 1
+    # Written aside first so a failed generator cannot leave a truncated fixture behind.
+    ./gradlew -q :mcu-upstream:printMcuRoleGoldens > "$scratch/UpstreamRoleGoldenData.kt" || return 1
+    ./gradlew -q :mcu-upstream:printMcuQuantizerGoldens > "$scratch/UpstreamQuantizerGoldenData.kt" || return 1
+    mv "$scratch/UpstreamRoleGoldenData.kt" "$scratch/UpstreamQuantizerGoldenData.kt" "$FIXTURES/" || return 1
+    ./gradlew :material-color-utilities:spotlessApply || return 1
+    git add "$FIXTURES" || return 1
+    git commit --quiet -m "test(mcu): regenerate golden fixtures for upstream $TARGET_SHORT" || return 1
+}
+
+# The golden generators compile against the adapted library, so they only run on a clean transform
+# and a transform failure is reported as the cause.
+transform=failure
+goldens=skipped
+if ./gradlew :material-color-utilities:generateMcuSources; then
+    transform=success
+    if regenerate_goldens; then
+        goldens=success
+    else
+        goldens=failure
+        git reset --quiet --hard HEAD
+    fi
+fi
+
+mkdir -p "$(dirname "$bundle")"
+git bundle create --quiet "$bundle" "$BUMP_BRANCH" "^$base"
+printf 'base=%s\ntransform=%s\ngoldens=%s\n' "$base" "$transform" "$goldens" >> "$github_output"

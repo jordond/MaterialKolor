@@ -9,7 +9,7 @@ import tempfile
 import unittest
 
 
-SCRIPT = Path(__file__).resolve().parents[1] / "plan-upstream"
+SCRIPT = Path(__file__).resolve().parents[1] / "scripts/plan-upstream"
 REAL_GIT = shutil.which("git")
 BOT_EMAIL = "41898282+github-actions[bot]@users.noreply.github.com"
 OLD_PIN = "a" * 40
@@ -37,9 +37,15 @@ class PlanUpstreamTest(unittest.TestCase):
         stub.write_text(
             '#!/usr/bin/env python3\n'
             'import json, os, sys\n'
+            'import subprocess\n'
+            'args = sys.argv[1:]\n'
             'with open(os.environ["GH_LOG"], "a") as stream:\n'
-            '    stream.write(json.dumps(sys.argv[1:]) + "\\n")\n'
-            'print(os.environ.get("PULL_REQUESTS", "[]"))\n'
+            '    stream.write(json.dumps(args) + "\\n")\n'
+            'data = os.environ.get("PULL_REQUESTS", "[]")\n'
+            'if "--jq" in args:\n'
+            '    data = subprocess.run(["jq", "-c", args[args.index("--jq") + 1]], input=data,\n'
+            '                          text=True, capture_output=True, check=True).stdout\n'
+            'print(data)\n'
         )
         stub.chmod(0o755)
 
@@ -110,8 +116,9 @@ class PlanUpstreamTest(unittest.TestCase):
         self.assertEqual(expected_delete, values["delete_branch"], result.stdout)
         return values
 
-    def open_pr(self, number=7, target=NEW_PIN):
-        return {"number": number, "state": "OPEN", "title": f"fix(mcu): update upstream pin to {target[:7]}"}
+    def open_pr(self, number=7, target=NEW_PIN, cross_repository=False):
+        return {"number": number, "state": "OPEN", "isCrossRepository": cross_repository,
+                "title": f"fix(mcu): update upstream pin to {target[:7]}"}
 
     def test_nothing_relevant_and_no_pull_request_does_nothing(self):
         self.assertPlan("none", relevant=0)
@@ -119,14 +126,19 @@ class PlanUpstreamTest(unittest.TestCase):
     def test_first_relevant_change_opens_a_pull_request(self):
         values = self.assertPlan("update")
         self.assertEqual("", values["number"])
+        # No branch yet, so the push must find it absent.
+        self.assertEqual("", values["expected"])
         self.assertEqual(f"fix(mcu): update upstream pin to {NEW_PIN[:7]}", values["title"])
 
     def test_gh_is_asked_for_every_pull_request_on_the_bump_branch(self):
         self.plan()
         call = json.loads(self.gh_log.read_text().splitlines()[0])
         self.assertEqual(["pr", "list"], call[:2])
-        for flag, value in [("--base", "next"), ("--head", "upstream/mcu"), ("--state", "all")]:
+        for flag, value in [("--base", "next"), ("--head", "upstream/mcu"), ("--state", "all"),
+                            ("--limit", "100")]:
             self.assertEqual(value, call[call.index(flag) + 1])
+        fields = call[call.index("--json") + 1].split(",")
+        self.assertEqual({"number", "state", "title", "isCrossRepository"}, set(fields))
 
     def test_caught_up_pull_request_is_closed_and_its_branch_deleted(self):
         self.bump_branch()
@@ -191,6 +203,43 @@ class PlanUpstreamTest(unittest.TestCase):
     def test_merged_pull_request_does_not_snooze(self):
         merged = {**self.open_pr(), "state": "MERGED"}
         self.assertPlan("update", pull_requests=[merged])
+
+    def test_fork_pull_request_with_the_same_branch_name_is_ignored(self):
+        values = self.assertPlan("update", pull_requests=[self.open_pr(number=9, cross_repository=True)])
+        self.assertEqual("", values["number"])
+
+    def test_source_under_an_api_directory_counts_as_maintainer_work(self):
+        self.bump_branch()
+        self.commit("feat: api helper", email="owner@example.invalid",
+                    path="material-color-utilities/src/commonMain/kotlin/api/Helper.kt")
+        self.publish()
+        self.assertPlan("notify", target=NEWER_PIN, pull_requests=[self.open_pr()])
+
+    def test_abi_dumps_in_nested_directories_do_not_count(self):
+        self.bump_branch()
+        self.commit("chore: update ABI dumps", email="owner@example.invalid",
+                    path="material-kolor-core/api/android/material-kolor-core.api")
+        self.publish()
+        self.assertPlan("update", target=NEWER_PIN, pull_requests=[self.open_pr()])
+
+    def test_orphaned_branch_with_maintainer_commits_is_left_alone(self):
+        self.bump_branch()
+        self.commit("fix(mcu): adapt a rule", email="owner@example.invalid", path="tools/rule.kt")
+        self.publish()
+        result, values = self.plan(target=NEWER_PIN)
+        self.assertEqual("none", values["action"])
+        self.assertIn("Delete it to resume", result.stdout)
+
+    def test_orphaned_bot_branch_is_rewritten_under_a_lease(self):
+        self.bump_branch()
+        self.publish()
+        values = self.assertPlan("update", target=NEWER_PIN)
+        self.assertEqual(self.git("rev-parse", "origin/upstream/mcu"), values["expected"])
+
+    def test_open_pull_request_without_its_branch_fails(self):
+        result, _ = self.plan(pull_requests=[self.open_pr()])
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("is gone", result.stderr)
 
     def test_missing_input_is_rejected(self):
         result, _ = self.plan(TARGET_SHORT="")

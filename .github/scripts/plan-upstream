@@ -7,7 +7,7 @@ set -euo pipefail
 usage() {
     echo "Usage: $0 --github-output <file>"
     echo "  Reads BASE_BRANCH, BUMP_BRANCH, BOT_EMAIL, CURRENT, TARGET, TARGET_SHORT and RELEVANT"
-    echo "  Appends number, action (none, close, notify or update), delete_branch and title"
+    echo "  Appends number, action (none, close, notify or update), delete_branch, title and expected"
 }
 
 github_output=""
@@ -45,8 +45,8 @@ lock_revision() {
 }
 
 # Commits a maintainer added to the bump branch. Merges from GitHub's "Update branch" button and
-# commits that only touch ABI dumps, which the pull request asks for after `updateKotlinAbi`, do not
-# count. A rewrite recreates the first and the reviewer reruns the second.
+# commits that only touch ABI dumps (`<module>/api/**/*.api`), which the pull request asks for after
+# `updateKotlinAbi`, do not count. A rewrite recreates the first and the reviewer reruns the second.
 maintainer_commits() {
     local commit files
     for commit in $(git rev-list --no-merges "origin/$BASE_BRANCH..origin/$BUMP_BRANCH"); do
@@ -54,30 +54,38 @@ maintainer_commits() {
             continue
         fi
         files=$(git diff-tree --no-commit-id --name-only -r "$commit")
-        if grep -qvE '(^|/)api/' <<< "$files"; then
+        if grep -qvE '^[^/]+/api/(.+/)?[^/]+\.api$' <<< "$files"; then
             echo "$commit"
         fi
     done
 }
 
 title="fix(mcu): update upstream pin to $TARGET_SHORT"
+# A fork branch with the same name is someone else's pull request.
 pull_requests=$(gh pr list --base "$BASE_BRANCH" --head "$BUMP_BRANCH" --state all --limit 100 \
-    --json number,state,title)
+    --json number,state,title,isCrossRepository --jq 'map(select(.isCrossRepository | not))')
 number=$(jq -r 'map(select(.state == "OPEN")) | .[0].number // empty' <<< "$pull_requests")
 # A bump the maintainer closed without merging stays closed until upstream moves again.
 snoozed=$(jq -r --arg title "$title" \
     'any(.[]; .state == "CLOSED" and .title == $title)' <<< "$pull_requests")
 
+# The branch can outlive its pull request, after a close by hand or a close that kept maintainer
+# commits, so it is inspected whenever it exists. Its head is also the lease for the later push.
 revision=""
 base_pin=""
 edited=false
-if [[ -n "$number" ]]; then
+expected=""
+if git ls-remote --exit-code --heads origin "$BUMP_BRANCH" > /dev/null; then
     git fetch --quiet origin "+refs/heads/$BUMP_BRANCH:refs/remotes/origin/$BUMP_BRANCH"
+    expected=$(git rev-parse "origin/$BUMP_BRANCH")
     revision=$(lock_revision "origin/$BUMP_BRANCH")
     base_pin=$(lock_revision "$(git merge-base "origin/$BASE_BRANCH" "origin/$BUMP_BRANCH")")
     if [[ -n $(maintainer_commits) ]]; then
         edited=true
     fi
+elif [[ -n "$number" ]]; then
+    echo "Pull request #$number is open but $BUMP_BRANCH is gone" >&2
+    exit 1
 fi
 
 action=none
@@ -95,6 +103,8 @@ elif [[ -n "$number" ]]; then
     if [[ "$revision" != "$TARGET" || "$base_pin" != "$CURRENT" ]]; then
         action=$([[ "$edited" == true ]] && echo notify || echo update)
     fi
+elif [[ "$edited" == true ]]; then
+    echo "$BUMP_BRANCH has maintainer commits but no open pull request. Delete it to resume the bump."
 elif [[ "$snoozed" != true ]]; then
     action=update
 fi
@@ -102,5 +112,5 @@ fi
 echo "Open pull request: ${number:-none}, pinned there: ${revision:-none}, based on: ${base_pin:-none}"
 echo "Base pin: $CURRENT, target: $TARGET, maintainer commits: $edited, closed for this target: $snoozed"
 echo "Action: $action"
-printf 'number=%s\naction=%s\ndelete_branch=%s\ntitle=%s\n' \
-    "$number" "$action" "$delete_branch" "$title" >> "$github_output"
+printf 'number=%s\naction=%s\ndelete_branch=%s\ntitle=%s\nexpected=%s\n' \
+    "$number" "$action" "$delete_branch" "$title" "$expected" >> "$github_output"
