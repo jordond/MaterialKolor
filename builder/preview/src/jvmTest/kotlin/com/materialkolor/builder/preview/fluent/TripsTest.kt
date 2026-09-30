@@ -52,6 +52,7 @@ import com.materialkolor.builder.preview.inspect.Inspecting
 import com.materialkolor.builder.preview.inspect.OnCard
 import com.materialkolor.builder.preview.inspect.PreviewRoles
 import com.materialkolor.builder.preview.inspect.firstRated
+import com.materialkolor.builder.preview.moduleSource
 import com.materialkolor.builder.preview.split.SplitState
 import com.materialkolor.builder.preview.trips.OfflineMapsSwitch
 import com.materialkolor.builder.preview.trips.PackingItem
@@ -64,10 +65,9 @@ import io.kotest.matchers.floats.shouldBeGreaterThan
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import java.io.File
 import kotlin.test.Test
 
-private const val FluentSourceDir = "src/commonMain/kotlin/com/materialkolor/builder/preview/fluent"
+private const val FluentSourceDir = "commonMain/kotlin/com/materialkolor/builder/preview/fluent"
 
 /**
  * The files of Fluent's Trips, which the gallery's sources are not.
@@ -336,7 +336,7 @@ class TripsTest {
 
     @Test
     fun tripsSources_openNothingOutsideTheLayoutAndNeverLoop() {
-        val sources = File(FluentSourceDir)
+        val sources = moduleSource(FluentSourceDir)
             .listFiles()
             .orEmpty()
             .filter { file -> file.name in TripsSources }

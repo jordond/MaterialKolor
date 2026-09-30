@@ -36,7 +36,9 @@ import com.materialkolor.builder.preview.LightSpec
 import com.materialkolor.builder.preview.ShellExpressive
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.PreviewPane
+import com.materialkolor.builder.preview.importedNames
 import com.materialkolor.builder.preview.inspect.PreviewRoles
+import com.materialkolor.builder.preview.moduleSource
 import com.materialkolor.builder.preview.on
 import com.materialkolor.builder.preview.split.PaneSpec
 import com.materialkolor.builder.preview.trips.OfflineMapsSwitch
@@ -48,7 +50,6 @@ import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
-import java.io.File
 import kotlin.test.Test
 
 /**
@@ -82,11 +83,11 @@ private val TripsContainerLevels: Set<Role> = setOf(
  * The Trips app's sources, from the module the tests run in.
  */
 private val TripsSources: List<String> = listOf(
-    "src/commonMain/kotlin/com/materialkolor/builder/preview/unstyled/AppEntry.kt",
-    "src/commonMain/kotlin/com/materialkolor/builder/preview/unstyled/UnstyledTrips.kt",
-    "src/commonMain/kotlin/com/materialkolor/builder/preview/unstyled/UnstyledTripDetail.kt",
-    "src/commonMain/kotlin/com/materialkolor/builder/preview/unstyled/UnstyledParts.kt",
-    "src/commonMain/kotlin/com/materialkolor/builder/preview/unstyled/UnstyledRoles.kt",
+    "commonMain/kotlin/com/materialkolor/builder/preview/unstyled/AppEntry.kt",
+    "commonMain/kotlin/com/materialkolor/builder/preview/unstyled/UnstyledTrips.kt",
+    "commonMain/kotlin/com/materialkolor/builder/preview/unstyled/UnstyledTripDetail.kt",
+    "commonMain/kotlin/com/materialkolor/builder/preview/unstyled/UnstyledParts.kt",
+    "commonMain/kotlin/com/materialkolor/builder/preview/unstyled/UnstyledRoles.kt",
 )
 
 /**
@@ -205,15 +206,10 @@ class TripsTest {
     fun tripsSources_openNoPopupWindowOrPortalAndNeverLoop() {
         for (path in TripsSources) {
             withClue(path) {
-                val source = File(path)
-                source.isFile shouldBe true
-                val lines = source.readLines().map { line -> line.trim() }
-                lines
-                    .filter { line -> line.startsWith("import ") }
-                    .map { line -> line.removePrefix("import ").substringBefore(" as ") }
-                    .filter { imported -> imported.isBannedInTrips() }
-                    .shouldBeEmpty()
-                lines
+                val source = moduleSource(path)
+                source.importedNames().filter { imported -> imported.isBannedInTrips() }.shouldBeEmpty()
+                source
+                    .readLines()
                     .filter { line -> TripsEndlessMotion.any { stem -> stem in line } }
                     .shouldBeEmpty()
             }

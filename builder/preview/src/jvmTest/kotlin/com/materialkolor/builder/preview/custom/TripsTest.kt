@@ -45,6 +45,7 @@ import com.materialkolor.builder.preview.LightSpec
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.PreviewPane
 import com.materialkolor.builder.preview.inspect.PreviewRoles
+import com.materialkolor.builder.preview.moduleSource
 import com.materialkolor.builder.preview.split.PaneSpec
 import com.materialkolor.builder.preview.trips.OfflineMapsSwitch
 import com.materialkolor.builder.preview.trips.PackingItem
@@ -297,7 +298,7 @@ private val TripsEndlessMotion: Regex = Regex("""\b(rememberInfinite\w*Transitio
  */
 private val TripsSources: List<File>
     get() {
-        val folder = File("src/commonMain/kotlin/com/materialkolor/builder/preview/custom")
+        val folder = moduleSource("commonMain/kotlin/com/materialkolor/builder/preview/custom")
         val trips = folder.listFiles().orEmpty().filter { file -> file.name.startsWith("CustomTrip") }
         return trips.sortedBy { file -> file.name } + File(folder, "AppEntry.kt") + File(folder, "CustomColors.kt")
     }

@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.resolve.ThemeResolver
+import com.materialkolor.builder.kit.checkEach
 import com.materialkolor.builder.kit.headless.HeadlessBottomSheet
 import com.materialkolor.builder.kit.headless.LocalOverlaysInTree
 import com.materialkolor.builder.kit.layout.LayoutInfo
@@ -33,7 +34,6 @@ import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.SkinTestTheme
 import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
-import io.kotest.assertions.withClue
 
 /**
  * Every skin the controls dispatch to, each named so a failure says which one.
@@ -45,14 +45,11 @@ internal val ControlSkins: List<Pair<String, Skin>> = listOf(
 )
 
 /**
- * Runs [block] once per skin in a fresh test, with the skin's name as the clue.
+ * Runs [block] once per skin in a fresh test, then fails with every skin that failed, each by name.
  */
 @OptIn(ExperimentalTestApi::class)
-internal fun forEachSkin(block: suspend ComposeUiTest.(name: String, skin: Skin) -> Unit) {
-    for ((name, skin) in ControlSkins) {
-        withClue(name) { runComposeUiTest { block(name, skin) } }
-    }
-}
+internal fun forEachSkin(block: suspend ComposeUiTest.(name: String, skin: Skin) -> Unit) =
+    checkEach(ControlSkins, name = { (name, _) -> name }) { (name, skin) -> runComposeUiTest { block(name, skin) } }
 
 /**
  * A skin over a resolved document, a measured layout and frozen motion.
@@ -89,13 +86,15 @@ internal fun HostOverlays(
 }
 
 /**
- * Runs [block] for every skin, first with overlays in windows of their own and then in the page.
+ * Runs [block] for every skin, first with overlays in windows of their own and then in the page,
+ * then fails with every case that failed, each by skin and host.
  */
 @OptIn(ExperimentalTestApi::class)
 internal fun hostEachWay(block: suspend ComposeUiTest.(skin: Skin, inTree: Boolean) -> Unit) {
-    for (inTree in listOf(false, true)) {
-        withClue(if (inTree) "in tree" else "in windows") { forEachSkin { _, skin -> block(skin, inTree) } }
+    val cases = listOf(false, true).flatMap { inTree ->
+        ControlSkins.map { (name, skin) -> Triple(if (inTree) "$name in tree" else "$name in windows", skin, inTree) }
     }
+    checkEach(cases, name = { case -> case.first }) { (_, skin, inTree) -> runComposeUiTest { block(skin, inTree) } }
 }
 
 /**
@@ -150,16 +149,14 @@ internal fun SkinnedPanel(
 }
 
 /**
- * Runs [block] in a fresh composition for each skin variant, naming the variant on failure.
+ * Runs [block] in a fresh composition for each skin variant, then fails with every variant that
+ * failed, each by name.
  */
 @OptIn(ExperimentalTestApi::class)
-internal fun forEverySkin(block: ComposeUiTest.(SkinVariant) -> Unit) {
-    for (variant in SkinVariant.entries) {
-        runComposeUiTest {
-            withClue(variant.name) { block(variant) }
-        }
-    }
-}
+internal fun forEverySkin(block: ComposeUiTest.(SkinVariant) -> Unit) =
+    checkEach(SkinVariant.entries, name = { variant ->
+        variant.name
+    }) { variant -> runComposeUiTest { block(variant) } }
 
 /**
  * The headless bottom sheet in the surrounding skin's overlay style, named by the kit's detent

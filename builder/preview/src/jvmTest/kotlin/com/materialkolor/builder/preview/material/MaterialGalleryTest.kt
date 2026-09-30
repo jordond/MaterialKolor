@@ -1,39 +1,23 @@
 package com.materialkolor.builder.preview.material
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.platform.LocalTextToolbar
-import androidx.compose.ui.platform.TextToolbar
-import androidx.compose.ui.platform.TextToolbarStatus
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.SemanticsMatcher
-import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
 import androidx.compose.ui.test.assertAll
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.isSelected
-import androidx.compose.ui.test.longClick
-import androidx.compose.ui.test.onRoot
-import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performSemanticsAction
-import androidx.compose.ui.test.performTextReplacement
-import androidx.compose.ui.test.performTouchInput
-import androidx.compose.ui.test.rightClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.IntSize
@@ -41,13 +25,25 @@ import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.preview.Chrome
 import com.materialkolor.builder.preview.DarkSpec
+import com.materialkolor.builder.preview.GalleryInteractive
+import com.materialkolor.builder.preview.GalleryWhole
 import com.materialkolor.builder.preview.LightSpec
+import com.materialkolor.builder.preview.TextToolbarProbe
 import com.materialkolor.builder.preview.canvas.ComponentsTab
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.GALLERY_CARD
 import com.materialkolor.builder.preview.canvas.GalleryGroup
 import com.materialkolor.builder.preview.canvas.PreviewPane
+import com.materialkolor.builder.preview.galleryCardDeclaresRoles
+import com.materialkolor.builder.preview.galleryDescendants
+import com.materialkolor.builder.preview.galleryFrame
+import com.materialkolor.builder.preview.galleryInteractive
+import com.materialkolor.builder.preview.galleryRowsOnScreen
+import com.materialkolor.builder.preview.importedNames
 import com.materialkolor.builder.preview.inspect.PreviewRoles
+import com.materialkolor.builder.preview.moduleSource
+import com.materialkolor.builder.preview.pressEveryControl
+import com.materialkolor.builder.preview.rightClickAndLongPressEveryField
 import com.materialkolor.builder.preview.split.LocalCompositionProbe
 import com.materialkolor.builder.preview.split.PaneSpec
 import com.materialkolor.builder.preview.split.SplitPreview
@@ -59,7 +55,6 @@ import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.ints.shouldBeInRange
 import io.kotest.matchers.ints.shouldBeLessThanOrEqual
 import io.kotest.matchers.shouldBe
-import java.io.File
 import kotlin.test.Test
 
 /**
@@ -71,13 +66,6 @@ private val GalleryFrames: List<IntSize> = listOf(IntSize(412, 900), IntSize(128
  * How many columns of 280 dp cards, 16 dp apart, fit across each frame's width.
  */
 private val GalleryColumns: Map<Int, Int> = mapOf(412 to 1, 1280 to 4)
-
-/**
- * Wide enough for four columns and tall enough that every card composes.
- */
-private val GalleryWhole: Modifier = Modifier
-    .wrapContentSize(Alignment.TopStart, unbounded = true)
-    .requiredSize(1280.dp, 8000.dp)
 
 /**
  * The cards whose component Material 3 gives no disabled look, or that hold nothing to press.
@@ -106,16 +94,16 @@ private val GalleryPopupImports: List<String> = listOf(
  * The sources every gallery card is drawn from, and the Trips screen that holds the note.
  */
 private val GallerySources: List<String> = listOf(
-    "src/commonMain/kotlin/com/materialkolor/builder/preview/canvas/ComponentsTab.kt",
-    "src/commonMain/kotlin/com/materialkolor/builder/preview/material/GalleryEntry.kt",
-    "src/commonMain/kotlin/com/materialkolor/builder/preview/material/MaterialGallery.kt",
-    "src/commonMain/kotlin/com/materialkolor/builder/preview/material/GalleryFeedback.kt",
-    "src/commonMain/kotlin/com/materialkolor/builder/preview/material/SampleFields.kt",
+    "commonMain/kotlin/com/materialkolor/builder/preview/canvas/ComponentsTab.kt",
+    "commonMain/kotlin/com/materialkolor/builder/preview/material/GalleryEntry.kt",
+    "commonMain/kotlin/com/materialkolor/builder/preview/material/MaterialGallery.kt",
+    "commonMain/kotlin/com/materialkolor/builder/preview/material/GalleryFeedback.kt",
+    "commonMain/kotlin/com/materialkolor/builder/preview/material/SampleFields.kt",
     // The Trips note is a sample field too, so the text field ban reaches it.
-    "src/commonMain/kotlin/com/materialkolor/builder/preview/material/TripDetail.kt",
-    "src/inkletMain/kotlin/com/materialkolor/builder/preview/inklet/InkletGallery.kt",
-    "src/inkletMain/kotlin/com/materialkolor/builder/preview/inklet/InkletGalleryPanels.kt",
-    "src/inkletMain/kotlin/com/materialkolor/builder/preview/inklet/InkletTripDetail.kt",
+    "commonMain/kotlin/com/materialkolor/builder/preview/material/TripDetail.kt",
+    "inkletMain/kotlin/com/materialkolor/builder/preview/inklet/InkletGallery.kt",
+    "inkletMain/kotlin/com/materialkolor/builder/preview/inklet/InkletGalleryPanels.kt",
+    "inkletMain/kotlin/com/materialkolor/builder/preview/inklet/InkletTripDetail.kt",
 )
 
 @OptIn(ExperimentalTestApi::class)
@@ -194,7 +182,7 @@ class MaterialGalleryTest {
     @Test
     fun gallery_everyControlPressed_opensNoPopupOrWindow() =
         runComposeUiTest {
-            val toolbar = GalleryToolbarProbe()
+            val toolbar = TextToolbarProbe()
             setContent {
                 CompositionLocalProvider(LocalTextToolbar provides toolbar) {
                     GalleryHarness(LightSpec, DemoAppState(), GalleryWhole)
@@ -202,34 +190,12 @@ class MaterialGalleryTest {
             }
             waitForIdle()
 
-            val pressable = onAllNodes(hasClickAction(), useUnmergedTree = true).fetchSemanticsNodes()
-            pressable.shouldNotBeEmpty()
-            runOnIdle {
-                for (node in pressable) {
-                    if (SemanticsProperties.Disabled !in node.config) {
-                        node.config
-                            .getOrNull(SemanticsActions.OnClick)
-                            ?.action
-                            ?.invoke()
-                    }
-                }
-            }
-            waitForIdle()
-            onAllNodes(isRoot()).assertCountEquals(1)
-
+            pressEveryControl()
             // A word to select, so a text field has a context menu and a text toolbar to open.
-            val destinations = onAllNodes(hasSetTextAction() and hasText("Destination")).assertCountEquals(2)
-            destinations[0].performTextReplacement("Lisbon")
-            for (index in 0..1) {
-                withClue("Destination field $index") {
-                    destinations[index].performMouseInput { rightClick() }
-                    waitForIdle()
-                    onAllNodes(isRoot()).assertCountEquals(1)
-                    destinations[index].performTouchInput { longClick() }
-                    waitForIdle()
-                    onAllNodes(isRoot()).assertCountEquals(1)
-                }
-            }
+            rightClickAndLongPressEveryField(
+                onAllNodes(hasSetTextAction() and hasText("Destination")).assertCountEquals(2),
+                "Lisbon",
+            )
             toolbar.shown shouldBe 0
         }
 
@@ -237,13 +203,8 @@ class MaterialGalleryTest {
     fun gallerySources_importNothingThatOpensAPopup() {
         for (path in GallerySources) {
             withClue(path) {
-                val source = File(path)
-                source.isFile shouldBe true
-                source
-                    .readLines()
-                    .map { line -> line.trim() }
-                    .filter { line -> line.startsWith("import ") }
-                    .map { line -> line.removePrefix("import ").substringBefore(" as ") }
+                moduleSource(path)
+                    .importedNames()
                     .filter { imported ->
                         imported in GalleryPopupImports ||
                             imported.startsWith("androidx.compose.ui.window.")
@@ -274,15 +235,6 @@ class MaterialGalleryTest {
 }
 
 /**
- * Anything a user can press, type into or drag.
- */
-private val GalleryInteractive: SemanticsMatcher =
-    SemanticsMatcher("is interactive") { node -> node.galleryInteractive() }
-
-private fun SemanticsNode.galleryInteractive(): Boolean =
-    SemanticsActions.OnClick in config || SemanticsActions.SetText in config || SemanticsActions.SetProgress in config
-
-/**
  * Whether the node declares its roles. A range slider's thumbs are nodes of their own under the
  * slider, so a node that is only dragged may leave its roles to its parent.
  */
@@ -290,63 +242,6 @@ private fun SemanticsNode.galleryDeclaresRoles(): Boolean {
     if (PreviewRoles in config) return true
     val onlyDragged = SemanticsActions.OnClick !in config && SemanticsActions.SetText !in config
     return onlyDragged && parent?.let { slider -> PreviewRoles in slider.config } == true
-}
-
-/**
- * Every node under this one in the unmerged tree.
- */
-private fun SemanticsNode.galleryDescendants(): List<SemanticsNode> =
-    children.flatMap { child -> listOf(child) + child.galleryDescendants() }
-
-/**
- * The frame of the card called [title], the node its title text sits in.
- */
-private fun SemanticsNodeInteractionsProvider.galleryFrame(title: String): SemanticsNode =
-    onAllNodes(hasText(title), useUnmergedTree = true)
-        .fetchSemanticsNodes()
-        .mapNotNull { text -> text.parent }
-        .first { frame -> PreviewRoles in frame.config }
-
-/**
- * How many rows of the [composed] cards show at least partly on screen. The cards of a row share
- * their top edge, so each distinct top is a row.
- */
-private fun SemanticsNodeInteractionsProvider.galleryRowsOnScreen(composed: Set<String>): Int {
-    val screen = onRoot().fetchSemanticsNode().boundsInRoot
-    return composed
-        .map { title -> galleryFrame(title) }
-        .filter { frame -> frame.layoutInfo.isPlaced && frame.boundsInRoot.overlaps(screen) }
-        .map { frame -> frame.boundsInRoot.top }
-        .distinct()
-        .size
-}
-
-/**
- * Whether anything in the card called [title] declares roles, its frame aside.
- */
-private fun SemanticsNodeInteractionsProvider.galleryCardDeclaresRoles(title: String): Boolean =
-    galleryFrame(title).galleryDescendants().any { node -> PreviewRoles in node.config }
-
-/**
- * A text toolbar that counts how often it is asked to show, where the web's would open a popup.
- */
-private class GalleryToolbarProbe : TextToolbar {
-    var shown: Int = 0
-        private set
-
-    override val status: TextToolbarStatus = TextToolbarStatus.Hidden
-
-    override fun showMenu(
-        rect: Rect,
-        onCopyRequested: (() -> Unit)?,
-        onPasteRequested: (() -> Unit)?,
-        onCutRequested: (() -> Unit)?,
-        onSelectAllRequested: (() -> Unit)?,
-    ) {
-        shown++
-    }
-
-    override fun hide() = Unit
 }
 
 /**

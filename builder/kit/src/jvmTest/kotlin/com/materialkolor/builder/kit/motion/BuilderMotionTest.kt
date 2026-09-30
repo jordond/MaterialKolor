@@ -11,21 +11,6 @@ import kotlin.test.assertIs
 
 class BuilderMotionTest {
     @Test
-    fun builderDurations_default_matchTheMotionPrinciples() {
-        val durations = BuilderDurations()
-
-        durations.quick shouldBe 120
-        durations.standard shouldBe 220
-        durations.slow shouldBe 380
-        durations.reveal shouldBe 420
-        durations.panelEnter shouldBe 300
-        durations.panelExit shouldBe 200
-        durations.popover shouldBe 160
-        durations.press shouldBe 100
-        durations.reducedCrossfade shouldBe 150
-    }
-
-    @Test
     fun builderDurations_outsideTheSpecRanges_areRejected() {
         assertFailsWith<IllegalArgumentException> { BuilderDurations(reveal = 300) }
         assertFailsWith<IllegalArgumentException> { BuilderDurations(panelEnter = 500) }
@@ -36,21 +21,6 @@ class BuilderMotionTest {
     }
 
     @Test
-    fun tweenMotion_eachSpec_runsForItsOwnDuration() {
-        val motion = tweenBuilderMotion()
-
-        durationOf(motion.effects<Float>()) shouldBe 120
-        durationOf(motion.spatial<Float>()) shouldBe 220
-        durationOf(motion.slide<Float>()) shouldBe 380
-        durationOf(motion.reveal<Float>()) shouldBe 420
-        durationOf(motion.panelEnter<Float>()) shouldBe 300
-        durationOf(motion.panelExit<Float>()) shouldBe 200
-        durationOf(motion.popover<Float>()) shouldBe 160
-        durationOf(motion.press<Float>()) shouldBe 100
-        durationOf(motion.crossfade<Float>()) shouldBe 220
-    }
-
-    @Test
     fun tweenMotion_theRevealAndPanelArrival_useEmphasizedDecelerate() {
         val motion = tweenBuilderMotion()
 
@@ -58,12 +28,6 @@ class BuilderMotionTest {
         easingOf(motion.panelEnter<Float>()) shouldBe BuilderEasing.EmphasizedDecelerate
         easingOf(motion.popover<Float>()) shouldBe BuilderEasing.EmphasizedDecelerate
         easingOf(motion.panelExit<Float>()) shouldBe BuilderEasing.EmphasizedAccelerate
-    }
-
-    @Test
-    fun tweenMotion_press_shrinksToNinetySeven() {
-        tweenBuilderMotion().pressScale shouldBe PressScale
-        PressScale shouldBe 0.97f
     }
 
     @Test

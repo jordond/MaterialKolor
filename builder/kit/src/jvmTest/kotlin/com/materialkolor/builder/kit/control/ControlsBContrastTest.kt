@@ -6,19 +6,25 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CheckboxColors
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.SliderColors
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.SwitchColors
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.requestFocus
-import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.kit.headless.CheckboxStyle
@@ -32,27 +38,32 @@ import com.materialkolor.builder.kit.skin.headless.FieldStyle
 import com.materialkolor.builder.kit.skin.material.materialHeroFieldStyle
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
-import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import kotlin.test.Test
-import kotlin.test.assertNotNull
 
 private const val ErrorField = "error-field"
 
 @OptIn(ExperimentalTestApi::class)
 class ControlsBContrastTest {
     @Test
-    fun material3_bothModes_drawEveryInputReadably() = checkSheets(SkinVariant.Material3)
+    fun inputTokens_everySkinBothModes_meetTheirContrastMinimums() {
+        readInEverySkin { seenStyles().inkPairs() }.shortfalls().shouldBeEmpty()
+    }
 
     @Test
-    fun material3Expressive_bothModes_drawEveryInputReadably() = checkSheets(SkinVariant.Expressive)
-
-    @Test
-    fun custom_bothModes_drawEveryInputReadably() = checkSheets(SkinVariant.Custom)
+    fun inputSheet_everySkin_rendersAndTakesTypingInAField() =
+        forEverySkin { variant ->
+            setSkinnedContent(variant) { ControlsSheet() }
+            onNodeWithTag(ErrorField).requestFocus()
+            onNodeWithTag(ErrorField).performTextReplacement("#12345")
+            waitForIdle()
+            onNodeWithTag(ErrorField).assertIsFocused()
+        }
 }
 
 /**
- * The headless styles a skin drew its inputs with, null where the skin draws natively.
+ * The colours a skin draws its inputs with. The Custom skin draws them from headless styles, and
+ * Material3 through Material's own components, whose colours come from their defaults.
  */
 private class SeenStyles(
     val tokens: BuilderTokens,
@@ -62,39 +73,31 @@ private class SeenStyles(
     val tabs: TabsStyle?,
     val field: FieldStyle?,
     val hero: FieldStyle?,
+    val material: MaterialInputColors?,
 )
 
-@OptIn(ExperimentalTestApi::class)
-private fun checkSheets(variant: SkinVariant) =
-    runComposeUiTest {
-        var isDark by mutableStateOf(false)
-        var seen: SeenStyles? = null
-        setContent {
-            SkinnedPanel(variant, isDark) {
-                seen = seenStyles()
-                ControlsSheet()
-            }
-        }
-
-        val unreadable = mutableListOf<String>()
-        for (dark in listOf(false, true)) {
-            isDark = dark
-            waitForIdle()
-            val mode = if (dark) "dark" else "light"
-            onNodeWithTag(ErrorField).requestFocus()
-            onNodeWithTag(ErrorField).performTextReplacement("#12345")
-            waitForIdle()
-            unreadable += assertNotNull(seen).inkPairs().shortfalls(mode)
-        }
-        withClue(variant.name) { unreadable.shouldBeEmpty() }
-    }
+/**
+ * The defaults the Material3 skin's switch, checkbox, slider and field are drawn with.
+ */
+private class MaterialInputColors(
+    val switch: SwitchColors,
+    val checkbox: CheckboxColors,
+    val slider: SliderColors,
+    val field: TextFieldColors,
+)
 
 @Composable
 private fun seenStyles(): SeenStyles {
     val tokens = LocalBuilderTokens.current
     return when (LocalSkin.current.library) {
         SkinLibrary.Material3 -> {
-            SeenStyles(tokens, null, null, null, null, null, materialHeroFieldStyle())
+            val material = MaterialInputColors(
+                switch = SwitchDefaults.colors(),
+                checkbox = CheckboxDefaults.colors(),
+                slider = SliderDefaults.colors(inactiveTrackColor = MaterialTheme.colorScheme.outline),
+                field = OutlinedTextFieldDefaults.colors(),
+            )
+            SeenStyles(tokens, null, null, null, null, null, materialHeroFieldStyle(), material)
         }
         SkinLibrary.Custom -> {
             SeenStyles(
@@ -105,6 +108,7 @@ private fun seenStyles(): SeenStyles {
                 tabs = CustomInputStyles.tabs,
                 field = CustomInputStyles.field,
                 hero = null,
+                material = null,
             )
         }
     }
@@ -155,6 +159,20 @@ private fun SeenStyles.inkPairs(): List<InkPair> {
             add(InkPair("field edge", style.outline, panel, 3.0))
             add(InkPair("field text", tokens.textStrong, style.container.onPanel(), 4.5))
             add(InkPair("field focus edge", style.active, panel, 3.0))
+        }
+        material?.let { colors ->
+            add(InkPair("switch edge off", colors.switch.uncheckedBorderColor, panel, 3.0))
+            add(InkPair("switch thumb off", colors.switch.uncheckedThumbColor, colors.switch.uncheckedTrackColor, 3.0))
+            add(InkPair("switch track on", colors.switch.checkedTrackColor, panel, 3.0))
+            add(InkPair("switch thumb on", colors.switch.checkedThumbColor, colors.switch.checkedTrackColor, 3.0))
+            add(InkPair("checkbox edge", colors.checkbox.uncheckedBorderColor, panel, 3.0))
+            add(InkPair("checkbox fill", colors.checkbox.checkedBoxColor, panel, 3.0))
+            add(InkPair("checkbox check", colors.checkbox.checkedCheckmarkColor, colors.checkbox.checkedBoxColor, 3.0))
+            add(InkPair("slider thumb", colors.slider.thumbColor, panel, 3.0))
+            add(InkPair("slider active track", colors.slider.activeTrackColor, panel, 3.0))
+            add(InkPair("field edge", colors.field.unfocusedIndicatorColor, panel, 3.0))
+            add(InkPair("field text", colors.field.focusedTextColor, panel, 4.5))
+            add(InkPair("field focus edge", colors.field.focusedIndicatorColor, panel, 3.0))
         }
     }
 }

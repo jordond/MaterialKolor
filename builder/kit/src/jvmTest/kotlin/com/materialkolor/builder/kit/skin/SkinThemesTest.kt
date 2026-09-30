@@ -35,11 +35,13 @@ import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.model.RolePin
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.resolve.ThemeResolver
+import com.materialkolor.builder.kit.checkEach
 import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.control.InkPair
+import com.materialkolor.builder.kit.control.readInEverySkin
 import com.materialkolor.builder.kit.control.shortfalls
 import com.materialkolor.builder.kit.icon.BuilderIcons
 import com.materialkolor.builder.kit.icon.IconId
@@ -69,15 +71,25 @@ private val Document = ThemeDocument(
     pins = mapOf(Role.Primary to RolePin(light = Argb(0xFFEE00), dark = Argb(0xFFEE00))),
 )
 
+/**
+ * Both flavours of the Material3 skin, the chrome's own theme.
+ */
+private val Flavours: List<Skin> =
+    listOf(Skin(SkinLibrary.Material3, expressive = false), Skin(SkinLibrary.Material3, expressive = true))
+
 @OptIn(ExperimentalTestApi::class)
 class SkinThemesTest {
     @Test
-    fun material3_bothModes_renderTheSheetOnFlooredChrome() =
-        runComposeUiTest { checkSheets(Skin(SkinLibrary.Material3, expressive = false), MaterialIcons, 20.dp) }
+    fun chromeTokens_bothMaterial3FlavoursBothModesOnAReducedPinnedDocument_meetTheirContrastMinimums() {
+        val flavours = Flavours.map { skin -> (if (skin.expressive) "expressive" else "material3") to skin }
+        readInEverySkin(Document, flavours) { LocalBuilderTokens.current.inkPairs() }.shortfalls().shouldBeEmpty()
+    }
 
     @Test
-    fun material3Expressive_bothModes_renderTheSheetOnFlooredChrome() =
-        runComposeUiTest { checkSheets(Skin(SkinLibrary.Material3, expressive = true), MaterialIcons, 20.dp) }
+    fun tokenSheet_bothMaterial3Flavours_rendersWithTheSkinsIconsAndMotion() =
+        checkEach(Flavours, name = { skin -> if (skin.expressive) "expressive" else "material3" }) { skin ->
+            runComposeUiTest { renderSheet(skin, MaterialIcons, 20.dp) }
+        }
 
     @Test
     fun material3_libraryText_isSetInTheBrandFace() =
@@ -142,13 +154,16 @@ private fun BuilderTokens.inkPairs(): List<InkPair> =
             InkPair("$kind on codeBackground", codePalette[kind], codeBackground, 4.5)
         }
 
+/**
+ * Draws the token sheet in [skin] in light then dark, checking the skin reached the sheet with its
+ * [icons], the default motion and its [iconSize].
+ */
 @OptIn(ExperimentalTestApi::class)
-private fun ComposeUiTest.checkSheets(
+private fun ComposeUiTest.renderSheet(
     skin: Skin,
     icons: BuilderIcons,
     iconSize: Dp,
 ) {
-    val unreadable = mutableListOf<String>()
     var isDark by mutableStateOf(false)
     var seen: Seen? = null
     setContent {
@@ -174,14 +189,11 @@ private fun ComposeUiTest.checkSheets(
         sheet.icons shouldBe icons
         sheet.durations shouldBe BuilderDurations()
         sheet.tokens.iconSize shouldBe iconSize
-        val mode = if (dark) "dark" else "light"
-        unreadable += sheet.tokens.inkPairs().shortfalls(mode)
         onNodeWithTag(SheetTag).assertExists()
         onNodeWithText(SeedHex).assertExists()
         onNodeWithContentDescription(IconId.Undo.name).assertExists()
         onNodeWithContentDescription(IconId.ExternalLink.name).assertExists()
     }
-    unreadable.shouldBeEmpty()
 }
 
 /**

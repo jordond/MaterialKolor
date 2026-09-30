@@ -5,13 +5,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.SemanticsActions
-import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.assertCountEquals
-import androidx.compose.ui.test.hasClickAction
-import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.model.Library
@@ -23,8 +17,8 @@ import com.materialkolor.builder.preview.canvas.AppTab
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.PreviewPane
 import com.materialkolor.builder.preview.on
+import com.materialkolor.builder.preview.pressEveryControl
 import io.kotest.assertions.withClue
-import io.kotest.matchers.collections.shouldNotBeEmpty
 import kotlin.test.Test
 
 /**
@@ -64,20 +58,7 @@ class InkletTripsTest {
                     }
                     waitForIdle()
 
-                    val pressable = onAllNodes(hasClickAction(), useUnmergedTree = true).fetchSemanticsNodes()
-                    pressable.shouldNotBeEmpty()
-                    runOnIdle {
-                        for (node in pressable) {
-                            if (SemanticsProperties.Disabled !in node.config) {
-                                node.config
-                                    .getOrNull(SemanticsActions.OnClick)
-                                    ?.action
-                                    ?.invoke()
-                            }
-                        }
-                    }
-                    waitForIdle()
-                    onAllNodes(isRoot()).assertCountEquals(1)
+                    pressEveryControl()
                 }
             }
         }

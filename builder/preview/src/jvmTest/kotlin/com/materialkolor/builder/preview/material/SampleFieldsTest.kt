@@ -27,9 +27,10 @@ private const val MaterialTag = "material"
 private const val SampleTag = "sample"
 
 /**
- * Past the focus animations of the label and the indicator, and inside the caret's first blink.
+ * Past the focus animations of the label and the indicator, and halfway through the caret's first
+ * 500 ms off phase, so neither capture holds a caret and the compare leaves it out.
  */
-private const val FocusSettleMillis = 300L
+private const val FocusSettleMillis = 750L
 
 /**
  * The sample fields are Material3's own fields put together from their parts, so the handles can be
@@ -92,7 +93,7 @@ class SampleFieldsTest {
     /**
      * Draws [material] and [sample] one above the other and checks their pixels match. When [focused]
      * each is focused in turn and drawn once its label and indicator have settled on their focused
-     * colours, on a clock held still so both carets are at the same point of their blink.
+     * colours, on a clock held still while both carets are off.
      */
     private fun ComposeUiTest.sideBySide(
         focused: Boolean,

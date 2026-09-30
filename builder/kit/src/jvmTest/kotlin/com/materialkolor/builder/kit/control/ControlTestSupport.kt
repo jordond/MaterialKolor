@@ -1,10 +1,19 @@
 package com.materialkolor.builder.kit.control
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.v2.runComposeUiTest
+import com.materialkolor.builder.domain.color.Argb
+import com.materialkolor.builder.domain.model.ThemeDocument
+import com.materialkolor.builder.engine.resolve.ThemeResolver
+import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinTestTheme
 
 /**
  * Matches a node that plays [role].
@@ -84,3 +93,36 @@ internal fun Iterable<InkPair>.shortfalls(mode: String): List<String> =
         val ratio = contrast(pair.ink, pair.ground)
         if (ratio < pair.minimum) "$mode ${pair.name} ${"%.2f".format(ratio)} < ${pair.minimum}" else null
     }
+
+/**
+ * What [read] sees inside each of [skins] over [document], in light and in dark, keyed by the
+ * skin's name and the mode. Every reading comes from one composition, with no scene drawn.
+ */
+@OptIn(ExperimentalTestApi::class)
+internal fun <T> readInEverySkin(
+    document: ThemeDocument = ThemeDocument(seed = Argb(0x6750A4)),
+    skins: List<Pair<String, Skin>> = ControlSkins,
+    read: @Composable () -> T,
+): Map<String, T> {
+    val seen = linkedMapOf<String, T>()
+    runComposeUiTest {
+        setContent {
+            val result = remember { ThemeResolver().resolve(document) }
+            for ((name, skin) in skins) {
+                for (isDark in listOf(false, true)) {
+                    SkinTestTheme(skin, result, isDark, reducedMotion = false) {
+                        seen["$name ${if (isDark) "dark" else "light"}"] = read()
+                    }
+                }
+            }
+        }
+        waitForIdle()
+    }
+    return seen
+}
+
+/**
+ * Every pair of every reading that falls short of its minimum, each headed by the skin and mode.
+ */
+internal fun Map<String, List<InkPair>>.shortfalls(): List<String> =
+    flatMap { (where, pairs) -> pairs.shortfalls(where) }
