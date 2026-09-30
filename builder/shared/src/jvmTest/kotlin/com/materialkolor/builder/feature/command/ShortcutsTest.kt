@@ -70,6 +70,22 @@ class ShortcutsTest {
         }
 
     @Test
+    fun space_afterIOnAndOff_shufflesAndLeavesInspectOff() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            boot()
+            keys { pressKey(Key.I) }
+            harness.workspace.state.value.inspect shouldBe true
+            keys { pressKey(Key.I) }
+            harness.workspace.state.value.inspect shouldBe false
+            val seed = seed()
+
+            keys { pressKey(Key.Spacebar) }
+
+            harness.workspace.state.value.inspect shouldBe false
+            seed() shouldNotBe seed
+        }
+
+    @Test
     fun numberKeys_eachSwitchTheLibraryAsOneUndoEntry() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             boot()
