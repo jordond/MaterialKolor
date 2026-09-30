@@ -7,6 +7,7 @@ import androidx.compose.ui.platform.PlatformTextInputMethodRequest
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.KeyInjectionScope
+import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasClickAction
@@ -20,6 +21,7 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performScrollToNode
@@ -363,6 +365,22 @@ class ShortcutsTest {
             keys { pressKey(Key.F) }
 
             harness.workspace.state.value.fullscreen shouldBe false
+        }
+
+    @Test
+    fun enterOnTheFullscreenButton_focusesTheExit_andEnterOnTheExitFocusesTheButton() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            boot()
+            onNodeWithContentDescription("Fullscreen").requestFocus()
+            waitForIdle()
+
+            keys { pressKey(Key.Enter) }
+            harness.workspace.state.value.fullscreen shouldBe true
+            onNodeWithText("Exit fullscreen").assertIsFocused()
+
+            keys { pressKey(Key.Enter) }
+            harness.workspace.state.value.fullscreen shouldBe false
+            onNodeWithContentDescription("Fullscreen").assertIsFocused()
         }
 
     @Test

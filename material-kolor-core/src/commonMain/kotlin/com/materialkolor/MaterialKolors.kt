@@ -33,7 +33,8 @@ public class MaterialKolors(
     private val colors = MaterialDynamicColors()
 
     /**
-     * Returns the highest surface color of [scheme], the surface its spec treats as the top of the elevation stack.
+     * Returns the highest surface color, the brightest surface in a dark scheme and the dimmest in a
+     * light one.
      *
      * @see MaterialDynamicColors.highestSurface
      */

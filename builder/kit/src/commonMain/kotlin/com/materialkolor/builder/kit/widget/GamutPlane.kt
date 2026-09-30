@@ -283,7 +283,7 @@ private fun planeSpan(hue: Double): Double {
 
 /**
  * The picture a plane shows, which trails the hue. The last one stays up until the next is ready.
- * Each picture not kept builds on [builder], off the main thread unless a test hands in its own.
+ * Each picture not kept builds on [builder], which defaults to `Dispatchers.Default`.
  */
 @Stable
 internal class PlanePictures(
