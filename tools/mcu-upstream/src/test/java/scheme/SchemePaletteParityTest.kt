@@ -31,28 +31,48 @@ class SchemePaletteParityTest {
             name = "Expressive",
             upstream = { isDark, contrast -> SchemeExpressive(expectedHct, isDark, contrast) },
             kolor = { isDark, contrast ->
-                com.materialkolor.scheme.SchemeExpressive(actualHct, isDark, contrast, specVersion = SpecVersion.SPEC_2021)
+                com.materialkolor.scheme.SchemeExpressive(
+                    actualHct,
+                    isDark,
+                    contrast,
+                    specVersion = SpecVersion.SPEC_2021,
+                )
             },
         ),
         Variant(
             name = "Fidelity",
             upstream = { isDark, contrast -> SchemeFidelity(expectedHct, isDark, contrast) },
             kolor = { isDark, contrast ->
-                com.materialkolor.scheme.SchemeFidelity(actualHct, isDark, contrast, specVersion = SpecVersion.SPEC_2021)
+                com.materialkolor.scheme.SchemeFidelity(
+                    actualHct,
+                    isDark,
+                    contrast,
+                    specVersion = SpecVersion.SPEC_2021,
+                )
             },
         ),
         Variant(
             name = "FruitSalad",
             upstream = { isDark, contrast -> SchemeFruitSalad(expectedHct, isDark, contrast) },
             kolor = { isDark, contrast ->
-                com.materialkolor.scheme.SchemeFruitSalad(actualHct, isDark, contrast, specVersion = SpecVersion.SPEC_2021)
+                com.materialkolor.scheme.SchemeFruitSalad(
+                    actualHct,
+                    isDark,
+                    contrast,
+                    specVersion = SpecVersion.SPEC_2021,
+                )
             },
         ),
         Variant(
             name = "Monochrome",
             upstream = { isDark, contrast -> SchemeMonochrome(expectedHct, isDark, contrast) },
             kolor = { isDark, contrast ->
-                com.materialkolor.scheme.SchemeMonochrome(actualHct, isDark, contrast, specVersion = SpecVersion.SPEC_2021)
+                com.materialkolor.scheme.SchemeMonochrome(
+                    actualHct,
+                    isDark,
+                    contrast,
+                    specVersion = SpecVersion.SPEC_2021,
+                )
             },
         ),
         Variant(
@@ -73,7 +93,12 @@ class SchemePaletteParityTest {
             name = "TonalSpot",
             upstream = { isDark, contrast -> SchemeTonalSpot(expectedHct, isDark, contrast) },
             kolor = { isDark, contrast ->
-                com.materialkolor.scheme.SchemeTonalSpot(actualHct, isDark, contrast, specVersion = SpecVersion.SPEC_2021)
+                com.materialkolor.scheme.SchemeTonalSpot(
+                    actualHct,
+                    isDark,
+                    contrast,
+                    specVersion = SpecVersion.SPEC_2021,
+                )
             },
         ),
         Variant(

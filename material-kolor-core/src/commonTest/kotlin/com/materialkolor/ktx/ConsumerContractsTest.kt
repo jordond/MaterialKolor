@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.toArgb
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.hct.Hct
+import com.materialkolor.palettes.TonalPalette
 import com.materialkolor.scheme.SchemeCmf
 import com.materialkolor.scheme.SchemeContent
 import com.materialkolor.scheme.SchemeExpressive
@@ -20,7 +21,6 @@ import com.materialkolor.scheme.SchemeNeutral
 import com.materialkolor.scheme.SchemeRainbow
 import com.materialkolor.scheme.SchemeTonalSpot
 import com.materialkolor.scheme.SchemeVibrant
-import com.materialkolor.palettes.TonalPalette
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
