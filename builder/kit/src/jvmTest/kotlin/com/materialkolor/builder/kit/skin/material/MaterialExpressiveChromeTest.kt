@@ -1,6 +1,5 @@
 package com.materialkolor.builder.kit.skin.material
 
-import com.materialkolor.builder.kit.checkEach
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -48,6 +47,7 @@ import com.materialkolor.builder.kit.a11y.ProvideWebFoldsForTest
 import com.materialkolor.builder.kit.a11y.foldsValueIntoName
 import com.materialkolor.builder.kit.a11y.progressRoleWord
 import com.materialkolor.builder.kit.a11y.valueNodeName
+import com.materialkolor.builder.kit.checkEach
 import com.materialkolor.builder.kit.control.BuilderProgress
 import com.materialkolor.builder.kit.control.BuilderSegmented
 import com.materialkolor.builder.kit.control.ControlsHarness
@@ -59,6 +59,7 @@ import com.materialkolor.builder.kit.control.shouldCoverEverySide
 import com.materialkolor.builder.kit.control.shouldRingAllTheWayRound
 import com.materialkolor.builder.kit.control.shouldShowRing
 import com.materialkolor.builder.kit.control.tabOntoRing
+import com.materialkolor.builder.kit.moduleSource
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.motion.LocalTabVisible
 import com.materialkolor.builder.kit.skin.Skin
@@ -69,7 +70,6 @@ import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import com.materialkolor.builder.kit.moduleSource
 import kotlin.test.Test
 
 /**

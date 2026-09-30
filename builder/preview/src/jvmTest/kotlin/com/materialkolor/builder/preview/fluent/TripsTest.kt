@@ -1,6 +1,5 @@
 package com.materialkolor.builder.preview.fluent
 
-import com.materialkolor.builder.preview.moduleSource
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
@@ -53,6 +52,7 @@ import com.materialkolor.builder.preview.inspect.Inspecting
 import com.materialkolor.builder.preview.inspect.OnCard
 import com.materialkolor.builder.preview.inspect.PreviewRoles
 import com.materialkolor.builder.preview.inspect.firstRated
+import com.materialkolor.builder.preview.moduleSource
 import com.materialkolor.builder.preview.split.SplitState
 import com.materialkolor.builder.preview.trips.OfflineMapsSwitch
 import com.materialkolor.builder.preview.trips.PackingItem
@@ -65,7 +65,6 @@ import io.kotest.matchers.floats.shouldBeGreaterThan
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import java.io.File
 import kotlin.test.Test
 
 private const val FluentSourceDir = "commonMain/kotlin/com/materialkolor/builder/preview/fluent"

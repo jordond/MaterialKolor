@@ -1,7 +1,5 @@
 package com.materialkolor.builder.preview.unstyled
 
-import com.materialkolor.builder.preview.importedNames
-import com.materialkolor.builder.preview.moduleSource
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
@@ -38,7 +36,9 @@ import com.materialkolor.builder.preview.LightSpec
 import com.materialkolor.builder.preview.ShellExpressive
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.PreviewPane
+import com.materialkolor.builder.preview.importedNames
 import com.materialkolor.builder.preview.inspect.PreviewRoles
+import com.materialkolor.builder.preview.moduleSource
 import com.materialkolor.builder.preview.on
 import com.materialkolor.builder.preview.split.PaneSpec
 import com.materialkolor.builder.preview.trips.OfflineMapsSwitch
@@ -50,7 +50,6 @@ import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
-import java.io.File
 import kotlin.test.Test
 
 /**

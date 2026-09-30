@@ -32,13 +32,12 @@ import com.materialkolor.builder.kit.layout.LayoutInfo
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.skin.Skin
-import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.SkinTestTheme
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import io.kotest.matchers.collections.shouldBeEmpty
-import kotlin.test.Test
 import io.kotest.matchers.shouldBe
+import kotlin.test.Test
 
 private val SheetLayout = LayoutInfo.of(widthDp = 1280.dp, heightDp = 800.dp)
 
@@ -55,8 +54,7 @@ class ControlsAContrastTest {
     }
 
     @Test
-    fun actionSheet_everySkin_rendersEnabledDisabledAndFocusedOnAPhone() =
-        forEachSkin { _, skin -> renderSheets(skin) }
+    fun actionSheet_everySkin_rendersEnabledDisabledAndFocusedOnAPhone() = forEachSkin { _, skin -> renderSheets(skin) }
 }
 
 /**

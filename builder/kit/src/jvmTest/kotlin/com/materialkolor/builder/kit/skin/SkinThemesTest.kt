@@ -35,6 +35,7 @@ import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.model.RolePin
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.resolve.ThemeResolver
+import com.materialkolor.builder.kit.checkEach
 import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
@@ -42,7 +43,6 @@ import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.control.InkPair
 import com.materialkolor.builder.kit.control.readInEverySkin
 import com.materialkolor.builder.kit.control.shortfalls
-import com.materialkolor.builder.kit.checkEach
 import com.materialkolor.builder.kit.icon.BuilderIcons
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.icon.LocalBuilderIcons
@@ -80,8 +80,9 @@ private val Flavours: List<Skin> =
 @OptIn(ExperimentalTestApi::class)
 class SkinThemesTest {
     @Test
-    fun chromeTokens_everySkinBothModesOnAReducedPinnedDocument_meetTheirContrastMinimums() {
-        readInEverySkin(Document) { LocalBuilderTokens.current.inkPairs() }.shortfalls().shouldBeEmpty()
+    fun chromeTokens_bothMaterial3FlavoursBothModesOnAReducedPinnedDocument_meetTheirContrastMinimums() {
+        val flavours = Flavours.map { skin -> (if (skin.expressive) "expressive" else "material3") to skin }
+        readInEverySkin(Document, flavours) { LocalBuilderTokens.current.inkPairs() }.shortfalls().shouldBeEmpty()
     }
 
     @Test

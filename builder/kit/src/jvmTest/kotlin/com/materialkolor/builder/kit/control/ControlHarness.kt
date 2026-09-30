@@ -1,6 +1,5 @@
 package com.materialkolor.builder.kit.control
 
-import com.materialkolor.builder.kit.checkEach
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -21,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.resolve.ThemeResolver
+import com.materialkolor.builder.kit.checkEach
 import com.materialkolor.builder.kit.headless.HeadlessBottomSheet
 import com.materialkolor.builder.kit.headless.LocalOverlaysInTree
 import com.materialkolor.builder.kit.layout.LayoutInfo
@@ -154,7 +154,9 @@ internal fun SkinnedPanel(
  */
 @OptIn(ExperimentalTestApi::class)
 internal fun forEverySkin(block: ComposeUiTest.(SkinVariant) -> Unit) =
-    checkEach(SkinVariant.entries, name = { variant -> variant.name }) { variant -> runComposeUiTest { block(variant) } }
+    checkEach(SkinVariant.entries, name = { variant ->
+        variant.name
+    }) { variant -> runComposeUiTest { block(variant) } }
 
 /**
  * The headless bottom sheet in the surrounding skin's overlay style, named by the kit's detent

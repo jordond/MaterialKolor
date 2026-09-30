@@ -1,33 +1,15 @@
 package com.materialkolor.builder.preview.fluent
 
-import com.materialkolor.builder.preview.importedNames
-import com.materialkolor.builder.preview.GalleryWhole
-import com.materialkolor.builder.preview.sweepEveryControl
-import com.materialkolor.builder.preview.moduleSource
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.semantics.SemanticsActions
-import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.assertCountEquals
-import androidx.compose.ui.test.hasClickAction
-import androidx.compose.ui.test.hasSetTextAction
-import androidx.compose.ui.test.isRoot
-import androidx.compose.ui.test.longClick
-import androidx.compose.ui.test.onRoot
-import androidx.compose.ui.test.performMouseInput
-import androidx.compose.ui.test.performTextReplacement
-import androidx.compose.ui.test.performTouchInput
-import androidx.compose.ui.test.requestFocus
-import androidx.compose.ui.test.rightClick
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
+import com.materialkolor.builder.preview.GalleryWhole
 import com.materialkolor.builder.preview.canvas.DemoAppState
+import com.materialkolor.builder.preview.importedNames
+import com.materialkolor.builder.preview.moduleSource
+import com.materialkolor.builder.preview.sweepEveryControl
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
-import io.kotest.matchers.collections.shouldNotBeEmpty
-import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
-import java.io.File
 import kotlin.test.Test
 
 /**

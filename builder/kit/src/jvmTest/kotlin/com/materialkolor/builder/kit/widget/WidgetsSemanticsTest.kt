@@ -1,6 +1,5 @@
 package com.materialkolor.builder.kit.widget
 
-import com.materialkolor.builder.kit.checkEach
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -66,6 +65,7 @@ import com.materialkolor.builder.engine.export.ExportResolver
 import com.materialkolor.builder.engine.resolve.RampSet
 import com.materialkolor.builder.engine.resolve.RampStep
 import com.materialkolor.builder.engine.resolve.ThemeResolver
+import com.materialkolor.builder.kit.checkEach
 import com.materialkolor.builder.kit.control.ControlSkins
 import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
 import com.materialkolor.builder.kit.control.hasStateDescription

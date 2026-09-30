@@ -1,6 +1,5 @@
 package com.materialkolor.builder.kit.control
 
-import com.materialkolor.builder.kit.ShortcutKey
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.getValue
@@ -31,6 +30,7 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.color.ParseNote
+import com.materialkolor.builder.kit.ShortcutKey
 import com.materialkolor.builder.kit.headless.FieldDraft
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotContain

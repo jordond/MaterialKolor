@@ -1,6 +1,5 @@
 package com.materialkolor.builder.kit.headless
 
-import com.materialkolor.builder.kit.ShortcutKey
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -30,6 +29,7 @@ import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.withKeyDown
 import androidx.compose.ui.unit.dp
+import com.materialkolor.builder.kit.ShortcutKey
 import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.widget.CodeScrollTag
 import com.materialkolor.builder.kit.widget.CodeView

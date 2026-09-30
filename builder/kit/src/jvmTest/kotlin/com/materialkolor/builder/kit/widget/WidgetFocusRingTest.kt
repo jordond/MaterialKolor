@@ -1,6 +1,5 @@
 package com.materialkolor.builder.kit.widget
 
-import com.materialkolor.builder.kit.ShortcutKey
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
@@ -41,6 +40,7 @@ import com.materialkolor.builder.domain.model.KeyColor
 import com.materialkolor.builder.engine.mapping.toColor
 import com.materialkolor.builder.engine.resolve.RampSet
 import com.materialkolor.builder.engine.resolve.ThemeResolver
+import com.materialkolor.builder.kit.ShortcutKey
 import com.materialkolor.builder.kit.control.contrast
 import com.materialkolor.builder.kit.control.shouldClearTheTrack
 import com.materialkolor.builder.kit.control.shouldRingAllTheWayRound

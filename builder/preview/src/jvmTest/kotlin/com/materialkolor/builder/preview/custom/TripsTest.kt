@@ -1,6 +1,5 @@
 package com.materialkolor.builder.preview.custom
 
-import com.materialkolor.builder.preview.moduleSource
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
@@ -46,6 +45,7 @@ import com.materialkolor.builder.preview.LightSpec
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.PreviewPane
 import com.materialkolor.builder.preview.inspect.PreviewRoles
+import com.materialkolor.builder.preview.moduleSource
 import com.materialkolor.builder.preview.split.PaneSpec
 import com.materialkolor.builder.preview.trips.OfflineMapsSwitch
 import com.materialkolor.builder.preview.trips.PackingItem

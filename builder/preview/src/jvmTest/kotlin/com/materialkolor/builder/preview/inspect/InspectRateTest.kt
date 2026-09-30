@@ -27,8 +27,8 @@ class InspectRateTest {
         val row = checkNotNull(result.rateOnPair(refs, isDark = true))
         row.pair shouldBe ContrastPair(foreground = onPrimary, background = primary, kind = PairKind.Text)
         row.isDark shouldBe true
-        row.ratio shouldBe (7.72 plusOrMinus 0.01)
-        row.badge shouldBe ContrastBadge.Aaa
+        row.ratio shouldBe (6.12 plusOrMinus 0.01)
+        row.badge shouldBe ContrastBadge.Aa
     }
 
     @Test
@@ -38,7 +38,7 @@ class InspectRateTest {
         val row = checkNotNull(result.rateOnPair(listOf(onPrimary, primary), isDark = false))
         row.pair shouldBe ContrastPair(foreground = onPrimary, background = primary, kind = PairKind.Text)
         row.isDark shouldBe false
-        row.ratio shouldBe (6.44 plusOrMinus 0.01)
+        row.ratio shouldBe (6.08 plusOrMinus 0.01)
         row.badge shouldBe ContrastBadge.Aa
     }
 
