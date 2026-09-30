@@ -31,13 +31,12 @@ internal class WholeFileResourceReader(
     private val lock = Mutex()
     private val files = mutableMapOf<String, Deferred<ByteArray>>()
     private val reading = MutableStateFlow(0)
-    private val started = MutableStateFlow(0)
 
     /**
-     * How many parts have been asked for so far.
+     * Whether a part is being read now.
      */
-    val partsStarted: Int
-        get() = started.value
+    val isReading: Boolean
+        get() = reading.value > 0
 
     override suspend fun read(path: String): ByteArray = base.read(path)
 
@@ -46,7 +45,6 @@ internal class WholeFileResourceReader(
         offset: Long,
         size: Long,
     ): ByteArray {
-        started.update { count -> count + 1 }
         reading.update { count -> count + 1 }
         try {
             val file = lock.withLock {

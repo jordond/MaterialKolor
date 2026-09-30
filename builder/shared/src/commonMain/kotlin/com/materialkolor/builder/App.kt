@@ -212,10 +212,9 @@ internal fun BuilderRoot(
  */
 private suspend fun WholeFileResourceReader.awaitFirstScreen() {
     do {
-        val seen = partsStarted
         awaitReads()
         withFrameNanos {}
-    } while (partsStarted != seen)
+    } while (isReading)
 }
 
 /**
