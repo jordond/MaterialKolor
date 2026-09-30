@@ -1,11 +1,9 @@
 name: Upstream changes
 
 on:
-  # Run at 3AM every monday
-  schedule:
-    - cron: "0 3 * * *"
-
-  # Can manually be run via the Github Actions interface
+  # The 6.0 monitor on next replaces this one, and scheduled runs only fire from the default
+  # branch, so the schedule stays off until 6.0 lands here. Keeping workflow_dispatch lets
+  # `gh workflow run upstream.yml --ref next` run the next version by hand.
   workflow_dispatch:
 
 permissions:
