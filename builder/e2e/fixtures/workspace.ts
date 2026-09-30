@@ -216,9 +216,12 @@ export async function pressKeyFor(page: Page, key: string, shows: Locator): Prom
   await expect(shows.first()).toBeAttached({ timeout: LAND_TIMEOUT_MS });
 }
 
-/** Clicks the middle of text field [field] and waits for Compose's backing field to take the keys. */
+/**
+ * Clicks the middle of text field [field] once it holds still, since a panel that just closed can
+ * still be sliding it into place, and waits for Compose's backing field to take the keys.
+ */
 export async function focusField(page: Page, field: Locator): Promise<void> {
-  await press(page, field);
+  await pressSettled(page, field);
   await expect(page.locator('.compose-backing-field')).toBeFocused({ timeout: LAND_TIMEOUT_MS });
 }
 
