@@ -1,5 +1,6 @@
 import type { CDPSession, Locator, Page } from '@playwright/test';
 import { expect } from './builder';
+import { holdFingerDown } from '../fixtures/timing';
 import { nextFrames, settledBox, type Box } from '../fixtures/workspace';
 
 export { settledBox };
@@ -28,7 +29,7 @@ export async function boxOf(target: Locator): Promise<Box> {
 export async function longPressAt(page: Page, cdp: CDPSession, at: Point): Promise<void> {
   checkPoint(at);
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [at] });
-  await hold(LONG_PRESS_MS);
+  await holdFingerDown(LONG_PRESS_MS);
   // The page has drawn with the finger still down, so the press has reached Compose.
   await nextFrames(page);
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
@@ -38,13 +39,8 @@ export async function longPressAt(page: Page, cdp: CDPSession, at: Point): Promi
 export async function tap(cdp: CDPSession, point: Point): Promise<void> {
   checkPoint(point);
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] });
-  await hold(60);
+  await holdFingerDown(60);
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
-}
-
-/** Keeps a finger down for [ms], how long the gesture lasts and not a wait on the page. */
-function hold(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /** Fails with a readable message on a point with no place, which CDP only calls invalid parameters. */

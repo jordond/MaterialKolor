@@ -7,9 +7,9 @@ export default defineConfig({
   globalSetup: './global-setup.ts',
   fullyParallel: true,
   forbidOnly: ci,
-  retries: ci ? 2 : 0,
+  retries: ci ? 1 : 0,
   workers: ci ? 1 : 3,
-  reporter: ci ? [['list'], ['html', { open: 'never' }]] : 'list',
+  reporter: ci ? [['list'], ['html', { open: 'never' }], ['json', { outputFile: 'results.json' }]] : 'list',
   timeout: 90_000,
   expect: { timeout: 15_000 },
   use: {

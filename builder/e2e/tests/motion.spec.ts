@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import type { Page } from '@playwright/test';
 import { expect, test } from './builder';
-import { button, focusCanvas, LAND_TIMEOUT_MS, openWorkspace } from '../fixtures/workspace';
+import { button, focusCanvas, openWorkspace } from '../fixtures/workspace';
 
 // Motion on a library switch. The new preview and colors reveal from the switcher in a circle,
 // and under reduced motion they crossfade instead. A small copy of every frame the page draws tells
@@ -56,7 +56,7 @@ test.describe('frozen motion', () => {
     for (const [key, name] of [['2', 'material3-expressive'], ['3', 'unstyled'], ['4', 'fluent'], ['5', 'inklet'], ['6', 'custom']]) {
       await focusCanvas(page);
       await page.keyboard.press(key);
-      await expect(button(page, /^Undo library change/)).toHaveCount(1, { timeout: LAND_TIMEOUT_MS });
+      await expect(button(page, /^Undo library change/)).toHaveCount(1);
       await expect(page).toHaveScreenshot(`${name}.png`, { maxDiffPixelRatio: 0.02 });
     }
   });
@@ -80,8 +80,8 @@ async function switchLibrary(page: Page): Promise<Frames> {
   await page.evaluate(() => (window as unknown as { mkCopy: { start: () => void } }).mkCopy.start());
 
   await page.keyboard.press('4');
-  await expect(button(page, /^Undo library change/)).toHaveCount(1, { timeout: LAND_TIMEOUT_MS });
-  await expect.poll(() => stillFor(page), { timeout: LAND_TIMEOUT_MS }).toBeGreaterThan(STILL_MS);
+  await expect(button(page, /^Undo library change/)).toHaveCount(1);
+  await expect.poll(() => stillFor(page)).toBeGreaterThan(STILL_MS);
 
   const frames = await page.evaluate(() => (window as unknown as { mkCopy: { stop: () => number[][] } }).mkCopy.stop());
   return compare(frames);

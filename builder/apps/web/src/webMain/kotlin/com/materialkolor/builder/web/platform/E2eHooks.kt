@@ -25,8 +25,14 @@ private val hookScope = CoroutineScope(Dispatchers.Unconfined)
 
 /**
  * Hang the router's hooks on the page when a spec opened it.
+ *
+ * [moves] counts the `popstate` events the router has handled and [pendingBacks] the backs it set
+ * off that have not landed yet, so a spec can tell when no further move is on its way.
  */
-internal fun Router.exposeToE2e() {
+internal fun Router.exposeToE2e(
+    moves: () -> Int,
+    pendingBacks: () -> Int,
+) {
     if (!e2eHooksWanted()) return
     var pops = 0
     hookScope.launch { overlayPops.collect { pops++ } }
@@ -35,6 +41,8 @@ internal fun Router.exposeToE2e() {
     exposeE2eAction("pushOverlay") { id -> pushOverlay(id) }
     exposeE2eAction("popOverlay") { popOverlay() }
     exposeE2eHook("overlayPops") { pops.toString() }
+    exposeE2eHook("routerMoves") { moves().toString() }
+    exposeE2eHook("routerPendingBacks") { pendingBacks().toString() }
 }
 
 /**
@@ -91,8 +99,11 @@ internal fun StoreFactory.exposeToE2e() {
 
 /**
  * Hang the environment's hooks on the page when a spec opened it.
+ *
+ * [holderFocused] says whether the page's focus holder has Compose focus, so a spec can wait for a
+ * press on the bare canvas to hand it focus before it sends a key.
  */
-internal fun Environment.exposeToE2e() {
+internal fun Environment.exposeToE2e(holderFocused: () -> Boolean) {
     if (!e2eHooksWanted()) return
     var hides = 0
     var persisted = "Pending"
@@ -104,6 +115,7 @@ internal fun Environment.exposeToE2e() {
     exposeE2eHook("storageAvailable") { storageAvailable.toString() }
     exposeE2eHook("eyeDropperAvailable") { eyeDropperAvailable.toString() }
     exposeE2eHook("pageHides") { hides.toString() }
+    exposeE2eHook("holderFocused") { holderFocused().toString() }
     exposeE2eAction("hideSplash") { hideSplash() }
     exposeE2eAction("setThemeColor") { hex -> setThemeColor(Argb.fromHex(hex)) }
     // Light, dark and seed hexes, then an appearance, `#000000,#ffffff,#d9653b,Dark`.

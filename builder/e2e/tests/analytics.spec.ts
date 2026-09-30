@@ -41,7 +41,8 @@ test('with a token the beacon starts after the first frame, and no cookie is set
   await openBuilder(page);
   await expect.poll(() => page.evaluate(() => (window as any).__mkBeaconRan === true), { timeout: 30_000 }).toBe(true);
 
-  // Both times on the page's own clock, the mark's and the moment the browser began to fetch.
+  // Both times on the page's own clock, the mark's and the moment the browser began to fetch. The
+  // fetch starts in the task that marks the frame, and the clock is coarse, so the two can be equal.
   const timing = await page.evaluate((beacon) => {
     const [frame] = performance.getEntriesByName('mk:first-frame');
     const [fetch] = performance.getEntriesByName(beacon);
@@ -49,7 +50,7 @@ test('with a token the beacon starts after the first frame, and no cookie is set
   }, BEACON);
   expect(timing.frame).not.toBeNull();
   expect(timing.fetch).not.toBeNull();
-  expect(timing.fetch!).toBeGreaterThan(timing.frame!);
+  expect(timing.fetch!).toBeGreaterThanOrEqual(timing.frame!);
   expect(insights).toEqual([BEACON]);
 
   const beacon = await page.evaluate(

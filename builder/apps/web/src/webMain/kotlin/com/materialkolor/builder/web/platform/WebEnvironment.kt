@@ -53,9 +53,15 @@ internal class WebEnvironment : Environment {
     private val hides = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     override val pageHides: Flow<Unit> = hides.asSharedFlow()
 
+    private var holderFocused = false
+
     init {
         onPageHide { hides.tryEmit(Unit) }
-        exposeToE2e()
+        exposeToE2e(holderFocused = { holderFocused })
+    }
+
+    override fun holderFocusChanged(focused: Boolean) {
+        holderFocused = focused
     }
 
     // The eyedropper only opens inside a click, and it opens before this first suspends, so start

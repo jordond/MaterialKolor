@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { expect, type Locator, type Page } from '@playwright/test';
-import { openBuilder } from '../tests/builder';
+import { hook, openBuilder } from '../tests/builder';
 
 // What the flow specs share. Compose draws on a canvas, so every control is found in the page's
 // accessibility mirror and pressed where the canvas draws it. Every wait here waits on something the
@@ -11,9 +11,6 @@ export const A11Y = '#cmp_a11y_root';
 
 /** Long enough for wasm to boot on a busy machine. */
 export const BOOT_TIMEOUT_MS = 30_000;
-
-/** Long enough for a press or a key to land and what it changes to show. */
-export const LAND_TIMEOUT_MS = 10_000;
 
 /** Whatever in the mirror holds [text], word for word when it is a string. */
 export function onPage(page: Page, text: string | RegExp): Locator {
@@ -53,8 +50,8 @@ export interface Box {
   height: number;
 }
 
-/** Where the canvas draws [target], once it has given it a size. */
-export async function boxOf(target: Locator, timeout = LAND_TIMEOUT_MS): Promise<Box> {
+/** Where the canvas draws [target], once it has given it a size, within [timeout] or the expect default. */
+export async function boxOf(target: Locator, timeout?: number): Promise<Box> {
   const first = target.first();
   let box: Box | null = null;
   await expect
@@ -71,38 +68,64 @@ export async function boxOf(target: Locator, timeout = LAND_TIMEOUT_MS): Promise
 }
 
 /**
- * How long a box has to hold still to count as laid out, longer than the mirror's longest wait
- * before it syncs.
+ * How many frames in a row a box has to hold still to count as laid out, about 1.2 s at 60 fps,
+ * longer than the mirror's longest wait before it syncs. A page starved of frames takes longer.
  */
-const STILL_MS = 1_200;
+const STILL_FRAMES = 72;
 
 /**
- * The box of [target] once it is laid out, when it has a height and has held still for `STILL_MS`.
- * A scroll, a docked panel or a dialog that is still moving moves the mirror's box with it, and a
- * press read off the box before then lands beside it.
+ * The box of [target] once it is laid out, when it has a height and has held still for
+ * `STILL_FRAMES` drawn frames. A scroll, a docked panel or a dialog that is still moving moves the
+ * mirror's box with it, and a press read off the box before then lands beside it.
  */
-export async function settledBox(target: Locator, timeout = 15_000): Promise<Box> {
+export async function settledBox(target: Locator, timeout?: number): Promise<Box> {
+  const page = target.page();
   let last: Box | null = null;
   let since = 0;
   await expect
     .poll(
       async () => {
+        const frame = await framesDrawn(page);
         const box = await target.boundingBox();
-        if (box === null || box.height === 0) {
+        if (box === null || box.height === 0 || frame < since) {
           last = null;
           return false;
         }
         if (last === null || !sameBox(box, last)) {
           last = box;
-          since = Date.now();
+          since = frame;
           return false;
         }
-        return Date.now() - since >= STILL_MS;
+        return frame - since >= STILL_FRAMES;
       },
-      { timeout, intervals: [200], message: 'The box never held still' },
+      { timeout, intervals: [100], message: 'The box never held still' },
     )
     .toBe(true);
   return last!;
+}
+
+/**
+ * How many frames the page has drawn since the count started. The first call starts it, and it
+ * stops once nothing has asked for five seconds, so the next call starts again from nothing.
+ */
+async function framesDrawn(page: Page): Promise<number> {
+  return page.evaluate(() => {
+    const host = window as unknown as { __mkFrames?: { count: number; askedAt: number } };
+    let frames = host.__mkFrames;
+    if (!frames) {
+      const counting = { count: 0, askedAt: 0 };
+      const tick = () => {
+        counting.count++;
+        if (performance.now() - counting.askedAt < 5_000) requestAnimationFrame(tick);
+        else delete host.__mkFrames;
+      };
+      host.__mkFrames = counting;
+      frames = counting;
+      requestAnimationFrame(tick);
+    }
+    frames.askedAt = performance.now();
+    return frames.count;
+  });
 }
 
 function sameBox(one: Box, two: Box): boolean {
@@ -142,7 +165,7 @@ export async function pressSettled(page: Page, target: Locator): Promise<void> {
 /** Clicks [target], then waits for [shows] to be in the mirror. */
 export async function pressFor(page: Page, target: Locator, shows: Locator): Promise<void> {
   await press(page, target);
-  await expect(shows.first()).toBeAttached({ timeout: LAND_TIMEOUT_MS });
+  await expect(shows.first()).toBeAttached();
 }
 
 /**
@@ -152,7 +175,7 @@ export async function pressFor(page: Page, target: Locator, shows: Locator): Pro
 export async function typeSeed(page: Page, hex: string): Promise<void> {
   await typeInto(page, seedField(page), hex);
   await page.keyboard.press('Enter');
-  await expect.poll(() => seedText(page), { timeout: LAND_TIMEOUT_MS }).toContain(hex.replace('#', '').toUpperCase());
+  await expect.poll(() => seedText(page)).toContain(hex.replace('#', '').toUpperCase());
 }
 
 /**
@@ -186,34 +209,27 @@ export async function pressBareCanvas(page: Page): Promise<void> {
   await canvasHoldsFocus(page);
 }
 
-/** Waits for the canvas to hold the page's focus with no text field under it, and for Compose to have taken that. */
+/**
+ * Waits for the page's focus holder to have Compose focus with no text field under it. The holder
+ * claims a bare press a couple of frames after the release, and a key sent before then lands nowhere.
+ */
 async function canvasHoldsFocus(page: Page): Promise<void> {
-  await expect
-    .poll(() =>
-      page.evaluate(() => {
-        let active = document.activeElement;
-        while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
-        return active?.tagName ?? '';
-      }),
-    )
-    .toBe('CANVAS');
   await expect(page.locator('.compose-backing-field')).toHaveCount(0);
-  // Compose takes the press on its next frame, so the frame after that has it.
-  await nextFrames(page);
+  await expect.poll(() => hook(page, 'holderFocused')).toBe('true');
 }
 
 /** Focuses the canvas, presses [key] once and waits for [landed] to say it has. */
 export async function pressKey(page: Page, key: string, landed: () => Promise<boolean>): Promise<void> {
   await focusCanvas(page);
   await page.keyboard.press(key);
-  await expect.poll(landed, { timeout: LAND_TIMEOUT_MS }).toBe(true);
+  await expect.poll(landed).toBe(true);
 }
 
 /** Focuses the canvas, presses [key] once and waits for [shows] to be in the mirror. */
 export async function pressKeyFor(page: Page, key: string, shows: Locator): Promise<void> {
   await focusCanvas(page);
   await page.keyboard.press(key);
-  await expect(shows.first()).toBeAttached({ timeout: LAND_TIMEOUT_MS });
+  await expect(shows.first()).toBeAttached();
 }
 
 /**
@@ -222,7 +238,7 @@ export async function pressKeyFor(page: Page, key: string, shows: Locator): Prom
  */
 export async function focusField(page: Page, field: Locator): Promise<void> {
   await pressSettled(page, field);
-  await expect(page.locator('.compose-backing-field')).toBeFocused({ timeout: LAND_TIMEOUT_MS });
+  await expect(page.locator('.compose-backing-field')).toBeFocused();
 }
 
 /** `Meta` when the page's user agent names an Apple system, where it takes Cmd, else `Control`. */
@@ -292,9 +308,9 @@ export async function typeInto(page: Page, field: Locator, text: string): Promis
     await page.keyboard.press('Delete');
     await page.keyboard.press('Backspace');
   }
-  await expect.poll(async () => (await field.first().textContent())?.trim(), { timeout: LAND_TIMEOUT_MS }).toBe('');
+  await expect.poll(async () => (await field.first().textContent())?.trim()).toBe('');
   await page.keyboard.type(text);
-  await expect.poll(async () => (await field.first().textContent())?.trim(), { timeout: LAND_TIMEOUT_MS }).toBe(text);
+  await expect.poll(async () => (await field.first().textContent())?.trim()).toBe(text);
 }
 
 /** Turns the mouse wheel over [over] until the canvas draws [target] inside it. */
@@ -310,7 +326,7 @@ export async function scrollTo(page: Page, target: Locator, over: Locator): Prom
         return false;
       },
       // WebKit moves the mirror only once a scroll settles, so each turn waits for that.
-      { timeout: LAND_TIMEOUT_MS, intervals: [500] },
+      { intervals: [500] },
     )
     .toBe(true);
 }

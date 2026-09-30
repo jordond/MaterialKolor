@@ -1,7 +1,6 @@
 import { expect, openBuilder, test } from './builder';
 import {
   button,
-  LAND_TIMEOUT_MS,
   onPage,
   openWorkspace,
   press,
@@ -30,14 +29,14 @@ test('4 switches the library to Fluent and 1 back, with no page error and the sh
   const undo = page.locator(A11Y).getByRole('button', { name: UNDO_SWITCH });
 
   await page.keyboard.press('4');
-  await expect(undo).toHaveAttribute('aria-label', /Fluent$/, { timeout: 10_000 });
-  await expect(page.locator(SELECTED_TAB).first()).toBeAttached({ timeout: 10_000 });
+  await expect(undo).toHaveAttribute('aria-label', /Fluent$/);
+  await expect(page.locator(SELECTED_TAB).first()).toBeAttached();
   await expect(page.locator(`${A11Y} [aria-label^="Contrast, tab, "]`).first()).toBeAttached();
 
   await pressBareCanvas(page);
   await page.keyboard.press('1');
-  await expect(undo).toHaveAttribute('aria-label', /M3$/, { timeout: 10_000 });
-  await expect(page.locator(SELECTED_TAB).first()).toBeAttached({ timeout: 10_000 });
+  await expect(undo).toHaveAttribute('aria-label', /M3$/);
+  await expect(page.locator(SELECTED_TAB).first()).toBeAttached();
 
   expect(errors).toEqual([]);
 });
@@ -65,7 +64,7 @@ test('3, 4 and 1 switch the library, 2 picks M3 Expressive with its style, and 1
   await pressKey(page, '1', () => undoNames('M3'));
   await pressKey(page, '2', () => undoNames('M3 Expressive'));
 
-  await expect.poll(async () => pick(await storedDocument(page)), { timeout: LAND_TIMEOUT_MS }).toEqual({
+  await expect.poll(async () => pick(await storedDocument(page))).toEqual({
     style: 'Expressive',
     spec: 'Spec2025',
     expressive: true,
@@ -73,14 +72,14 @@ test('3, 4 and 1 switch the library, 2 picks M3 Expressive with its style, and 1
   await expect(onPage(page, /^Use the Expressive style\?/)).toHaveCount(0);
 
   await pressKey(page, '1', () => undoNames('M3'));
-  await expect.poll(async () => pick(await storedDocument(page)), { timeout: LAND_TIMEOUT_MS }).toEqual({
+  await expect.poll(async () => pick(await storedDocument(page))).toEqual({
     style: 'TonalSpot',
     spec: 'Spec2021',
     expressive: false,
   });
 
   await press(page, button(page, /^Undo /));
-  await expect.poll(async () => pick(await storedDocument(page)), { timeout: LAND_TIMEOUT_MS }).toEqual({
+  await expect.poll(async () => pick(await storedDocument(page))).toEqual({
     style: 'Expressive',
     spec: 'Spec2025',
     expressive: true,

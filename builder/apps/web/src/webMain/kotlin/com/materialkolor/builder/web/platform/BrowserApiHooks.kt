@@ -15,7 +15,6 @@ import com.materialkolor.builder.web.interop.pageMillis
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.w3c.files.File
 import kotlin.math.roundToInt
 
 // Hooks the Playwright specs in `builder/e2e` drive the clipboard, downloads, sharing, images,
@@ -110,16 +109,6 @@ internal fun PlatformServices.exposeBrowserApisToE2e() {
         decoded
     }
     exposeE2eHook("decoded") { decoded }
-    exposeE2eHook("profileLatest") {
-        val file = (latest as? BrowserImage)?.file
-        if (file == null) {
-            decoded = "None"
-        } else {
-            decoded = "Pending"
-            hookScope.launch { decoded = profile(file) }
-        }
-        decoded
-    }
     exposeE2eHook("pixel") { at ->
         val current = image ?: return@exposeE2eHook ""
         val (x, y) = at.split(",").map(String::toInt)
@@ -127,24 +116,6 @@ internal fun PlatformServices.exposeBrowserApisToE2e() {
     }
     exposeE2eHook("thumbnailPixel") { at -> image?.thumbnail?.pixelAt(at).orEmpty() }
     exposeE2eHook("detailPixel") { at -> image?.detail?.pixelAt(at).orEmpty() }
-}
-
-// Each stage timed apart for the e2e decode timing, the browser's decode, scale and read, then the
-// copy into Kotlin and Skia.
-private suspend fun profile(file: File): String {
-    val started = pageMillis()
-    val scaled = scale(file) ?: return "None"
-    val copyStarted = pageMillis()
-    scaled.toDecodedImage() ?: return "None"
-    val finished = pageMillis()
-    return "{" +
-        "\"resized\":${scaled.resized}," +
-        "\"decode\":${scaled.decodeMillis.tenths()}," +
-        "\"scale\":${scaled.scaleMillis.tenths()}," +
-        "\"read\":${scaled.readMillis.tenths()}," +
-        "\"copy\":${(finished - copyStarted).tenths()}," +
-        "\"total\":${(finished - started).tenths()}" +
-        "}"
 }
 
 private fun sharedFiles(secondMime: String): List<OutgoingFile> =

@@ -6,7 +6,6 @@ import { readZip } from '../fixtures/zip';
 import {
   A11Y,
   button,
-  LAND_TIMEOUT_MS,
   labelled,
   onPage,
   openWorkspace,
@@ -67,7 +66,7 @@ test('the package stays across a seed change, a reload and a new project', async
 
   await pressKeyFor(page, 'p', button(page, 'New project'));
   await pressFor(page, button(page, 'New project'), labelled(page, 'Projects, '));
-  await expect(onPage(page, /^Projects, dialog/)).toHaveCount(0, { timeout: LAND_TIMEOUT_MS });
+  await expect(onPage(page, /^Projects, dialog/)).toHaveCount(0);
   await openSheet(page);
   await expect.poll(() => textOf(page, 'Package name')).toBe('com.acme.app');
 });
@@ -81,7 +80,7 @@ async function openSheet(page: Page): Promise<void> {
 
 async function closeSheet(page: Page): Promise<void> {
   await press(page, button(page, 'Close'));
-  await expect(onPage(page, EXPORT_DIALOG)).toHaveCount(0, { timeout: LAND_TIMEOUT_MS });
+  await expect(onPage(page, EXPORT_DIALOG)).toHaveCount(0);
 }
 
 /** The file names on the sheet's tabs. */

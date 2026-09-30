@@ -6,7 +6,6 @@ import {
   button,
   dragSplit,
   focusCanvas,
-  LAND_TIMEOUT_MS,
   labelled,
   openWorkspace,
   press,
@@ -74,21 +73,21 @@ test('the first run, from a typed seed to a copied Theme.kt, retires the hint fo
   await pressKeyFor(page, 'i', labelled(page, 'Inspect, checked'));
   const fab = await boxOf(button(page, 'New trip'));
   await page.mouse.move(fab.x + fab.width / 2, fab.y + fab.height / 2);
-  await expect(readout.first()).toBeAttached({ timeout: LAND_TIMEOUT_MS });
+  await expect(readout.first()).toBeAttached();
   await pressKeyFor(page, 'i', labelled(page, 'Inspect, not checked'));
 
   await focusCanvas(page);
   const seeds = [await seedText(page)];
   for (let shuffle = 0; shuffle < 3; shuffle++) {
     await page.keyboard.press('Space');
-    await expect.poll(() => seedText(page), { timeout: LAND_TIMEOUT_MS }).not.toBe(seeds.at(-1));
+    await expect.poll(() => seedText(page)).not.toBe(seeds.at(-1));
     seeds.push(await seedText(page));
   }
   const primary = await primaryKey(page);
   await page.keyboard.press(`${primary}+z`);
-  await expect.poll(() => seedText(page), { timeout: LAND_TIMEOUT_MS }).toBe(seeds[2]);
+  await expect.poll(() => seedText(page)).toBe(seeds[2]);
   await page.keyboard.press(`${primary}+z`);
-  await expect.poll(() => seedText(page), { timeout: LAND_TIMEOUT_MS }).toBe(seeds[1]);
+  await expect.poll(() => seedText(page)).toBe(seeds[1]);
 
   await pressKeyFor(page, 'e', labelled(page, 'Theme.kt, tab, '));
   await pressFor(page, labelled(page, 'Theme.kt, tab, not selected'), labelled(page, 'Theme.kt, tab, selected'));
@@ -97,9 +96,9 @@ test('the first run, from a typed seed to a copied Theme.kt, retires the hint fo
     await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toContain('package com.example.theme');
   }
   await press(page, button(page, 'Close'));
-  await expect(page.locator(A11Y).getByText(/^Export code, dialog/)).toHaveCount(0, { timeout: LAND_TIMEOUT_MS });
+  await expect(page.locator(A11Y).getByText(/^Export code, dialog/)).toHaveCount(0);
 
-  await expect(onPage(page, HINT)).toHaveCount(0, { timeout: LAND_TIMEOUT_MS });
+  await expect(onPage(page, HINT)).toHaveCount(0);
   await reloadBuilder(page);
   await expect(page.locator(NAMED_PROJECTS).first()).toBeAttached({ timeout: 30_000 });
   await expect(onPage(page, HINT)).toHaveCount(0);

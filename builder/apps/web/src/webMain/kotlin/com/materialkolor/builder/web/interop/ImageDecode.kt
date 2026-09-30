@@ -20,11 +20,6 @@ import kotlin.js.Promise
  * @property[thumbnail] RGBA bytes row by row, not premultiplied, the longer side at the thumbnail
  *   edge.
  * @property[detail] RGBA bytes the same way, the longer side at the detail edge.
- * @property[resized] Whether `createImageBitmap` did the scaling. False when it ignored the resize
- *   options and a canvas scaled instead.
- * @property[decodeMillis] How long the full decode took.
- * @property[scaleMillis] How long the three scales took.
- * @property[readMillis] How long reading the pixels back took.
  */
 internal external interface ScaledImage : JsAny {
     val width: Int
@@ -36,10 +31,6 @@ internal external interface ScaledImage : JsAny {
     val detailWidth: Int
     val detailHeight: Int
     val detail: ArrayBuffer
-    val resized: Boolean
-    val decodeMillis: Double
-    val scaleMillis: Double
-    val readMillis: Double
 }
 
 /**
@@ -147,7 +138,6 @@ private fun startScaling(
                 source.height = 0;
             }
         };
-        let resized = true;
         const fit = (source, edge) => {
             const scale = Math.min(1, edge / Math.max(source.width, source.height));
             return [Math.max(1, Math.round(source.width * scale)), Math.max(1, Math.round(source.height * scale))];
@@ -189,7 +179,6 @@ private fun startScaling(
                 .then(null, () => null)
                 .then((bitmap) => {
                     if (bitmap) return bitmap;
-                    resized = false;
                     return draw(source, width, height);
                 });
         };
@@ -200,7 +189,7 @@ private fun startScaling(
             release(canvas);
             return buffer;
         };
-        const scaleAll = (full, started, decoded) =>
+        const scaleAll = (full) =>
             Promise.resolve()
                 .then(() => scale(full, detailEdge))
                 .then((detail) => {
@@ -208,7 +197,6 @@ private fun startScaling(
                     return Promise.all([scale(detail, thumbnailEdge), scale(detail, pixelEdge)]).then((scaledPair) => {
                         const thumbnail = scaledPair[0];
                         const small = scaledPair[1];
-                        const scaled = performance.now();
                         const pixels = new Int32Array(read(small));
                         for (let index = 0; index < pixels.length; index++) {
                             const rgba = pixels[index];
@@ -224,10 +212,6 @@ private fun startScaling(
                             detailWidth: detail.width,
                             detailHeight: detail.height,
                             detail: read(detail),
-                            resized: resized,
-                            decodeMillis: decoded - started,
-                            scaleMillis: scaled - decoded,
-                            readMillis: performance.now() - scaled,
                         };
                     });
                 })
@@ -236,15 +220,13 @@ private fun startScaling(
                     held.forEach(release);
                     return image;
                 });
-        const decode = () => {
-            const started = performance.now();
-            return Promise.resolve()
+        const decode = () =>
+            Promise.resolve()
                 .then(() => createImageBitmap(blob))
                 .then(
-                    (bitmap) => scaleAll(hold(bitmap), started, performance.now()),
+                    (bitmap) => scaleAll(hold(bitmap)),
                     () => null,
                 );
-        };
 
         if (blob.size > maxBytes) return Promise.resolve(null);
         return headerPixels().then((pixels) => (pixels > maxPixels ? null : decode()));

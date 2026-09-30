@@ -2,6 +2,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
 import { site } from './builder';
+import { networkQuietFor } from '../fixtures/timing';
 
 // The production site as the host serves it. It boots from the root and from a theme link, takes
 // its scripts and wasm from /assets/ whatever path it was opened on, and logs no errors doing it.
@@ -49,7 +50,7 @@ for (const [engine, route] of [
     await expect(page.locator('#cmp_a11y_root > *').first()).toBeAttached({ timeout: 30_000 });
     await page.waitForLoadState('networkidle');
     // Fonts and strings are asked for after the first frame, which can be after networkidle.
-    await settle(responses);
+    await networkQuietFor(responses);
 
     const counted = firstVisitFiles(engine);
     const origin = new URL(site('/')).origin;
@@ -82,22 +83,22 @@ test('the page lists the hashed assets each engine boots with', async ({ page, r
   }
 });
 
+test('the server answers the way the host does', async ({ request }) => {
+  expect((await request.get(site('/no-such-file.txt'))).status()).toBe(404);
+
+  const root = process.env.MK_E2E_SITE_DIR;
+  if (!root) throw new Error('MK_E2E_SITE_DIR is not set, the global setup did not run');
+  const wasm = readdirSync(path.join(root, 'assets')).find((file) => file.endsWith('.wasm'));
+  if (!wasm) throw new Error(`No wasm in ${root}/assets`);
+  const response = await request.get(site(`/assets/${wasm}`), { headers: { 'Accept-Encoding': 'gzip' } });
+  expect(response.status()).toBe(200);
+  expect(response.headers()['content-encoding']).toBe('gzip');
+  expect(response.headers()['vary']).toBe('Accept-Encoding');
+  expect(response.headers()['cache-control']).toBe('public, max-age=31536000, immutable');
+});
+
 /** Compose string resource files, which load on first use rather than at boot. */
 const LAZY_STRINGS = /^composeResources\/[^/]+\/values\/[^/]+\.cvr$/;
-
-/** Waits until no new response has arrived for two seconds, or fifteen seconds have passed. */
-async function settle(responses: unknown[]): Promise<void> {
-  const deadline = Date.now() + 15_000;
-  let seen = responses.length;
-  let quietSince = Date.now();
-  while (Date.now() < deadline && Date.now() - quietSince < 2_000) {
-    await new Promise((resolve) => setTimeout(resolve, 250));
-    if (responses.length !== seen) {
-      seen = responses.length;
-      quietSince = Date.now();
-    }
-  }
-}
 
 function collectErrors(page: Page): string[] {
   const errors: string[] = [];

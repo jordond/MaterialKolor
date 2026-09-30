@@ -16,11 +16,11 @@ test('a search with one match, a style, runs it on Enter', async ({ page }) => {
 
   await focusField(page, field);
   await page.keyboard.type('Monochrome');
-  await expect(paletteRow(page, /^Use style Monochrome/)).toHaveCount(1, { timeout: 10_000 });
+  await expect(paletteRow(page, /^Use style Monochrome/)).toHaveCount(1);
   await page.keyboard.press('Enter');
 
   // The line under the style chips names the chosen style.
-  await expect(page.locator(A11Y).getByText(/^Monochrome\. /)).toHaveCount(1, { timeout: 10_000 });
+  await expect(page.locator(A11Y).getByText(/^Monochrome\. /)).toHaveCount(1);
 });
 
 test('a typed hex leads with setting the seed to it', async ({ page }) => {
@@ -29,11 +29,11 @@ test('a typed hex leads with setting the seed to it', async ({ page }) => {
 
   await focusField(page, field);
   await page.keyboard.type('#0B6E4F');
-  await expect(paletteRow(page, /^Set seed to #0B6E4F/)).toHaveCount(1, { timeout: 10_000 });
+  await expect(paletteRow(page, /^Set seed to #0B6E4F/)).toHaveCount(1);
   // Enter runs the top row, so the seed changing says the row came first.
   await page.keyboard.press('Enter');
 
-  await expect.poll(() => seedText(page), { timeout: 10_000 }).toMatch(/0B6E4F/i);
+  await expect.poll(() => seedText(page)).toMatch(/0B6E4F/i);
 });
 
 test('Esc then Cmd or Ctrl+O opens Projects in the history, and Back closes it', async ({ page }) => {
@@ -42,15 +42,15 @@ test('Esc then Cmd or Ctrl+O opens Projects in the history, and Back closes it',
   const primary = await primaryKey(page);
 
   await page.keyboard.press('Escape');
-  await expect.poll(() => openOverlay(page), { timeout: 10_000 }).toBeNull();
+  await expect.poll(() => openOverlay(page)).toBeNull();
   // Straight away, while the palette may still be on its way out with focus in it.
   await page.keyboard.press(`${primary}+o`);
 
   const projects = page.locator(A11Y).getByText(/^Projects, dialog/);
-  await expect(projects).toHaveCount(1, { timeout: 10_000 });
-  await expect.poll(() => openOverlay(page), { timeout: 10_000 }).toBe('Projects');
+  await expect(projects).toHaveCount(1);
+  await expect.poll(() => openOverlay(page)).toBe('Projects');
   await page.evaluate(() => history.back());
-  await expect(projects).toHaveCount(0, { timeout: 10_000 });
+  await expect(projects).toHaveCount(0);
   expect(await openOverlay(page)).toBeNull();
 });
 
@@ -60,8 +60,8 @@ async function openPalette(page: Page): Promise<Locator> {
   await pressBareCanvas(page);
   await page.keyboard.press(`${await primaryKey(page)}+k`);
   const field = page.locator(A11Y).getByRole('textbox', { name: /^Search commands/ });
-  await expect(field).toBeAttached({ timeout: 10_000 });
-  await expect.poll(async () => (await field.boundingBox())?.height ?? 0, { timeout: 10_000 }).toBeGreaterThan(0);
+  await expect(field).toBeAttached();
+  await expect.poll(async () => (await field.boundingBox())?.height ?? 0).toBeGreaterThan(0);
   return field;
 }
 
@@ -74,7 +74,7 @@ function paletteRow(page: Page, name: RegExp): Locator {
 async function seedField(page: Page): Promise<Locator> {
   const field = page.locator(A11Y).getByRole('textbox', { name: /^Seed color/ });
   await expect(field).toBeAttached({ timeout: 30_000 });
-  await expect.poll(async () => (await field.boundingBox())?.height ?? 0, { timeout: 10_000 }).toBeGreaterThan(0);
+  await expect.poll(async () => (await field.boundingBox())?.height ?? 0).toBeGreaterThan(0);
   return field;
 }
 

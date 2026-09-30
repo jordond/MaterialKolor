@@ -60,7 +60,7 @@ async function longPressKeepsMirror(page: Page, cdp: CDPSession, field: Locator,
   expect(after).toBeGreaterThan(before * 0.8);
 
   await page.keyboard.type(SAMPLE_REPLACEMENT);
-  await expect(field).toHaveText(SAMPLE_REPLACEMENT, { timeout: 10_000 });
+  await expect(field).toHaveText(SAMPLE_REPLACEMENT);
 }
 
 /** Tabs until no text field holds focus, so no backing input lies over a field. */
@@ -101,7 +101,7 @@ async function typeInTripsNote(page: Page): Promise<Locator> {
   await page.mouse.click(tab.x + tab.width / 2, tab.y + tab.height / 2);
   // The note closes the open trip's pane, so scrolling that pane well past it only stops at its end.
   const checkIn = page.locator('#cmp_a11y_root [role="button"]').filter({ hasText: /^Check in$/ });
-  await expect(checkIn).toBeAttached({ timeout: 15_000 });
+  await expect(checkIn).toBeAttached();
   const pane = await settledBox(checkIn);
   await page.mouse.move(pane.x + pane.width / 2, pane.y + pane.height / 2);
   for (const _ of [1, 2, 3]) {

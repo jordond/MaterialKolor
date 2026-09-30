@@ -1,6 +1,6 @@
 import type { Locator, Page } from '@playwright/test';
 import { expect, test } from './builder';
-import { button, LAND_TIMEOUT_MS, openWorkspace, press, pressKey, typeSeed } from '../fixtures/workspace';
+import { button, openWorkspace, press, pressKey, typeSeed } from '../fixtures/workspace';
 
 // The History list. Three library switches make three steps, and a click on a row goes straight to
 // its step, across skins, with the list still open and the mirror keeping up with each skin it
@@ -21,15 +21,15 @@ test('a row travels to its step, and the next edit drops the undone steps', asyn
   await openHistory(page);
   await press(page, row(page, 'Library change to Unstyled'));
 
-  await expect(button(page, 'Undo library change to Unstyled')).toHaveCount(1, { timeout: LAND_TIMEOUT_MS });
-  await expect(row(page, 'Library change to Fluent', /undone/)).toHaveCount(1, { timeout: LAND_TIMEOUT_MS });
+  await expect(button(page, 'Undo library change to Unstyled')).toHaveCount(1);
+  await expect(row(page, 'Library change to Fluent', /undone/)).toHaveCount(1);
   await expect(row(page, 'Library change to M3', /undone/)).toHaveCount(1);
   await press(page, row(page, 'Library change to M3'));
-  await expect(button(page, /^Redo, disabled$/)).toHaveCount(1, { timeout: LAND_TIMEOUT_MS });
+  await expect(button(page, /^Redo, disabled$/)).toHaveCount(1);
   await press(page, row(page, 'Library change to Unstyled'));
-  await expect(button(page, 'Undo library change to Unstyled')).toHaveCount(1, { timeout: LAND_TIMEOUT_MS });
+  await expect(button(page, 'Undo library change to Unstyled')).toHaveCount(1);
   await page.keyboard.press('Escape');
-  await expect(row(page, 'Start')).toHaveCount(0, { timeout: LAND_TIMEOUT_MS });
+  await expect(row(page, 'Start')).toHaveCount(0);
   await typeSeed(page, NEW_SEED);
   await openHistory(page);
 
@@ -47,7 +47,7 @@ async function undoNames(page: Page, name: string): Promise<boolean> {
 /** Opens the History list from its top bar button and waits for its Start row. */
 async function openHistory(page: Page): Promise<void> {
   await press(page, button(page, 'History'));
-  await expect(row(page, 'Start')).toHaveCount(1, { timeout: LAND_TIMEOUT_MS });
+  await expect(row(page, 'Start')).toHaveCount(1);
 }
 
 /**
