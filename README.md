@@ -4,7 +4,7 @@
 </picture>
 <br />
 
-![Maven Central](https://img.shields.io/maven-central/v/com.materialkolor/material-kolor)
+![Maven Central](https://img.shields.io/maven-central/v/com.materialkolor/material-kolor-core)
 [![Kotlin](https://img.shields.io/badge/kotlin-v2.4.20-blue.svg?logo=kotlin)](http://kotlinlang.org)
 [![MCU](https://img.shields.io/badge/mcu-5b3618b-blue)](https://github.com/material-foundation/material-color-utilities/tree/5b3618b16fdc3825e21d5679bafd144662088ea1)
 [![Build](https://github.com/jordond/materialkolor/actions/workflows/ci.yml/badge.svg)](https://github.com/jordond/materialkolor/actions/workflows/ci.yml)
@@ -16,737 +16,205 @@
 ![badge-desktop](http://img.shields.io/badge/platform-desktop-DB413D.svg?style=flat)
 ![badge-js](http://img.shields.io/badge/platform-js%2Fwasm-FDD835.svg?style=flat)
 
-A Compose Multiplatform library for creating dynamic Material Design 3 color palettes from any
-color.
+MaterialKolor generates Material color schemes from a single seed color in Compose Multiplatform.
+It runs Google's [material-color-utilities](https://github.com/material-foundation/material-color-utilities)
+on Android, iOS, macOS, desktop JVM, JS and Wasm. There are adapters for Material 3, Compose
+Unstyled and Compose Fluent, and you can use the core module to build a theme of your own.
 
-Check out [MaterialKolor Builder](https://materialkolor.com) to see MaterialKolor in action and
-generate your own color schemes. It exports code for Material 3, Compose Unstyled and Compose Fluent,
-or plain MaterialKolor.
+[MaterialKolor Builder](https://materialkolor.com) lets you try seeds and styles in the browser and
+exports the theme code. API docs are at [docs.materialkolor.com](https://docs.materialkolor.com).
 
-The KDoc is published at [docs.materialkolor.com](https://docs.materialkolor.com)
+> [!NOTE]
+> Upgrading from 5.x? Read the [6.0 migration guide](docs/migration-6.0.md).
 
-## Table of Contents
+## Install
 
-- [Platforms](#platforms)
-- [Inspiration](#inspiration)
-- [Setup](#setup)
-    - [Multiplatform](#multiplatform)
-    - [Single Platform](#single-platform)
-    - [Version Catalog](#version-catalog)
-- [Usage](#usage)
-    - [Updated Colors](#updated-colors)
-    - [DynamicMaterialTheme](#dynamicmaterialtheme)
-    - [DynamicMaterialExpressiveTheme](#dynamicmaterialexpressivetheme)
-- [Tonal Ramps](#tonal-ramps)
-    - [Building Your Own Theme](#building-your-own-theme)
-- [Extensions](#extensions)
-    - [Harmonize Colors](#harmonize-colors)
-    - [Lighten and Darken](#lighten-and-darken)
-    - [Color Temperature](#color-temperature)
-- [Generating from an Image](#generating-from-an-image)
-    - [Palette module](#palette-module)
-- [Samples](#samples)
-- [License](#license)
-    - [Changes from original source](#changes-from-original-source)
+Pick the artifact for your UI toolkit. Each adapter brings in `material-kolor-core` for you.
 
-## Platforms
-
-This library is written for Compose Multiplatform, and can be used on the following platforms:
-
-- Android
-- iOS
-- JVM (Desktop)
-- JavaScript/wasm (Browser)
-
-You can see it in action by using [MaterialKolor Builder](https://materialkolor.com).
-
-## Inspiration
-
-The heart of this library comes from
-the [material-color-utilities](https://github.com/material-foundation/material-color-utilities)
-repository. It is currently
-only a Java library, and I wanted to make it available to Kotlin Multiplatform projects. The source
-code was taken and converted into a Kotlin Multiplatform library.
-
-I also incorporated the Compose ideas from another open source
-library [m3color](https://github.com/Kyant0/m3color).
-
-## Setup
-
-You can add this library to your project using Gradle.
-
-Upgrading from 5.x? The [6.0 migration guide](docs/migration-6.0.md) covers the intentional API
-changes.
-
-### Multiplatform
-
-To add to a multiplatform project, add the dependency to the common source-set:
+| Artifact | Use it for |
+|---|---|
+| `material-kolor-material3` | Material 3 apps |
+| [`material-kolor-unstyled`](material-kolor-unstyled/README.md) | [Compose Unstyled](https://composeunstyled.com) apps |
+| [`material-kolor-fluent`](material-kolor-fluent/README.md) | [Compose Fluent](https://github.com/Compose-Fluent/compose-fluent-ui) apps |
+| `material-kolor-core` | Your own theme, or any app that only needs the colors |
+| [`material-kolor-palette`](material-kolor-palette/README.md) | Seed colors from images, using [kmpalette](https://github.com/jordond/kmpalette) |
+| `material-color-utilities` | The color engine on its own, without Compose |
 
 ```kotlin
 kotlin {
     sourceSets {
-        commonMain {
-            dependencies {
-                implementation("com.materialkolor:material-kolor-material3:5.0.1")
-            }
+        commonMain.dependencies {
+            implementation("com.materialkolor:material-kolor-material3:6.0.0")
         }
     }
 }
 ```
 
-`material-kolor-material3` is the artifact a Material3 app needs. It brings in
-`material-kolor-core` as an `api` dependency, so `PaletteStyle`, `MaterialKolors` and the `ktx`
-helpers come with it.
-
-If you theme something other than Material3, depend on the core artifact on its own.
-
-```kotlin
-implementation("com.materialkolor:material-kolor-core:5.0.1")
-```
-
-If your app uses Compose Unstyled instead of Material3, depend on the adapter artifact.
-
-```kotlin
-implementation("com.materialkolor:material-kolor-unstyled:5.0.1")
-```
-
-`material-kolor-unstyled` is for Compose Unstyled apps. It brings in `material-kolor-core` as an
-`api` dependency, so it does not need Material3. It does **not** bring Compose Unstyled itself, so
-declare the version you want alongside it.
-
-```kotlin
-implementation("com.composables:composeunstyled-theming:2.10.0")
-```
-
-On JVM and Android nothing is brought in for you, so this line is required. On iOS, JS and Wasm the
-klib format makes the dependency part of the artifact whether we like it or not, so you get a
-version by default there; declaring your own still overrides it.
-
-If your app uses Compose Fluent, depend on the Fluent adapter artifact.
-
-```kotlin
-implementation("com.materialkolor:material-kolor-fluent:5.0.1")
-```
-
-`material-kolor-fluent` brings in `material-kolor-core` as an `api` dependency. It does **not**
-bring [Compose Fluent](https://github.com/Compose-Fluent/compose-fluent-ui) itself, so declare the
-version you want alongside it.
-
-```kotlin
-implementation("io.github.compose-fluent:fluent:v0.1.0")
-```
-
-On JVM and Android nothing is brought in for you, so this line is required. On iOS, JS and Wasm the
-klib format makes the dependency part of the artifact whether we like it or not, so you get a
-version by default there; declaring your own still overrides it.
-
-The adapter has no macOS native target, because Fluent does not publish one.
-
-If you seed your theme from images, depend on the palette artifact.
-
-```kotlin
-implementation("com.materialkolor:material-kolor-palette:5.0.1")
-```
-
-`material-kolor-palette` brings in `material-kolor-core` and
-[kmpalette](https://github.com/jordond/kmpalette) as `api` dependencies. It ships on the same
-platforms as core.
-
-### Single Platform
-
-For an Android only project, add the dependency to app level `build.gradle.kts`:
-
-```kotlin
-dependencies {
-    implementation("com.materialkolor:material-kolor-material3:5.0.1")
-}
-```
-
-### Version Catalog
+Or with a version catalog:
 
 ```toml
 [versions]
-materialKolor = "5.0.1"
+materialKolor = "6.0.0"
 
 [libraries]
-materialKolor-core = { module = "com.materialkolor:material-kolor-core", version.ref = "materialKolor" }
 materialKolor-material3 = { module = "com.materialkolor:material-kolor-material3", version.ref = "materialKolor" }
-materialKolor-unstyled = { module = "com.materialkolor:material-kolor-unstyled", version.ref = "materialKolor" }
-materialKolor-palette = { module = "com.materialkolor:material-kolor-palette", version.ref = "materialKolor" }
-materialKolor-fluent = { module = "com.materialkolor:material-kolor-fluent", version.ref = "materialKolor" }
 ```
 
-### Without compose
+The Unstyled and Fluent adapters also need the toolkit itself declared next to them. Their READMEs
+cover the details.
 
-If you don't use Compose and don't need any of the extension functions provided by
-`material-kolor-core`, you can use the `material-color-utilities` artifact instead.
-It is a Kotlin Multiplatform port of
-Google's [Material Color Utilities](https://github.com/material-foundation/material-color-utilities).
+## Material 3
 
-```toml
-[versions]
-materialKolor = "5.0.1"
-
-[libraries]
-materialKolor-utilities = { module = "com.materialkolor:material-color-utilities", version.ref = "materialKolor" }
-```
-
-## Usage
-
-To generate a custom `ColorScheme` you simply need to call `rememberDynamicColorScheme()` with your
-target seed color:
+`DynamicMaterialTheme` wraps `MaterialTheme` and generates the color scheme from a seed:
 
 ```kotlin
 @Composable
-fun MyTheme(
-    seedColor: Color,
-    isDark: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
-) {
-    val colorScheme = rememberDynamicColorScheme(seedColor = seedColor, isDark = isDark)
-
-    MaterialTheme(
-        colorScheme = colorScheme,
-        content = content,
-    )
-}
-```
-
-You can also pass in
-a [`PaletteStyle`](material-kolor-core/src/commonMain/kotlin/com/materialkolor/PaletteStyle.kt) to
-customize the generated palette:
-
-```kotlin
-dynamicColorScheme(
-    seedColor = seedColor,
-    isDark = isDark,
-    style = PaletteStyle.Expressive,
-)
-```
-
-### Updated Colors
-
-With the release of Material3 Expressive, Google has added a new color spec used when generating
-colors. By default MaterialKolor uses the `SPEC_2025` version. If you want to keep the colors from
-earlier releases, pass `ColorSpec.SpecVersion.SPEC_2021`:
-
-```kotlin
-val scheme = rememberDynamicColorScheme(
-    seedColor = seedColor,
-    isDark = isDark,
-    specVersion = ColorSpec.SpecVersion.SPEC_2021,
-)
-```
-
-`PaletteStyle.Expressive` is optional but recommended if you are using `MaterialExpressiveTheme`.
-
-### DynamicMaterialTheme
-
-A `DynamicMaterialTheme` Composable is also available. It is a wrapper around `MaterialTheme` that
-uses `dynamicColorScheme()` to generate a `ColorScheme` for you. You can animate the color scheme by
-passing in `animate = true`.
-
-Example:
-
-```kotlin
-@Composable
-fun MyTheme(
-    seedColor: Color,
-    isDark: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
-) {
+fun AppTheme(seedColor: Color, content: @Composable () -> Unit) {
     DynamicMaterialTheme(
         seedColor = seedColor,
-        isDark = isDark,
+        isDark = isSystemInDarkTheme(),
         animate = true,
         content = content,
     )
 }
 ```
 
-[`samples/material3`](samples/material3) builds the [Tasks sample](#samples) on Material 3
-components themed by `DynamicMaterialTheme`. Run it with `./gradlew :samples:material3:run`.
-
-### DynamicMaterialExpressiveTheme
-
-For more vibrant and playful themes, use `DynamicMaterialExpressiveTheme`. This composable is
-designed for the Material 3 Expressive design system and defaults to using `PaletteStyle.Expressive`
-and `ColorSpec.SpecVersion.SPEC_2025` for optimal color generation.
-
-**Important:** Make sure to use `SPEC_2025` and `PaletteStyle.Expressive` for the best results:
+If you'd rather call `MaterialTheme` yourself, `rememberDynamicColorScheme` returns the
+`ColorScheme`, and `dynamicColorScheme` does the same outside of composition.
 
 ```kotlin
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-fun MyExpressiveTheme(
-    seedColor: Color,
-    isDark: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
-) {
-    DynamicMaterialExpressiveTheme(
-        seedColor = seedColor,
-        motionScheme = MotionScheme.expressive(),
-        isDark = isDark,
-        animate = true,
-        content = content,
-    )
-}
+val colorScheme = rememberDynamicColorScheme(seedColor = seedColor, isDark = isDark)
+MaterialTheme(colorScheme = colorScheme, content = content)
 ```
 
-The Expressive theme generates vibrant color schemes where the source color's hue may not directly
-appear in the final theme, creating more dynamic and playful color palettes.
+All of them accept the same options:
 
-## Tonal Ramps
+- `style` picks a [`PaletteStyle`](material-kolor-core/src/commonMain/kotlin/com/materialkolor/PaletteStyle.kt),
+  such as `TonalSpot` (the default), `Vibrant`, `Expressive` or `Monochrome`.
+- `primary`, `secondary`, `tertiary`, `neutral`, `neutralVariant` and `error` pin that palette to
+  an exact color. The seed still drives the rest.
+- `contrastLevel` runs from -1.0 to 1.0. `Contrast.Medium.value` and `Contrast.High.value` are
+  the standard steps.
+- `isAmoled` makes the dark background and surface pure black.
+- `specVersion` defaults to `SPEC_2025`. Pass `ColorSpec.SpecVersion.SPEC_2021` for the colors
+  MaterialKolor produced before 6.0.
 
-Roles are one projection of a scheme, the one Material defines. The same scheme carries the six
-tonal ramps those roles were cut from, and you can read any tone off them:
+For Material 3 Expressive, use `DynamicMaterialExpressiveTheme`. It defaults to
+`PaletteStyle.Expressive` and accepts a `motionScheme`.
+
+## Your own theme
+
+`material-kolor-core` doesn't depend on Material 3. `rememberDynamicScheme` generates the scheme,
+and `MaterialKolors` reads its roles as Compose colors:
 
 ```kotlin
 val scheme = rememberDynamicScheme(seedColor = seedColor, isDark = isDark)
+val kolors = remember(scheme) { MaterialKolors(scheme) }
 
-val pressed = scheme.primaryPalette.toneColor(30)
-val sunken = scheme.neutralPalette.toneColor(94)
-val hairline = scheme.neutralVariantPalette.toneColor(85)
+val accent = kolors.primary()
+val onAccent = kolors.onPrimary()
 ```
 
-Reach for a ramp whenever you want a tone Material never gave a name to. A pressed or raised state,
-a gradient stop, a border that is one step stronger than the last one, a severity scale. Reach for a
-role for everything else, because roles already solved the accent and container problem and there is
-no reason to redo that work.
-
-Whatever tone you pick, `onTone` gives you a content color from the same ramp that is readable on
-top of it:
+The roles are only part of what a scheme contains. Each scheme also carries the six tonal palettes
+the roles come from, and you can read any tone from 0 to 100 off them. Use them for the colors
+Material has no role for, such as a pressed state, a gradient stop or a severity scale. `onTone`
+gives you a readable content color from the same palette, aiming for WCAG AA by default.
 
 ```kotlin
+val pressed = scheme.primaryPalette.toneColor(30)
 val badge = scheme.tertiaryPalette.toneColor(90)
-val badgeText = scheme.tertiaryPalette.onTone(90)
+val onBadge = scheme.tertiaryPalette.onTone(90)
 ```
 
-By default it targets WCAG AA for normal text. Pass a different `ContrastThreshold` if you need
-large text or AAA. When the ramp cannot reach the ratio in either direction, you get the nearer end
-of it, which is the most readable color the palette has.
-
-Themes usually want more accents than a scheme has ramps. `rememberTonalPalette` builds one from any
-seed, optionally pulling it towards the scheme's seed first so it looks like it belongs:
+When you need more accent colors than the scheme has, `rememberTonalPalette` builds a palette from
+any color. You can also shift its hue towards your seed so it fits in with the rest of the theme:
 
 ```kotlin
 val success = rememberTonalPalette(seed = Color(0xFF2E7D32), harmonizeWith = seedColor)
-
 val successContainer = success.toneColor(90)
-val onSuccessContainer = success.onTone(90)
 ```
 
-### Building Your Own Theme
-
-You do not need Material3 to use MaterialKolor. `material-kolor-core` has no dependency on it, so a
-theme with its own shape can be generated from one seed the same way a `ColorScheme` is:
-
-```kotlin
-@Composable
-fun AppTheme(seed: Color, isDark: Boolean, content: @Composable () -> Unit) {
-    val scheme = rememberDynamicScheme(seedColor = seed, isDark = isDark)
-    val kolors = remember(scheme) { MaterialKolors(scheme) }
-    val success = rememberTonalPalette(seed = SuccessSeed, harmonizeWith = seed)
-
-    val colors = AppColors(
-        primary = kolors.primary(),
-        onPrimary = kolors.onPrimary(),
-        primaryPressed = scheme.primaryPalette.toneColor(if (isDark) 70 else 32),
-        success = success.toneColor(if (isDark) 80 else 40),
-        onSuccess = success.onTone(if (isDark) 80 else 40),
-    )
-
-    CompositionLocalProvider(LocalAppColors provides colors, content = content)
-}
-```
-
-[`samples/custom-theme`](samples/custom-theme) is a working version of that, styled as a risograph
-print. A paper stock, a key ink and three spot inks, each a ramp built from its own seed and pulled
-towards yours, next to the primary and error roles. It builds the [Tasks sample](#samples) on
-Compose Foundation alone, and its Palette tab shows every ramp and the tone the theme prints at.
-
-Run it with `./gradlew :samples:custom-theme:run`.
+[`samples/custom-theme`](samples/custom-theme) builds a complete theme this way.
 
 ## Compose Unstyled
 
-`material-kolor-unstyled` adapts a MaterialKolor scheme
-to[Compose Unstyled](https://composeunstyled.com) theming.
+[`material-kolor-unstyled`](material-kolor-unstyled/README.md) turns a scheme into Compose Unstyled
+theme values:
 
 ```kotlin
-import com.composeunstyled.theme.ColorScheme
-import com.composeunstyled.theme.Theme
-import com.composeunstyled.theme.buildThemeV2
-import com.materialkolor.PaletteStyle
-import com.materialkolor.unstyled.MaterialKolorTokens
-import com.materialkolor.unstyled.rememberDynamicLightDarkColors
-
-object ThemeSettings {
-    var seedColor by mutableStateOf(Color(0xFF6750A4))
-}
-
 val AppTheme = buildThemeV2 {
-    colorSchemeTransitionSpec = tween(300)
-
-    val (light, dark) = rememberDynamicLightDarkColors(
-        seedColor = ThemeSettings.seedColor,
-        style = PaletteStyle.Vibrant
-    )
+    val (light, dark) = rememberDynamicLightDarkColors(seedColor = seedColor)
     properties[MaterialKolorTokens.colors] = light
 
     colorScheme(ColorScheme.Dark) {
         properties[MaterialKolorTokens.colors] = dark
     }
 }
-
-@Composable
-fun App() {
-    AppTheme {
-        val colors = Theme[MaterialKolorTokens.colors]
-        Column(Modifier.background(colors[MaterialKolorTokens.surface])) {
-            Text("Hello", color = colors[MaterialKolorTokens.onSurface])
-            Button(onClick = { ThemeSettings.seedColor = Color(0xFF00695C) }) {
-                Text("Teal")
-            }
-        }
-    }
-}
 ```
-
-The builder lambda is composable, so it reads `ThemeSettings.seedColor` on every recomposition and
-the theme regenerates when the button sets a new one. `rememberDynamicLightDarkColors` builds the
-light and dark token maps from one set of arguments and remembers both as a pair. It takes the same
-parameters as `rememberDynamicScheme`, minus `isDark`.
-
-Light goes in the base values and dark goes in the `ColorScheme.Dark` block. Unstyled lays the
-active scheme's overrides over the base values, so `AppTheme { }` follows the system,
-`AppTheme(colorScheme = ColorScheme.Dark) { }` pins one, and a scheme that never sets the colors
-falls back to the light ones. The dark block is yours, so anything else dark mode changes goes
-next to the colors.
-
-```kotlin
-colorScheme(ColorScheme.Dark) {
-    properties[MaterialKolorTokens.colors] = dark
-    properties[AppShadows] = darkShadows
-    defaultContentColor = Color(0xFFE6E0E9)
-}
-```
-
-A scheme of your own needs one set of colors. `rememberDynamicColors` takes `isDark` and gives a
-single map.
-
-```kotlin
-val Sepia = ColorScheme("sepia")
-
-val AppTheme = buildThemeV2 {
-    // The base values and the dark block, as above.
-
-    colorScheme(Sepia) {
-        properties[MaterialKolorTokens.colors] =
-            rememberDynamicColors(Color(0xFF704214), isDark = false)
-    }
-}
-```
-
-When the theme already has a `DynamicScheme`, for example one kept in application state,
-`scheme.toThemeValues()` gives the same map.
-
-Set `defaultIndication` on the builder. Left unset, Unstyled falls back to an indication that
-foundation's `clickable` rejects, and the first plain `clickable` throws. Setting it only reaches
-`LocalIndication`, though. `UnstyledButton`, `UnstyledCheckbox`, `UnstyledSwitch`, the radio group
-and the tab group all default their `indication` parameter to `null`, so pass
-`LocalIndication.current` to each of them, or wrap them in your own components that do. The
-[`samples/unstyled`](samples/unstyled) components show one way.
-
-The adapter never animates. Set `colorSchemeTransitionSpec` on the builder, as above, and Unstyled
-animates every color token whenever it changes, whether the seed moved or the scheme flipped
-between light and dark.
-
-If your app owns its own token vocabulary, map the `MaterialKolors` roles onto it.
-
-```kotlin
-val appColors = ThemeProperty<Color>("app.colors")
-val accent = ThemeToken<Color>("accent")
-val onAccent = ThemeToken<Color>("on_accent")
-val canvas = ThemeToken<Color>("canvas")
-
-fun MaterialKolors.toAppColors(): Map<ThemeToken<Color>, Color> =
-    mapOf(
-        accent to primary(),
-        onAccent to onPrimary(),
-        canvas to surfaceContainerLow(),
-    )
-
-val AppTheme = buildThemeV2 {
-    val light = rememberDynamicScheme(ThemeSettings.seedColor, isDark = false)
-    val dark = rememberDynamicScheme(ThemeSettings.seedColor, isDark = true)
-
-    properties[appColors] = remember(light) { MaterialKolors(light).toAppColors() }
-
-    colorScheme(ColorScheme.Dark) {
-        properties[appColors] = remember(dark) { MaterialKolors(dark).toAppColors() }
-    }
-}
-```
-
-The adapter publishes android, jvm, js, wasmJs, iosArm64 and iosSimulatorArm64, because Compose
-Unstyled has no macOS native target. Android minSdk 23 and Java 17 bytecode both come from Unstyled.
-Core keeps its own floor.
-
-[`samples/unstyled`](samples/unstyled) builds the [Tasks sample](#samples) on Compose Unstyled with
-this adapter. Run it with `./gradlew :samples:unstyled:run`.
 
 ## Compose Fluent
 
-`material-kolor-fluent` gives [Compose Fluent](https://github.com/Compose-Fluent/compose-fluent-ui)
-an accent it can actually theme from. Fluent ships one accent colour, Windows blue, and its
-`generateShades` is a lookup with a single entry, so every other accent silently comes back as that
-same blue. The adapter replaces the lookup with a generated ramp.
+[`material-kolor-fluent`](material-kolor-fluent/README.md) generates Fluent's accent shades from a
+seed:
 
 ```kotlin
-import com.materialkolor.fluent.rememberFluentColors
-import io.github.composefluent.FluentTheme
-
-@Composable
-fun App() {
-    FluentTheme(colors = rememberFluentColors(seedColor = Color(0xFF6750A4))) {
-        Text("Themed from a seed colour")
-    }
+FluentTheme(colors = rememberFluentColors(seedColor = seedColor)) {
+    App()
 }
 ```
 
-`rememberFluentColors` takes the same parameters as `rememberDynamicScheme`, so `style`,
-`contrastLevel` and the rest work the way they do everywhere else. If you already have a scheme,
-`scheme.toFluentColors()` reads its primary ramp and its dark flag. If you want a Fluent theme
-built on some other ramp, any `TonalPalette` converts:
+## Colors from an image
+
+[`material-kolor-palette`](material-kolor-palette/README.md) uses kmpalette to pick a seed color
+from an image:
 
 ```kotlin
-val shades = scheme.secondaryPalette.toFluentShades()
-val shades = TonalPalette.from(seedColor).toFluentShades()
+val seedColor = rememberThemeColor(
+    loader = ByteArrayLoader,
+    input = imageBytes,
+    fallback = MaterialTheme.colorScheme.primary,
+)
 ```
 
-Those two are not the same, and the difference is worth knowing. A `PaletteStyle` reshapes chroma
-on the way into a scheme, so `TonalSpot` gives a calmer accent than the seed you handed it, while
-`TonalPalette.from(seedColor)` keeps the seed as it was.
+> [!NOTE]
+> The `ImageBitmap` helpers in core still work, but they are deprecated and will be removed in
+> 7.0.
 
-The seven shades are anchored to the lightness of Microsoft's own Windows blue family, rounded to
-the nearest five:
+## Color helpers
 
-| Shade    | Windows blue | its tone | tone used here |
-|----------|--------------|----------|----------------|
-| `dark3`  | `#001968`    | 13.8     | 15             |
-| `dark2`  | `#003D92`    | 27.9     | 30             |
-| `dark1`  | `#005EB7`    | 40.3     | 40             |
-| `base`   | `#0078D4`    | 49.7     | 50             |
-| `light1` | `#0093F9`    | 59.6     | 60             |
-| `light2` | `#60CCFE`    | 77.8     | 80             |
-| `light3` | `#98ECFE`    | 88.8     | 90             |
-
-Microsoft's ramp shifts hue by 64 degrees from its darkest shade to its lightest, and a tonal
-palette holds hue steady, so this matches the lightness of that ramp rather than reproducing it.
-That is the right trade for a generated accent: you get a ramp of one colour instead of an
-imitation of a blue you did not ask for.
-
-To fade between seeds rather than cut, wrap the colours in `animateFluentColors`.
+`com.materialkolor.ktx` has a few extensions for working with colors directly:
 
 ```kotlin
-@Composable
-fun App() {
-    val colors = animateFluentColors(
-        rememberFluentColors(seedColor = ThemeSettings.seedColor),
-    )
-
-    FluentTheme(colors = colors) {
-        Button(onClick = { ThemeSettings.seedColor = Color(0xFF00695C) }) {
-            Text("Teal")
-        }
-    }
-}
+val harmonized = Color.Blue.harmonize(brandColor)
+val alsoHarmonized = MaterialTheme.colorScheme.harmonizeWithPrimary(Color.Blue)
+val lighter = color.lighten(1.5f)
+val warm = color.isWarm()
+val readable = textColor.hasEnoughContrast(background, ContrastThreshold.WcagAaNormalText)
 ```
-
-The seven shades animate and the groups derived from them follow. `system` and `controlOnImage`
-hold still, because they are built from Fluent's own constants and never depended on the accent.
-Switching between light and dark is a cut rather than a fade for the same reason: Fluent derives
-both from one set of shades and a flag, so there is no pair of colours to move between.
-
-Fluent's `success`, `caution` and `critical` live on `Colors.system`, which is built from constants
-with no setter a caller can reach, so a scheme's secondary, tertiary and error ramps have nowhere
-to go and are left alone.
-
-A seed with little chroma gives a Fluent theme with little chroma. A grey seed produces seven
-greys, which is the ramp working rather than a fault.
-
-[`samples/fluent`](samples/fluent) builds the [Tasks sample](#samples) on Fluent components. Run it
-with `./gradlew :samples:fluent:run` to switch seeds, flip light and dark, and see the generated
-ramp
-beside the single blue Fluent falls back to on its own.
-
-Platforms: JVM, Android, iOS, JS and Wasm. No macOS native target, Java 17 bytecode from Fluent,
-and the Android floor is core's own 21.
-
-## Extensions
-
-Included in the library are some extensions for working with colors. You can check out
-the [/ktx](material-kolor-core/src/commonMain/kotlin/com/materialkolor/ktx) package for more
-information.
-
-But here are a couple useful examples:
-
-### Harmonize Colors
-
-If you want to harmonize a color with another you can use the `Color.harmonize()` function. You can
-read more about color harmonization on
-the [Material 3 Documentation](https://m3.material.io/styles/color/advanced/adjust-existing-colors#1cc12e43-237b-45b9-8fe0-9a3549c1f61e).
-
-Example:
-
-```kotlin
-val newColor = MaterialTheme.colorScheme.primary.harmonize(Color.Blue)
-```
-
-There is an additional function specifically for harmonizing with the primary color:
-
-```kotlin
-val newColor = Color.Blue.harmonizeWithPrimary()
-```
-
-**Note:** `Color.harmonize()` has an optional parameter `matchSaturation` which when set to `true`
-will adjust the saturation from the other color.
-
-### Lighten and Darken
-
-You can lighten or darken a color using the `Color.lighten()` and `Color.darken()` functions.
-
-For example:
-
-```kotlin
-val newColor = MaterialTheme.colorScheme.primary.lighten(0.2f)
-```
-
-Check out the demo app for a full example.
-
-### Color Temperature
-
-You can determine if a `Color` is warm or cold using the following:
-
-```kotlin
-val isWarm = MaterialTheme.colorScheme.primary.isWarm()
-val isCold = MaterialTheme.colorScheme.primary.isCold()
-```
-
-## Generating from an Image
-
-You can calculate a seed color, or colors that are suitable for UI theming from an image. This is
-useful for generating a color scheme from a user's profile picture, or a background image.
-
-The `ImageBitmap` helpers in core are deprecated as of 6.0 and go away in 7.0. New code should use
-the [palette module](#palette-module) below. Until then you can still call
-`ImageBitmap.themeColors()`,
-`ImageBitmap.themeColor()` or the `@Composable` function `rememberThemeColors()` or
-`rememberThemeColor()`:
-
-```kotlin
-fun calculateSeedColor(bitmap: ImageBitmap): Color {
-    val suitableColors = bitmap.themeColors(fallback = Color.Blue)
-    return suitableColors.first()
-}
-```
-
-All of these sample the image down to a 128 by 128 pixel budget before quantizing. Pass `sampleArea`
-if you want a different budget, or zero and below to read every pixel.
-
-See [
-`ImageBitmap.kt`](material-kolor-core/src/commonMain/kotlin/com/materialkolor/ktx/ImageBitmap.kt)
-for more information.
-
-Or in Compose land:
-
-```kotlin
-@Composable
-fun DynamicTheme(image: ImageBitmap, content: @Composable () -> Unit) {
-    val seedColor = rememberThemeColor(image, fallback = MaterialTheme.colorScheme.primary)
-
-    DynamicMaterialTheme(
-        seedColor = seedColor,
-        content = content
-    )
-}
-```
-
-### Palette module
-
-`material-kolor-palette` starts from [kmpalette](https://github.com/jordond/kmpalette) instead of
-an `ImageBitmap`. kmpalette loads and quantizes the image off the main thread, and this module
-scores
-the swatches that come back with the same scoring Android applies to wallpapers.
-
-Anything kmpalette can load is an input, so you pass a loader and the thing it loads:
-
-```kotlin
-@Composable
-fun DynamicTheme(bytes: ByteArray, content: @Composable () -> Unit) {
-    val seedColor = rememberThemeColor(
-        loader = ByteArrayLoader,
-        input = bytes,
-        fallback = MaterialTheme.colorScheme.primary,
-    )
-
-    DynamicMaterialTheme(
-        seedColor = seedColor,
-        content = content,
-    )
-}
-```
-
-If you already hold a `PaletteState`, build the scheme straight from it:
-
-```kotlin
-@Composable
-fun DynamicTheme(image: ImageBitmap, content: @Composable () -> Unit) {
-    val palette = rememberPaletteState()
-    LaunchedEffect(image) { palette.generate(image) }
-
-    val scheme = rememberDynamicScheme(
-        palette = palette,
-        fallback = MaterialTheme.colorScheme.primary,
-        isDark = isSystemInDarkTheme(),
-    )
-
-    MaterialTheme(
-        colorScheme = scheme.toColorScheme(),
-        content = content,
-    )
-}
-```
-
-`Palette.themeColors()`, `Palette.themeColor()`, `Palette.themeColorOrNull()` and
-`Palette.seedColorOrNull()` are there for when you want to score a palette you generated yourself,
-and `rememberPainterThemeColor()` starts from a `Painter`. For base64 strings, network URLs and
-files, add the matching kmpalette extension artifact and pass its loader.
 
 ## Samples
 
-The [samples](samples) are one small app, Tasks, built four times. A to-do list with a seed picker
-and a light and dark switch on top. The behaviour, the copy and the data live in one shared module,
-so the four differ only in their UI stack and in how they turn a seed into a theme.
+[`samples`](samples) has one small to-do app built four times, once for each UI stack. See
+[`samples/README.md`](samples/README.md) for screenshots.
 
-| Sample                                 | UI                 | Theme from                        | Run it                                |
-|----------------------------------------|--------------------|-----------------------------------|---------------------------------------|
-| [`custom-theme`](samples/custom-theme) | Compose Foundation | `material-kolor-core` tonal ramps | `./gradlew :samples:custom-theme:run` |
-| [`fluent`](samples/fluent)             | Compose Fluent     | `material-kolor-fluent`           | `./gradlew :samples:fluent:run`       |
-| [`material3`](samples/material3)       | Compose Material 3 | `material-kolor-material3`        | `./gradlew :samples:material3:run`    |
-| [`unstyled`](samples/unstyled)         | Compose Unstyled   | `material-kolor-unstyled`         | `./gradlew :samples:unstyled:run`     |
+| Sample | Theme from | Run |
+|---|---|---|
+| [`material3`](samples/material3) | `material-kolor-material3` | `./gradlew :samples:material3:run` |
+| [`unstyled`](samples/unstyled) | `material-kolor-unstyled` | `./gradlew :samples:unstyled:run` |
+| [`fluent`](samples/fluent) | `material-kolor-fluent` | `./gradlew :samples:fluent:run` |
+| [`custom-theme`](samples/custom-theme) | `material-kolor-core` tonal palettes | `./gradlew :samples:custom-theme:run` |
 
-[`samples/README.md`](samples/README.md) has the full spec.
+## How the engine is built
+
+`material-color-utilities` is generated from Google's upstream Kotlin source at the revision in
+the MCU badge above. A source transformer adjusts it for Kotlin Multiplatform and for this
+library's API. [`docs/upstream-psi.md`](docs/upstream-psi.md) describes each change it makes and
+how upstream updates are reviewed.
+
+The Compose ideas started from [m3color](https://github.com/Kyant0/m3color).
 
 ## License
 
-The module `material-color-utilities` is licensed under the Apache License, Version 2.0. See
-their [LICENSE](material-color-utilities/src/commonMain/kotlin/com/materialkolor/LICENSE) and their
-repository [here](https://github.com/material-foundation/material-color-utilities) for more
-information.
-
-### Changes from original source
-
-- Transform library to Kotlin Multiplatform
-
-For the remaining code see [LICENSE](LICENSE) for more information.
+MaterialKolor is MIT licensed, see [LICENSE](LICENSE). The generated `material-color-utilities`
+code is under Google's
+[Apache 2.0 license](https://github.com/material-foundation/material-color-utilities/blob/main/LICENSE).

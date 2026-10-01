@@ -1,8 +1,11 @@
-# Maintaining the upstream Kotlin engine
+# Maintaining the upstream engine
 
-## Source and toolchain pins
+`material-color-utilities` isn't written by hand. It is generated from Google's upstream Kotlin
+source, which is checked out as a submodule at `tools/mcu-upstream/src/main` and pinned by
+`gradle/mcu-upstream.lock.json`. `tools/mcu-source-transformer` parses that source with the Kotlin
+PSI and rewrites it for Kotlin Multiplatform and for MaterialKolor's API.
 
-Initialize the exact recorded submodule revision before building:
+## Setup
 
 ```sh
 git submodule update --init --recursive
@@ -10,129 +13,121 @@ git submodule update --init --recursive
 ./gradlew :material-color-utilities:generateMcuSources --configuration-cache
 ```
 
-## What the adapter may change
+The generated sources go to `material-color-utilities/build/generated/mcu/commonMain/`. A report of
+every rule applied to each file goes to `material-color-utilities/build/reports/mcu-sources.tsv`.
+Review the report and the generated diff together. If a transform fails, the previous output is
+left untouched.
 
-Untouched text, copyright headers and comments are preserved. Unsupported shapes fail with the file,
-location and rule identity.
+## What the transformer changes
 
-The adapter makes three kinds of change, each reviewable on its own:
+The transformer makes three kinds of change, each in its own pass:
 
-1. Namespace relocation changes upstream root packages to `com.materialkolor.*`.
-2. Portability rules replace audited JVM operations with common Kotlin operations or narrow internal
-   helpers.
-3. MaterialKolor semantic rules preserve deliberate conveniences and immutable/value behavior.
+1. Namespace: it moves upstream's packages under `com.materialkolor.*`.
+2. Portability: it replaces JVM-only calls with common Kotlin.
+3. Semantics: it adds the MaterialKolor API changes, listed under [Semantic rules](#semantic-rules).
 
-| Upstream operation                             | Common replacement                                                              |
-|------------------------------------------------|---------------------------------------------------------------------------------|
-| `ArrayList`, `HashMap`, `LinkedHashMap`        | Kotlin collections with their required ordering                                 |
-| `Arrays.sort`, `Collections.sort`              | In-place array/list sorting with the original comparator                        |
-| `Collections.unmodifiableList`                 | A copy behind the audited private cache boundary                                |
-| `Math.toRadians`, `Math.toDegrees`, `Math.max` | Common math/helpers                                                             |
-| RGB `String.format`                            | Locale-independent lowercase hexadecimal with two digits per channel            |
-| `Locale.ENGLISH` enum lowercasing              | Locale-independent Kotlin lowercasing                                           |
-| Seeded `java.util.Random`                      | Internal Java-compatible 48-bit generator, including bounded rejection sampling |
-| `DecimalFormat("0.0")` for scheme contrast     | The narrow diagnostic formatting policy below                                   |
+Everything else in a file, including comments and copyright headers, is kept as is. If a rule hits
+a shape it doesn't support, generation fails and reports the file, the location and the rule ID.
 
-Import aliases are permitted only when their target and call shape are audited. Wildcard JVM
-imports, unknown JVM APIs/annotations, ambiguous symbol shadowing, new public mutation paths,
-overlapping edits and source inventory drift require review.
+| Upstream | Replacement |
+|---|---|
+| `ArrayList`, `HashMap`, `LinkedHashMap` | Kotlin collections with the same ordering |
+| `Arrays.sort`, `Collections.sort` | In-place sort with the same comparator |
+| `Collections.unmodifiableList` | A private copy |
+| `Math.toRadians`, `Math.toDegrees`, `Math.max` | Common math |
+| RGB `String.format` | Locale-independent lowercase hex, two digits per channel |
+| `Locale.ENGLISH` enum lowercasing | Locale-independent lowercasing |
+| Seeded `java.util.Random` | An internal Java-compatible 48-bit generator, including bounded draws |
+| `DecimalFormat("0.0")` in `DynamicScheme.toString` | See [Diagnostic formatting](#diagnostic-formatting) |
 
-Generated library sources live under `material-color-utilities/build/generated/mcu/commonMain/`. A
-failed transform must leave the previous complete output intact. Review the deterministic report at
-`material-color-utilities/build/reports/mcu-sources.tsv` alongside adapted source diffs.
+The following changes in upstream fail the build until someone reviews them: wildcard JVM imports,
+unknown JVM APIs or annotations, ambiguous symbol shadowing, new public mutation, overlapping
+edits, and files being added or removed. An import alias is only allowed when its target and call
+shape have been reviewed.
 
-The original Java compiled by `:mcu-upstream` and the raw Kotlin it carries as test fixtures are
-independent JVM references. The latter performs namespace relocation only, into `upstream.kotlin.*`;
-it must not receive portability or MaterialKolor semantic rules. Its report is
-`tools/mcu-upstream/build/reports/mcu-reference.tsv`. Neither reference nor the transformer is a
-public library dependency.
+There are two reference builds, and neither is published. `:mcu-upstream` compiles upstream's Java,
+and it also compiles upstream's Kotlin with only the namespace moved, into `upstream.kotlin.*`. The
+parity tests compare the generated library against both. The namespace-only copy must never get
+portability or semantic rules. Its report is `tools/mcu-upstream/build/reports/mcu-reference.tsv`.
 
-### Semantic rule budget
+### Semantic rules
 
-The semantic pass is the most expensive part of this adapter to maintain: every upstream refactor of
-a declaration a rule selects becomes rule-repair work. Each rule is budgeted against one test:
+Semantic rules are the expensive part to maintain, because every upstream refactor of a
+declaration a rule targets means repairing that rule. A rule is only justified if it needs access
+from inside the class:
 
-> A semantic transformation is justified ONLY if the behavior requires in-class access:
-> private/internal member access, equality/hashCode/toString overrides, constructor/visibility
-> changes, removing a public mutation surface, or altering supertype/annotation shape. Anything
-> expressible as a handwritten extension, top-level factory, or facade in ordinary source must be
-> handwritten.
+- private or internal members
+- `equals`, `hashCode` or `toString`
+- constructor or visibility changes
+- removing public mutation
+- supertype or annotation changes
 
-Rules fall into two groups. **Group A** passes the test: handwritten source cannot express it at
-all. **Group B** does not: the injected declaration only calls public API and would compile as a
-handwritten extension. Group B is retained under one exception: an unimported extension does not
-replace a member where receiver-call ergonomics require one. Each group B declaration is already a
-reviewed entry in `material-color-utilities/api/`, moving it would change that dump and force an
-import at call sites where the neighboring upstream members need none. The module has two
-handwritten production files and neither is a home for conveniences.
-`src/commonMain/kotlin/com/materialkolor/InternalMaterialKolorApi.kt` is the public opt-in marker
-that `subclass-opt-in-required` refers to, and
-`src/commonMain/kotlin/com/materialkolor/compat/PlatformCompat.kt` is `internal` portability
-support. Group B is the part to revisit first if that policy changes, and it must not grow without
-an explicit API-dump review.
+Anything that could be a handwritten extension, factory or facade should be handwritten.
 
-Every rule ID below is recorded per file in `build/reports/mcu-sources.tsv`. A new rule must add a
-row.
+Group A rules meet that test. Group B rules don't. They only call public API, but they are kept as
+members because they sit next to upstream members that need no import, and each one is already a
+reviewed entry in the API dump. Group B is the first thing to reconsider, and it doesn't grow
+without an API dump review.
 
-| Rule ID                     | Verdict        | Justification                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-|-----------------------------|----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `analogous-property`        | KEEP (A)       | Replaces `TemperatureCache.getAnalogousColors()` with `val analogousColors`. Both compile to `getAnalogousColors()Ljava/util/List;`, so the property can exist only if the no-argument member is deleted, and deleting a member needs in-class access.                                                                                                                                                                                                                                                                                                                                                                           |
-| `cam16-visibility`          | KEEP (A)       | Widens five `internal` `Cam16` members to `public`. Visibility change. CAM16 under custom viewing conditions was public in 5.x.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `dynamic-color-factory`     | KEEP (B)       | `DynamicColor.Companion.fromPalette`. A companion extension preserves the call shape but requires an import; the member and its `fromPalette$default` synthetic are reviewed dump entries.                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `enum-default`              | KEEP (A)       | Adds `companion object { val Default }` to `SpecVersion` (`SPEC_2025`) and `Platform` (`PHONE`). A companion object cannot be attached to a class from outside it.                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `harmonize-hct`             | KEEP (B)       | `@JvmStatic` `Hct` overload of `Blend.harmonize`, static like the `Int` overload. As an extension it would split the overload set, and `material-kolor-core`'s own `Blend.harmonize(Color, Color, Boolean)` extension resolves it through the implicit receiver.                                                                                                                                                                                                                                                                                                                                                                 |
-| `hct-copy-body`             | KEEP (A)       | Rewrites the in-place `setInternalState` call into `return Hct(...)`. Reads a private member and a private constructor.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `hct-copy-method`           | KEEP (A)       | Renames `setHue`/`setChroma`/`setTone` to `withHue`/`withChroma`/`withTone`, removing the public mutation surface.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `hct-copy-type`             | KEEP (A)       | Adds the `Hct` return type that rename requires. Signature change.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `hct-value-contract`        | KEEP (A and B) | `equals`/`hashCode` over `argb` can only be members. The bundled `isBlue`/`isYellow`/`isCyan` are group B, kept as members beside the upstream `Hct` members they belong with. They share this rule ID rather than splitting it and changing the report.                                                                                                                                                                                                                                                                                                                                                                         |
-| `hide-palette-cache`        | KEEP (A)       | Makes `TonalPalette.cache` private. Visibility change, and what keeps the cache outside `value-equality`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `implementation-visibility` | KEEP (A)       | Narrows thirteen quantizer, spec, solver and math types to `internal`, including `ColorSpec2021`, `ColorSpec2025`, `ColorSpec2026` and `HctSolver`. Visibility change, placed after the type's KDoc.                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `initial-tone-default`      | KEEP (A)       | Adds `= null` to the `getInitialToneFromBackground` parameter. Signature change.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `luminance-member`          | KEEP (B)       | `ColorUtils.calculateLuminance`. Kept as a member so it resolves beside the other `ColorUtils` conversions without an import. Core's `Color.isLight` calls it.                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `member-visibility`         | KEEP (A)       | Narrows named members of public types to `internal`: the raw `ColorUtils` math (`argbFromLinrgb`, `linearized`, `delinearized`, `labF`, `labInvf`), the `DynamicScheme` companion's `DEFAULT_SPEC_VERSION`, `DEFAULT_PLATFORM`, `getPiecewiseValue` and `getRotatedHue`, the `DynamicColor` companion's `foregroundTone`, `enableLightForeground`, `tonePrefersLightForeground` and `toneAllowsLightForeground`, and `ViewingConditions.rgbD`. A hidden member drops `@JvmStatic`, whose static bridge would stay public under a mangled name. Visibility change. Fails when a named member disappears, is overloaded or is no longer public. |
-| `poko-class`                | KEEP (A)       | Turns `DynamicColor`, `ToneDeltaPair`, `CorePalettes`, `Cam16` and `ViewingConditions` from data classes into `@Poko` classes, so upstream adding a property no longer breaks `copy` and `componentN` callers. `ViewingConditions.rgbD` gets `@Poko.ReadArrayContent`. `DynamicColor` gets an `internal` `copy` for the upstream specs that call it. Modifier and annotation shape. Also fails when any other public data class appears.                                                                                                                                                                                         |
-| `scheme-copy`               | KEEP (B)       | `DynamicScheme.copy` and the four nullable dim roles. An extension named `copy` would be silently shadowed if upstream ever made the class a data class, and the dim roles would need an import while the adjacent role members do not.                                                                                                                                                                                                                                                                                                                                                                                          |
-| `scheme-error-default`      | KEEP (A)       | Adds the `errorPalette` default to the primary and secondary constructors. Constructor change.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `score-default`             | KEEP (A)       | Adds `desired`, `fallbackColorArgb` and `filter` defaults to the full `score` function and deletes the one-, two- and three-argument overloads those defaults replace, moving their comment to the parameter it explains. `@JvmOverloads` keeps the shorter forms for Java callers. Signature change.                                                                                                                                                                                                                                                                                                                                                                                      |
-| `score-nullable-fallback`   | KEEP (A)       | Widens `fallbackColorArgb` to `Int?` on the one remaining `score` function. Signature change.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `score-optional-fallback`   | KEEP (A)       | Guards the fallback append on the now-nullable parameter. Body change that only exists behind that signature change.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `spec-default`              | KEEP (A)       | Rewrites the `DynamicScheme` companion's `DEFAULT_SPEC_VERSION` from `SPEC_2021` to `SpecVersion.Default`, so a scheme constructed without a spec version matches the library default of `SPEC_2025`. Initializer change. Fails when the upstream default changes.                                                                                                                                                                                                                                                                                                                                                               |
-| `subclass-opt-in`           | KEEP (A)       | Adds `@OptIn(InternalMaterialKolorApi::class)` to every in-module subclass or implementer of an opt-in type, the ten `Scheme*` classes and `ColorSpec2021`. Annotation shape that `subclass-opt-in-required` makes necessary.                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `subclass-opt-in-required`  | KEEP (A)       | Adds `@SubclassOptInRequired(InternalMaterialKolorApi::class)` to `ColorSpec` and `DynamicScheme`. Their open members follow upstream, so outside subclasses opt into that churn. Annotation shape.                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `value-equality`            | KEEP (A)       | Injects `equals`/`hashCode`/`toString` into `TonalPalette`, `TemperatureCache` and `ContrastCurve`. Named by the test.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `value-input-visibility`    | KEEP (A)       | Makes the `TemperatureCache` and `ContrastCurve` constructor inputs private. Visibility change.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `white-point-copy`          | KEEP (A)       | Makes `ColorUtils.whitePointD65` return a copy of the D65 array, so callers building custom `ViewingConditions` cannot mutate the array every conversion reads. Fails if the upstream body changes.                                                                                                                                                                                                                                                                                                                                                                                                                              |
+The module has two handwritten production files, and conveniences don't belong in either one.
+`InternalMaterialKolorApi.kt` is the opt-in marker, and `compat/PlatformCompat.kt` holds internal
+portability helpers.
 
-Four identifiers in the same pass record no edit. They exist to fail, with file and location, when
-upstream moves something a rule depends on. They add no API surface and are outside the budget, but
-they are still maintenance and a new one needs the same review as a rule:
+| Rule | Group | What it does |
+|---|---|---|
+| `analogous-property` | A | `TemperatureCache.getAnalogousColors()` becomes `val analogousColors`. Both compile to the same JVM signature, so the function has to be removed. |
+| `cam16-visibility` | A | Makes five internal `Cam16` members public. They were public in 5.x. |
+| `dynamic-color-factory` | B | `DynamicColor.Companion.fromPalette`. As an extension it would need an import. |
+| `enum-default` | A | Adds `Default` companions to `SpecVersion` (`SPEC_2025`) and `Platform` (`PHONE`). |
+| `harmonize-hct` | B | A static `Hct` overload of `Blend.harmonize`, next to the `Int` one. |
+| `hct-copy-body` | A | Returns a new `Hct` instead of calling the private `setInternalState`. |
+| `hct-copy-method` | A | Renames `setHue`, `setChroma` and `setTone` to `withHue`, `withChroma` and `withTone`. |
+| `hct-copy-type` | A | Adds the `Hct` return type that the rename needs. |
+| `hct-value-contract` | A, B | `equals` and `hashCode` over `argb` (A), plus `isBlue`, `isYellow` and `isCyan` (B). |
+| `hide-palette-cache` | A | Makes `TonalPalette.cache` private, which keeps it out of equality. |
+| `implementation-visibility` | A | Makes thirteen quantizer, spec, solver and math types internal, including `ColorSpec2021` to `2026` and `HctSolver`. |
+| `initial-tone-default` | A | Defaults the `getInitialToneFromBackground` parameter to `null`. |
+| `luminance-member` | B | `ColorUtils.calculateLuminance`, which core's `Color.isLight` uses. |
+| `member-visibility` | A | Makes named members internal: the raw `ColorUtils` math, some `DynamicScheme` and `DynamicColor` companion helpers, and `ViewingConditions.rgbD`. Hidden members drop `@JvmStatic`. Fails if a named member disappears, is overloaded or is no longer public. |
+| `poko-class` | A | Turns `DynamicColor`, `ToneDeltaPair`, `CorePalettes`, `Cam16` and `ViewingConditions` into `@Poko` classes, so a new upstream property can't break `copy` or `componentN` callers. `DynamicColor` keeps an internal `copy` for upstream's own use. Fails if any other public data class appears. |
+| `scheme-copy` | B | `DynamicScheme.copy` and the four nullable dim roles. An extension `copy` would be shadowed if upstream made the class a data class. |
+| `scheme-error-default` | A | Defaults `errorPalette` in the primary and secondary constructors. |
+| `score-default` | A | Adds defaults to the full `score` function and deletes the shorter overloads. `@JvmOverloads` keeps them for Java. |
+| `score-nullable-fallback` | A | Makes `fallbackColorArgb` an `Int?`. |
+| `score-optional-fallback` | A | Only appends the fallback when it isn't null. |
+| `spec-default` | A | Points `DynamicScheme`'s default spec version at `SpecVersion.Default`. Fails if upstream's default changes. |
+| `subclass-opt-in` | A | Adds `@OptIn(InternalMaterialKolorApi::class)` to the in-module subclasses of opt-in types. |
+| `subclass-opt-in-required` | A | Requires `InternalMaterialKolorApi` to subclass `ColorSpec` or `DynamicScheme`, because their open members change with upstream. |
+| `value-equality` | A | Adds `equals`, `hashCode` and `toString` to `TonalPalette`, `TemperatureCache` and `ContrastCurve`. |
+| `value-input-visibility` | A | Makes the `TemperatureCache` and `ContrastCurve` constructor inputs private. |
+| `white-point-copy` | A | `ColorUtils.whitePointD65` returns a copy, so callers can't mutate the shared array. |
 
-| Guard ID               | What it refuses                                                                                                        |
-|------------------------|------------------------------------------------------------------------------------------------------------------------|
-| `semantic-inventory`   | A file whose path and package no longer agree, which would otherwise silently skip every rule for it.                  |
-| `palette-cache`        | `TonalPalette.cache` losing the mutable non-private shape that `hide-palette-cache` hides.                             |
-| `hct-mutation-surface` | Any change to `Hct`'s constructor, method and property inventory, writable properties, or internal mutation structure. |
-| `score-fallback`       | A change to the `Score.score` overload inventory, or a shorter overload that no longer delegates with the defaults.    |
+Four guards make no edits. They exist to fail, with a file and location, when upstream moves
+something a rule depends on. Adding a guard needs the same review as adding a rule.
 
-No rule has been moved to handwritten source so far. A move must replace its row above with "moved
-to handwritten `<file>` on `<date>`" and record the resulting API dump diff as a reviewed change.
+| Guard | Fails when |
+|---|---|
+| `semantic-inventory` | A file's path and package no longer agree. Otherwise every rule for that file would be skipped without any error. |
+| `palette-cache` | `TonalPalette.cache` is no longer the mutable, non-private field that `hide-palette-cache` expects. |
+| `hct-mutation-surface` | `Hct`'s constructor, methods, properties or internal mutation change. |
+| `score-fallback` | The `Score.score` overloads change, or a short overload stops delegating with the defaults. |
+
+A new rule needs a row in the rules table. No rule has been moved to handwritten source yet. If one
+is, replace its row with "moved to handwritten `<file>` on `<date>`" and review the resulting API
+dump diff.
 
 ### Diagnostic formatting
 
-The common contrast formatter is only for the finite, one-decimal diagnostic value in
-`DynamicScheme.toString()`. It uses common `round(abs(value) * 10)` with ties to even on that scaled
-binary floating-point value, writes exactly one decimal digit and preserves a negative sign
-including negative zero. Finite magnitudes of at least `2^52` (`4503599627370496.0`) are integral at
-the available precision and receive a `.0` suffix. Non-finite values are rejected. It is locale
-independent and has tie/sign regression tests. This policy can differ from Java decimal formatting
-at binary/decimal rounding boundaries. It does not implement general `DecimalFormat` patterns,
-locale selection, grouping or arbitrary precision, and its output is a diagnostic rather than a
-stable serialization format. Any rounding-policy change needs a regression case and review alongside
-the helper's tests.
+`DynamicScheme.toString()` prints the contrast level with one decimal, which upstream does with
+`DecimalFormat`. The common replacement handles only that case. It is `round(abs(value) * 10)` with
+ties to even, keeps the sign including on negative zero, adds `.0` to values of at least 2^52, and
+rejects non-finite values. It can differ from Java at binary rounding boundaries. This is
+diagnostic output, not a serialization format, so don't rely on it anywhere else. Any change to the
+rounding needs a regression test.
 
 ## Verification gates
 
-Run every gate from the repository root:
+Run these from the repository root:
 
 ```sh
 ./gradlew verifyMcuUpstream
@@ -140,88 +135,81 @@ rm -rf material-color-utilities/build/generated/mcu
 ./gradlew :material-color-utilities:generateMcuSources --no-build-cache --rerun-tasks
 ./gradlew :mcu-source-transformer:test :mcu-source-transformer:testAlternateParser
 ./gradlew checkKotlinAbi spotlessCheck
-./gradlew verifyMcuJvm
-./gradlew verifyMcuWeb
-./gradlew verifyMcuAndroid
-./gradlew verifyMcuApple
-./gradlew verifyMcuPublication
+./gradlew verifyMcuJvm verifyMcuWeb verifyMcuAndroid verifyMcuApple verifyMcuPublication
 python3 -B -m unittest discover -s .github/tests -v
 ```
 
-| Gate                                          | What it proves                                                                                                                                                                                                                                                            |
-|-----------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `verifyMcuUpstream`                           | The submodule checkout, Kotlin inventory, source hashes and license hash are the identity recorded in `gradle/mcu-upstream.lock.json`.                                                                                                                                    |
-| `:mcu-source-transformer:test`                | Rules select the shapes they claim to, edits do not overlap, untouched text survives, and an unsupported shape fails with its file, location and rule identity.                                                                                                           |
-| `:mcu-source-transformer:testAlternateParser` | The same corpus transforms under a second PSI runtime, so a parser change cannot alter the output or drop `createForProduction` unnoticed.                                                                                                                                |
-| Determinism check                             | Regeneration from the same inputs is byte-identical. Compare the file inventory, a digest of the generated tree, and `build/reports/mcu-sources.tsv` against the previous run.                                                                                            |
-| `checkKotlinAbi`                              | The public surface still matches the reviewed dumps in `material-color-utilities/api/`, `material-kolor-core/api/` and `material-kolor-material3/api/`, without regenerating them. It covers the JVM and Android class surfaces and, through each module's `.klib.api`, the native, `js` and `wasmJs` surfaces. |
-| `spotlessCheck`                               | Handwritten code is formatted. Generated and raw upstream code is excluded from formatting.                                                                                                                                                                               |
-| `verifyMcuJvm`                                | The generated implementation produces the same ARGB as both the exact-revision Java reference and the namespace-only Kotlin reference, and the characterization tests that protect MaterialKolor conveniences still pass.                                                 |
-| `verifyMcuWeb`                                | The common fixtures pass in Node and in a headless browser for both `js` and `wasmJs`, including the Compose consumers on their Skiko runtime.                                                                                                                            |
-| `verifyMcuAndroid`                            | Every library module assembles its Android variants, its host tests pass, and lint analysis runs.                                                                                                                                                                         |
-| `verifyMcuApple`                              | The common fixtures pass on the iOS simulator, the iOS device framework compiles and links, and macOS compiles.                                                                                                                                                           |
-| `verifyMcuPublication`                        | Artifacts, metadata, source archives and documentation build into a temporary repository under `build/`, and an artifact-only consumer compiles against them.                                                                                                             |
-| Builder against the local engine              | A real consumer resolves `project(":material-kolor-core")`, `project(":material-kolor-material3")` and `project(":material-color-utilities")` instead of published coordinates, and still compiles and tests.                                                                                                          |
-| `.github/tests`                               | The upstream scripts classify commits, plan, bump and publish correctly against disposable Git repositories, with no network access.  |
+| Gate | Checks |
+|---|---|
+| `verifyMcuUpstream` | The submodule, its Kotlin file list, the source hashes and the license hash match the lock. |
+| `:mcu-source-transformer:test` | Rules match what they claim to, edits don't overlap, untouched text survives, and unsupported shapes fail with a location. |
+| `testAlternateParser` | The same sources transform identically with a newer PSI runtime. |
+| Determinism | Regenerating from the same inputs gives byte-identical files and the same report. Compare them against the previous run. |
+| `checkKotlinAbi` | Every module's public API matches its reviewed dump in `<module>/api/`, for JVM, Android and klib targets. |
+| `spotlessCheck` | Handwritten code is formatted. Generated and upstream code is excluded. |
+| `verifyMcuJvm` | Generated output matches both the Java and the namespace-only Kotlin reference, ARGB for ARGB, and the MaterialKolor characterization tests pass. |
+| `verifyMcuWeb` | Common tests pass in Node and headless Chrome for `js` and `wasmJs`. |
+| `verifyMcuAndroid` | Every library module assembles for Android, and its host tests and lint pass. |
+| `verifyMcuApple` | Common tests pass on the iOS simulator, the device framework links, and macOS compiles. |
+| `verifyMcuPublication` | Artifacts publish to a temporary repository under `build/`, and an artifact-only consumer compiles against them. |
+| Builder | The Builder app compiles and tests against the local modules instead of published ones. |
+| `.github/tests` | The upstream scripts behave correctly against throwaway Git repositories, without network access. |
 
-The publication gate must not publish to Maven Central or deploy documentation. Source archives
-include the generated Kotlin, handwritten helpers and upstream license material exactly once.
-PSI/compiler, reference, transformer and scratchpad dependencies must never enter published
-metadata.
+`verifyMcuPublication` never publishes to Maven Central or deploys docs. The source jars include the
+generated code, the handwritten helpers and the upstream license, each once. The PSI, reference and
+transformer dependencies must never show up in published metadata.
 
-`dokkaGenerate` reports one unresolved KDoc link, `[DynamicScheme]` in `palettes/CorePalettes.kt`.
-That file is generated output and the reference is inherited from the upstream Javadoc. Leave the
-warning alone, do not patch generated sources for it.
+`dokkaGenerate` warns about one unresolved link, `[DynamicScheme]` in `palettes/CorePalettes.kt`.
+It comes from upstream's Javadoc, so leave it.
 
-Lifecycle tests use disposable fixture checkouts for dirty/missing sources, cache restoration, stale
-output, configuration-cache reuse, relocation and offline behavior. Do not mutate the production
-submodule to test rejection paths. Neither a normal build nor a test may silently regenerate
-reviewed API baselines or golden fixtures.
+Tests that exercise failure cases use throwaway fixture checkouts and never touch the real
+submodule. Neither a build nor a test may regenerate the API dumps or golden fixtures on its own.
 
 ## API stability
 
-The generated API is frozen for 6.x and every pin bump is checked against
+The generated API is frozen for 6.x. Every pin bump is checked against
 `material-color-utilities/api/`.
 
-- New entries in `Variant`, `SpecVersion`, `Platform`, `TonePolarity` and `DeltaConstraint`, and new
-  `PaletteStyle` members, are not breaking changes. Consumers should not rely on an exhaustive
-  `when` over them.
-- `SpecVersion.Default` is `SPEC_2025` for all of 6.x. The `DynamicScheme` constant upstream uses for
-  scheme constructor defaults reads it, so both paths agree.
-- A pin bump that changes a public constructor or function signature fails `checkKotlinAbi`. No
-  rule preserves the old signature automatically. The reviewer adds a
-  `@Deprecated(level = DeprecationLevel.HIDDEN)` overload by hand, or treats the break as a flagged
-  decision, before updating the dump.
+- New entries in `Variant`, `SpecVersion`, `Platform`, `TonePolarity`, `DeltaConstraint` or
+  `PaletteStyle` don't count as breaking changes. Consumers shouldn't write exhaustive `when`
+  expressions over them.
+- `SpecVersion.Default` stays `SPEC_2025` for all of 6.x.
+- If a bump changes a public signature, `checkKotlinAbi` fails. Nothing keeps the old signature
+  automatically. Before updating the dump, either add a `@Deprecated(level = HIDDEN)` overload by
+  hand or decide explicitly to accept the break.
 
-## Reviewing an upstream update
+## Updating the upstream pin
 
-Keep the previous generated tree/report available before changing the pin so both raw and adapted
-diffs can be reviewed. Fetching upstream is an explicit maintenance action:
+The [upstream monitor](#ci-and-the-upstream-monitor) normally opens this change as a pull request.
+To update by hand, first save the current output so you can diff it afterwards:
 
 ```sh
 ./gradlew :material-color-utilities:generateMcuSources
 mkdir -p build/mcu-update
 cp -R material-color-utilities/build/generated/mcu/commonMain build/mcu-update/previous
-cp gradle/mcu-upstream.lock.json build/mcu-update/previous-lock.json
 cp material-color-utilities/build/reports/mcu-sources.tsv build/mcu-update/previous-report.tsv
-PREVIOUS_REVISION=$(git -C tools/mcu-upstream/src/main rev-parse HEAD)
+PREVIOUS=$(git -C tools/mcu-upstream/src/main rev-parse HEAD)
+```
 
+Then move the submodule to the candidate revision and review what changed upstream:
+
+```sh
 git -C tools/mcu-upstream/src/main fetch origin
-# Replace this value with the full, reviewed candidate revision.
-CANDIDATE_REVISION=the-full-reviewed-commit-sha
-git -C tools/mcu-upstream/src/main checkout --detach "$CANDIDATE_REVISION"
-git -C tools/mcu-upstream/src/main diff "$PREVIOUS_REVISION" "$CANDIDATE_REVISION" -- kotlin java LICENSE
+CANDIDATE=<full commit sha>
+git -C tools/mcu-upstream/src/main checkout --detach "$CANDIDATE"
+git -C tools/mcu-upstream/src/main diff "$PREVIOUS" "$CANDIDATE" -- kotlin java LICENSE
 ./gradlew candidateMcuUpstreamLock
 diff -u gradle/mcu-upstream.lock.json build/mcu-upstream.lock.candidate.json
 ```
 
-`candidateMcuUpstreamLock` writes `build/mcu-upstream.lock.candidate.json` from the clean proposed
-submodule checkout. Inspect added/removed files and their content changes, and review license
-changes. The tracked lock is not rewritten by this task. Review rules and their shape expectations
-before adopting the candidate. A new upstream API, mutation path or JVM operation is a policy
-decision, not a reason to relax drift checks.
+`candidateMcuUpstreamLock` writes a proposed lock without touching the real one. Check added and
+removed files and any license change. If upstream adds a new API, a new mutation path or a new JVM
+call, decide how to handle it.
 
-After reviewing the candidate and policy changes, adopt and stage the input identity together:
+> [!IMPORTANT]
+> Don't loosen a drift check to make the build pass.
+
+Adopt the lock, regenerate, and review the generated diff:
 
 ```sh
 cp build/mcu-upstream.lock.candidate.json gradle/mcu-upstream.lock.json
@@ -231,28 +219,19 @@ git diff --no-index build/mcu-update/previous material-color-utilities/build/gen
 diff -u build/mcu-update/previous-report.tsv material-color-utilities/build/reports/mcu-sources.tsv
 ```
 
-The diff commands exit 1 when there are differences, review them before continuing. Run every
-applicable gate above, including local Builder consumers. Review API differences before invoking
-`updateKotlinAbi`; subsequent `checkKotlinAbi` must pass without updating expectations. Independent
-golden fixtures need independently established expected values and an explained change, not
-adapted-output snapshots.
+Run every gate. Review the API differences before running `updateKotlinAbi`, which needs macOS.
+After that, `checkKotlinAbi` should pass without further changes. Commit the submodule, the lock,
+any rule changes, the reviewed dumps and fixtures, and any migration notes together, for example as
+`fix(mcu): update upstream pin to <sha>`, and target `next`.
 
-Commit the Gitlink, lock, rule changes, reviewed API/fixture changes and migration notes together,
-using the repository's Conventional Commits style, for example
-`fix(mcu): update upstream pin to <sha>`. Record exact commands/results and host limitations in the
-change description. Target `next`; maintenance verification does not authorize a remote release or
-deployment.
+### Golden fixtures
 
-### Regenerating golden fixtures
-
-Golden fixtures are regenerated only as part of a reviewed upstream update.
-`conformance.GenerateGoldenFixtures` and `conformance.GenerateQuantizerFixtures` read the
-namespace-only Kotlin reference, never the adapted library, and each writes a header naming the
-generator, the upstream revision read from `gradle/mcu-upstream.lock.json` at generation time, and
-the command that produced the file. Regenerate from the repository root, then format the result:
+Golden fixtures are only regenerated as part of a reviewed pin update. The generators read the
+namespace-only reference, never the generated library, and each output file records the generator,
+the upstream revision and the command that produced it.
 
 ```sh
-# A cold build prints the transformer summary even under -q, so compile first.
+# Compile first, because a cold build prints the transformer summary even with -q.
 ./gradlew :mcu-upstream:testClasses
 ./gradlew -q :mcu-upstream:printMcuRoleGoldens \
   > material-color-utilities/src/commonTest/kotlin/com/materialkolor/conformance/UpstreamRoleGoldenData.kt
@@ -261,94 +240,71 @@ the command that produced the file. Regenerate from the repository root, then fo
 ./gradlew :material-color-utilities:spotlessApply
 ```
 
-Never hand-edit fixture data, and never include a fixture change in a commit that also changes
-transformer rules or algorithm behavior unless that commit explains the fixture diff. When only the
-pin moved, the diff is the header plus reviewed ARGB changes.
+> [!CAUTION]
+> Never edit fixture data by hand.
+
+If only the pin moved, the diff should be the header and the
+reviewed ARGB changes. A fixture change in a commit that also changes rules or algorithm behavior
+needs an explanation.
 
 ### Upgrading the PSI parser
 
-Change the `mcu-psi` version independently of the Kotlin compiler version. Run
-`:mcu-source-transformer:test` and `:mcu-source-transformer:testAlternateParser` (the catalogue's
-Kotlin), deterministic-generation checks and all compilation/parity gates with the actual project
-compiler. Review the report and generated-source diff. A parser-only update should not silently
-change the public algorithm output. Never assume a parser runtime test proves compatibility with a
-different compiler used to build the tool.
+The `mcu-psi` version is bumped separately from the project's Kotlin version. After a bump, run
+the transformer tests, the alternate parser test, the determinism check and the full gates, and
+review the generated diff. A parser update alone shouldn't change any algorithm output.
 
-#### Parser API succession
+#### Parser succession
 
-`PsiSession` in
-`tools/mcu-source-transformer/src/main/kotlin/com/materialkolor/transformer/psi/PsiSession.kt` opts
-into
-`org.jetbrains.kotlin.K1Deprecation` and builds its parser with
-`KotlinCoreEnvironment.createForProduction`, an entry point JetBrains is removing along with the K1
-frontend. The pinned `mcu-psi` runtime (currently `2.4.20`) still ships that environment, so the
-transformer uses it rather than an unstable replacement. The supported successor is the Analysis API
-standalone session, `buildStandaloneAnalysisAPISession` in
-`org.jetbrains.kotlin.analysis.api.standalone`; as of September 2026 that API is still experimental
-and is not published to Maven Central, tracked by
-[KT-56203](https://youtrack.jetbrains.com/issue/KT-56203).
-`:mcu-source-transformer:testAlternateParser` runs a newer parser against the same corpus: when a
-candidate pin drops `createForProduction`, that task fails before the pin is adopted, and porting
-`PsiSession` to the standalone session becomes part of the parser upgrade.
+`PsiSession` creates its parser with `KotlinCoreEnvironment.createForProduction`, behind the
+`K1Deprecation` opt-in. JetBrains is removing that entry point along with K1. The pinned `mcu-psi`
+2.4.20 still ships it. Its replacement, `buildStandaloneAnalysisAPISession`, is still experimental
+and not on Maven Central ([KT-56203](https://youtrack.jetbrains.com/issue/KT-56203)).
+`testAlternateParser` runs a newer parser on the same sources, so it fails as soon as a candidate
+version drops `createForProduction`. Porting `PsiSession` to the standalone session then becomes
+part of that upgrade.
 
 ## CI and the upstream monitor
 
-The upstream scripts live in `.github/scripts/`, and `.github/tests/` covers each one against
-disposable Git repositories with no network access. `test_workflow_wiring.py` checks that the
-workflows and scripts agree on every output and environment name. Run those tests, not the workflow, when changing
-them.
+The scripts are in `.github/scripts/`, and each has tests in `.github/tests/` that run against
+throwaway Git repositories with no network access. `test_workflow_wiring.py` checks that the
+workflows and scripts agree on every output and environment variable name. When you change them,
+run these tests rather than the workflow.
 
-`check-upstream` reports upstream commits that touch `kotlin/` or license and notice files. Java-only
-commits are skipped because the engine is generated from Kotlin alone. The Java reference still backs
-the JVM parity tests, and the bump pull request runs those. Each reported commit is classified as
-`upstream-source`, or `kotlin-build-scaffold` when it touches build or publishing scaffolding under
-upstream's `kotlin/` tree, which may indicate that upstream is starting its own Kotlin Multiplatform
-publication (see
-[material-color-utilities#76](https://github.com/material-foundation/material-color-utilities/pull/76)).
-It fetches upstream over HTTPS by URL, because `.gitmodules` records an SSH remote a runner cannot
-use. The script only reads. It writes the current and target revisions and counts for a workflow
-step, and a Markdown commit list for the pull request body, capped at 50 commits, 10 files per
-commit, 120 characters per title and 40,000 characters overall, with a compare link for the rest.
-Upstream issue references are rewritten to point at upstream, mentions are defused, and commit
-messages are logged with workflow commands stopped.
+`check-upstream` looks for upstream commits that touch `kotlin/` or the license and notice files.
+It skips Java-only commits, because the engine is generated from Kotlin alone. It flags commits
+that change build scaffolding under `kotlin/`, which could mean upstream is starting its own
+multiplatform publication
+([material-color-utilities#76](https://github.com/material-foundation/material-color-utilities/pull/76)).
+It fetches over HTTPS, because `.gitmodules` uses an SSH remote that runners can't use. The script
+is read-only. It outputs the revisions, and a commit list for the pull request body capped at 50
+commits, with a compare link for the rest. Upstream issue references and mentions are rewritten so
+they don't ping anyone in this repository.
 
-`.github/workflows/upstream.yml` turns relevant upstream commits into one rolling pull request
-against `next` on the `upstream/mcu` branch. A `preflight` job first checks that the token secret
-exists, so a missing secret fails in seconds. Two jobs follow.
+`.github/workflows/upstream.yml` keeps one rolling pull request from `upstream/mcu` into `next`:
 
-1. `prepare` holds no write token, because it runs upstream code through Gradle. `plan-upstream`
-   picks the action. `bump-upstream` moves the Gitlink to upstream's head, writes the lock from
-   `candidateMcuUpstreamLock` and checks the transform. When the transform passes it regenerates the
-   golden fixtures in a separate commit. The new commits leave the job as a Git bundle.
-2. `publish` starts from a fresh checkout of the base commit that `plan-upstream` recorded before
-   any upstream code ran. `publish-upstream` refuses a bundle that does not build on that base,
-   touches anything besides the Gitlink, the lock and the two golden fixture files, or pins another
-   revision than planned. It then pushes under a lease and opens, updates, closes or comments on the
-   pull request. The token reaches Git only as a masked HTTP header through the environment.
+1. `preflight` fails fast if the token secret is missing.
+2. `prepare` runs upstream code through Gradle, so it has no write token. `plan-upstream` decides
+   what to do. `bump-upstream` moves the submodule, writes the lock, checks the transform and
+   regenerates the golden fixtures in a separate commit. The commits are passed on as a Git bundle.
+3. `publish` starts from a fresh checkout of the base commit. `publish-upstream` rejects a bundle
+   that doesn't build on that base, touches anything other than the submodule, the lock and the two
+   fixture files, or pins a different revision than planned. It then pushes with a lease and
+   updates the pull request.
 
-CI and Builder then run on the pull request. The bot cannot refresh the ABI dumps, because
-`updateKotlinAbi` needs macOS. A red `checkKotlinAbi` is the prompt to review the API change and push
-the dumps by hand. Merging stays a reviewed step, following
-[Reviewing an upstream update](#reviewing-an-upstream-update).
+The bot can't refresh the API dumps, because `updateKotlinAbi` needs macOS. A red `checkKotlinAbi`
+on the pull request means you need to review the API change and push the dumps yourself. Merging
+always goes through the review described in [Updating the upstream pin](#updating-the-upstream-pin).
 
-`plan-upstream` decides the action as follows.
+`plan-upstream` behaves as follows:
 
-- No open pull request opens one, unless a pull request for the same upstream revision was closed
-  without merging. Closing one by hand snoozes the bump until upstream moves again.
-- An open pull request is rewritten when upstream moves again or the pin on `next` changes under it.
-  Maintainer commits stop the rewrite and the workflow comments once instead. Merges from GitHub's
-  "Update branch" button and commits that only touch ABI dumps (`<module>/api/**/*.api`) do not
-  count, so a rewrite drops them and the dumps need pushing again.
-- When `next` already pins every relevant change, the pull request is closed. Its branch is deleted
+- With no open pull request, it opens one, unless a pull request for the same upstream revision
+  was closed without merging. Closing it by hand snoozes the bump until upstream moves again.
+- An open pull request is rewritten when upstream moves or when the pin on `next` changes.
+  Commits from a maintainer stop the rewrite, and the bot comments once instead. "Update branch"
+  merges and commits that only touch `<module>/api/**/*.api` don't count as maintainer commits,
+  so a rewrite drops them and the dumps have to be pushed again.
+- If `next` already pins every relevant change, the pull request is closed. The branch is deleted
   unless it has maintainer commits.
-- A branch with maintainer commits and no open pull request is left alone. Delete it to resume.
-- Pull requests from forks that happen to use the same branch name are ignored.
-
-The workflow needs an `UPSTREAM_BOT_TOKEN` repository secret, a fine-grained token with contents,
-pull requests and issues write access, because pull requests opened with `GITHUB_TOKEN` do not
-trigger other workflows. Scheduled runs fire only from the default branch, so until 6.0 lands on
-`main` run it with `gh workflow run upstream.yml --ref next`. It also runs on every push to `next`
-that changes the pin. When 6.0 lands on `main`, change `BASE_BRANCH` and the hard-coded
-`on.push.branches` entry in the workflow to `main`, drop the `--ref next` hint from its comment and
-from this section, and expect a conflict on the `on:` block with the copy on `main` that stopped the
-5.x schedule.
+- A branch with maintainer commits and no open pull request is left alone. Delete the branch to
+  resume.
+- Pull requests from forks that use the same branch name are ignored.

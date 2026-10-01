@@ -2,18 +2,18 @@
 
 Every sample is the same small app, **Tasks**, built four times on four different UI stacks. The behaviour, the copy and the data are shared. Only the UI and the theme wiring change.
 
-| Sample | UI stack | Theme from MaterialKolor | Run it |
-|---|---|---|---|
-| [`custom-theme`](custom-theme) | Compose Foundation and hand-rolled components | `material-kolor-core` tonal ramps into an app-owned set of risograph inks | `./gradlew :samples:custom-theme:run` |
-| [`fluent`](fluent) | [Compose Fluent](https://github.com/compose-fluent/compose-fluent-ui) | `material-kolor-fluent` | `./gradlew :samples:fluent:run` |
-| [`material3`](material3) | [Compose Material 3](https://developer.android.com/jetpack/compose/designsystems/material3) | `material-kolor-material3` | `./gradlew :samples:material3:run` |
-| [`unstyled`](unstyled) | [Compose Unstyled](https://composeunstyled.com) | `material-kolor-unstyled` colors next to app-owned shapes, shadows and gradients | `./gradlew :samples:unstyled:run` |
+| Sample                         | UI stack                                                                                    | Theme from MaterialKolor                                                         | Run it                                |
+| ------------------------------ | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------- |
+| [`custom-theme`](custom-theme) | Compose Foundation and hand-rolled components                                               | `material-kolor-core` tonal ramps into an app-owned set of risograph inks        | `./gradlew :samples:custom-theme:run` |
+| [`fluent`](fluent)             | [Compose Fluent](https://github.com/compose-fluent/compose-fluent-ui)                       | `material-kolor-fluent`                                                          | `./gradlew :samples:fluent:run`       |
+| [`material3`](material3)       | [Compose Material 3](https://developer.android.com/jetpack/compose/designsystems/material3) | `material-kolor-material3`                                                       | `./gradlew :samples:material3:run`    |
+| [`unstyled`](unstyled)         | [Compose Unstyled](https://composeunstyled.com)                                             | `material-kolor-unstyled` colors next to app-owned shapes, shadows and gradients | `./gradlew :samples:unstyled:run`     |
 
-| `custom-theme` | `fluent` |
-|---|---|
-| ![custom-theme sample](screenshots/images/custom-theme.png) | ![fluent sample](screenshots/images/fluent.png) |
-| **`material3`** | **`unstyled`** |
-| ![material3 sample](screenshots/images/material3.png) | ![unstyled sample](screenshots/images/unstyled.png) |
+| `custom-theme`                                              | `fluent`                                            |
+| ----------------------------------------------------------- | --------------------------------------------------- |
+| ![custom-theme sample](screenshots/images/custom-theme.png) | ![fluent sample](screenshots/images/fluent.png)     |
+| **`material3`**                                             | **`unstyled`**                                      |
+| ![material3 sample](screenshots/images/material3.png)       | ![unstyled sample](screenshots/images/unstyled.png) |
 
 ## Modules
 
