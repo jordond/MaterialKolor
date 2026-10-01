@@ -193,8 +193,8 @@ materialKolor-utilities = { module = "com.materialkolor:material-color-utilities
 
 ## Usage
 
-To generate a custom `ColorScheme` you simply need to call `dynamicColorScheme()` with your target
-seed color:
+To generate a custom `ColorScheme` you simply need to call `rememberDynamicColorScheme()` with your
+target seed color:
 
 ```kotlin
 @Composable
@@ -206,7 +206,7 @@ fun MyTheme(
     val colorScheme = rememberDynamicColorScheme(seedColor = seedColor, isDark = isDark)
 
     MaterialTheme(
-        colors = colorScheme,
+        colorScheme = colorScheme,
         content = content,
     )
 }
