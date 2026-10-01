@@ -5,10 +5,12 @@ import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.create
+import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 /**
  * Registers the settings a module can override and the callback that reads them.
@@ -81,6 +83,12 @@ internal fun Project.configureKmpLibrary(settings: MaterialKolorLibraryExtension
         }
 
         jvmToolchain(intVersion("jvmTarget"))
+    }
+
+    // R8 names the rewritten .kotlin_module file after the module name in the Kotlin metadata, and
+    // AGP rejects the default `MaterialKolor:<module>` name when it packages a minified release bundle.
+    tasks.withType<KotlinJvmCompile>().configureEach {
+        compilerOptions.moduleName.set(compilerOptions.moduleName.get().replace(':', '_'))
     }
 }
 
