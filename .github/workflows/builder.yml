@@ -315,8 +315,8 @@ jobs:
       - *setup-java
       - *setup-gradle
 
-      - name: Assemble the staging site
-        run: ./gradlew :builder:apps:web:assembleSite -Psite.env=staging
+      - name: Assemble the next site
+        run: ./gradlew :builder:apps:web:assembleSite -Psite.env=next
 
       - name: setup-node
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -347,12 +347,12 @@ jobs:
           SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           npm ci
-          npx wrangler versions upload --env staging \
+          npx wrangler versions upload --env next \
             --preview-alias "pr-$PR" --tag "pr-$PR" --message "Pull request #$PR at ${SHA:0:7}"
           version=$(jq -r 'select(.type == "version-upload") | .preview_url // ""' "$WRANGLER_OUTPUT_FILE_PATH")
           alias=$(jq -r 'select(.type == "version-upload") | .preview_alias_url // ""' "$WRANGLER_OUTPUT_FILE_PATH")
           if [ -z "$version" ]; then
-            echo "::error title=No preview URL::wrangler gave no preview URL. Preview URLs come on with the first staging deploy, so run the Builder workflow by hand on next once, and check that the account has a workers.dev subdomain."
+            echo "::error title=No preview URL::wrangler gave no preview URL. Preview URLs come on with the first next deploy, so run the Builder workflow by hand on next once, and check that the account has a workers.dev subdomain."
             exit 1
           fi
           # The alias always serves the latest push, the version URL stays on this commit.
@@ -374,7 +374,7 @@ jobs:
 
             ${{ steps.screenshot.outcome == 'success' && format('![The builder at this commit]({0}/pr-screenshot.png)', steps.upload.outputs.version) || '_The screenshot failed, see the Screenshot the preview step in the logs._' }}
 
-            Built as the staging site, so its share links and link cards point at staging.materialkolor.com.
+            Built as the next site, so its share links and link cards point at next.materialkolor.com.
 
             _Updates on every push to this pull request._
 
@@ -393,8 +393,8 @@ jobs:
 
             The preview URL, if any, still points at an older commit.
 
-  staging:
-    name: "Staging"
+  next:
+    name: "Next"
     needs: [ test, ui-tests, compile-check, site, e2e, worker ]
     if: >-
       github.repository == 'jordond/MaterialKolor'
@@ -403,20 +403,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     environment:
-      name: staging
-      url: https://staging.materialkolor.com
+      name: next
+      url: https://next.materialkolor.com
     concurrency:
-      group: builder-staging
+      group: builder-next
       cancel-in-progress: false
     steps:
       - *checkout
       - *setup-java
       - *setup-gradle
 
-      - name: Assemble the staging site
+      - name: Assemble the next site
         env:
           CF_WEB_ANALYTICS_TOKEN: ${{ vars.CF_WEB_ANALYTICS_TOKEN }}
-        run: ./gradlew :builder:apps:web:assembleSite -Psite.env=staging
+        run: ./gradlew :builder:apps:web:assembleSite -Psite.env=next
 
       - name: setup-node
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -425,7 +425,7 @@ jobs:
           cache: npm
           cache-dependency-path: builder/worker/package-lock.json
 
-      - name: Deploy staging
+      - name: Deploy next
         working-directory: builder/worker
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -433,10 +433,10 @@ jobs:
           REF: ${{ github.ref_name }}
         run: |
           npm ci
-          npx wrangler deploy --env staging --message "$REF at ${GITHUB_SHA:0:7}"
+          npx wrangler deploy --env next --message "$REF at ${GITHUB_SHA:0:7}"
 
       - name: Check the deployed headers
-        run: builder/worker/scripts/check-deploy.sh https://staging.materialkolor.com staging
+        run: builder/worker/scripts/check-deploy.sh https://next.materialkolor.com next
 
   release:
     name: "Release check"

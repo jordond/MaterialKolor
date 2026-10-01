@@ -16,7 +16,7 @@ public const val SHARE_URL_PREFIX: String = "$SITE_ORIGIN/t/"
 
 /**
  * The link to [document] called [projectName], the one Share gives and every export links back with.
- * It opens on [origin], so a link made on staging opens on staging.
+ * It opens on [origin], so a link made on next opens on next.
  *
  * The code carries the document and the name and nothing else, so an export option such as the
  * package name never ends up in it. A document whose own accents do not fit in a code links to what
@@ -31,7 +31,7 @@ public fun shareLink(
 
 /**
  * The link to the card for [document] called [projectName], the PNG a chat app shows under the
- * link [shareLink] gives. It is served from [origin], so a card made on staging comes from staging.
+ * link [shareLink] gives. It is served from [origin], so a card made on next comes from next.
  *
  * It carries the same code as [shareLink], so it is null exactly when that link is.
  */

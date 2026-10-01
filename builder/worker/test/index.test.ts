@@ -33,28 +33,28 @@ describe('a route that throws', () => {
 });
 
 describe('the robots tag', () => {
-  const staging = { ...env, ROBOTS_TAG: 'noindex' } as Env;
+  const next = { ...env, ROBOTS_TAG: 'noindex' } as Env;
   const card = `/og/${namedCode([...new TextEncoder().encode('Robots')])}.png`;
 
   it.each([
     ['a theme page', `/t/${vectors[0]!.code}`, 'no-cache'],
     ['a code that does not read', '/t/AdllOwAAAAAU', 'no-cache'],
     ['a theme card', card, 'public, max-age=31536000, immutable'],
-  ])('is noindex on %s on staging', async (_, path, cacheControl) => {
+  ])('is noindex on %s on next', async (_, path, cacheControl) => {
     const context = createExecutionContext();
-    const response = await worker.fetch(request(path), staging, context);
+    const response = await worker.fetch(request(path), next, context);
     await waitOnExecutionContext(context);
     expect(response.headers.get('X-Robots-Tag')).toBe('noindex');
     expectSiteHeaders(response, cacheControl);
   });
 
-  it('is noindex on a card out of the cache on staging', async () => {
+  it('is noindex on a card out of the cache on next', async () => {
     const first = createExecutionContext();
-    await worker.fetch(request(card), staging, first);
+    await worker.fetch(request(card), next, first);
     await waitOnExecutionContext(first);
     // A miss would hand a cache write to waitUntil, which throws here and turns into the default card.
     const pending: Promise<unknown>[] = [];
-    const response = await worker.fetch(request(card), staging, throwingContext(pending));
+    const response = await worker.fetch(request(card), next, throwingContext(pending));
     expect(pending).toHaveLength(0);
     expect(response.headers.get('X-Robots-Tag')).toBe('noindex');
     expectSiteHeaders(response, 'public, max-age=31536000, immutable');

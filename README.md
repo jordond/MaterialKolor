@@ -22,7 +22,8 @@ on Android, iOS, macOS, desktop JVM, JS and Wasm. There are adapters for Materia
 Unstyled and Compose Fluent, and you can use the core module to build a theme of your own.
 
 [MaterialKolor Builder](https://materialkolor.com) lets you try seeds and styles in the browser and
-exports the theme code. API docs are at [docs.materialkolor.com](https://docs.materialkolor.com).
+exports the theme code. While 6.0 is in beta, [next.materialkolor.com](https://next.materialkolor.com)
+runs the builder on 6.0. API docs are at [docs.materialkolor.com](https://docs.materialkolor.com).
 
 > [!NOTE]
 > Upgrading from 5.x? Read the [6.0 migration guide](docs/migration-6.0.md).

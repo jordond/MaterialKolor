@@ -73,15 +73,15 @@ class ShareControllerTest : SessionTestBase() {
         }
 
     @Test
-    fun link_onStaging_opensOnStaging() =
+    fun link_onNext_opensOnNext() =
         runTest {
             val (session, _) = session()
             booted(session)
-            val controller = controller(session, FakeEnvironment(siteOrigin = "https://staging.materialkolor.com"))
+            val controller = controller(session, FakeEnvironment(siteOrigin = "https://next.materialkolor.com"))
 
             val link = controller.link(OCEAN, "Harbour")
 
-            link shouldBe "https://staging.materialkolor.com/t/" + ShareCodec.encode(OCEAN, "Harbour")
+            link shouldBe "https://next.materialkolor.com/t/" + ShareCodec.encode(OCEAN, "Harbour")
             harness.clearAndJoin()
         }
 

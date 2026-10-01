@@ -14,8 +14,8 @@
   "rules": [{ "type": "Data", "globs": ["**/*.bin"], "fallthrough": false }],
   "routes": [{ "pattern": "materialkolor.com", "custom_domain": true }],
   "env": {
-    "staging": {
-      "routes": [{ "pattern": "staging.materialkolor.com", "custom_domain": true }],
+    "next": {
+      "routes": [{ "pattern": "next.materialkolor.com", "custom_domain": true }],
       "workers_dev": false,
       "preview_urls": true,
       "vars": { "ROBOTS_TAG": "noindex" },

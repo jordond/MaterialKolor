@@ -32,9 +32,9 @@ describe('/t/<code>', () => {
 
   it('builds every URL from the origin it was asked on', async () => {
     const code = vectors[0]!.code;
-    const meta = await metaOf(await SELF.fetch(`https://staging.materialkolor.test/t/${code}`));
-    expect(meta.get('og:url')).toEqual([`https://staging.materialkolor.test/t/${code}`]);
-    expect(meta.get('og:image')).toEqual([`https://staging.materialkolor.test/og/${code}.png`]);
+    const meta = await metaOf(await SELF.fetch(`https://next.materialkolor.test/t/${code}`));
+    expect(meta.get('og:url')).toEqual([`https://next.materialkolor.test/t/${code}`]);
+    expect(meta.get('og:image')).toEqual([`https://next.materialkolor.test/og/${code}.png`]);
   });
 
   it('escapes a project name that tries to leave its attribute', async () => {

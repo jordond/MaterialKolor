@@ -18,7 +18,7 @@ const NAMED_PROJECTS = '#cmp_a11y_root [aria-label^="Projects, "]';
 const CONTRAST_LEVELS = ['Reduced', 'Standard', 'Medium', 'High'];
 
 test('the builder at this commit', async ({ page }) => {
-  // A staging build may carry an analytics token. A screenshot is not a visit.
+  // A next build may carry an analytics token. A screenshot is not a visit.
   await page.route('https://static.cloudflareinsights.com/**', (route) => route.abort());
 
   await page.goto(site('/'));

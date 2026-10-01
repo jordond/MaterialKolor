@@ -468,7 +468,7 @@ interface Environment {
 
     /**
      * Where share links and the links in exports open. The web gives the page's own origin, so a
-     * link made on staging opens on staging. The desktop build has no page and links to [SITE_ORIGIN].
+     * link made on next opens on next. The desktop build has no page and links to [SITE_ORIGIN].
      */
     val siteOrigin: String
         get() = SITE_ORIGIN

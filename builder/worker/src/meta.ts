@@ -2,7 +2,7 @@
 //
 // index.html holds one tag per rewritten property, so each selector matches by attribute. Every
 // value goes through setAttribute or setInnerContent as text, which escape it. URLs come from the
-// request's own origin, so staging links point at staging.
+// request's own origin, so links made on next point at next.
 import { decodeShareCode, type SharedTheme } from './code';
 import { cardAlt, themeDescription, themeTitle } from './copy';
 import { NO_CACHE, withSiteHeaders } from './headers';

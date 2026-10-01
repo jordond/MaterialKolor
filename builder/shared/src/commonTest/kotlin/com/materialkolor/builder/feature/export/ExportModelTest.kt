@@ -46,7 +46,7 @@ import kotlin.test.Test
 private const val PACKAGE = "com.acme.ui"
 private const val PROJECT = "Ocean study"
 private const val RENAMED = "Harbor study"
-private const val STAGING = "https://staging.materialkolor.com"
+private const val NEXT = "https://next.materialkolor.com"
 private val VERSIONS =
     ExportVersions(
         builder = "2.0.0",
@@ -243,15 +243,15 @@ class ExportModelTest : SessionTestBase() {
         }
 
     @Test
-    fun shareLink_onStaging_opensOnStagingInEveryFile() =
+    fun shareLink_onNext_opensOnNextInEveryFile() =
         runTest {
             val (session, preferences) = session()
             booted(session)
-            val model = exportModel(session, preferences, FakeEnvironment(siteOrigin = STAGING))
+            val model = exportModel(session, preferences, FakeEnvironment(siteOrigin = NEXT))
 
             val ready = model.outcome().shouldBeInstanceOf<ExportOutcome.Ready>()
 
-            ready.allText shouldContain "$STAGING/t/"
+            ready.allText shouldContain "$NEXT/t/"
             ready.allText shouldNotContain SHARE_URL_PREFIX
             harness.clearAndJoin()
         }

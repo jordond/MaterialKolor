@@ -81,11 +81,11 @@ Every pull request's preview comment shows a screenshot of the builder at that c
 Everything deploys from the Builder workflow (`.github/workflows/builder.yml`) to Cloudflare
 Workers.
 
-- **Pull requests** from this repo upload a preview version of the staging Worker and comment its
+- **Pull requests** from this repo upload a preview version of the next Worker and comment its
   URL on the pull request. The comment updates on every push.
-- **Staging** at [staging.materialkolor.com](https://staging.materialkolor.com) deploys on every
-  push to `next`. It is built with `-Psite.env=staging`, so it is never indexed and its share links
-  stay on staging. It uses the MaterialKolor modules in this repo, as pull request previews do.
+- **Next** at [next.materialkolor.com](https://next.materialkolor.com) deploys on every push to
+  `next`. It is built with `-Psite.env=next`, so it is never indexed and its share links stay on
+  next. It uses the MaterialKolor modules in this repo, as pull request previews do.
 - **Production** at [materialkolor.com](https://materialkolor.com) deploys from a
   `builder/<version>` tag. The tag must match `builder-version` in `gradle/libs.versions.toml`, and
   the MaterialKolor version the exports pin (`materialKolorExport`) must already be on Maven

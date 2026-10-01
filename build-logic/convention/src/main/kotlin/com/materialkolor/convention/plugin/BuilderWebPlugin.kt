@@ -31,9 +31,9 @@ import javax.inject.Inject
  * `composeResources/` at the root. Both engines share that one site and `boot.js` picks the glue
  * the browser can run. `checkBudget` holds the result against `budget.json`.
  *
- * `-Psite.env=staging` adds a noindex header and turns every crawler away in `robots.txt`, which
- * lets them all in on production. It also points the page's canonical link and link cards at the
- * staging origin.
+ * `-Psite.env=next` builds the site for next.materialkolor.com. It adds a noindex header and turns
+ * every crawler away in `robots.txt`, which lets them all in on production. It also points the
+ * page's canonical link and link cards at the next origin.
  */
 class BuilderWebPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -185,27 +185,27 @@ abstract class WriteHeaders : DefaultTask() {
 
     @TaskAction
     fun write() {
-        val staging = when (val name = environment.get()) {
+        val noindex = when (val name = environment.get()) {
             "production" -> false
-            "staging" -> true
-            else -> throw GradleException("site.env is '$name', expected production or staging")
+            "next" -> true
+            else -> throw GradleException("site.env is '$name', expected production or next")
         }
         val directory = outputDirectory.get().asFile
         directory.deleteRecursively()
         directory.mkdirs()
-        directory.resolve("_headers").writeText(headers(staging))
+        directory.resolve("_headers").writeText(headers(noindex))
         // Production lets every crawler in. There is no sitemap yet, so robots.txt names none.
-        val robots = if (staging) "User-agent: *\nDisallow: /\n" else "User-agent: *\nAllow: /\n"
+        val robots = if (noindex) "User-agent: *\nDisallow: /\n" else "User-agent: *\nAllow: /\n"
         directory.resolve("robots.txt").writeText(robots)
     }
 
-    private fun headers(staging: Boolean): String =
+    private fun headers(noindex: Boolean): String =
         buildString {
             appendLine("/*")
             appendLine("  X-Content-Type-Options: nosniff")
             appendLine("  Referrer-Policy: strict-origin-when-cross-origin")
             appendLine("  Content-Security-Policy: $CONTENT_SECURITY_POLICY")
-            if (staging) appendLine("  X-Robots-Tag: noindex")
+            if (noindex) appendLine("  X-Robots-Tag: noindex")
             appendLine("/$ASSETS/*")
             appendLine("  Cache-Control: public, max-age=31536000, immutable")
             appendLine("/boot.js")
@@ -345,7 +345,7 @@ abstract class AssembleSite : DefaultTask() {
         page.writeText(page.readText().replace(BOOT_TAG, config + BOOT_TAG))
     }
 
-    // A staging page that still names production would hand production its link previews and search
+    // A next page that still names production would hand production its link previews and search
     // results, so any host file that does fails the build rather than going out.
     private fun checkNoProductionOrigin(output: File) {
         val named = output
@@ -367,12 +367,12 @@ abstract class AssembleSite : DefaultTask() {
 private fun siteOrigin(environment: String): String =
     when (environment) {
         "production" -> PRODUCTION_ORIGIN
-        "staging" -> STAGING_ORIGIN
-        else -> throw GradleException("site.env is '$environment', expected production or staging")
+        "next" -> NEXT_ORIGIN
+        else -> throw GradleException("site.env is '$environment', expected production or next")
     }
 
 private const val PRODUCTION_ORIGIN = "https://materialkolor.com"
-private const val STAGING_ORIGIN = "https://staging.materialkolor.com"
+private const val NEXT_ORIGIN = "https://next.materialkolor.com"
 private val HOST_TEXT_EXTENSIONS = setOf("html", "js", "json", "webmanifest", "txt")
 
 private const val SITE_GROUP = "site"

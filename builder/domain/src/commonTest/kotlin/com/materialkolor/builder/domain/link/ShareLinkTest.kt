@@ -45,14 +45,14 @@ class ShareLinkTest {
     fun shareLink_anotherOrigin_opensThere() {
         val document = ThemeDocument(seed = SEED)
 
-        val link = shareLink(document, "Harbour", origin = "https://staging.materialkolor.com")
+        val link = shareLink(document, "Harbour", origin = "https://next.materialkolor.com")
 
-        assertEquals("https://staging.materialkolor.com/t/" + ShareCodec.encode(document, "Harbour"), link)
+        assertEquals("https://next.materialkolor.com/t/" + ShareCodec.encode(document, "Harbour"), link)
     }
 
     @Test
     fun shareCardLink_carriesTheSameCodeAsShareLink() {
-        val origin = "https://staging.materialkolor.com"
+        val origin = "https://next.materialkolor.com"
         val documents =
             listOf(
                 ThemeDocument(seed = SEED, accents = accents(MAX_ACCENTS)),

@@ -108,10 +108,10 @@ describe('/api/versions', () => {
     ]);
   });
 
-  it('is routed to the Worker with the robots tag on staging', async () => {
+  it('is routed to the Worker with the robots tag on next', async () => {
     const kv = new FakeKv({ [VERSIONS_KEY]: '{"fetchedAt":"then","fluent":["v0.1.0"]}' });
-    const staging = { ...withKv(kv), ROBOTS_TAG: 'noindex' } as Env;
-    const response = await worker.fetch(request(), staging, createExecutionContext());
+    const next = { ...withKv(kv), ROBOTS_TAG: 'noindex' } as Env;
+    const response = await worker.fetch(request(), next, createExecutionContext());
     expect(await response.json()).toEqual({ fetchedAt: 'then', fluent: ['v0.1.0'] });
     expect(response.headers.get('X-Robots-Tag')).toBe('noindex');
   });
