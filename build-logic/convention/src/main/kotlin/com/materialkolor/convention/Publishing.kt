@@ -36,9 +36,12 @@ internal fun Project.configureMcuPublishing() {
         }
     }
 
-    // Unversioned local builds are snapshots. Release automation supplies VERSION_NAME explicitly.
+    // Unversioned local builds are snapshots. Release automation supplies VERSION_NAME, which the
+    // plugin applies and finalizes itself, so setting it again here fails.
     extensions.configure<MavenPublishBaseExtension> {
-        coordinates(version = providers.gradleProperty("VERSION_NAME").orElse("0.0.0-SNAPSHOT").get())
+        if (!providers.gradleProperty("VERSION_NAME").isPresent) {
+            coordinates(version = "0.0.0-SNAPSHOT")
+        }
         pom {
             licenses {
                 license {
