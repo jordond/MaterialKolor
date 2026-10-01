@@ -286,7 +286,7 @@ test.describe('head', () => {
   const origin = 'https://materialkolor.com';
   const description =
     'Build a Compose color theme from one seed color or a photo. Preview it in Material 3, Expressive, Unstyled and ' +
-    'Fluent, then export code that compiles.';
+    'Fluent.';
   const imageAlt = 'MaterialKolor Builder, with the seed color #D9653B and six colors of the theme it makes';
   /** A selector for one tag, the attribute that carries its value, and the value. */
   const tags: [string, string, string][] = [

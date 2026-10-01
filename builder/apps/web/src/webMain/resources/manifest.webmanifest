@@ -2,7 +2,7 @@
   "id": "/",
   "name": "MaterialKolor Builder",
   "short_name": "MaterialKolor",
-  "description": "Build a Compose color theme from one seed color or a photo. Preview it in Material 3, Expressive, Unstyled and Fluent, then export code that compiles.",
+  "description": "Build a Compose color theme from one seed color or a photo. Preview it in Material 3, Expressive, Unstyled and Fluent.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
