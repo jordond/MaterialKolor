@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- What a screen reader calls the handle between the two copies of a split preview. -->
+    <string name="split_handle_label">Split</string>
+    <!-- What a screen reader says the handle is set to. %1$d is how much of the start copy shows, in percent, and %2$s is that copy's label, such as Light. -->
+    <string name="split_handle_state">%1$d% %2$s</string>
+</resources>

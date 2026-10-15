@@ -1,0 +1,17 @@
+{
+  "name": "materialkolor-builder-e2e",
+  "private": true,
+  "description": "Browser tests for the MaterialKolor builder, run against the built site.",
+  "scripts": {
+    "test": "playwright test --project chromium",
+    "test:all": "playwright test",
+    "lint": "node lint.mjs",
+    "fixtures": "node fixtures/make-photo.mjs",
+    "perf": "playwright test --config perf/playwright.config.ts",
+    "pr-screenshot": "playwright test --config preview/playwright.config.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.0",
+    "@types/node": "24.19.2"
+  }
+}

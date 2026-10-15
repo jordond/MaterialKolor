@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="picker_title_seed">Seed color</string>
+    <string name="picker_title_key_color">%1$s key color</string>
+    <string name="picker_title_pin_light">Pin %1$s in light mode</string>
+    <string name="picker_title_pin_dark">Pin %1$s in dark mode</string>
+    <string name="picker_title_accent">%1$s seed</string>
+    <string name="picker_title_cmf">Tertiary seed</string>
+    <string name="picker_eyedropper">Pick from screen</string>
+    <string name="picker_was">Was</string>
+    <string name="picker_was_seed">From the seed</string>
+    <string name="picker_go_back">Go back to %1$s</string>
+    <string name="picker_go_back_seed">Go back to the color from the seed</string>
+    <string name="picker_cancel">Cancel</string>
+    <string name="picker_done">Done</string>
+    <string name="picker_pick_cmf">Pick the tertiary seed</string>
+</resources>

@@ -1,0 +1,56 @@
+#!/bin/bash
+set -euo pipefail
+
+# Points the README's MCU badge at the upstream revision in the lock. With --check it only reports
+# whether the badge already matches.
+
+CWD="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+ROOT="$(cd "$CWD"/../.. >/dev/null 2>&1 && pwd)"
+LOCK="gradle/mcu-upstream.lock.json"
+README="README.md"
+UPSTREAM_REPO="https://github.com/material-foundation/material-color-utilities"
+BADGE_PATTERN='\[!\[MCU\]\(https://img\.shields\.io/badge/mcu-[0-9a-f]+-blue\)\]\(https://github\.com/material-foundation/material-color-utilities/tree/[0-9a-f]+\)'
+
+usage() {
+    echo "Usage: $0 [--check]"
+    echo "  Rewrites the MCU badge in $README to the upstreamRevision in $LOCK"
+    echo "  --check: fail instead of rewriting when the badge is stale"
+}
+
+check=false
+case "${1:-}" in
+"") ;;
+--check) check=true ;;
+*)
+    usage >&2
+    exit 1
+    ;;
+esac
+
+cd "$ROOT"
+revision=$(jq -r '.upstreamRevision // empty' "$LOCK")
+if [[ ! "$revision" =~ ^[0-9a-f]{40}$ ]]; then
+    echo "No upstreamRevision in $LOCK" >&2
+    exit 1
+fi
+badge="[![MCU](https://img.shields.io/badge/mcu-${revision:0:7}-blue)]($UPSTREAM_REPO/tree/$revision)"
+
+count=$(grep -cE "$BADGE_PATTERN" "$README" || true)
+if [[ "$count" != 1 ]]; then
+    echo "Expected one MCU badge in $README, found $count" >&2
+    exit 1
+fi
+
+if grep -qF "$badge" "$README"; then
+    exit 0
+fi
+if $check; then
+    echo "The MCU badge in $README does not match ${revision:0:7}, run .github/scripts/readme-mcu-badge" >&2
+    exit 1
+fi
+
+updated=$(mktemp)
+sed -E "s#$BADGE_PATTERN#$badge#" "$README" > "$updated"
+cat "$updated" > "$README"
+rm "$updated"
+echo "Updated the MCU badge to ${revision:0:7}"

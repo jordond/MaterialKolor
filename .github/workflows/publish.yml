@@ -18,21 +18,22 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          submodules: recursive
           ref: ${{ github.event.release.tag_name }}
 
       - name: Copy CI gradle.properties
         run: mkdir -p ~/.gradle ; cp .github/ci-gradle.properties ~/.gradle/gradle.properties
 
       - name: setup-java
-        uses: actions/setup-java@v6
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           java-version: 25
           distribution: temurin
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
+        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
 
       - name: Deploy to Sonatype
         run: |
@@ -43,7 +44,6 @@ jobs:
           fi
           echo "New version: ${NEW_VERSION}"
           export ORG_GRADLE_PROJECT_VERSION_NAME=${NEW_VERSION}
-          echo "RELEASE_VERSION=$NEW_VERSION" >> "$GITHUB_ENV"
           ./gradlew publishAllPublicationsToMavenCentral --no-configuration-cache --stacktrace
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.OSSRH_USERNAME }}
@@ -52,40 +52,32 @@ jobs:
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_KEY }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_PASSWORD }}
 
-      - name: Update README for ${{ env.RELEASE_VERSION }}
-        run: ./.github/version.sh "${RELEASE_VERSION}"
-
-      - name: Commit changes to README
-        uses: EndBug/add-and-commit@v11
-        with:
-          add: "./README.md"
-          message: "Update README.md with version ${{ env.RELEASE_VERSION }}"
-          new_branch: main
-
   documentation:
     name: "Generate Documentation"
     runs-on: ubuntu-latest
     needs: release
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
 
       - name: setup-java
-        uses: actions/setup-java@v6
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           java-version: 25
           distribution: temurin
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
+        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
 
       - name: Gradle Wrapper Validation
-        uses: gradle/actions/wrapper-validation@v6
+        uses: gradle/actions/wrapper-validation@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
 
       - name: Generate documentation
         run: ./gradlew dokkaGenerate
 
       - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@v4
+        uses: JamesIves/github-pages-deploy-action@fa24774553152dd7873cd16ebd8d959b010c5445 # v4.9.0
         with:
           folder: dokka/

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The label above the style chips. -->
+    <string name="style_label">Style</string>
+    <!-- The style chips as a group, read out before the chips. -->
+    <string name="style_chips">Palette style</string>
+
+    <!-- Each style's name, spelled the way the library names it. -->
+    <string name="style_name_tonal_spot">TonalSpot</string>
+    <string name="style_name_neutral">Neutral</string>
+    <string name="style_name_vibrant">Vibrant</string>
+    <string name="style_name_expressive">Expressive</string>
+    <string name="style_name_rainbow">Rainbow</string>
+    <string name="style_name_fruit_salad">FruitSalad</string>
+    <string name="style_name_monochrome">Monochrome</string>
+    <string name="style_name_fidelity">Fidelity</string>
+    <string name="style_name_content">Content</string>
+    <string name="style_name_cmf">Cmf</string>
+
+    <!-- Each style's name under its chip, as words with spaces. Keep each short, it sits on one line under a small circle. -->
+    <string name="style_display_tonal_spot">Tonal Spot</string>
+    <string name="style_display_neutral">Neutral</string>
+    <string name="style_display_vibrant">Vibrant</string>
+    <string name="style_display_expressive">Expressive</string>
+    <string name="style_display_rainbow">Rainbow</string>
+    <string name="style_display_fruit_salad">Fruit Salad</string>
+    <string name="style_display_monochrome">Monochrome</string>
+    <string name="style_display_fidelity">Fidelity</string>
+    <string name="style_display_content">Content</string>
+    <string name="style_display_cmf">Cmf</string>
+
+    <!-- A chip's name for assistive tech. The first argument is the style's name, the second its tooltip below. -->
+    <string name="style_chip">%1$s, %2$s</string>
+    <!-- A chip's tooltip on hover and focus. The first argument is the style's name under the chip, the second its tooltip below, the third the specs it runs in below. -->
+    <string name="style_chip_tooltip">%1$s, %2$s. Spec %3$s</string>
+
+    <!-- The short hint each chip shows on hover and focus. -->
+    <string name="style_tooltip_tonal_spot">calm and even, the Material default</string>
+    <string name="style_tooltip_neutral">nearly gray with a hint of your seed</string>
+    <string name="style_tooltip_vibrant">loud, primary as colorful as it gets</string>
+    <string name="style_tooltip_expressive">playful, primary leaves your hue</string>
+    <string name="style_tooltip_rainbow">your hue on gray surfaces</string>
+    <string name="style_tooltip_fruit_salad">a bright mix of shifted hues</string>
+    <string name="style_tooltip_monochrome">black, white and gray only</string>
+    <string name="style_tooltip_fidelity">your seed as is, with a complementary tertiary</string>
+    <string name="style_tooltip_content">your seed as is, with a neighboring tertiary</string>
+    <string name="style_tooltip_cmf">the 2026 style, with a second seed for tertiary</string>
+
+    <!-- The line under the chips about the chosen style. The first argument is the style's name, the second its description below. -->
+    <string name="style_line">%1$s. %2$s</string>
+
+    <!-- One line on what each style does with the seed. -->
+    <string name="style_description_tonal_spot">Soft, balanced palettes that sit back and let the content lead.</string>
+    <string name="style_description_neutral">Mutes every palette almost to gray, so only a trace of your seed is left.</string>
+    <string name="style_description_vibrant">Asks primary for all the chroma its hue can hold and turns up the other palettes to match.</string>
+    <string name="style_description_expressive">Swings primary well away from your hue for a theme that feels playful rather than on brand.</string>
+    <string name="style_description_rainbow">Keeps primary on your hue while the surfaces go fully gray and tertiary drifts along the wheel.</string>
+    <string name="style_description_fruit_salad">Shifts primary and secondary off your hue and hands tertiary your seed, for a lively mix.</string>
+    <string name="style_description_monochrome">Takes out every bit of chroma, leaving a theme of black, white and grays.</string>
+    <string name="style_description_fidelity">Keeps the chroma of your seed and sets the seed itself in primaryContainer, opposite a complementary tertiary.</string>
+    <string name="style_description_content">Keeps your seed intact like Fidelity does, but pairs it with a tertiary from the next hues over.</string>
+    <string name="style_description_cmf">The 2026 color, material and finish style. Give it a second seed for tertiary or let it pick one.</string>
+
+    <!-- The specs a style runs in, at the end of its chip's tooltip after the word Spec. -->
+    <string name="style_spec_classic">2021 only</string>
+    <string name="style_spec_revised">2021 or 2025</string>
+    <string name="style_spec_cmf">2026</string>
+    <!-- Beside the Style label while the chosen style only runs in one spec. The first argument is the spec's year, the second the style's name under its chip. -->
+    <string name="style_spec_forced">Spec %1$s, set by %2$s</string>
+
+    <!-- A toggle at the end of the style's line that keeps the style when Shuffle draws a new seed. Keep it short, it shares the line. -->
+    <string name="style_keep">Keep on shuffle</string>
+    <!-- The same toggle read out by assistive tech, which hears it without the line before it. -->
+    <string name="style_keep_spoken">Keep the style when shuffling</string>
+
+    <!-- The second seed Cmf reads for its tertiary palette. -->
+    <string name="style_cmf_field">Tertiary seed, any format</string>
+    <!-- Under the tertiary seed field while Cmf derives the seed itself. -->
+    <string name="style_cmf_derived">Derived from your seed until you type or pick one</string>
+    <!-- Hands the tertiary seed back to Cmf. -->
+    <string name="style_cmf_derive">Derive from seed</string>
+
+    <!-- The label above the contrast control. -->
+    <string name="contrast_label">Contrast</string>
+    <!-- The choice of contrast level, read out as its name. -->
+    <string name="contrast_level">Contrast level</string>
+    <!-- The four named contrast levels, one option each. -->
+    <string name="contrast_reduced">Reduced</string>
+    <string name="contrast_standard">Standard</string>
+    <string name="contrast_medium">Medium</string>
+    <string name="contrast_high">High</string>
+    <!-- On the right of the Contrast label, the lowest ratio any text pair has in the modes the preview shows and the grade it earns. The first argument is the ratio to one decimal, the second the grade below, as in 6.5:1 AA. -->
+    <string name="contrast_readout">%1$s:1 %2$s</string>
+    <!-- The readout's tooltip on hover. The argument is the pair below. -->
+    <string name="contrast_readout_tooltip">Lowest text pair: %1$s</string>
+    <!-- The readout read out by assistive tech. The first argument is the ratio to one decimal, the second the grade below, the third the pair below. -->
+    <string name="contrast_readout_spoken">Lowest text pair %1$s:1, %2$s, %3$s</string>
+    <!-- The pair with the lowest ratio. The arguments are the text role and the role it sits on, the way they are named in code. -->
+    <string name="contrast_pair_light">%1$s on %2$s, in light</string>
+    <string name="contrast_pair_dark">%1$s on %2$s, in dark</string>
+    <!-- The grade a ratio earns, beside the readout here and on the Contrast tab. -->
+    <string name="contrast_badge_aaa">AAA</string>
+    <string name="contrast_badge_aa">AA</string>
+    <string name="contrast_badge_aa_large">AA large</string>
+    <string name="contrast_badge_fail">Fails AA</string>
+</resources>

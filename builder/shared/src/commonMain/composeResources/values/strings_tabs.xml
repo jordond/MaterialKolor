@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The Roles tab heading over the accent roles, error included. -->
+    <string name="tabs_group_accent">Accent</string>
+    <!-- The Roles tab heading over the background and surface roles. -->
+    <string name="tabs_group_surface">Surface</string>
+    <!-- The Roles tab heading over the fixed roles, which keep their tone in both modes. -->
+    <string name="tabs_group_fixed">Fixed</string>
+    <!-- The Roles tab heading over the outline, scrim and inverse roles. -->
+    <string name="tabs_group_outline_inverse">Outline and inverse</string>
+    <!-- The Roles tab heading over the key color each palette is built around. -->
+    <string name="tabs_group_key_colors">Key colors</string>
+    <!-- The Roles tab heading over the document's extra accents. -->
+    <string name="tabs_group_accents">Accents</string>
+    <!-- The swatch menu item that copies the color as a hex. -->
+    <string name="tabs_copy_hex">Copy hex</string>
+    <!-- The swatch menu item that copies the color as a Kotlin Color literal. -->
+    <string name="tabs_copy_kotlin">Copy Kotlin literal</string>
+    <!-- Names what was copied in the copy toast. %1$s is the swatch name, such as primary. -->
+    <string name="tabs_copied_hex">%1$s hex</string>
+    <!-- Names what was copied in the copy toast. %1$s is the swatch name, such as primary. -->
+    <string name="tabs_copied_kotlin">%1$s as Kotlin</string>
+    <!-- The swatch menu item that pins the role to the color it has in this mode. -->
+    <string name="tabs_pin">Pin this role</string>
+    <!-- The swatch menu item that clears the pin of the role in this mode. -->
+    <string name="tabs_unpin">Unpin this role</string>
+    <!-- The swatch menu item that opens the Palettes tab at the ramp the color sits on. -->
+    <string name="tabs_show_on_ramp">Show on ramp</string>
+    <!-- The Contrast tab filter that hides every pair that passes. -->
+    <string name="tabs_failures_only">Failures only</string>
+    <!-- The Contrast tab note when no visible pair fails. -->
+    <string name="tabs_all_pass">Every pair passes AA at this contrast level</string>
+    <!-- The Contrast tab note under a mode's heading when Failures only is on and nothing in that mode fails. -->
+    <string name="tabs_mode_no_failures">Nothing fails in this mode</string>
+    <!-- The Palettes tab heading over the ramps that are the same in both modes. -->
+    <string name="tabs_same_in_both">Same in light and dark</string>
+    <!-- The Palettes tab heading over the primary palette. -->
+    <string name="tabs_palette_primary">Primary</string>
+    <!-- The Palettes tab heading over the secondary palette. -->
+    <string name="tabs_palette_secondary">Secondary</string>
+    <!-- The Palettes tab heading over the tertiary palette. -->
+    <string name="tabs_palette_tertiary">Tertiary</string>
+    <!-- The Palettes tab heading over the neutral palette. -->
+    <string name="tabs_palette_neutral">Neutral</string>
+    <!-- The Palettes tab heading over the neutral variant palette. -->
+    <string name="tabs_palette_neutral_variant">Neutral variant</string>
+    <!-- The Palettes tab heading over the error palette. -->
+    <string name="tabs_palette_error">Error</string>
+    <!-- A tag under a ramp naming what landed on one tone. %1$d is the tone and %2$s the roles or accent colors there, such as primary, surfaceTint. -->
+    <string name="tabs_tone_tag">%1$d · %2$s</string>
+    <!-- What the Palettes tab calls the tone a palette is built around, named in the tag beside the ramp's title. -->
+    <string name="tabs_key_color">key color</string>
+    <!-- Names what was copied in the copy toast. %1$s is the ramp, such as Primary, and %2$d the tone of the stop. -->
+    <string name="tabs_copied_tone">%1$s tone %2$d</string>
+    <!-- The label on the ramp Show on ramp picked out. %1$s is the role or accent color, such as primary. -->
+    <string name="tabs_ramp_shown">%1$s sits on this ramp</string>
+    <!-- A Contrast tab row. %1$s is the color on top, %2$s the color under it, such as onPrimary on primary. -->
+    <string name="tabs_pair">%1$s on %2$s</string>
+    <!-- A contrast ratio. %1$s is the ratio to one decimal. -->
+    <string name="tabs_ratio">%1$s to 1</string>
+    <!-- Why a pair fails. Each name is the key of an audit reason. -->
+    <string name="audit_reason_text_only_large">Under 4.5 to 1, so only large text reads well here.</string>
+    <string name="audit_reason_text_unreadable">Under 3 to 1, so text is hard to read at any size.</string>
+    <string name="audit_reason_shape_faint">Under 3 to 1, so borders and icons are hard to see.</string>
+    <!-- What to try on a failing pair. Each name is the key of an audit suggestion. -->
+    <string name="audit_suggest_change_pin">Try another pinned color, or unpin the role.</string>
+    <string name="audit_suggest_move_accent_tones">Try pulling the accent’s tones apart or raising its threshold.</string>
+    <string name="audit_suggest_move_slot_tone">Try moving the slot’s tone.</string>
+    <string name="audit_suggest_change_seed">Try a lighter or darker seed. Fluent’s text colors are fixed.</string>
+    <string name="audit_suggest_raise_contrast">Try a higher contrast level.</string>
+</resources>

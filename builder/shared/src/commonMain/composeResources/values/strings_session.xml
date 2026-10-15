@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- What a project opened from a link without a name is called once it is saved. -->
+    <string name="shared_theme_name">Shared theme</string>
+</resources>

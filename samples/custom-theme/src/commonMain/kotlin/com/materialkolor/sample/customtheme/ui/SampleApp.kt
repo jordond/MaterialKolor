@@ -1,0 +1,120 @@
+package com.materialkolor.sample.customtheme.ui
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.foundation.text.selection.TextSelectionColors
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.materialkolor.sample.customtheme.theme.AppTheme
+import com.materialkolor.sample.customtheme.theme.AppThemeMode
+import com.materialkolor.sample.customtheme.theme.LocalAppColors
+import com.materialkolor.sample.customtheme.ui.component.PageScrollbar
+import com.materialkolor.sample.customtheme.ui.component.cropMarks
+import com.materialkolor.sample.customtheme.ui.palette.PaletteSection
+import com.materialkolor.sample.customtheme.ui.tasks.TasksSection
+import com.materialkolor.sample.shared.model.AppSection
+import com.materialkolor.sample.shared.state.SampleAction
+import com.materialkolor.sample.shared.state.SampleState
+import com.materialkolor.sample.shared.state.SampleStore
+import com.materialkolor.sample.shared.state.rememberSampleStore
+import com.materialkolor.sample.shared.theme.ThemeMode
+
+@Composable
+public fun SampleApp(store: SampleStore = rememberSampleStore()) {
+    val state = store.state
+
+    AppTheme(
+        seed = state.seed.color,
+        mode = state.mode.toAppThemeMode(),
+    ) {
+        val colors = LocalAppColors.current
+        val selection = remember(colors) {
+            TextSelectionColors(
+                handleColor = colors.pink,
+                backgroundColor = colors.highlight,
+            )
+        }
+
+        CompositionLocalProvider(LocalTextSelectionColors provides selection) {
+            Page(
+                state = state,
+                dispatch = store::dispatch,
+            )
+        }
+    }
+}
+
+@Composable
+private fun Page(
+    state: SampleState,
+    dispatch: (SampleAction) -> Unit,
+) {
+    val colors = LocalAppColors.current
+    val scroll = rememberScrollState()
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colors.paper),
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scroll)
+                .padding(horizontal = 48.dp, vertical = 40.dp),
+        ) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(36.dp),
+                modifier = Modifier
+                    .widthIn(max = 820.dp)
+                    .fillMaxWidth()
+                    .cropMarks(colors.inkSoft),
+            ) {
+                Header(
+                    state = state,
+                    dispatch = dispatch,
+                )
+
+                when (state.section) {
+                    AppSection.Tasks -> TasksSection(
+                        state = state,
+                        dispatch = dispatch,
+                    )
+                    AppSection.Palette -> PaletteSection()
+                }
+
+                ColorBar()
+            }
+        }
+
+        PageScrollbar(
+            state = scroll,
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .fillMaxHeight()
+                .padding(vertical = 4.dp, horizontal = 2.dp),
+        )
+    }
+}
+
+private fun ThemeMode.toAppThemeMode(): AppThemeMode =
+    when (this) {
+        ThemeMode.System -> AppThemeMode.System
+        ThemeMode.Light -> AppThemeMode.Light
+        ThemeMode.Dark -> AppThemeMode.Dark
+    }

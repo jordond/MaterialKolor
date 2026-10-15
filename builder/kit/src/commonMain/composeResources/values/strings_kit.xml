@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        The state words a control reads out, as they stand alone. On the web each one also follows
+        the control's name after a comma, "Tonal spot, selected", with its first letter lowered.
+    -->
+    <string name="state_selected">Selected</string>
+    <string name="state_not_selected">Not selected</string>
+    <string name="state_checked">Checked</string>
+    <string name="state_not_checked">Not checked</string>
+    <string name="state_on">On</string>
+    <string name="state_off">Off</string>
+    <string name="state_expanded">Expanded</string>
+    <string name="state_collapsed">Collapsed</string>
+    <string name="state_disabled">Disabled</string>
+
+    <!--
+        The role a control plays, read on the web after its name and before its state, "Include dark
+        scheme, checkbox, checked", while the page reads every clickable as a button and a node with
+        no role as plain text. Written as they read there, so their case is kept.
+    -->
+    <string name="role_checkbox">checkbox</string>
+    <string name="role_switch">switch</string>
+    <string name="role_radio">radio</string>
+    <string name="role_tab">tab</string>
+    <string name="role_slider">slider</string>
+    <string name="role_progress_bar">progress bar</string>
+    <string name="role_pop_up_button">pop-up button</string>
+    <string name="role_menu_item">menu item</string>
+    <string name="role_option">option</string>
+    <string name="role_dialog">dialog</string>
+
+    <!-- What the code viewer's list of lines is called when read out. -->
+    <string name="code_view_name">Code</string>
+
+    <!-- How far along a progress bar is, as a whole percentage. -->
+    <string name="progress_percent">%1$d%</string>
+
+    <!-- The close button on a side panel or a sheet, read out to assistive technology. -->
+    <string name="close">Close</string>
+
+    <!-- What a bottom sheet's handle reads as its state at each detent. -->
+    <string name="sheet_detent_peek">Peek</string>
+    <string name="sheet_detent_half">Half</string>
+    <string name="sheet_detent_full">Full</string>
+</resources>

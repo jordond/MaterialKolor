@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="6 6 52 52">
+  <style>
+    .a { stroke: #a33e16 } .b { stroke: #e56e43 } .c { stroke: #ffb59c }
+    @media (prefers-color-scheme: dark) { .a { stroke: #ffb59c } .c { stroke: #a33e16 } }
+  </style>
+  <g fill="none" stroke-width="12" stroke-linecap="round">
+    <path class="c" d="M24 32 46 52"/>
+    <path class="b" d="M24 32 46 12"/>
+    <path class="a" d="M18 12v40"/>
+  </g>
+</svg>

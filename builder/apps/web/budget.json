@@ -1,0 +1,48 @@
+{
+  "$comment": "Sizes are brotli bytes, 1 MB = 1000000 bytes. A role's maxBytes holds each file it names, its totalBytes all of them together. The limits are loose backstops against accidents, not targets.",
+  "compression": {
+    "algorithm": "brotli",
+    "quality": 11,
+    "window": 22
+  },
+  "skip": [
+    "**/*.map",
+    "**/*.LICENSE.txt",
+    "_headers",
+    "robots.txt"
+  ],
+  "roles": [
+    { "name": "skiko", "files": "assets/skiko.*.wasm", "maxBytes": 3500000 },
+    { "name": "app wasm", "files": "assets/MaterialKolor-builder-apps-web.*.wasm", "maxBytes": 3000000 },
+    { "name": "glue", "files": "assets/builder.*.js", "maxBytes": 500000 },
+    { "name": "js glue", "files": "assets/builder-js.*.js", "maxBytes": 3000000 },
+    { "name": "initial fonts", "files": "composeResources/com.materialkolor.**/font/*", "totalBytes": 500000 },
+    { "name": "index.html", "files": "index.html", "maxBytes": 50000 }
+  ],
+  "firstVisit": {
+    "$comment": "boot.js loads one engine per visit, so each engine's first visit is the files every visit loads plus that engine's own, held against its own total.",
+    "files": [
+      "index.html",
+      "boot.js",
+      "composeResources/com.materialkolor.**"
+    ],
+    "exclude": [
+      "composeResources/**/files/OFL-*.txt",
+      "composeResources/**/drawable/preset_*.webp"
+    ],
+    "engines": {
+      "wasm": {
+        "files": ["assets/builder.*.js", "assets/skiko.*.wasm", "assets/MaterialKolor-builder-apps-web.*.wasm"],
+        "maxBytes": 8000000
+      },
+      "js": {
+        "files": ["assets/builder-js.*.js", "assets/skiko.*.wasm"],
+        "maxBytes": 8000000
+      }
+    }
+  },
+  "rawFile": {
+    "$comment": "Raw bytes, not brotli, for every file in the site. Cloudflare will not serve one asset over 25 MiB.",
+    "maxBytes": 26214400
+  }
+}

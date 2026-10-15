@@ -1,0 +1,223 @@
+#!/bin/bash
+set -euo pipefail
+
+CWD="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+ROOT="$(cd "$CWD"/../.. >/dev/null 2>&1 && pwd)"
+UPSTREAM_SLUG="material-foundation/material-color-utilities"
+UPSTREAM_REPO="https://github.com/$UPSTREAM_SLUG"
+# Keeps a long lag well inside GitHub's 65,536 character pull request body limit. The compare link
+# covers the rest.
+MAX_SUMMARY_COMMITS=50
+MAX_SUMMARY_FILES=10
+MAX_SUMMARY_CHARACTERS=40000
+MAX_TITLE_CHARACTERS=120
+MAX_PATH_CHARACTERS=160
+SUBMODULE_PATH="$ROOT/tools/mcu-upstream/src/main"
+
+usage() {
+    echo "Usage: $0 [--github-output <file>] [--summary <file>] [--no-output]"
+    echo "  --github-output: append current, target, their short forms, relevant and scaffold values"
+    echo "  --summary: write a Markdown list of the relevant upstream commits"
+    echo "  --no-output: Do not output to console"
+}
+
+show_output=true
+github_output=""
+summary_file=""
+while [[ $# -gt 0 ]]; do
+    case $1 in
+    --github-output | --summary)
+        if [[ $# -lt 2 || -z "$2" ]]; then
+            usage >&2
+            exit 1
+        fi
+        if [[ "$1" == "--github-output" ]]; then
+            github_output="$2"
+        else
+            summary_file="$2"
+        fi
+        shift 2
+        ;;
+    --no-output)
+        show_output=false
+        shift
+        ;;
+    *)
+        echo "Unknown option: $1" >&2
+        usage >&2
+        exit 1
+        ;;
+    esac
+done
+
+log() {
+    if "$show_output"; then
+        printf '%s\n' "$@"
+    fi
+}
+
+# Upstream commit messages reach the log verbatim, so a line starting with `::` must not be read as
+# a workflow command.
+if "$show_output" && [[ "${GITHUB_ACTIONS:-}" == true ]]; then
+    resume_token=$(od -An -N16 -tx1 /dev/urandom | tr -d ' \n')
+    echo "::stop-commands::$resume_token"
+    trap 'echo "::$resume_token::"' EXIT
+fi
+
+# Upstream issue references would link to this repository's issues and mentions would notify
+# upstream authors, so both are rewritten before upstream text reaches the pull request body.
+defuse_mentions() {
+    sed -E 's~@([[:alnum:]_-])~@\&#8203;\1~g' <<< "$1"
+}
+
+markdown_title() {
+    local title="$1"
+    if ((${#title} > MAX_TITLE_CHARACTERS)); then
+        title="${title:0:MAX_TITLE_CHARACTERS}..."
+    fi
+    defuse_mentions "$(sed -E \
+        -e "s~(^|[^[:alnum:]_/])#([0-9]+)~\\1$UPSTREAM_SLUG#\\2~g" \
+        -e "s~(^|[^[:alnum:]_/-])GH-([0-9]+)~\\1$UPSTREAM_SLUG#\\2~g" <<< "$title")"
+}
+
+# File names go inside a code span, where mentions and references stay inert, so only a backtick
+# that would end the span early is replaced. Long names are cut so the body cap holds.
+markdown_path() {
+    local path="$1"
+    if ((${#path} > MAX_PATH_CHARACTERS)); then
+        path="...${path: -MAX_PATH_CHARACTERS}"
+    fi
+    tr '`' "'" <<< "$path"
+}
+
+# The engine is generated from upstream's Kotlin alone, so only Kotlin and license changes need a
+# pin update. Upstream Java still backs the JVM parity tests, but the bump pull request runs those.
+relevant_files() {
+    grep -Ei '^kotlin/|(^|/)(licen[cs]es?|notices?|copying)(([._-][^/]*)?$|/)' || [[ $? == 1 ]]
+}
+
+# Build and publishing scaffolding under upstream's kotlin/ tree gets its own category: it is the
+# first visible sign that upstream is preparing first-party Kotlin Multiplatform artifacts, which
+# would change what this project needs to port rather than merely what it needs to re-adapt.
+kotlin_scaffold_files() {
+    grep -Ei '^kotlin/([^/]+/)*(build\.gradle(\.kts)?|settings\.gradle(\.kts)?|pom\.xml|gradle\.properties|[^/]+\.toml)$' || [[ $? == 1 ]]
+}
+
+SOURCE_CATEGORY="upstream-source"
+SCAFFOLD_CATEGORY="kotlin-build-scaffold"
+SCAFFOLD_NOTE="Build or publishing scaffolding changed under upstream's \`kotlin/\` tree, so \
+first-party Kotlin Multiplatform publication may be starting. Review whether this project should \
+keep adapting upstream sources. Reference: $UPSTREAM_REPO/pull/76."
+
+summary=""
+summary_commits=0
+omitted_commits=0
+report_commit() {
+    local commit="$1" files_changed="$2" category="$3"
+    local short_sha date title file_count
+    short_sha=$(git rev-parse --short "$commit")
+    date=$(git show -s --format=%cI "$commit")
+    title=$(git log -1 --pretty=%s "$commit")
+    log "----------------------------------------" "Commit: $short_sha" "Date: $date" \
+        "Title: $title" "Category: $category" "Commit message:" \
+        "$(git log -1 --pretty=%B "$commit" | sed 's/^/    /')" \
+        "Changed files:" "$files_changed"
+    if [[ "$category" == "$SCAFFOLD_CATEGORY" ]]; then
+        log "Note: $SCAFFOLD_NOTE"
+    fi
+
+    summary_commits=$((summary_commits + 1))
+    if ((summary_commits > MAX_SUMMARY_COMMITS || ${#summary} > MAX_SUMMARY_CHARACTERS)); then
+        omitted_commits=$((omitted_commits + 1))
+        return
+    fi
+    summary+="- [\`$short_sha\`]($UPSTREAM_REPO/commit/$commit) $(markdown_title "$title")"
+    if [[ "$category" == "$SCAFFOLD_CATEGORY" ]]; then
+        summary+=" (**$SCAFFOLD_CATEGORY**)"
+    fi
+    summary+=$'\n'
+    while IFS= read -r file; do
+        summary+="  - \`$(markdown_path "$file")\`"$'\n'
+    done < <(head -n "$MAX_SUMMARY_FILES" <<< "$files_changed")
+    file_count=$(wc -l <<< "$files_changed")
+    if ((file_count > MAX_SUMMARY_FILES)); then
+        summary+="  - and $((file_count - MAX_SUMMARY_FILES)) more files"$'\n'
+    fi
+}
+
+write_results() {
+    local current="$1" target="$2" relevant="$3" scaffold="$4"
+    local current_short target_short
+    current_short=$(git rev-parse --short "$current")
+    target_short=$(git rev-parse --short "$target")
+    if [[ -n "$github_output" ]]; then
+        printf 'current=%s\ncurrent_short=%s\ntarget=%s\ntarget_short=%s\nrelevant=%s\nscaffold=%s\n' \
+            "$current" "$current_short" "$target" "$target_short" "$relevant" "$scaffold" >> "$github_output"
+    fi
+    if [[ -n "$summary_file" ]]; then
+        if ((omitted_commits > 0)); then
+            summary+="- and $omitted_commits more commits"$'\n'
+        fi
+        summary+=$'\n'"[Compare \`$current_short...$target_short\`]($UPSTREAM_REPO/compare/$current...$target)"$'\n'
+        if ((scaffold > 0)); then
+            summary+=$'\n'"$SCAFFOLD_NOTE"$'\n'
+        fi
+        mkdir -p "$(dirname "$summary_file")"
+        printf '%s' "$summary" > "$summary_file"
+    fi
+}
+
+log "Checking submodule: $SUBMODULE_PATH"
+# Without this guard an uninitialised submodule directory lets `cd` succeed and
+# every later git command resolves against the parent repository instead, so the
+# monitor would report "no relevant changes" forever.
+if [[ ! -e "$SUBMODULE_PATH/.git" ]]; then
+    echo "Error: submodule not initialised at $SUBMODULE_PATH" >&2
+    echo "Run: git submodule update --init --recursive" >&2
+    exit 1
+fi
+cd "$SUBMODULE_PATH"
+log "Fetching latest changes from remote..."
+# `.gitmodules` records an SSH URL, which a runner without SSH keys cannot use, so the fetch names
+# the public HTTPS repository and fills the usual remote-tracking refs itself.
+fetch_args=(--quiet --prune "$UPSTREAM_REPO.git" "+refs/heads/*:refs/remotes/origin/*")
+if [[ $(git rev-parse --is-shallow-repository) == true ]]; then
+    fetch_args=(--unshallow "${fetch_args[@]}")
+fi
+git fetch "${fetch_args[@]}"
+
+current_commit=$(git rev-parse HEAD)
+remote_commit=$(git rev-parse --verify origin/main 2>/dev/null || git rev-parse --verify origin/master)
+log "Current commit: $(git rev-parse --short "$current_commit")" \
+    "Remote commit: $(git rev-parse --short "$remote_commit")"
+commits=$(git log --reverse --pretty=format:"%H" "${current_commit}..${remote_commit}")
+if [[ -z "$commits" ]]; then
+    log "No new commits found."
+    write_results "$current_commit" "$remote_commit" 0 0
+    exit 0
+fi
+
+commit_count=0
+relevant_commits=0
+scaffold_commits=0
+while IFS= read -r commit; do
+    commit_count=$((commit_count + 1))
+    changed_files=$(git diff-tree --root --first-parent -m --no-commit-id --name-only -r "$commit")
+    files_to_review=$(relevant_files <<< "$changed_files")
+    if [[ -n "$files_to_review" ]]; then
+        relevant_commits=$((relevant_commits + 1))
+        category="$SOURCE_CATEGORY"
+        if [[ -n $(kotlin_scaffold_files <<< "$changed_files") ]]; then
+            category="$SCAFFOLD_CATEGORY"
+            scaffold_commits=$((scaffold_commits + 1))
+        fi
+        report_commit "$commit" "$files_to_review" "$category"
+    else
+        log "Skipping $(git rev-parse --short "$commit"): no Kotlin or license changes."
+    fi
+done <<< "$commits"
+log "Summary: Processed $commit_count commits, $relevant_commits had Kotlin or license changes"
+if ((scaffold_commits > 0)); then
+    log "Summary: $scaffold_commits of those changed kotlin/ build scaffolding ($SCAFFOLD_CATEGORY)"
+fi
+write_results "$current_commit" "$remote_commit" "$relevant_commits" "$scaffold_commits"

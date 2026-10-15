@@ -1,0 +1,416 @@
+package com.materialkolor.builder.kit.transition
+
+import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.TargetBasedAnimation
+import androidx.compose.animation.core.VectorConverter
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.MonotonicFrameClock
+import androidx.compose.runtime.MutableFloatState
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.layer.GraphicsLayer
+import androidx.compose.ui.graphics.rememberGraphicsLayer
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
+import com.materialkolor.builder.kit.motion.BuilderMotion
+import com.materialkolor.builder.kit.motion.LocalBuilderMotion
+import com.materialkolor.builder.kit.motion.LocalMotionFrozen
+import com.materialkolor.builder.kit.motion.LocalReducedMotion
+import com.materialkolor.builder.kit.motion.LocalTabVisible
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+
+/**
+ * How long a reveal waits for the host to draw the old frame before it gives up on the capture.
+ */
+private val CaptureTimeout = 100.milliseconds
+
+/**
+ * How long a warm-up step waits for the host to draw it before the warm-up gives up.
+ */
+private val WarmUpTimeout = 2000.milliseconds
+
+/**
+ * The most one frame moves a reveal on. A browser can take hundreds of milliseconds to compose a new
+ * skin, a frame or two after the change, and timed from the clock alone the reveal would be over by
+ * the frame after it.
+ */
+private val MaxFrameStep = 50.milliseconds
+
+/**
+ * What the reveal draws the old frame from.
+ *
+ * A recorded layer is the cheap path, but it may point at nested layers live rather than copying
+ * them, and a skin that adds render effects can make it drift. The bitmap path rasterizes the
+ * capture once per switch and draws that instead.
+ */
+public enum class SnapshotMode {
+    /**
+     * Draw the recorded layer as it is.
+     */
+    Layer,
+
+    /**
+     * Rasterize the recorded layer once, then draw the bitmap.
+     */
+    Bitmap,
+}
+
+/**
+ * How the old frame gives way to the new one.
+ *
+ * The library switch plays [Circle] out of the switcher. Every other discrete change, a preset, a
+ * chip, a shuffle, a style or an image candidate, plays [Crossfade]. Reduced motion turns either
+ * one into the short crossfade.
+ */
+@Immutable
+public sealed interface RevealStyle {
+    /**
+     * The old frame shrinks away behind a circle growing out of [origin], on the skin's reveal
+     * spec.
+     *
+     * @property[origin] Where the circle grows from, in the host's coordinates. [Offset.Unspecified]
+     * grows it from the middle.
+     */
+    public data class Circle(
+        public val origin: Offset,
+    ) : RevealStyle
+
+    /**
+     * The old frame fades out in place, on the skin's crossfade spec.
+     */
+    public data object Crossfade : RevealStyle
+}
+
+/**
+ * The reveal that plays on every discrete change, such as a library switch, the light and dark
+ * toggle, a style chip, a preset, a shuffle or an image candidate.
+ *
+ * Call [reveal] with a [RevealStyle] and the change. The host draws one more frame of the old UI
+ * into a layer, the change applies, and the old frame gives way to the new one, either behind a
+ * growing circle or by fading out in place. Drags never come through here, and neither do undo,
+ * redo or keyboard nudges.
+ *
+ * Get one from [rememberSkinTransition] and draw through [SkinTransitionHost].
+ */
+@Stable
+public class SkinTransition internal constructor(
+    internal val snapshot: GraphicsLayer,
+    private val scope: CoroutineScope,
+    private val environment: () -> RevealEnvironment,
+    internal val warmLayer: GraphicsLayer,
+) {
+    /**
+     * What the host composes off screen while a warm-up runs, null otherwise.
+     */
+    internal var warmSample: (@Composable () -> Unit)? by mutableStateOf(null)
+
+    /**
+     * The warm-up step the host draws next, while a warm-up waits for it.
+     */
+    internal var warmPass: WarmPass? by mutableStateOf(null)
+
+    /**
+     * Whether [warmLayer] holds the sample. Its node sets it from draw, so it is a plain field.
+     */
+    internal var warmRecorded: Boolean = false
+
+    /**
+     * Set while a reveal waits for the host to record the old frame. The host completes it from draw.
+     */
+    internal var pendingCapture: CompletableDeferred<Unit>? by mutableStateOf(null)
+
+    /**
+     * How the running reveal draws, already turned into a crossfade under reduced motion.
+     */
+    internal var style: RevealStyle by mutableStateOf(RevealStyle.Crossfade)
+
+    /**
+     * The rasterized old frame under [SnapshotMode.Bitmap], null otherwise.
+     */
+    internal var bitmap: ImageBitmap? by mutableStateOf(null)
+
+    /**
+     * Zero while the old frame covers everything, one once it is gone. Only draw reads it.
+     */
+    internal val progress: MutableFloatState = mutableFloatStateOf(1f)
+
+    private val switching = Mutex()
+
+    /**
+     * The reveal's animation while it plays, which the next reveal cuts short.
+     */
+    private var playing: Job? = null
+
+    /**
+     * Applies [change] behind a reveal in the given [style].
+     *
+     * The host records the old frame while it draws, and the change applies at the start of the
+     * frame after that, never inside a draw pass. The change applies straight away with no capture
+     * when motion is frozen or the tab is hidden, and also when the host has not drawn within 100 ms
+     * or its next frame has not come within 100 ms of that draw. A reveal that arrives while another
+     * is still running snaps that one to its end first. Under reduced motion either style becomes the
+     * short crossfade.
+     *
+     * The animation moves on by the time between frames, but by no more than 50 ms a frame, so the
+     * long frame in which the new UI composes costs it one step rather than the whole reveal.
+     *
+     * Returns once the reveal has finished or been cut short by the next one. Cancelling the caller
+     * after the change has applied does not stop the reveal, since the animation belongs to the host.
+     *
+     * @param[style] A circle out of the library switcher, or a crossfade for every other discrete
+     * change.
+     * @param[change] The edit. It runs once, synchronously, whatever path the reveal takes.
+     */
+    public suspend fun reveal(
+        style: RevealStyle,
+        change: () -> Unit,
+    ) {
+        val animation = switching.withLock {
+            playing?.cancel()
+            progress.value = 1f
+            val environment = environment()
+            if (environment.frozen || !environment.tabVisible) {
+                change()
+                return
+            }
+
+            if (!capture()) {
+                change()
+                return
+            }
+
+            val image = when (environment.mode) {
+                SnapshotMode.Layer -> null
+                SnapshotMode.Bitmap -> snapshot.toImageBitmap()
+            }
+            bitmap = image
+            val shown = if (environment.reduced) RevealStyle.Crossfade else style
+            this.style = shown
+            change()
+            progress.value = 0f
+
+            val spec = when (shown) {
+                is RevealStyle.Circle -> environment.motion.reveal<Float>()
+                RevealStyle.Crossfade -> environment.motion.crossfade<Float>()
+            }
+            scope
+                .launch(start = CoroutineStart.UNDISPATCHED) {
+                    try {
+                        play(spec)
+                    } finally {
+                        if (bitmap === image) bitmap = null
+                    }
+                }.also { job -> playing = job }
+        }
+        animation.join()
+    }
+
+    /**
+     * Draws once, under the live frame, what the first reveals will draw, so the browser has its GPU
+     * programs ready before anyone switches.
+     *
+     * The first switch to a skin draws shadows, clips and shapes the page has not drawn yet, and the
+     * old frame behind a circle for the first time, and the browser compiles a program for each
+     * inside that one frame. Here the host draws the same things one step a frame under a cover of
+     * the live frame, so nothing on screen changes. The steps are [sample] as it is, behind the
+     * reveal's circle and faded the way a crossfade draws it, then the live frame behind the circle
+     * and faded.
+     *
+     * [sample] composes off screen, out of reach of assistive tech, focus and pointers. Its steps run
+     * one frame after another and it leaves straight after them, so it lives no longer than it must.
+     * Nothing runs while motion is frozen. A step waits while a reveal plays, and the warm-up gives up
+     * when the host has not drawn a step within two seconds.
+     *
+     * @param[sample] A frame the builder has not drawn yet, such as the workspace in another skin, or
+     * null to warm only the reveal's circle and crossfade over the live frame.
+     * @param[pause] Runs before the sample composes, before its steps and before the live frame's. The
+     * web waits there for an idle moment, so no step lands on someone's input.
+     */
+    public suspend fun warmUp(
+        sample: (@Composable () -> Unit)?,
+        pause: suspend () -> Unit = {},
+    ) {
+        if (environment().frozen) return
+        try {
+            if (sample != null) {
+                pause()
+                warmSample = sample
+                pause()
+                val drawn = WarmStep.entries.filter { step -> step.drawsSample }.all { step -> drawWarmStep(step) }
+                letSampleGo()
+                // Recorded again empty, so the layer keeps none of the sample's own layers alive.
+                warmLayer.record(EmptyDensity, LayoutDirection.Ltr, IntSize.Zero) {}
+                if (!drawn) return
+            }
+            pause()
+            for (step in WarmStep.entries.filterNot { step -> step.drawsSample }) {
+                if (!drawWarmStep(step)) return
+            }
+        } finally {
+            // A cancelled warm-up leaves with its host, which releases the layer itself.
+            letSampleGo()
+        }
+    }
+
+    /**
+     * Takes the sample out of composition, so the host stops drawing it.
+     */
+    private fun letSampleGo() {
+        warmSample = null
+        warmRecorded = false
+    }
+
+    /**
+     * Asks the host to draw [step] under the live frame and waits for the frame after it, so nothing
+     * after this runs inside a draw. False when the host did not draw it within the timeout.
+     */
+    private suspend fun drawWarmStep(step: WarmStep): Boolean {
+        val drawn = CompletableDeferred<Unit>()
+        warmPass = WarmPass(step, drawn)
+        try {
+            finishesWithin(WarmUpTimeout) {
+                drawn.await()
+                nextFrame {}
+            }
+            return drawn.isCompleted
+        } finally {
+            warmPass = null
+        }
+    }
+
+    /**
+     * Moves [progress] from zero to one on [spec], a frame at a time, each frame by the time since the
+     * last one but never by more than [MaxFrameStep]. The first frame is the start, as it is for any
+     * Compose animation.
+     */
+    private suspend fun play(spec: FiniteAnimationSpec<Float>) {
+        val animation = TargetBasedAnimation(spec, Float.VectorConverter, initialValue = 0f, targetValue = 1f)
+        val step = MaxFrameStep.inWholeNanoseconds
+        var played = 0L
+        var last = -1L
+        while (played < animation.durationNanos) {
+            nextFrame { now ->
+                if (last >= 0) played += (now - last).coerceIn(0L, step)
+                last = now
+                progress.value = animation.getValueFromNanos(played)
+            }
+        }
+    }
+
+    /**
+     * Asks the host to record its next frame, then waits for the frame after it. False when the host
+     * did not draw within the timeout or the next frame did not come within it after that.
+     *
+     * The host completes the capture from inside its draw pass, and a dispatcher that resumes
+     * inline would carry straight on from there. Waiting for the next frame on the host's clock is
+     * the boundary. Everything after the capture, the state writes and the change included, runs
+     * at the start of a frame and never inside a draw, whatever dispatcher the caller is on.
+     *
+     * A browser runs the timer and the frame on one thread, so a capture frame that takes longer than
+     * the timeout holds the timer back until it ends. Whether the host drew decides, not which of the
+     * two resumed first, and each wait gets a timeout of its own.
+     */
+    private suspend fun capture(): Boolean {
+        val captured = CompletableDeferred<Unit>()
+        pendingCapture = captured
+        try {
+            finishesWithin(CaptureTimeout) { captured.await() }
+            if (!captured.isCompleted) return false
+        } finally {
+            pendingCapture = null
+        }
+        var framed = false
+        finishesWithin(CaptureTimeout) { nextFrame { framed = true } }
+        return framed
+    }
+
+    /**
+     * Suspends until the next frame starts, on the clock the host animates with, and runs [onFrame]
+     * in it with the frame's time. The caller's own context only has to carry a clock when the
+     * transition's scope somehow lacks one.
+     */
+    private suspend fun nextFrame(onFrame: (frameNanos: Long) -> Unit) {
+        val clock = scope.coroutineContext[MonotonicFrameClock]
+        if (clock != null) clock.withFrameNanos(onFrame) else withFrameNanos(onFrame)
+    }
+}
+
+/**
+ * Runs [block] for at most [timeout] and says whether it finished in time.
+ *
+ * Compose's frame dispatchers pass `delay` through to the host but not timeouts, so
+ * `withTimeoutOrNull` would run on a wall clock of its own that no test clock can drive. Racing a
+ * plain delay keeps the timeout on the same clock as the frames.
+ */
+private suspend fun finishesWithin(
+    timeout: Duration,
+    block: suspend () -> Unit,
+): Boolean =
+    coroutineScope {
+        val work = launch { block() }
+        val timer = launch {
+            delay(timeout)
+            work.cancel()
+        }
+        work.join()
+        timer.cancel()
+        !work.isCancelled
+    }
+
+/**
+ * The locals a reveal reads at the moment it starts.
+ */
+internal data class RevealEnvironment(
+    val motion: BuilderMotion,
+    val mode: SnapshotMode,
+    val frozen: Boolean,
+    val reduced: Boolean,
+    val tabVisible: Boolean,
+)
+
+/**
+ * Remembers the [SkinTransition] for one [SkinTransitionHost].
+ *
+ * It picks up the skin's motion, [LocalMotionFrozen], [LocalReducedMotion] and [LocalTabVisible]
+ * from where it is called, so call it inside the skin.
+ *
+ * @param[mode] What the reveal draws the old frame from.
+ */
+@Composable
+public fun rememberSkinTransition(mode: SnapshotMode = SnapshotMode.Layer): SkinTransition {
+    val snapshot = rememberGraphicsLayer()
+    val warmLayer = rememberGraphicsLayer()
+    val scope = rememberCoroutineScope()
+    val environment = rememberUpdatedState(
+        RevealEnvironment(
+            motion = LocalBuilderMotion.current,
+            mode = mode,
+            frozen = LocalMotionFrozen.current,
+            reduced = LocalReducedMotion.current,
+            tabVisible = LocalTabVisible.current,
+        ),
+    )
+    return remember(snapshot, warmLayer, scope) {
+        SkinTransition(snapshot = snapshot, scope = scope, environment = { environment.value }, warmLayer = warmLayer)
+    }
+}

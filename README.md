@@ -1,320 +1,221 @@
-<img width="500px" src="art/materialkolor-logo.png" alt="logo"/>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="art/materialkolor-logo-dark.svg">
+  <img width="500" src="art/materialkolor-logo.svg" alt="MaterialKolor">
+</picture>
 <br />
 
-![Maven Central](https://img.shields.io/maven-central/v/com.materialkolor/material-kolor)
-[![Kotlin](https://img.shields.io/badge/kotlin-v2.4.10-blue.svg?logo=kotlin)](http://kotlinlang.org)
+![Maven Central](https://img.shields.io/maven-central/v/com.materialkolor/material-kolor-core)
+[![Kotlin](https://img.shields.io/badge/kotlin-v2.4.21-blue.svg?logo=kotlin)](http://kotlinlang.org)
+[![MCU](https://img.shields.io/badge/mcu-5b3618b-blue)](https://github.com/material-foundation/material-color-utilities/tree/5b3618b16fdc3825e21d5679bafd144662088ea1)
 [![Build](https://github.com/jordond/materialkolor/actions/workflows/ci.yml/badge.svg)](https://github.com/jordond/materialkolor/actions/workflows/ci.yml)
 [![License](https://img.shields.io/github/license/jordond/MaterialKolor)](https://opensource.org/license/mit/)
 
-[![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.9.1-blue)](https://github.com/JetBrains/compose-multiplatform)
+[![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.12.1-blue)](https://github.com/JetBrains/compose-multiplatform)
 ![badge-android](http://img.shields.io/badge/platform-android-6EDB8D.svg?style=flat)
 ![badge-ios](http://img.shields.io/badge/platform-ios-CDCDCD.svg?style=flat)
 ![badge-desktop](http://img.shields.io/badge/platform-desktop-DB413D.svg?style=flat)
 ![badge-js](http://img.shields.io/badge/platform-js%2Fwasm-FDD835.svg?style=flat)
 
-> [!TIP]
-> Looking for MaterialKolor's 6.0.0 documentation? Click [here](https://github.com/jordond/MaterialKolor/tree/next)
+MaterialKolor generates Material color schemes from a single seed color in Compose Multiplatform.
+It runs Google's [material-color-utilities](https://github.com/material-foundation/material-color-utilities)
+on Android, iOS, macOS, desktop JVM, JS and Wasm. There are adapters for Material 3, Compose
+Unstyled and Compose Fluent, and you can use the core module to build a theme of your own.
 
-A Compose Multiplatform library for creating dynamic Material Design 3 color palettes from any
-color.
+[MaterialKolor Builder](https://materialkolor.com) lets you try seeds and styles in the browser and
+exports the theme code. While 6.0 is in beta, [next.materialkolor.com](https://next.materialkolor.com)
+runs the builder on 6.0. API docs are at [docs.materialkolor.com](https://docs.materialkolor.com).
 
-Check out [MaterialKolor Builder](https://materialkolor.com) to see MaterialKolor in action and
-generate your own color schemes. It can export to MaterialKolor code, or plain Material 3 code.
+> [!NOTE]
+> Upgrading from 5.x? Read the [6.0 migration guide](docs/migration-6.0.md).
 
-The KDoc is published at [docs.materialkolor.com](https://docs.materialkolor.com)
+## Install
 
-## Table of Contents
+Pick the artifact for your UI toolkit. Each adapter brings in `material-kolor-core` for you.
 
-- [Platforms](#platforms)
-- [Inspiration](#inspiration)
-- [Setup](#setup)
-    - [Multiplatform](#multiplatform)
-    - [Single Platform](#single-platform)
-    - [Version Catalog](#version-catalog)
-- [Usage](#usage)
-  - [Updated Colors](#updated-colors)
-  - [DynamicMaterialTheme](#dynamicmaterialtheme)
-  - [DynamicMaterialExpressiveTheme](#dynamicmaterialexpressivetheme)
-- [Extensions](#extensions)
-    - [Harmonize Colors](#harmonize-colors)
-    - [Lighten and Darken](#lighten-and-darken)
-    - [Color Temperature](#color-temperature)
-- [Generating from an Image](#generating-from-an-image)
-- [License](#license)
-  - [Changes from original source](#changes-from-original-source)
-
-## Platforms
-
-This library is written for Compose Multiplatform, and can be used on the following platforms:
-
-- Android
-- iOS
-- JVM (Desktop)
-- JavaScript/wasm (Browser)
-
-You can see it in action by using [MaterialKolor Builder](https://materialkolor.com).
-
-## Inspiration
-
-The heart of this library comes from
-the [material-color-utilities](https://github.com/material-foundation/material-color-utilities)
-repository. It is currently
-only a Java library, and I wanted to make it available to Kotlin Multiplatform projects. The source
-code was taken and converted into a Kotlin Multiplatform library.
-
-I also incorporated the Compose ideas from another open source
-library [m3color](https://github.com/Kyant0/m3color).
-
-## Setup
-
-You can add this library to your project using Gradle.
-
-### Multiplatform
-
-To add to a multiplatform project, add the dependency to the common source-set:
+| Artifact | Use it for |
+|---|---|
+| `material-kolor-material3` | Material 3 apps |
+| [`material-kolor-unstyled`](material-kolor-unstyled/README.md) | [Compose Unstyled](https://composeunstyled.com) apps |
+| [`material-kolor-fluent`](material-kolor-fluent/README.md) | [Compose Fluent](https://github.com/Compose-Fluent/compose-fluent-ui) apps |
+| `material-kolor-core` | Your own theme, or any app that only needs the colors |
+| [`material-kolor-palette`](material-kolor-palette/README.md) | Seed colors from images, using [kmpalette](https://github.com/jordond/kmpalette) |
+| `material-color-utilities` | The color engine on its own, without Compose |
 
 ```kotlin
 kotlin {
     sourceSets {
-        commonMain {
-            dependencies {
-              implementation("com.materialkolor:material-kolor:5.0.1")
-            }
+        commonMain.dependencies {
+            implementation("com.materialkolor:material-kolor-material3:6.0.0")
         }
     }
 }
 ```
 
-### Single Platform
-
-For an Android only project, add the dependency to app level `build.gradle.kts`:
-
-```kotlin
-dependencies {
-  implementation("com.materialkolor:material-kolor:5.0.1")
-}
-```
-
-### Version Catalog
+Or with a version catalog:
 
 ```toml
 [versions]
-materialKolor = "5.0.1"
+materialKolor = "6.0.0"
 
 [libraries]
-materialKolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolor" }
+materialKolor-material3 = { module = "com.materialkolor:material-kolor-material3", version.ref = "materialKolor" }
 ```
 
-### Without compose
+The Unstyled and Fluent adapters also need the toolkit itself declared next to them. Their READMEs
+cover the details.
 
-If you don't use Compose and don't need any of the extension functions provided by `material-kolor`,
-you can use the `material-color-utilities` artifact instead.
-It is a Kotlin Multiplatform port of
-Google's [Material Color Utilities](https://github.com/material-foundation/material-color-utilities).
+## Material 3
 
-```toml
-[versions]
-materialKolor = "5.0.1"
-
-[libraries]
-materialKolor-utilities = { module = "com.materialkolor:material-color-utilities", version.ref = "materialKolor" }
-```
-
-## Usage
-
-To generate a custom `ColorScheme` you simply need to call `dynamicColorScheme()` with your target
-seed color:
+`DynamicMaterialTheme` wraps `MaterialTheme` and generates the color scheme from a seed:
 
 ```kotlin
 @Composable
-fun MyTheme(
-    seedColor: Color,
-    isDark: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
-) {
-    val colorScheme = rememberDynamicColorScheme(seedColor = seedColor, isDark = isDark)
-
-    MaterialTheme(
-        colors = colorScheme,
-        content = content,
-    )
-}
-```
-
-You can also pass in
-a [`PaletteStyle`](material-kolor/src/commonMain/kotlin/com/materialkolor/PaletteStyle.kt) to
-customize the generated palette:
-
-```kotlin
-dynamicColorScheme(
-    seedColor = seedColor,
-    isDark = isDark,
-  style = PaletteStyle.Expressive,
-)
-```
-
-### Updated Colors
-
-With the release of Material3 Expressive, Google has added a new color spec used when generating
-colors. By default MaterialKolor uses the `SPEC_2021` version. If you want to try out the new colors
-you will need to use `ColorSpec.SpecVersion.SPEC_2025`:
-
-```kotlin
-val scheme = rememberDynamicColorScheme(
-  seedColor = seedColor,
-  isDark = isDark,
-  specVersion = ColorSpec.SpecVersion.SPEC_2025,
-  style = PaletteStyle.Expressive, // Optional but recommended if you are using `MaterialExpressiveTheme`
-)
-```
-
-### DynamicMaterialTheme
-
-A `DynamicMaterialTheme` Composable is also available. It is a wrapper around `MaterialTheme` that
-uses `dynamicColorScheme()` to generate a `ColorScheme` for you. You can animate the color scheme by
-passing in `animate = true`.
-
-Example:
-
-```kotlin
-@Composable
-fun MyTheme(
-    seedColor: Color,
-    isDark: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
-) {
+fun AppTheme(seedColor: Color, content: @Composable () -> Unit) {
     DynamicMaterialTheme(
         seedColor = seedColor,
-        isDark = isDark,
+        isDark = isSystemInDarkTheme(),
         animate = true,
         content = content,
     )
 }
 ```
 
-### DynamicMaterialExpressiveTheme
-
-For more vibrant and playful themes, use `DynamicMaterialExpressiveTheme`. This composable is
-designed for the Material 3 Expressive design system and defaults to using `PaletteStyle.Expressive`
-and `ColorSpec.SpecVersion.SPEC_2025` for optimal color generation.
-
-**Important:** Make sure to use `SPEC_2025` and `PaletteStyle.Expressive` for the best results:
+If you'd rather call `MaterialTheme` yourself, `rememberDynamicColorScheme` returns the
+`ColorScheme`, and `dynamicColorScheme` does the same outside of composition.
 
 ```kotlin
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-fun MyExpressiveTheme(
-  seedColor: Color,
-  isDark: Boolean = isSystemInDarkTheme(),
-  content: @Composable () -> Unit
-) {
-  DynamicMaterialExpressiveTheme(
-    seedColor = seedColor,
-    motionScheme = MotionScheme.expressive(),
-    isDark = isDark,
-    animate = true,
-    content = content,
-  )
+val colorScheme = rememberDynamicColorScheme(seedColor = seedColor, isDark = isDark)
+MaterialTheme(colorScheme = colorScheme, content = content)
+```
+
+All of them accept the same options:
+
+- `style` picks a [`PaletteStyle`](material-kolor-core/src/commonMain/kotlin/com/materialkolor/PaletteStyle.kt),
+  such as `TonalSpot` (the default), `Vibrant`, `Expressive` or `Monochrome`.
+- `primary`, `secondary`, `tertiary`, `neutral`, `neutralVariant` and `error` pin that palette to
+  an exact color. The seed still drives the rest.
+- `contrastLevel` runs from -1.0 to 1.0. `Contrast.Medium.value` and `Contrast.High.value` are
+  the standard steps.
+- `isAmoled` makes the dark background and surface pure black.
+- `specVersion` defaults to `SPEC_2025`. Pass `ColorSpec.SpecVersion.SPEC_2021` for the colors
+  MaterialKolor produced before 6.0.
+
+For Material 3 Expressive, use `DynamicMaterialExpressiveTheme`. It defaults to
+`PaletteStyle.Expressive` and accepts a `motionScheme`.
+
+## Your own theme
+
+`material-kolor-core` doesn't depend on Material 3. `rememberDynamicScheme` generates the scheme,
+and `MaterialKolors` reads its roles as Compose colors:
+
+```kotlin
+val scheme = rememberDynamicScheme(seedColor = seedColor, isDark = isDark)
+val kolors = remember(scheme) { MaterialKolors(scheme) }
+
+val accent = kolors.primary()
+val onAccent = kolors.onPrimary()
+```
+
+The roles are only part of what a scheme contains. Each scheme also carries the six tonal palettes
+the roles come from, and you can read any tone from 0 to 100 off them. Use them for the colors
+Material has no role for, such as a pressed state, a gradient stop or a severity scale. `onTone`
+gives you a readable content color from the same palette, aiming for WCAG AA by default.
+
+```kotlin
+val pressed = scheme.primaryPalette.toneColor(30)
+val badge = scheme.tertiaryPalette.toneColor(90)
+val onBadge = scheme.tertiaryPalette.onTone(90)
+```
+
+When you need more accent colors than the scheme has, `rememberTonalPalette` builds a palette from
+any color. You can also shift its hue towards your seed so it fits in with the rest of the theme:
+
+```kotlin
+val success = rememberTonalPalette(seed = Color(0xFF2E7D32), harmonizeWith = seedColor)
+val successContainer = success.toneColor(90)
+```
+
+[`samples/custom-theme`](samples/custom-theme) builds a complete theme this way.
+
+## Compose Unstyled
+
+[`material-kolor-unstyled`](material-kolor-unstyled/README.md) turns a scheme into Compose Unstyled
+theme values:
+
+```kotlin
+val AppTheme = buildThemeV2 {
+    val (light, dark) = rememberDynamicLightDarkColors(seedColor = seedColor)
+    properties[MaterialKolorTokens.colors] = light
+
+    colorScheme(ColorScheme.Dark) {
+        properties[MaterialKolorTokens.colors] = dark
+    }
 }
 ```
 
-The Expressive theme generates vibrant color schemes where the source color's hue may not directly
-appear in the final theme, creating more dynamic and playful color palettes.
+## Compose Fluent
 
-## Extensions
-
-Included in the library are some extensions for working with colors. You can check out
-the [/ktx](material-kolor/src/commonMain/kotlin/com/materialkolor/ktx) package for more information.
-
-But here are a couple useful examples:
-
-### Harmonize Colors
-
-If you want to harmonize a color with another you can use the `Color.harmonize()` function. You can
-read more about color harmonization on
-the [Material 3 Documentation](https://m3.material.io/styles/color/advanced/adjust-existing-colors#1cc12e43-237b-45b9-8fe0-9a3549c1f61e).
-
-Example:
+[`material-kolor-fluent`](material-kolor-fluent/README.md) generates Fluent's accent shades from a
+seed:
 
 ```kotlin
-val newColor = MaterialTheme.colorScheme.primary.harmonize(Color.Blue)
-```
-
-There is an additional function specifically for harmonizing with the primary color:
-
-```kotlin
-val newColor = Color.Blue.harmonizeWithPrimary()
-```
-
-**Note:** `Color.harmonize()` has an optional parameter `matchSaturation` which when set to `true`
-will adjust the saturation from the other color.
-
-### Lighten and Darken
-
-You can lighten or darken a color using the `Color.lighten()` and `Color.darken()` functions.
-
-For example:
-
-```kotlin
-val newColor = MaterialTheme.colorScheme.primary.lighten(0.2f)
-```
-
-Check out the demo app for a full example.
-
-### Color Temperature
-
-You can determine if a `Color` is warm or cold using the following:
-
-```kotlin
-val isWarm = MaterialTheme.colorScheme.primary.isWarm()
-val isCold = MaterialTheme.colorScheme.primary.isCold()
-```
-
-## Generating from an Image
-
-You can calculate a seed color, or colors that are suitable for UI theming from an image. This is
-useful for generating a color scheme from a user's profile picture, or a background image.
-
-To do so you can call `ImageBitmap.themeColors()`, `ImageBitmap.themeColor()` or the `@Composable`
-function `rememberThemeColors()` or `rememberThemeColor()`:
-
-```kotlin
-fun calculateSeedColor(bitmap: ImageBitmap): Color {
-    val suitableColors = bitmap.themeColors(fallback = Color.Blue)
-    return suitableColors.first()
+FluentTheme(colors = rememberFluentColors(seedColor = seedColor)) {
+    App()
 }
 ```
 
-See [`ImageBitmap.kt`](material-kolor/src/commonMain/kotlin/com/materialkolor/ktx/ImageBitmap.kt)
-for more information.
+## Colors from an image
 
-Or in Compose land:
+[`material-kolor-palette`](material-kolor-palette/README.md) uses kmpalette to pick a seed color
+from an image:
 
 ```kotlin
-@Composable
-fun DynamicTheme(image: ImageBitmap, content: @Composable () -> Unit) {
-    val seedColor = rememberThemeColor(image, fallback = MaterialTheme.colorScheme.primary)
-
-  DynamicMaterialTheme(
-        seedColor = seedColor,
-        content = content
-    )
-}
+val seedColor = rememberThemeColor(
+    loader = ByteArrayLoader,
+    input = imageBytes,
+    fallback = MaterialTheme.colorScheme.primary,
+)
 ```
 
-**Note:** This approach can be pretty slow, so I wouldn't really recommend using it in your UI
-unless you are eagerly loading the colors.
+> [!NOTE]
+> The `ImageBitmap` helpers in core still work, but they are deprecated and will be removed in
+> 7.0.
+
+## Color helpers
+
+`com.materialkolor.ktx` has a few extensions for working with colors directly:
+
+```kotlin
+val harmonized = Color.Blue.harmonize(brandColor)
+val alsoHarmonized = MaterialTheme.colorScheme.harmonizeWithPrimary(Color.Blue)
+val lighter = color.lighten(1.5f)
+val warm = color.isWarm()
+val readable = textColor.hasEnoughContrast(background, ContrastThreshold.WcagAaNormalText)
+```
+
+## Samples
+
+[`samples`](samples) has one small to-do app built four times, once for each UI stack. See
+[`samples/README.md`](samples/README.md) for screenshots.
+
+| Sample | Theme from | Run |
+|---|---|---|
+| [`material3`](samples/material3) | `material-kolor-material3` | `./gradlew :samples:material3:run` |
+| [`unstyled`](samples/unstyled) | `material-kolor-unstyled` | `./gradlew :samples:unstyled:run` |
+| [`fluent`](samples/fluent) | `material-kolor-fluent` | `./gradlew :samples:fluent:run` |
+| [`custom-theme`](samples/custom-theme) | `material-kolor-core` tonal palettes | `./gradlew :samples:custom-theme:run` |
+
+## How the engine is built
+
+`material-color-utilities` is generated from Google's upstream Kotlin source at the revision in
+the MCU badge above. A source transformer adjusts it for Kotlin Multiplatform and for this
+library's API. [`docs/upstream-psi.md`](docs/upstream-psi.md) describes each change it makes and
+how upstream updates are reviewed.
+
+The Compose ideas started from [m3color](https://github.com/Kyant0/m3color).
 
 ## License
 
-The module `material-color-utilities` is licensed under the Apache License, Version 2.0. See
-their [LICENSE](material-color-utilities/src/commonMain/kotlin/com/materialkolor/LICENSE) and their
-repository [here](https://github.com/material-foundation/material-color-utilities) for more
-information.
-
-### Changes from original source
-
-- Convert Java code to Kotlin
-- Convert library to Kotlin Multiplatform
-
-For the remaining code see [LICENSE](LICENSE) for more information.
+MaterialKolor is MIT licensed, see [LICENSE](LICENSE). The generated `material-color-utilities`
+code is under Google's
+[Apache 2.0 license](https://github.com/material-foundation/material-color-utilities/blob/main/LICENSE).

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        The poster's name, read on the handle of its sheet on a phone and as the pane title of the
+        docked poster everywhere else.
+    -->
+    <string name="shell_poster_label">Seed and theme controls</string>
+</resources>

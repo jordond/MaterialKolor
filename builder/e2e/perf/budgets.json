@@ -1,0 +1,21 @@
+{
+  "$comment": "The builder's perf budgets. The perf run reports against them and fails nothing. first-visit-bytes is gated by checkBudget in builder/apps/web instead. A budget has a max or a min, in its unit.",
+  "network": { "downloadMbps": 9, "rttMs": 60 },
+  "budgets": [
+    { "id": "first-visit-bytes", "what": "First visit bytes on the wire before the first frame", "unit": "bytes", "max": 4200000 },
+    { "id": "splash-paint", "what": "Splash first contentful paint at 9 Mbps and 60 ms RTT", "unit": "ms", "max": 600 },
+    { "id": "first-frame-broadband", "what": "First Compose frame on broadband", "unit": "ms", "max": 2000 },
+    { "id": "first-frame-throttled", "what": "First Compose frame at 9 Mbps and 60 ms RTT", "unit": "ms", "max": 5000 },
+    { "id": "repeat-visit-frame", "what": "First Compose frame on a repeat visit at 9 Mbps and 60 ms RTT", "unit": "ms", "max": 1000 },
+    { "id": "seed-drag-frame-work", "what": "Seed picker drag, p95 of the work in each frame", "unit": "ms", "max": 8 },
+    { "id": "photo-candidates", "what": "A 12 MP photo dropped to its seed candidates", "unit": "ms", "max": 150 },
+    { "id": "photo-thumbnail", "what": "A 12 MP photo dropped to its thumbnail", "unit": "ms", "max": 100 },
+    { "id": "heap", "what": "JS and wasm heap after the scripted run, desktop Chromium", "unit": "bytes", "max": 200000000 },
+    { "id": "slowest-interaction", "what": "Interaction to next paint, the slowest interaction of the run", "unit": "ms", "max": 200 },
+    { "id": "switch-reveal-fps", "what": "Frame rate while a library switch reveals the new skin", "unit": "fps", "min": 57 },
+    { "id": "other-origin-requests", "what": "Requests to other origins before the first frame", "unit": "requests", "max": 0 },
+    { "id": "split-drag-frame-work", "what": "Split handle drag, p95 of the work in each frame", "unit": "ms", "max": 4 },
+    { "id": "split-drag-recompositions", "what": "Recompositions during a split handle drag", "unit": "count", "max": 0 },
+    { "id": "theme-resolve", "what": "One theme resolve, p95 over a run of seed changes", "unit": "ms", "max": 4 }
+  ]
+}

@@ -1,0 +1,30 @@
+public final class com/materialkolor/palette/DynamicSchemeKt {
+	public static final fun rememberDynamicScheme-UygoVkE (Lcom/kmpalette/PaletteState;JZLandroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Lcom/materialkolor/PaletteStyle;DLcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;Lcom/materialkolor/dynamiccolor/DynamicScheme$Platform;Landroidx/compose/runtime/Composer;III)Lcom/materialkolor/dynamiccolor/DynamicScheme;
+}
+
+public final class com/materialkolor/palette/PaletteKt {
+	public static final fun seedColorOrNull (Lcom/kmpalette/palette/graphics/Palette;)Landroidx/compose/ui/graphics/Color;
+	public static final fun themeColor-bw27NRU (Lcom/kmpalette/palette/graphics/Palette;JZ)J
+	public static synthetic fun themeColor-bw27NRU$default (Lcom/kmpalette/palette/graphics/Palette;JZILjava/lang/Object;)J
+	public static final fun themeColorOrNull (Lcom/kmpalette/palette/graphics/Palette;Z)Landroidx/compose/ui/graphics/Color;
+	public static synthetic fun themeColorOrNull$default (Lcom/kmpalette/palette/graphics/Palette;ZILjava/lang/Object;)Landroidx/compose/ui/graphics/Color;
+	public static final fun themeColors-RPmYEkk (Lcom/kmpalette/palette/graphics/Palette;JIZ)Ljava/util/List;
+	public static synthetic fun themeColors-RPmYEkk$default (Lcom/kmpalette/palette/graphics/Palette;JIZILjava/lang/Object;)Ljava/util/List;
+	public static final fun toHct (Lcom/kmpalette/palette/graphics/Palette$Swatch;)Lcom/materialkolor/hct/Hct;
+}
+
+public final class com/materialkolor/palette/PaletteStateKt {
+	public static final fun themeColor-bw27NRU (Lcom/kmpalette/PaletteState;JZ)J
+	public static synthetic fun themeColor-bw27NRU$default (Lcom/kmpalette/PaletteState;JZILjava/lang/Object;)J
+	public static final fun themeColorOrNull (Lcom/kmpalette/DominantColorState;Z)Landroidx/compose/ui/graphics/Color;
+	public static final fun themeColorOrNull (Lcom/kmpalette/PaletteState;Z)Landroidx/compose/ui/graphics/Color;
+	public static synthetic fun themeColorOrNull$default (Lcom/kmpalette/DominantColorState;ZILjava/lang/Object;)Landroidx/compose/ui/graphics/Color;
+	public static synthetic fun themeColorOrNull$default (Lcom/kmpalette/PaletteState;ZILjava/lang/Object;)Landroidx/compose/ui/graphics/Color;
+}
+
+public final class com/materialkolor/palette/RememberThemeColorKt {
+	public static final fun rememberPainterThemeColor-OadGlvw (Landroidx/compose/ui/graphics/painter/Painter;JZILkotlin/coroutines/CoroutineContext;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)J
+	public static final fun rememberThemeColor-TgFrcIs (Lcom/kmpalette/loader/ImageBitmapLoader;Ljava/lang/Object;JZILkotlin/coroutines/CoroutineContext;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)J
+	public static final fun rememberThemeColors-lVb_Clg (Lcom/kmpalette/loader/ImageBitmapLoader;Ljava/lang/Object;JIZILkotlin/coroutines/CoroutineContext;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)Ljava/util/List;
+}
+

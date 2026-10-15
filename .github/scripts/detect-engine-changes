@@ -1,0 +1,75 @@
+#!/bin/bash
+set -euo pipefail
+
+# Decides which slow CI lanes a pull request needs from the files it changes. Every other event runs
+# the full matrix.
+
+usage() {
+    echo "Usage: $0 --github-output <file>"
+    echo "  Reads EVENT_NAME, and BASE_SHA for pull requests"
+    echo "  Appends engine and apple, each true or false"
+}
+
+github_output=""
+while [[ $# -gt 0 ]]; do
+    case $1 in
+    --github-output)
+        if [[ $# -lt 2 || -z "$2" ]]; then
+            usage >&2
+            exit 1
+        fi
+        github_output="$2"
+        shift 2
+        ;;
+    *)
+        echo "Unknown option: $1" >&2
+        usage >&2
+        exit 1
+        ;;
+    esac
+done
+if [[ -z "$github_output" || -z "${EVENT_NAME:-}" ]]; then
+    usage >&2
+    exit 1
+fi
+
+if [[ "$EVENT_NAME" != pull_request ]]; then
+    echo "Event is '$EVENT_NAME': running the full matrix."
+    printf 'engine=true\napple=true\n' >> "$github_output"
+    exit 0
+fi
+if [[ -z "${BASE_SHA:-}" ]]; then
+    usage >&2
+    exit 1
+fi
+
+# Paths that can affect the generated engine, the PSI source transformer, the upstream scripts, or
+# the publication and artifact-only consumer verification. `tools/` covers the pinned upstream
+# checkout and the transformer alike, and the module pattern picks up any new material-kolor-*
+# module.
+engine_paths='^(material-(color-utilities|kolor-[^/]+)/|tools/|build-logic/|gradle/|kotlin-js-store/|settings\.gradle\.kts$|build\.gradle\.kts$|gradle\.properties$|gradlew(\.bat)?$|\.github/workflows/ci\.yml$|\.github/scripts/|\.github/tests/)'
+
+# The macOS lane is slow, so pull requests only run it for the MCU engine, its transformer and
+# upstream pin, this workflow and this script. Every push to main, preview and next still runs it
+# for everything else.
+apple_paths='^(material-color-utilities/|tools/mcu-|gradle/mcu-upstream\.lock\.json$|\.github/workflows/ci\.yml$|\.github/scripts/detect-engine-changes$)'
+
+changed=$(git diff --name-only "$BASE_SHA...HEAD")
+echo 'Files changed in this pull request:'
+echo "$changed"
+
+if grep -qE "$engine_paths" <<< "$changed"; then
+    echo 'Engine or build machinery touched: running the publication lane.'
+    echo 'engine=true' >> "$github_output"
+else
+    echo 'No engine or build machinery changes: skipping the publication lane.'
+    echo 'engine=false' >> "$github_output"
+fi
+
+if grep -qE "$apple_paths" <<< "$changed"; then
+    echo 'MCU engine touched: running the Apple lane.'
+    echo 'apple=true' >> "$github_output"
+else
+    echo 'No MCU engine changes: skipping the Apple lane.'
+    echo 'apple=false' >> "$github_output"
+fi

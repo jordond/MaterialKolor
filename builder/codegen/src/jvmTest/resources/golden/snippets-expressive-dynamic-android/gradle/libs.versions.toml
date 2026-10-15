@@ -1,0 +1,7 @@
+[versions]
+materialKolor = "6.0.0"
+compose-material3 = "1.5.0-alpha28"
+
+[libraries]
+materialKolor-material3 = { module = "com.materialkolor:material-kolor-material3", version.ref = "materialKolor" }
+androidx-compose-material3 = { module = "androidx.compose.material3:material3", version.ref = "compose-material3" }

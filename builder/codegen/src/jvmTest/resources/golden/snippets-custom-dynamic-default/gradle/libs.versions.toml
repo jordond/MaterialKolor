@@ -1,0 +1,5 @@
+[versions]
+materialKolor = "6.0.0"
+
+[libraries]
+materialKolor-core = { module = "com.materialkolor:material-kolor-core", version.ref = "materialKolor" }

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The button at the foot of the poster that opens the Fine-tune sheet, and the sheet's title. -->
+    <string name="finetune_title">Fine-tune</string>
+    <!-- What the Fine-tune button reads out. The arguments are the title above and the summary line under it. -->
+    <string name="finetune_button">%1$s, %2$s</string>
+    <!-- The sheet's close button, read out in place of its glyph. -->
+    <string name="finetune_close">Close Fine-tune</string>
+
+    <!-- The summary under the button's title while no key color or pin is set. -->
+    <string name="finetune_summary_from_seed">Colors from seed</string>
+    <!-- The spec in the summary. The argument is the spec's year, such as 2021. -->
+    <string name="finetune_summary_spec">%1$s spec</string>
+    <!-- The summary line, the colors part then the spec. Keep the dot between them. -->
+    <string name="finetune_summary">%1$s · %2$s</string>
+    <!-- The summary line with the extra colors count after the spec. -->
+    <string name="finetune_summary_extras">%1$s · %2$s · %3$s</string>
+
+    <!-- The eyebrow over the locks that keep something when Shuffle draws a new seed. -->
+    <string name="finetune_locks_label">Shuffle keeps</string>
+    <!-- The lock that keeps the seed's hue on shuffle. Short, since the eyebrow above says what it keeps it from. -->
+    <string name="finetune_keep_hue">Hue</string>
+    <!-- What the hue lock reads out, whole, for someone who hears it without the eyebrow. -->
+    <string name="finetune_keep_hue_spoken">Keep the hue when shuffling</string>
+    <!-- The lock that keeps the whole seed on shuffle. -->
+    <string name="finetune_keep_seed">Seed</string>
+    <!-- What the seed lock reads out. -->
+    <string name="finetune_keep_seed_spoken">Keep the seed when shuffling</string>
+</resources>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The label over the extra colors editor. -->
+    <string name="accents_label">Extra colors</string>
+    <!-- Under the label while the theme has no extra colors. -->
+    <string name="accents_empty">Extra colors are for what the scheme has no role for, such as a brand, a status or a category color.</string>
+    <!-- Appends a new extra color. -->
+    <string name="accents_add">Add extra color</string>
+    <!-- Under Add once the theme holds as many extra colors as an export takes. The argument is that number. -->
+    <string name="accents_cap">A theme holds up to %1$d extra colors.</string>
+
+    <!-- Each extra color's name field. The argument is its place in the list, from 1. -->
+    <string name="accents_name">Extra color %1$d name</string>
+    <!-- Removes an extra color. The argument is its name. -->
+    <string name="accents_remove">Remove %1$s</string>
+    <!-- Each extra color's seed field. The argument is its name. -->
+    <string name="accents_seed">%1$s seed</string>
+    <!-- Opens the color picker on an extra color's seed. The argument is its name. -->
+    <string name="accents_pick">Pick %1$s seed</string>
+    <!-- Pulls an extra color's seed toward the theme seed. The argument is its name. -->
+    <string name="accents_harmonize">Harmonize %1$s with seed</string>
+    <!-- Shows an extra color's ramp on the Palettes tab. The argument is its name. -->
+    <string name="accents_show_on_ramp">Show %1$s on ramp</string>
+
+    <!-- The modes an extra color's four colors are shown in. -->
+    <string name="accents_mode_light">Light</string>
+    <string name="accents_mode_dark">Dark</string>
+    <!-- Beside one mode's four colors. The arguments are the mode above and the two ratios, each to one decimal. -->
+    <string name="accents_ratios">%1$s, on color %2$s to 1, on container %3$s to 1</string>
+
+    <!-- The four tone sliders of an extra color. The argument is its name. -->
+    <string name="accents_tone_light_color">%1$s light color tone</string>
+    <string name="accents_tone_light_container">%1$s light container tone</string>
+    <string name="accents_tone_dark_color">%1$s dark color tone</string>
+    <string name="accents_tone_dark_container">%1$s dark container tone</string>
+    <!-- Beside each tone slider, the tone it holds. -->
+    <string name="accents_tone_value">Tone %1$d</string>
+
+    <!-- The label over the contrast an extra color's on colors have to clear. -->
+    <string name="accents_threshold">On colors clear</string>
+    <!-- Read out for that choice. The argument is the extra color's name. -->
+    <string name="accents_threshold_for">%1$s on colors clear</string>
+    <!-- The contrast rules an on color can be held to. -->
+    <string name="accents_threshold_aa_large">AA large</string>
+    <string name="accents_threshold_aa">AA</string>
+    <string name="accents_threshold_aaa">AAA</string>
+
+    <!-- Under a name field, what is wrong with the name typed. -->
+    <string name="accents_name_invalid">Use letters, digits and underscores, starting with a letter or underscore.</string>
+    <string name="accents_name_keyword">Kotlin keeps that name for itself.</string>
+    <!-- The argument is the most bytes a name may take. -->
+    <string name="accents_name_too_long">Keep the name to %1$d bytes or fewer.</string>
+    <string name="accents_name_duplicate">Another extra color already has that name.</string>
+    <string name="accents_name_case_clash">Another extra color has that name with other capitals.</string>
+    <string name="accents_name_role">The scheme already has a role by that name.</string>
+    <string name="accents_name_taken">The export already uses that name for something else.</string>
+</resources>

@@ -1,10 +1,11 @@
 pluginManagement {
     repositories {
         gradlePluginPortal()
-        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
         google()
         mavenCentral()
     }
+
+    includeBuild("build-logic")
 }
 
 dependencyResolutionManagement {
@@ -12,12 +13,11 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     }
 }
 
 plugins {
-    id("com.gradle.develocity") version "4.5.1"
+    id("com.gradle.develocity") version "4.6.0"
     id("org.gradle.toolchains.foojay-resolver-convention").version("1.0.0")
 }
 
@@ -35,9 +35,35 @@ develocity {
 rootProject.name = "MaterialKolor"
 
 include(
-    ":material-kolor",
+    ":material-kolor-core",
+    ":material-kolor-material3",
+    ":material-kolor-palette",
+    ":material-kolor-unstyled",
+    ":material-kolor-fluent",
     ":material-color-utilities",
     ":mcu-upstream",
-    ":builder:shared",
-    ":builder:android",
 )
+
+include(
+    ":samples:shared",
+    ":samples:custom-theme",
+    ":samples:fluent",
+    ":samples:material3",
+    ":samples:unstyled",
+    ":samples:screenshots",
+)
+
+include(
+    ":builder:domain",
+    ":builder:codegen",
+    ":builder:engine",
+    ":builder:kit",
+    ":builder:preview",
+    ":builder:shared",
+    ":builder:apps:web",
+    ":builder:apps:desktop",
+)
+
+include(":mcu-source-transformer")
+project(":mcu-source-transformer").projectDir = file("tools/mcu-source-transformer")
+project(":mcu-upstream").projectDir = file("tools/mcu-upstream")

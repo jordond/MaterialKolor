@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        The buttons of the text toolbar a touch selection in a text field shows where overlays draw in
+        the page, on the web. Each one acts on the field's selection.
+    -->
+    <string name="text_toolbar_cut">Cut</string>
+    <string name="text_toolbar_copy">Copy</string>
+    <string name="text_toolbar_paste">Paste</string>
+    <string name="text_toolbar_select_all">Select all</string>
+</resources>

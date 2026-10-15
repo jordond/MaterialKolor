@@ -1,0 +1,405 @@
+package com.materialkolor.builder.feature.topbar
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
+import androidx.compose.ui.platform.testTag
+import com.materialkolor.builder.core.session.Timeline
+import com.materialkolor.builder.domain.persist.Appearance
+import com.materialkolor.builder.feature.about.GITHUB_URL
+import com.materialkolor.builder.feature.command.LocalAppleKeys
+import com.materialkolor.builder.feature.command.LocalShortcutFocus
+import com.materialkolor.builder.feature.command.Shortcut
+import com.materialkolor.builder.feature.history.TimelineList
+import com.materialkolor.builder.feature.poster.switcherPulse
+import com.materialkolor.builder.feature.workspace.Panel
+import com.materialkolor.builder.feature.workspace.WorkspaceAction
+import com.materialkolor.builder.feature.workspace.WorkspaceModel
+import com.materialkolor.builder.generated.resources.Res
+import com.materialkolor.builder.generated.resources.history_title
+import com.materialkolor.builder.generated.resources.history_tooltip
+import com.materialkolor.builder.generated.resources.topbar_about
+import com.materialkolor.builder.generated.resources.topbar_appearance_dark
+import com.materialkolor.builder.generated.resources.topbar_appearance_light
+import com.materialkolor.builder.generated.resources.topbar_appearance_system
+import com.materialkolor.builder.generated.resources.topbar_commands
+import com.materialkolor.builder.generated.resources.topbar_export
+import com.materialkolor.builder.generated.resources.topbar_github
+import com.materialkolor.builder.generated.resources.topbar_help
+import com.materialkolor.builder.generated.resources.topbar_more
+import com.materialkolor.builder.generated.resources.topbar_share
+import com.materialkolor.builder.generated.resources.topbar_shortcuts
+import com.materialkolor.builder.kit.control.BuilderButton
+import com.materialkolor.builder.kit.control.BuilderIconButton
+import com.materialkolor.builder.kit.control.BuilderMenu
+import com.materialkolor.builder.kit.control.BuilderMenuItem
+import com.materialkolor.builder.kit.control.BuilderPopover
+import com.materialkolor.builder.kit.control.Emphasis
+import com.materialkolor.builder.kit.icon.IconId
+import com.materialkolor.builder.kit.layout.LocalLayout
+import com.materialkolor.builder.kit.layout.WindowClass
+import com.materialkolor.builder.kit.shell.TopBarControlMaxHeight
+import com.materialkolor.builder.kit.shell.TopBarRegion
+import dev.stateholder.dispatcher.Dispatcher
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
+
+/**
+ * The top bar, the library switcher on the start edge and the project's actions on the end edge.
+ *
+ * On a wide window it holds the switcher, the command palette, undo, redo, History, Share, Export
+ * code and the overflow menu. The actions always get their full width, and the switcher takes what
+ * is left, segmented where the window is wide and the row fits, a dropdown otherwise. A wide window
+ * shows Share with its label and the command palette with its key in a keycap, and turns both into
+ * glyphs when that makes the room the segmented row needs. A Medium window keeps the dropdown's name
+ * whole, moving History, then the command palette, then redo, then undo into the overflow until it
+ * fits. Phones show the mark and the project's name with Share, Export as a glyph and the overflow,
+ * which holds History, the command palette, undo and redo, and the libraries in a row of chips under
+ * the bar.
+ *
+ * The History list opens in a popover under the History button, or under the overflow button once
+ * History has moved there. It stays open while someone jumps between steps and hands focus
+ * back to whatever opened it, the page itself when the H key did.
+ *
+ * A library switch goes through the reveal from the control that made it as one undo entry, the
+ * style it moves onto or off M3 Expressive included. The bar keeps its own skin across a switch.
+ * [focus] comes from the workspace, which hands Share and Export focus back when their panels close,
+ * and puts focus back on the switcher when a switch leaves it nowhere.
+ */
+@Composable
+internal fun TopBarContent(
+    state: WorkspaceModel.State,
+    dispatcher: Dispatcher<WorkspaceAction>,
+    modifier: Modifier = Modifier,
+    focus: TopBarFocus = rememberTopBarFocus(state.document.library),
+) {
+    var menuOpen by remember { mutableStateOf(false) }
+    val currentRow = remember { FocusRequester() }
+    val windowClass = LocalLayout.current.windowClass
+    val fit = remember { MediumBarFit() }
+    val overflowed = when (windowClass) {
+        WindowClass.Compact -> MediumOverflowOrder.toSet()
+        WindowClass.Medium -> fit.overflowed
+        WindowClass.Expanded -> emptySet()
+    }
+    val report = LocalSwitcherForm.current
+    if (report != null) SideEffect { report.overflowed = overflowed }
+    // The switcher changes form with the window class, so focus it held follows it to the new one.
+    LaunchedEffect(windowClass) { focus.restoreAfterRefit(TopBarControl.Library) }
+    // A wide bar shows Share's label and the palette's keycap while the segmented switcher still fits.
+    val wideFit = remember { WideBarFit() }
+    val wideForms = windowClass == WindowClass.Expanded && !wideFit.compact
+    LaunchedEffect(wideForms) {
+        focus.restoreAfterRefit(TopBarControl.Share)
+        focus.restoreAfterRefit(TopBarControl.Commands)
+    }
+    val items = overflowItems(state, dispatcher, overflowed, LocalUriHandler.current)
+    val selected = LibraryChoice.of(state.document)
+    val switcherModifier = Modifier
+        .testTag(LIBRARY_SWITCHER_TAG)
+        // A dropdown's floating label stays inside the bar.
+        .shrinkToHeight(TopBarControlMaxHeight)
+        .topBarFocus(focus, TopBarControl.Library)
+        .switcherPulse(state, dispatcher)
+        .reportSwitcherOrigin(report)
+    val onSwitch = { choice: LibraryChoice, origin: Offset ->
+        dispatcher.dispatch(WorkspaceAction.PickLibrary(choice, origin))
+    }
+    // The list hangs from More once History has moved into it, with More kept in one place either way.
+    val moreButton = rememberMovable {
+        HistoryPopover(
+            expanded = state.panel == Panel.History && TopBarControl.History in overflowed,
+            timeline = state.timeline,
+            dispatcher = dispatcher,
+            currentRow = currentRow,
+        ) {
+            BuilderMenu(
+                expanded = menuOpen,
+                onDismissRequest = { menuOpen = false },
+                items = items,
+            ) {
+                TopBarIconButton(
+                    control = TopBarControl.More,
+                    focus = focus,
+                    icon = IconId.More,
+                    description = stringResource(Res.string.topbar_more),
+                    onClick = { menuOpen = true },
+                )
+            }
+        }
+    }
+    val historyButton = rememberMovable {
+        HistoryPopover(
+            expanded = state.panel == Panel.History,
+            timeline = state.timeline,
+            dispatcher = dispatcher,
+            currentRow = currentRow,
+        ) {
+            TopBarIconButton(
+                control = TopBarControl.History,
+                focus = focus,
+                icon = IconId.History,
+                description = stringResource(Res.string.history_title),
+                tooltip = stringResource(
+                    Res.string.history_tooltip,
+                    Shortcut.History.text(LocalAppleKeys.current),
+                ),
+                onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.History)) },
+            )
+        }
+    }
+    val actions: @Composable () -> Unit = {
+        val share = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Share)) }
+        if (wideForms) {
+            BuilderButton(
+                onClick = share,
+                label = stringResource(Res.string.topbar_share),
+                modifier = Modifier.topBarFocus(focus, TopBarControl.Share),
+                emphasis = Emphasis.Secondary,
+            )
+        } else {
+            TopBarIconButton(
+                control = TopBarControl.Share,
+                focus = focus,
+                icon = IconId.Share,
+                description = stringResource(Res.string.topbar_share),
+                onClick = share,
+            )
+        }
+        val export = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Export)) }
+        // A phone's bar has room for the glyph alone, still named Export code.
+        if (windowClass == WindowClass.Compact) {
+            BuilderIconButton(
+                onClick = export,
+                icon = IconId.Export,
+                contentDescription = stringResource(Res.string.topbar_export),
+                modifier = Modifier.topBarFocus(focus, TopBarControl.Export),
+                emphasis = Emphasis.Primary,
+            )
+        } else {
+            BuilderButton(
+                onClick = export,
+                label = stringResource(Res.string.topbar_export),
+                modifier = Modifier.topBarFocus(focus, TopBarControl.Export),
+                emphasis = Emphasis.Primary,
+                icon = IconId.Export,
+            )
+        }
+        moreButton()
+    }
+
+    if (windowClass == WindowClass.Compact) {
+        Column(modifier) {
+            CompactTopBar(state.projectName, state.document.seed, Modifier.testTag(TOP_BAR_TAG)) { actions() }
+            LibraryChipRow(
+                selected = selected,
+                onSwitch = onSwitch,
+                switcherModifier = switcherModifier,
+            )
+        }
+    } else {
+        TopBarRegion(modifier.testTag(TOP_BAR_TAG)) {
+            // The actions take their full width first, since a row measures its weighted child last, and
+            // the switcher gets what is left, so More options is never squeezed.
+            if (windowClass == WindowClass.Medium) {
+                LibraryDropdown(
+                    selected = selected,
+                    onSwitch = onSwitch,
+                    fit = fit,
+                    modifier = Modifier.weight(1f),
+                    switcherModifier = switcherModifier,
+                )
+            } else {
+                val shownCompact = wideFit.compact
+                FittedLibrarySwitcher(
+                    selected = selected,
+                    modifier = Modifier.weight(1f),
+                    switcherModifier = switcherModifier,
+                    onSwitch = onSwitch,
+                    onRefit = { focus.restoreAfterRefit(TopBarControl.Library) },
+                    onFit = { needed, room -> wideFit.refit(needed, room, shownCompact) },
+                )
+            }
+            if (TopBarControl.Commands !in overflowed) {
+                CommandsButton(
+                    focus = focus,
+                    keycap = wideForms,
+                    onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Palette)) },
+                )
+            }
+            if (TopBarControl.Undo !in overflowed) {
+                TopBarIconButton(
+                    control = TopBarControl.Undo,
+                    focus = focus,
+                    icon = IconId.Undo,
+                    description = undoText(state.history, state.document),
+                    enabled = state.history.canUndo,
+                    onClick = { dispatcher.dispatch(WorkspaceAction.Undo) },
+                )
+            }
+            if (TopBarControl.Redo !in overflowed) {
+                TopBarIconButton(
+                    control = TopBarControl.Redo,
+                    focus = focus,
+                    icon = IconId.Redo,
+                    description = redoText(state.history, state.document),
+                    enabled = state.history.canRedo,
+                    onClick = { dispatcher.dispatch(WorkspaceAction.Redo) },
+                )
+            }
+            if (TopBarControl.History !in overflowed) historyButton()
+            actions()
+        }
+    }
+}
+
+/**
+ * The History list in a popover under [anchor], open while [expanded] holds. Focus starts on the
+ * step the theme is at, through [currentRow], and goes back to the anchor once the list closes, or
+ * to the page when the H key opened it.
+ */
+@Composable
+private fun HistoryPopover(
+    expanded: Boolean,
+    timeline: Timeline?,
+    dispatcher: Dispatcher<WorkspaceAction>,
+    currentRow: FocusRequester,
+    anchor: @Composable () -> Unit,
+) {
+    BuilderPopover(
+        expanded = expanded,
+        onDismissRequest = { dispatcher.dispatch(WorkspaceAction.ClosePanel) },
+        initialFocus = currentRow,
+        returnFocusTo = LocalShortcutFocus.current?.returnFocusFor(Panel.History, otherwise = null),
+        anchor = anchor,
+    ) {
+        if (timeline != null) TimelineList(timeline, dispatcher, currentRow)
+    }
+}
+
+/**
+ * [content] as movable content, so wherever the top bar draws it next it moves there with all
+ * it holds rather than starting over. An open History list stays open that way, and on the desktop,
+ * where its popover is a window of its own, no window closes while a skin switch measures the page,
+ * which crashes the scene. It always draws the latest [content].
+ */
+@Composable
+private fun rememberMovable(content: @Composable () -> Unit): @Composable () -> Unit {
+    val latest by rememberUpdatedState(content)
+    return remember { movableContentOf { latest() } }
+}
+
+/**
+ * The overflow menu, the chrome's appearance, Help, the shortcuts, About and GitHub. Whichever of
+ * History, the command palette, undo and redo the bar has moved in come first, all four on a phone.
+ */
+@Composable
+private fun overflowItems(
+    state: WorkspaceModel.State,
+    dispatcher: Dispatcher<WorkspaceAction>,
+    overflowed: Set<TopBarControl>,
+    uriHandler: UriHandler,
+): List<BuilderMenuItem> {
+    val appearance = state.preferences.appearance
+    val appearanceItems = Appearance.entries.map { option ->
+        BuilderMenuItem(
+            label = stringResource(appearanceLabel(option)),
+            onClick = { dispatcher.dispatch(WorkspaceAction.SetAppearance(option)) },
+            icon = option.icon,
+            selected = option == appearance,
+        )
+    }
+    val movedItems = buildList {
+        if (TopBarControl.Commands in overflowed) {
+            add(
+                BuilderMenuItem(
+                    label = stringResource(Res.string.topbar_commands),
+                    onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Palette)) },
+                    icon = IconId.Command,
+                ),
+            )
+        }
+        if (TopBarControl.Undo in overflowed) {
+            add(
+                BuilderMenuItem(
+                    label = undoText(state.history, state.document),
+                    onClick = { dispatcher.dispatch(WorkspaceAction.Undo) },
+                    icon = IconId.Undo,
+                    enabled = state.history.canUndo,
+                ),
+            )
+        }
+        if (TopBarControl.Redo in overflowed) {
+            add(
+                BuilderMenuItem(
+                    label = redoText(state.history, state.document),
+                    onClick = { dispatcher.dispatch(WorkspaceAction.Redo) },
+                    icon = IconId.Redo,
+                    enabled = state.history.canRedo,
+                ),
+            )
+        }
+        if (TopBarControl.History in overflowed) {
+            add(
+                BuilderMenuItem(
+                    label = stringResource(Res.string.history_title),
+                    onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.History)) },
+                    icon = IconId.History,
+                ),
+            )
+        }
+    }
+    return movedItems +
+        appearanceItems +
+        listOf(
+            BuilderMenuItem(
+                label = stringResource(Res.string.topbar_help),
+                onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Help)) },
+                icon = IconId.Help,
+            ),
+            BuilderMenuItem(
+                label = stringResource(Res.string.topbar_shortcuts),
+                onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.CheatSheet)) },
+                icon = IconId.Keyboard,
+            ),
+            BuilderMenuItem(
+                label = stringResource(Res.string.topbar_about),
+                onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.About)) },
+                icon = IconId.Info,
+            ),
+            BuilderMenuItem(
+                label = stringResource(Res.string.topbar_github),
+                onClick = { uriHandler.openUri(GITHUB_URL) },
+                icon = IconId.ExternalLink,
+            ),
+        )
+}
+
+private fun appearanceLabel(appearance: Appearance): StringResource =
+    when (appearance) {
+        Appearance.System -> Res.string.topbar_appearance_system
+        Appearance.Light -> Res.string.topbar_appearance_light
+        Appearance.Dark -> Res.string.topbar_appearance_dark
+    }
+
+/**
+ * The glyph an appearance row shows, so its text starts where the other rows' text does.
+ */
+private val Appearance.icon: IconId
+    get() = when (this) {
+        Appearance.System -> IconId.Desktop
+        Appearance.Light -> IconId.Sun
+        Appearance.Dark -> IconId.Moon
+    }
