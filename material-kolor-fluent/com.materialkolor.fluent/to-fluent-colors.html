@@ -1,0 +1,117 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>toFluentColors</title>
+<link href="../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../styles/style.css" rel="Stylesheet">
+<link href="../../styles/main.css" rel="Stylesheet">
+<link href="../../styles/prism.css" rel="Stylesheet">
+<link href="../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../index.html" tabindex="1">
+                    MaterialKolor
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":material-kolor-fluent/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":material-kolor-fluent/commonMain" data-filter=":material-kolor-fluent/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    MaterialKolor
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="member" id="content" pageids="material-kolor-fluent::com.materialkolor.fluent//toFluentColors/com.materialkolor.dynamiccolor.DynamicScheme#/PointingToDeclaration//-670856867">
+  <div class="breadcrumbs"><a href="../index.html">material-kolor-fluent</a><span class="delimiter">/</span><a href="index.html">com.materialkolor.fluent</a><span class="delimiter">/</span><span class="current">toFluentColors</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>to</span><wbr><span>Fluent</span><wbr><span><span>Colors</span></span></h1>
+  </div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-kolor-fluent/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span data-unresolved-link="com.materialkolor.dynamiccolor/DynamicScheme///PointingToDeclaration/">DynamicScheme</span><span class="token punctuation">.</span><a href="to-fluent-colors.html"><span class="token function">toFluentColors</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="io.github.composefluent/Colors///PointingToDeclaration/">Colors</span></div><p class="paragraph">Builds Fluent <span data-unresolved-link="io.github.composefluent/Colors///PointingToDeclaration/">Colors</span> from this scheme's primary ramp.</p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">FluentTheme(colors = scheme.toFluentColors()) {<br>    Text("Themed from a seed colour")<br>}</code></pre><span class="copy-tooltip"><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div><span class="copy-icon"></span></span></div><p class="paragraph">Fluent builds light and dark from seven shades and a flag. <code class="lang-kotlin">lightColors</code> and <code class="lang-kotlin">darkColors</code> both call <code class="lang-kotlin">generateShades</code> and differ only in the <code class="lang-kotlin">darkMode</code> they pass on. This reads <span data-unresolved-link="com.materialkolor.dynamiccolor/DynamicScheme/isDark/#/PointingToDeclaration/">DynamicScheme.isDark</span> for that flag, so a dark scheme always gives dark Fluent colors. From <code class="lang-kotlin">SPEC_2025</code> the scheme's primary ramp also changes between light and dark, so the shades differ as well.</p><p class="paragraph">Only the primary ramp is used. Fluent's <code class="lang-kotlin">success</code>, <code class="lang-kotlin">caution</code> and <code class="lang-kotlin">critical</code> come from <code class="lang-kotlin">Colors.system</code>, which is built from constants and has no setter a caller can reach, so a scheme's secondary, tertiary and error ramps have nowhere to go. Pass another ramp to <a href="to-fluent-shades.html">toFluentShades</a> yourself if you want a Fluent theme built on one of them.</p><p class="paragraph">The ramp this reads is the scheme's, which is not the same as the seed's own. A <a href="../../material-kolor-core/com.materialkolor/-palette-style/index.html">com.materialkolor.PaletteStyle</a> reshapes chroma on the way through, so <code class="lang-kotlin">TonalSpot</code> gives a calmer accent than the seed and <code class="lang-kotlin">Fidelity</code> stays close to it. To get the seed exactly as it was handed over, skip the scheme.</p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">val shades = TonalPalette.from(seedColor).toFluentShades()</code></pre><span class="copy-tooltip"><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div><span class="copy-icon"></span></span></div><span class="kdoc-tag"><h4 class="">Receiver</h4><p class="paragraph">The scheme to take the primary ramp and the dark flag from.</p></span><span class="kdoc-tag"><h4 class="">Return</h4><p class="paragraph"><span data-unresolved-link="io.github.composefluent/Colors///PointingToDeclaration/">Colors</span> to hand to <code class="lang-kotlin">FluentTheme</code>.</p></span></div></div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
