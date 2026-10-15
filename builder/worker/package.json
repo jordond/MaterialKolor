@@ -12,7 +12,7 @@
     "@cloudflare/vitest-pool-workers": "0.23.0",
     "@cloudflare/workers-types": "5.20261010.1",
     "typescript": "7.0.2",
-    "vitest": "4.1.11",
+    "vitest": "5.0.4",
     "wrangler": "4.149.0"
   }
 }
