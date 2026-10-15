@@ -84,7 +84,7 @@ Workers.
 - **Pull requests** from this repo upload a preview version of the next Worker and comment its
   URL on the pull request. The comment updates on every push.
 - **Next** at [next.materialkolor.com](https://next.materialkolor.com) deploys on every push to
-  `next`. It is built with `-Psite.env=next`, so it is never indexed and its share links stay on
+  `main`. It is built with `-Psite.env=next`, so it is never indexed and its share links stay on
   next. It uses the MaterialKolor modules in this repo, as pull request previews do.
 - **Production** at [materialkolor.com](https://materialkolor.com) deploys from a
   `builder/<version>` tag. The tag must match `builder-version` in `gradle/libs.versions.toml`, and

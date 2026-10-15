@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - next
+      - main
     paths:
       - tools/mcu-upstream/src/main
 
@@ -18,7 +18,7 @@ permissions:
   contents: read
 
 env:
-  BASE_BRANCH: next
+  BASE_BRANCH: main
   BUMP_BRANCH: upstream/mcu
   BOT_NAME: github-actions[bot]
   BOT_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com

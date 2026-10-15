@@ -18,7 +18,7 @@ class DetectEngineChangesTest(unittest.TestCase):
         self.addCleanup(self.temporary.cleanup)
         self.repo = Path(self.temporary.name) / "repo"
         self.repo.mkdir()
-        self.git("init", "--quiet", "-b", "next")
+        self.git("init", "--quiet", "-b", "main")
         self.commit("README.md")
         self.base = self.git("rev-parse", "HEAD")
 

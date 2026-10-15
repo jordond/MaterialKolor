@@ -222,7 +222,7 @@ diff -u build/mcu-update/previous-report.tsv material-color-utilities/build/repo
 Run every gate. Review the API differences before running `updateKotlinAbi`, which needs macOS.
 After that, `checkKotlinAbi` should pass without further changes. Commit the submodule, the lock,
 any rule changes, the reviewed dumps and fixtures, and any migration notes together, for example as
-`fix(mcu): update upstream pin to <sha>`, and target `next`.
+`fix(mcu): update upstream pin to <sha>`, and target `main`.
 
 ### Golden fixtures
 
@@ -280,7 +280,7 @@ is read-only. It outputs the revisions, and a commit list for the pull request b
 commits, with a compare link for the rest. Upstream issue references and mentions are rewritten so
 they don't ping anyone in this repository.
 
-`.github/workflows/upstream.yml` keeps one rolling pull request from `upstream/mcu` into `next`:
+`.github/workflows/upstream.yml` keeps one rolling pull request from `upstream/mcu` into `main`:
 
 1. `preflight` fails fast if the token secret is missing.
 2. `prepare` runs upstream code through Gradle, so it has no write token. `plan-upstream` decides
@@ -299,11 +299,11 @@ always goes through the review described in [Updating the upstream pin](#updatin
 
 - With no open pull request, it opens one, unless a pull request for the same upstream revision
   was closed without merging. Closing it by hand snoozes the bump until upstream moves again.
-- An open pull request is rewritten when upstream moves or when the pin on `next` changes.
+- An open pull request is rewritten when upstream moves or when the pin on `main` changes.
   Commits from a maintainer stop the rewrite, and the bot comments once instead. "Update branch"
   merges and commits that only touch `<module>/api/**/*.api` don't count as maintainer commits,
   so a rewrite drops them and the dumps have to be pushed again.
-- If `next` already pins every relevant change, the pull request is closed. The branch is deleted
+- If `main` already pins every relevant change, the pull request is closed. The branch is deleted
   unless it has maintainer commits.
 - A branch with maintainer commits and no open pull request is left alone. Delete the branch to
   resume.

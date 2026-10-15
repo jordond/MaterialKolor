@@ -26,12 +26,12 @@ class PublishUpstreamTest(unittest.TestCase):
         self.origin = self.root / "origin.git"
         self.builder = self.root / "builder"
         self.checkout = self.root / "checkout"
-        subprocess.run([REAL_GIT, "init", "--quiet", "--bare", "-b", "next", str(self.origin)], check=True)
+        subprocess.run([REAL_GIT, "init", "--quiet", "--bare", "-b", "main", str(self.origin)], check=True)
         subprocess.run([REAL_GIT, "clone", "--quiet", str(self.origin), str(self.builder)],
                        check=True, capture_output=True)
         self.set_pin(self.builder, CURRENT)
         self.commit(self.builder, "README.md", "chore: base")
-        self.git(self.builder, "push", "--quiet", "origin", "HEAD:next")
+        self.git(self.builder, "push", "--quiet", "origin", "HEAD:main")
         self.base = self.git(self.builder, "rev-parse", "HEAD")
 
         # The bump is built in one clone and published from another, as the two jobs do.
@@ -106,7 +106,7 @@ class PublishUpstreamTest(unittest.TestCase):
             "CALL_LOG": str(self.log),
             "GH_TOKEN": TOKEN,
             "ACTION": action,
-            "BASE_BRANCH": "next",
+            "BASE_BRANCH": "main",
             "BUMP_BRANCH": "upstream/mcu",
             "NUMBER": "",
             "DELETE_BRANCH": "true",
@@ -141,7 +141,7 @@ class PublishUpstreamTest(unittest.TestCase):
         self.assertEqual(self.bump_head, self.origin_head())
         (create,) = self.calls("gh")
         self.assertEqual(["pr", "create"], create["args"][:2])
-        for flag, value in [("--base", "next"), ("--head", "upstream/mcu"), ("--label", "upstream"),
+        for flag, value in [("--base", "main"), ("--head", "upstream/mcu"), ("--label", "upstream"),
                             ("--title", "fix(mcu): update upstream pin to bbbbbbb")]:
             self.assertEqual(value, create["args"][create["args"].index(flag) + 1])
         body = create["body"]
@@ -208,7 +208,7 @@ class PublishUpstreamTest(unittest.TestCase):
     def test_base_off_the_base_branch_is_rejected(self):
         self.git(self.checkout, "-c", "user.email=x@example.invalid", "-c", "user.name=X", "commit",
                  "--quiet", "--allow-empty", "-m", "detached work")
-        self.assertBumpRejected("is not on next")
+        self.assertBumpRejected("is not on main")
 
     def test_encoded_token_is_masked(self):
         result = self.publish("update")

@@ -50,7 +50,7 @@ fi
 engine_paths='^(material-(color-utilities|kolor-[^/]+)/|tools/|build-logic/|gradle/|kotlin-js-store/|settings\.gradle\.kts$|build\.gradle\.kts$|gradle\.properties$|gradlew(\.bat)?$|\.github/workflows/ci\.yml$|\.github/scripts/|\.github/tests/)'
 
 # The macOS lane is slow, so pull requests only run it for the MCU engine, its transformer and
-# upstream pin, this workflow and this script. Every push to main, preview and next still runs it
+# upstream pin, this workflow and this script. Every push to main and preview still runs it
 # for everything else.
 apple_paths='^(material-color-utilities/|tools/mcu-|gradle/mcu-upstream\.lock\.json$|\.github/workflows/ci\.yml$|\.github/scripts/detect-engine-changes$)'
 

@@ -24,12 +24,12 @@ class PlanUpstreamTest(unittest.TestCase):
         self.root = Path(self.temporary.name)
         self.origin = self.root / "origin.git"
         self.repo = self.root / "work"
-        subprocess.run([REAL_GIT, "init", "--quiet", "--bare", "-b", "next", str(self.origin)], check=True)
-        subprocess.run([REAL_GIT, "init", "--quiet", "-b", "next", str(self.repo)], check=True)
+        subprocess.run([REAL_GIT, "init", "--quiet", "--bare", "-b", "main", str(self.origin)], check=True)
+        subprocess.run([REAL_GIT, "init", "--quiet", "-b", "main", str(self.repo)], check=True)
         self.git("remote", "add", "origin", str(self.origin))
         self.write_lock(OLD_PIN)
         self.commit("chore: base", email="owner@example.invalid")
-        self.git("push", "--quiet", "origin", "next")
+        self.git("push", "--quiet", "origin", "main")
         self.bin = self.root / "bin"
         self.bin.mkdir()
         self.gh_log = self.root / "gh.jsonl"
@@ -69,20 +69,20 @@ class PlanUpstreamTest(unittest.TestCase):
                  "--allow-empty", "-m", message)
 
     def bump_branch(self, revision=NEW_PIN):
-        self.git("switch", "--quiet", "-C", "upstream/mcu", "origin/next")
+        self.git("switch", "--quiet", "-C", "upstream/mcu", "origin/main")
         self.write_lock(revision)
         self.commit(f"fix(mcu): update upstream pin to {revision[:7]}")
 
     def publish(self):
         self.git("push", "--quiet", "--force", "origin", "upstream/mcu")
-        self.git("switch", "--quiet", "next")
+        self.git("switch", "--quiet", "main")
         self.git("fetch", "--quiet", "origin")
 
-    def move_next_pin(self, revision):
-        self.git("switch", "--quiet", "next")
+    def move_main_pin(self, revision):
+        self.git("switch", "--quiet", "main")
         self.write_lock(revision)
         self.commit("fix(mcu): manual bump", email="owner@example.invalid")
-        self.git("push", "--quiet", "origin", "next")
+        self.git("push", "--quiet", "origin", "main")
         self.git("fetch", "--quiet", "origin")
 
     def plan(self, current=OLD_PIN, target=NEW_PIN, relevant=1, pull_requests=(), **overrides):
@@ -93,7 +93,7 @@ class PlanUpstreamTest(unittest.TestCase):
             "PATH": str(self.bin) + os.pathsep + os.environ["PATH"],
             "GH_LOG": str(self.gh_log),
             "PULL_REQUESTS": json.dumps(list(pull_requests)),
-            "BASE_BRANCH": "next",
+            "BASE_BRANCH": "main",
             "BUMP_BRANCH": "upstream/mcu",
             "BOT_EMAIL": BOT_EMAIL,
             "CURRENT": current,
@@ -134,7 +134,7 @@ class PlanUpstreamTest(unittest.TestCase):
         self.plan()
         call = json.loads(self.gh_log.read_text().splitlines()[0])
         self.assertEqual(["pr", "list"], call[:2])
-        for flag, value in [("--base", "next"), ("--head", "upstream/mcu"), ("--state", "all"),
+        for flag, value in [("--base", "main"), ("--head", "upstream/mcu"), ("--state", "all"),
                             ("--limit", "100")]:
             self.assertEqual(value, call[call.index(flag) + 1])
         fields = call[call.index("--json") + 1].split(",")
@@ -171,12 +171,12 @@ class PlanUpstreamTest(unittest.TestCase):
 
     def test_update_branch_merges_do_not_stop_the_rewrite(self):
         self.bump_branch()
-        self.git("switch", "--quiet", "next")
-        self.commit("feat: unrelated work on next", email="owner@example.invalid", path="README.md")
-        self.git("push", "--quiet", "origin", "next")
+        self.git("switch", "--quiet", "main")
+        self.commit("feat: unrelated work on main", email="owner@example.invalid", path="README.md")
+        self.git("push", "--quiet", "origin", "main")
         self.git("switch", "--quiet", "upstream/mcu")
         self.git("-c", "user.email=owner@example.invalid", "-c", "user.name=Owner", "merge", "--quiet",
-                 "--no-edit", "next")
+                 "--no-edit", "main")
         self.publish()
         self.assertPlan("update", target=NEWER_PIN, pull_requests=[self.open_pr()])
 
@@ -186,10 +186,10 @@ class PlanUpstreamTest(unittest.TestCase):
         self.publish()
         self.assertPlan("notify", target=NEWER_PIN, pull_requests=[self.open_pr()])
 
-    def test_manual_pin_change_on_next_refreshes_the_pull_request(self):
+    def test_manual_pin_change_on_main_refreshes_the_pull_request(self):
         self.bump_branch(NEWER_PIN)
         self.publish()
-        self.move_next_pin(NEW_PIN)
+        self.move_main_pin(NEW_PIN)
         self.assertPlan("update", current=NEW_PIN, target=NEWER_PIN, pull_requests=[self.open_pr(target=NEWER_PIN)])
 
     def test_pull_request_closed_by_the_maintainer_stays_closed_for_that_target(self):

@@ -59,7 +59,7 @@ class BumpUpstreamTest(unittest.TestCase):
         self.new_pin = self.run_git(self.upstream, "rev-parse", "HEAD")
 
         self.repo.mkdir()
-        self.run_git(self.repo, "init", "--quiet", "-b", "next")
+        self.run_git(self.repo, "init", "--quiet", "-b", "main")
         (self.repo / ".github/scripts").mkdir(parents=True)
         for name in ["bump-upstream", "readme-mcu-badge"]:
             shutil.copy2(SCRIPTS / name, self.repo / ".github/scripts" / name)

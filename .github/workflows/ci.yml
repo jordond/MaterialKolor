@@ -6,14 +6,12 @@ on:
     branches:
       - main
       - preview
-      - next
     paths-ignore:
       - '**.md'
       - 'builder/**'
   pull_request:
     branches:
       - main
-      - next
     types: [ opened, synchronize, reopened, ready_for_review ]
     paths-ignore:
       - 'art/**'
