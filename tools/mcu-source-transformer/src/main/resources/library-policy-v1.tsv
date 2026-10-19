@@ -29,7 +29,7 @@ quantize/QuantizerResult.kt	implementation-visibility=1,package=1
 quantize/QuantizerWsmeans.kt	array-sort=1,collection-import=1,implementation-visibility=1,package=1,remove-jvm-import=1,rng-alias=1,rng-import=1
 quantize/QuantizerWu.kt	collection-import=2,implementation-visibility=1,import-package=1,package=1
 scheme/SchemeCmf.kt	import-package=5,package=1,subclass-opt-in=2
-scheme/SchemeContent.kt	import-package=5,package=1,subclass-opt-in=2
+scheme/SchemeContent.kt	import-package=6,package=1,subclass-opt-in=2
 scheme/SchemeExpressive.kt	import-package=5,package=1,subclass-opt-in=2
 scheme/SchemeFidelity.kt	import-package=5,package=1,subclass-opt-in=2
 scheme/SchemeFruitSalad.kt	import-package=5,package=1,subclass-opt-in=2

@@ -6,7 +6,7 @@
 
 ![Maven Central](https://img.shields.io/maven-central/v/com.materialkolor/material-kolor-core)
 [![Kotlin](https://img.shields.io/badge/kotlin-v2.4.21-blue.svg?logo=kotlin)](http://kotlinlang.org)
-[![MCU](https://img.shields.io/badge/mcu-5b3618b-blue)](https://github.com/material-foundation/material-color-utilities/tree/5b3618b16fdc3825e21d5679bafd144662088ea1)
+[![MCU](https://img.shields.io/badge/mcu-dd62982-blue)](https://github.com/material-foundation/material-color-utilities/tree/dd62982dfdefdfc9232ce8d76e122fb1c6d188ae)
 [![Build](https://github.com/jordond/materialkolor/actions/workflows/ci.yml/badge.svg)](https://github.com/jordond/materialkolor/actions/workflows/ci.yml)
 [![License](https://img.shields.io/github/license/jordond/MaterialKolor)](https://opensource.org/license/mit/)
 
