@@ -38,6 +38,7 @@ class PublishUpstreamTest(unittest.TestCase):
         self.git(self.builder, "switch", "--quiet", "-c", "upstream/mcu")
         self.set_pin(self.builder, TARGET)
         self.commit(self.builder, "gradle/mcu-upstream.lock.json", "fix(mcu): update upstream pin to bbbbbbb")
+        self.commit(self.builder, "README.md", "docs: update the MCU badge to bbbbbbb")
         self.commit(self.builder, FIXTURE, "test(mcu): regenerate golden fixtures for upstream bbbbbbb")
         self.bump_head = self.git(self.builder, "rev-parse", "HEAD")
         self.bundle = self.root / "bump/bump.bundle"

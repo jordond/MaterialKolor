@@ -5,7 +5,7 @@ set -euo pipefail
 # that holds the write token, so it runs in a fresh checkout that has never run upstream code.
 
 SUBMODULE="tools/mcu-upstream/src/main"
-ALLOWED_PATHS="$SUBMODULE|gradle/mcu-upstream\.lock\.json|material-color-utilities/src/commonTest/kotlin/com/materialkolor/conformance/Upstream(Role|Quantizer)GoldenData\.kt"
+ALLOWED_PATHS="$SUBMODULE|README\.md|gradle/mcu-upstream\.lock\.json|material-color-utilities/src/commonTest/kotlin/com/materialkolor/conformance/Upstream(Role|Quantizer)GoldenData\.kt"
 
 usage() {
     echo "Usage: $0 [--bundle <file>] [--summary <file>]"
@@ -101,8 +101,9 @@ write_body() {
     echo "- A red \`checkKotlinAbi\` means the public API moved. Review it against docs/upstream-psi.md, then run \`./gradlew updateKotlinAbi\` on macOS and push to this branch. When upstream moves again the bot rewrites the branch and drops those dump commits, so push them again."
 }
 
-# The bundle was built by a job that ran upstream code, so only the pin, the lock and the golden
-# fixtures may change, on top of the checked-out base, with the Gitlink at the planned target.
+# The bundle was built by a job that ran upstream code, so only the pin, the lock, the README badge
+# and the golden fixtures may change, on top of the checked-out base, with the Gitlink at the
+# planned target.
 verify_bump() {
     local base="$1" changed unexpected gitlink
     if ! git merge-base --is-ancestor "$base" "origin/$BASE_BRANCH"; then
