@@ -1,4 +1,4 @@
-# Audited eligible files and exact rule application counts. Update only with source/policy review.
+# Audited eligible files and exact rule counts. Upstream bumps regenerate it, review every change.
 path	rules
 blend/Blend.kt	harmonize-hct=1,import-package=4,jvm-static-import=1,package=1
 contrast/Contrast.kt	import-package=1,jvm-static-import=1,package=1

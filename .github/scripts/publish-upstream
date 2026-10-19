@@ -5,7 +5,8 @@ set -euo pipefail
 # that holds the write token, so it runs in a fresh checkout that has never run upstream code.
 
 SUBMODULE="tools/mcu-upstream/src/main"
-ALLOWED_PATHS="$SUBMODULE|README\.md|gradle/mcu-upstream\.lock\.json|material-color-utilities/src/commonTest/kotlin/com/materialkolor/conformance/Upstream(Role|Quantizer)GoldenData\.kt"
+POLICY="tools/mcu-source-transformer/src/main/resources/library-policy-v1.tsv"
+ALLOWED_PATHS="$SUBMODULE|README\.md|tools/mcu-source-transformer/src/main/resources/library-policy-v1\.tsv|gradle/mcu-upstream\.lock\.json|material-color-utilities/src/commonTest/kotlin/com/materialkolor/conformance/Upstream(Role|Quantizer)GoldenData\.kt"
 
 usage() {
     echo "Usage: $0 [--bundle <file>] [--summary <file>]"
@@ -77,7 +78,7 @@ $marker"
 }
 
 write_body() {
-    local transform_status goldens_status
+    local base="$1" transform_status goldens_status policy_status
     if [[ "$TRANSFORM" == success ]]; then
         transform_status="The transformer adapted the new sources."
     else
@@ -88,6 +89,11 @@ write_body() {
     skipped) goldens_status="Golden fixtures were not regenerated because the transform failed. Regenerate them once it passes." ;;
     *) goldens_status="**Golden fixture regeneration failed**, see the [workflow run]($RUN_URL)." ;;
     esac
+    if git diff --quiet "$base" "refs/heads/$BUMP_BRANCH" -- "$POLICY"; then
+        policy_status="The rule policy is unchanged."
+    else
+        policy_status="**The rule policy changed** in its own commit. Check each new count against the upstream diff before merging."
+    fi
     echo "Moves the material-color-utilities pin from \`$CURRENT_SHORT\` to \`$TARGET_SHORT\`."
     echo
     echo "## Upstream Kotlin and license changes"
@@ -97,13 +103,14 @@ write_body() {
     echo "## Status"
     echo
     echo "- $transform_status"
+    echo "- $policy_status"
     echo "- $goldens_status"
     echo "- A red \`checkKotlinAbi\` means the public API moved. Review it against docs/upstream-psi.md, then run \`./gradlew updateKotlinAbi\` on macOS and push to this branch. When upstream moves again the bot rewrites the branch and drops those dump commits, so push them again."
 }
 
-# The bundle was built by a job that ran upstream code, so only the pin, the lock, the README badge
-# and the golden fixtures may change, on top of the checked-out base, with the Gitlink at the
-# planned target.
+# The bundle was built by a job that ran upstream code, so only the pin, the lock, the README badge,
+# the rule policy and the golden fixtures may change, on top of the checked-out base, with the
+# Gitlink at the planned target.
 verify_bump() {
     local base="$1" changed unexpected gitlink
     if ! git merge-base --is-ancestor "$base" "origin/$BASE_BRANCH"; then
@@ -134,14 +141,12 @@ update_pull_request() {
         usage >&2
         exit 1
     fi
-    local body authorization
-    body=$(mktemp)
-    write_body > "$body"
-
-    local base
+    local body authorization base
     base=$(git rev-parse HEAD)
     git fetch --quiet "$bundle" "+refs/heads/$BUMP_BRANCH:refs/heads/$BUMP_BRANCH"
     verify_bump "$base"
+    body=$(mktemp)
+    write_body "$base" > "$body"
     # The token travels as a header through the environment, never in a URL or on a command line.
     # The lease expects the branch exactly as planning saw it, or absent when it did not exist yet.
     authorization=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 | tr -d '\n')

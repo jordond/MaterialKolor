@@ -63,6 +63,21 @@ tasks.register<VerifyMcuParserAgreement>("verifyMcuParserAgreement") {
     alternateDirectory.set(generateMcuWithAlternateParser.flatMap { task -> task.outputDirectory })
 }
 
+tasks.register<JavaExec>("candidateMcuRulePolicy") {
+    group = "maintenance"
+    description = "Write a candidate rule policy under build for explicit upstream-update review."
+    dependsOn(rootProject.tasks.named("verifyMcuUpstream"))
+    classpath = mcuTransformer
+    mainClass.set("com.materialkolor.transformer.MainKt")
+    maxHeapSize = "512m"
+    args(
+        "policy",
+        upstreamSources.asFile.absolutePath,
+        sourceLock.asFile.absolutePath,
+        rootProject.layout.buildDirectory.file("mcu-rule-policy.candidate.tsv").get().asFile.absolutePath,
+    )
+}
+
 kotlin {
     // The generated sources keep upstream's implicit visibility.
     explicitApi = ExplicitApiMode.Disabled

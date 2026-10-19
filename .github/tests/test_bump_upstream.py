@@ -13,9 +13,10 @@ SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 REAL_GIT = shutil.which("git")
 FIXTURES = "material-color-utilities/src/commonTest/kotlin/com/materialkolor/conformance"
 SUBMODULE = "tools/mcu-upstream/src/main"
+POLICY = "tools/mcu-source-transformer/src/main/resources/library-policy-v1.tsv"
 
 # Stands in for the Gradle tasks the bump calls, logging each one and failing the one named by
-# FAIL_TASK.
+# FAIL_TASK. The candidate rule policy is POLICY_CANDIDATE when set, else the reviewed one.
 FAKE_GRADLEW = r'''#!/usr/bin/env python3
 import json, os, subprocess, sys
 task = sys.argv[-1]
@@ -29,6 +30,13 @@ if task == "candidateMcuUpstreamLock":
     os.makedirs("build", exist_ok=True)
     with open("build/mcu-upstream.lock.candidate.json", "w") as stream:
         json.dump({"upstreamRevision": revision}, stream, indent=4)
+elif task == ":material-color-utilities:candidateMcuRulePolicy":
+    os.makedirs("build", exist_ok=True)
+    policy = os.environ.get("POLICY_CANDIDATE")
+    if policy is None:
+        policy = open("tools/mcu-source-transformer/src/main/resources/library-policy-v1.tsv").read()
+    with open("build/mcu-rule-policy.candidate.tsv", "w") as stream:
+        stream.write(policy)
 elif task.startswith(":mcu-upstream:printMcu"):
     print(f"package com.materialkolor.conformance\n// {task} {revision}")
 '''
@@ -74,6 +82,8 @@ class BumpUpstreamTest(unittest.TestCase):
         (self.repo / "gradle/mcu-upstream.lock.json").write_text(
             json.dumps({"upstreamRevision": self.old_pin}, indent=2) + "\n")
         (self.repo / "README.md").write_text(f"# Kolor\n{badge(self.old_pin)}\n")
+        (self.repo / POLICY).parent.mkdir(parents=True)
+        (self.repo / POLICY).write_text("path\trules\nHct.kt\tpackage=1\n")
         fixtures = self.repo / FIXTURES
         fixtures.mkdir(parents=True)
         for name in ["UpstreamRoleGoldenData.kt", "UpstreamQuantizerGoldenData.kt"]:
@@ -142,9 +152,32 @@ class BumpUpstreamTest(unittest.TestCase):
         tasks = self.tasks()
         self.assertLess(tasks.index(":mcu-upstream:testClasses"), tasks.index(":mcu-upstream:printMcuRoleGoldens"))
         self.assertLess(tasks.index(":material-color-utilities:generateMcuSources"), tasks.index(":mcu-upstream:testClasses"))
+        self.assertLess(tasks.index(":material-color-utilities:candidateMcuRulePolicy"),
+                        tasks.index(":material-color-utilities:generateMcuSources"))
         heads = self.run_git(self.repo, "bundle", "list-heads", str(bundle))
         self.assertIn("refs/heads/upstream/mcu", heads)
         self.assertIn(self.run_git(self.repo, "rev-parse", "upstream/mcu"), heads)
+
+    def test_changed_rule_policy_gets_its_own_commit(self):
+        policy = "path\trules\nHct.kt\timport-package=1,package=1\n"
+        result, values, _ = self.bump(POLICY_CANDIDATE=policy)
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertEqual({"transform": "success", "goldens": "success"}, values)
+        self.assertEqual([
+            f"test(mcu): regenerate golden fixtures for upstream {self.new_pin[:7]}",
+            f"fix(mcu): update the rule policy for upstream {self.new_pin[:7]}",
+            f"fix(mcu): update upstream pin to {self.new_pin[:7]}",
+        ], self.bump_commits())
+        changed = self.run_git(self.repo, "diff-tree", "--no-commit-id", "--name-only", "-r", "upstream/mcu~1")
+        self.assertEqual(POLICY, changed)
+        self.assertEqual(policy, (self.repo / POLICY).read_text())
+
+    def test_failed_rule_policy_counts_as_a_failed_transform(self):
+        result, values, _ = self.bump(FAIL_TASK=":material-color-utilities:candidateMcuRulePolicy")
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertEqual({"transform": "failure", "goldens": "skipped"}, values)
+        self.assertEqual(1, len(self.bump_commits()))
+        self.assertNotIn(":material-color-utilities:generateMcuSources", self.tasks())
 
     def test_failed_transform_skips_the_fixtures(self):
         result, values, _ = self.bump(FAIL_TASK=":material-color-utilities:generateMcuSources")

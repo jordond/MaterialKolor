@@ -1,14 +1,15 @@
 #!/bin/bash
 set -euo pipefail
 
-# Moves the upstream pin on the bump branch, writes the lock and the README badge, checks the
-# transform and regenerates the golden fixtures, then bundles the new commits for the publishing
+# Moves the upstream pin on the bump branch, writes the lock and the README badge, proposes the rule
+# policy, checks the transform and regenerates the golden fixtures, then bundles the new commits for the publishing
 # job. It runs upstream code through Gradle, so it must never see a write token.
 
 CWD="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 ROOT="$(cd "$CWD"/../.. >/dev/null 2>&1 && pwd)"
 SUBMODULE="tools/mcu-upstream/src/main"
 FIXTURES="material-color-utilities/src/commonTest/kotlin/com/materialkolor/conformance"
+POLICY="tools/mcu-source-transformer/src/main/resources/library-policy-v1.tsv"
 
 usage() {
     echo "Usage: $0 --github-output <file> --bundle <file>"
@@ -81,11 +82,23 @@ regenerate_goldens() {
     git commit --quiet -m "test(mcu): regenerate golden fixtures for upstream $TARGET_SHORT" || return 1
 }
 
+# Rule counts follow the upstream sources, so the bump proposes the policy they need in its own
+# commit. The reviewer sees every count change in that diff instead of a failed transform.
+update_policy() {
+    ./gradlew :material-color-utilities:candidateMcuRulePolicy || return 1
+    if cmp -s build/mcu-rule-policy.candidate.tsv "$POLICY"; then
+        return 0
+    fi
+    cp build/mcu-rule-policy.candidate.tsv "$POLICY" || return 1
+    git add "$POLICY" || return 1
+    git commit --quiet -m "fix(mcu): update the rule policy for upstream $TARGET_SHORT" || return 1
+}
+
 # The golden generators compile against the adapted library, so they only run on a clean transform
 # and a transform failure is reported as the cause.
 transform=failure
 goldens=skipped
-if ./gradlew :material-color-utilities:generateMcuSources; then
+if update_policy && ./gradlew :material-color-utilities:generateMcuSources; then
     transform=success
     if regenerate_goldens; then
         goldens=success

@@ -48,7 +48,9 @@ recognize. Review it alongside the rule policy.
 `src/main/resources/library-policy-v1.tsv` independently records the eligible
 library files and exact counts of each rule. Updating upstream requires reviewing
 both the input lock and this rule policy. A newly locked source cannot silently
-introduce a new adaptation operation. Reference fixtures may use smaller reviewed
+introduce a new adaptation operation. `:material-color-utilities:candidateMcuRulePolicy`
+writes the policy the locked sources need to `build/mcu-rule-policy.candidate.tsv`,
+and the upstream bump commits it on its own so every count change shows in review. Reference fixtures may use smaller reviewed
 inventories because only namespace relocation runs in reference mode.
 
 Untouched source text and original Apache comments remain unchanged. CRLF inputs

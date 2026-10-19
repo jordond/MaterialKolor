@@ -46,16 +46,7 @@ internal fun generate(
 
     val lock = SourceLock.read(lockFile)
     val sources = lock.validate(input)
-    val results = Adapter().use { adapter ->
-        sources.mapValues { (name, source) ->
-            adapter.transform(
-                name,
-                source,
-                mode == Mode.Library,
-                mode,
-            )
-        }
-    }
+    val results = adapt(sources, mode)
 
     if (mode == Mode.Library) {
         verifyRulePolicy(results)
@@ -70,6 +61,34 @@ internal fun generate(
             "mode=${mode.name.lowercase()}, policy=$POLICY_VERSION, parser=$parserVersion",
     )
 }
+
+/**
+ * Writes the rule policy the locked sources need to [candidate], for review on an upstream bump.
+ */
+internal fun candidateRulePolicy(
+    input: File,
+    lockFile: File,
+    candidate: File,
+) {
+    val results = adapt(SourceLock.read(lockFile).validate(input), Mode.Library)
+    candidate.parentFile.mkdirs()
+    candidate.writeText(rulePolicy(results))
+}
+
+private fun adapt(
+    sources: Map<String, String>,
+    mode: Mode,
+): Map<String, Result> =
+    Adapter().use { adapter ->
+        sources.mapValues { (name, source) ->
+            adapter.transform(
+                name,
+                source,
+                mode == Mode.Library,
+                mode,
+            )
+        }
+    }
 
 /**
  * Stages a complete validated tree, then swaps it with rollback if either owned output fails.

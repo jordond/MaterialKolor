@@ -9,6 +9,9 @@ import com.materialkolor.transformer.lock.sha256
 private const val COMMENT = "#"
 private const val HEADER_PREFIX = "path\t"
 private const val MANIFEST_HEADER = "${HEADER_PREFIX}input_sha256\toutput_sha256\trules"
+private const val POLICY_PREAMBLE =
+    "$COMMENT Audited eligible files and exact rule counts. Upstream bumps regenerate it, review every change."
+private const val POLICY_HEADER = "${HEADER_PREFIX}rules"
 
 /**
  * Renders the reviewed, diffable TSV audit artifact for one generation.
@@ -45,6 +48,18 @@ internal fun manifest(
         rows.forEach { row -> append("$row\n") }
     }
 }
+
+/**
+ * Renders the rule policy that [verifyRulePolicy] would accept for [results].
+ *
+ * Generation never writes it. The upstream bump commits it on its own so every count change is reviewed in the diff.
+ */
+internal fun rulePolicy(results: Map<String, Result>): String =
+    buildString {
+        append("$POLICY_PREAMBLE\n")
+        append("$POLICY_HEADER\n")
+        results.toSortedMap().forEach { (path, result) -> append("$path\t${ruleCounts(result)}\n") }
+    }
 
 /**
  * Renders the per-file rule tally that both the manifest and the reviewed policy lock compare.

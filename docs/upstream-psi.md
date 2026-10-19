@@ -209,11 +209,20 @@ call, decide how to handle it.
 > [!IMPORTANT]
 > Don't loosen a drift check to make the build pass.
 
-Adopt the lock, regenerate, and review the generated diff:
+Adopt the lock, then propose the rule policy the new sources need:
 
 ```sh
 cp build/mcu-upstream.lock.candidate.json gradle/mcu-upstream.lock.json
 git add gradle/mcu-upstream.lock.json tools/mcu-upstream/src/main
+./gradlew :material-color-utilities:candidateMcuRulePolicy
+diff -u tools/mcu-source-transformer/src/main/resources/library-policy-v1.tsv build/mcu-rule-policy.candidate.tsv
+```
+
+Each changed count must match an upstream change, such as a new import. Adopt the candidate, then
+regenerate and review the generated diff:
+
+```sh
+cp build/mcu-rule-policy.candidate.tsv tools/mcu-source-transformer/src/main/resources/library-policy-v1.tsv
 ./gradlew verifyMcuUpstream :material-color-utilities:generateMcuSources
 git diff --no-index build/mcu-update/previous material-color-utilities/build/generated/mcu/commonMain
 diff -u build/mcu-update/previous-report.tsv material-color-utilities/build/reports/mcu-sources.tsv
@@ -284,11 +293,13 @@ they don't ping anyone in this repository.
 
 1. `preflight` fails fast if the token secret is missing.
 2. `prepare` runs upstream code through Gradle, so it has no write token. `plan-upstream` decides
-   what to do. `bump-upstream` moves the submodule, writes the lock, checks the transform and
-   regenerates the golden fixtures in a separate commit. The commits are passed on as a Git bundle.
+   what to do. `bump-upstream` moves the submodule, writes the lock and the README badge, commits
+   the rule policy the new sources need when it changed, checks the transform and regenerates the
+   golden fixtures in a separate commit. The commits are passed on as a Git bundle.
 3. `publish` starts from a fresh checkout of the base commit. `publish-upstream` rejects a bundle
-   that doesn't build on that base, touches anything other than the submodule, the lock and the two
-   fixture files, or pins a different revision than planned. It then pushes with a lease and
+   that doesn't build on that base, touches anything other than the submodule, the lock, the README,
+   the rule policy and the two fixture files, or pins a different revision than planned. The pull
+   request body says whether the rule policy changed. It then pushes with a lease and
    updates the pull request.
 
 The bot can't refresh the API dumps, because `updateKotlinAbi` needs macOS. A red `checkKotlinAbi`

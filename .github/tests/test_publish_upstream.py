@@ -15,6 +15,7 @@ TOKEN = "fixture-secret-token"
 TARGET = "b" * 40
 CURRENT = "a" * 40
 SUBMODULE = "tools/mcu-upstream/src/main"
+POLICY = "tools/mcu-source-transformer/src/main/resources/library-policy-v1.tsv"
 FIXTURE = "material-color-utilities/src/commonTest/kotlin/com/materialkolor/conformance/UpstreamRoleGoldenData.kt"
 
 
@@ -150,6 +151,7 @@ class PublishUpstreamTest(unittest.TestCase):
         self.assertIn("Kotlin update", body)
         self.assertIn("The transformer adapted the new sources.", body)
         self.assertIn("Golden fixtures were regenerated", body)
+        self.assertIn("The rule policy is unchanged.", body)
 
     def test_token_travels_only_as_a_header(self):
         self.publish("update")
@@ -198,6 +200,15 @@ class PublishUpstreamTest(unittest.TestCase):
         self.assertIn(message, result.stderr)
         self.assertEqual("", self.origin_head())
         self.assertEqual([], self.calls("gh"))
+
+    def test_rule_policy_change_is_published_and_flagged(self):
+        self.commit(self.builder, POLICY, "fix(mcu): update the rule policy for upstream bbbbbbb")
+        self.make_bundle()
+        result = self.publish("update")
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertEqual(self.git(self.builder, "rev-parse", "HEAD"), self.origin_head())
+        (create,) = self.calls("gh")
+        self.assertIn("**The rule policy changed**", create["body"])
 
     def test_bump_touching_other_files_is_rejected(self):
         self.commit(self.builder, ".github/scripts/publish-upstream", "chore: doctored script")

@@ -90,6 +90,20 @@ class GeneratorTest {
             }
         }
 
+    @Test
+    fun candidatePolicyReproducesTheReviewedPolicyForThePinnedSources() =
+        fixture { root ->
+            val project = File(requiredProperty("mcu.projectRoot"))
+            val candidate = File(root, "policy/candidate.tsv")
+            candidateRulePolicy(
+                File(project, "tools/mcu-upstream/src/main/kotlin"),
+                File(project, "gradle/mcu-upstream.lock.json"),
+                candidate,
+            )
+            val reviewed = checkNotNull(javaClass.getResource("/library-policy-v1.tsv")).readText()
+            assertEquals(reviewed, candidate.readText())
+        }
+
     private fun generate(
         root: File,
         lock: File,
