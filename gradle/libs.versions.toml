@@ -28,7 +28,7 @@ kotest = "6.2.6"
 ktlint = "1.8.0"
 spotless = "8.10.4"
 androidx-lifecycle = "2.11.0"
-compose-hot-reload = "1.2.0"
+compose-hot-reload = "1.3.0"
 kotlinx-coroutines = "1.11.0"
 kotlinx-collections = "0.5.2"
 kotlinx-serialization = "1.11.0"
@@ -36,12 +36,12 @@ kotlinxBrowser = "0.5.0"
 kmpalette = "4.0.0"
 kermit = "2.2.0"
 stateHolder = "3.1.0"
-buildKonfig = "0.23.0"
+buildKonfig = "0.24.1"
 
 # Builder v2
 builder-version = "2.0.0"
 materialKolorExport = "6.0.0"
-metro = "1.5.0"
+metro = "1.6.0"
 
 [libraries]
 gradlePlugin-android = { module = "com.android.tools.build:gradle", version.ref = "agp" }
