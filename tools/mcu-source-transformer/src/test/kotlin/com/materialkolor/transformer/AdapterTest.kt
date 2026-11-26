@@ -4,6 +4,7 @@ import com.materialkolor.transformer.edits.Result
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class AdapterTest {
@@ -48,6 +49,21 @@ class AdapterTest {
             adapt("package utils\nfun angle(Math: UserMath) = Math.toRadians(1.0)")
         }
         assertTrue(error.message.orEmpty().contains("shadowed"))
+    }
+
+    @Test fun jvmOnlyExceptionsThrowTheirCommonCounterpart() {
+        val result = adapt(
+            "package utils\nfun f(n: Int): Nothing = throw NegativeArraySizeException(\"negative\")",
+        ).text
+        assertTrue(result.contains("throw IllegalArgumentException(\"negative\")"))
+        assertFalse(result.contains("NegativeArraySizeException"))
+    }
+
+    @Test fun rejectsJvmOnlyExceptionsOutsideAConstructorCall() {
+        val error = assertFailsWith<IllegalArgumentException> {
+            adapt("package utils\nfun f(block: () -> Unit) = try { block() } catch (e: NegativeArraySizeException) {}")
+        }
+        assertTrue(error.message.orEmpty().contains("jvm-reference"))
     }
 
     @Test fun rejectsUnknownJvmDependency() {

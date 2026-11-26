@@ -29,6 +29,10 @@ internal object Mappings {
         "max" to MathMethod("kotlin.math", Rule.MathMax),
     )
 
+    val jvmExceptions = mapOf(
+        "NegativeArraySizeException" to "IllegalArgumentException",
+    )
+
     val jvmStaticAnnotations = setOf("JvmStatic", "kotlin.jvm.JvmStatic")
 
     const val SUPPRESSION_ANNOTATION = "SuppressWarnings"
@@ -36,7 +40,8 @@ internal object Mappings {
     val allowedAnnotations = setOf("Suppress", "ConsistentCopyVisibility")
 
     val forbiddenReferences =
-        setOf("java", "javax", "System", "Thread", "Class", "ClassLoader", "Runtime", "Math", "SuppressWarnings")
+        setOf("java", "javax", "System", "Thread", "Class", "ClassLoader", "Runtime", "Math", "SuppressWarnings") +
+            jvmExceptions.keys
 
     val sourcePackages = setOf(
         "blend",

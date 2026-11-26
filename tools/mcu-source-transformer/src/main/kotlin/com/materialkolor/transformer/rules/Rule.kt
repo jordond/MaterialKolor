@@ -23,6 +23,7 @@ internal enum class Rule(
     ImplementationVisibility("implementation-visibility"),
     ImportPackage("import-package"),
     InitialToneDefault("initial-tone-default"),
+    JvmException("jvm-exception"),
     JvmStaticImport("jvm-static-import"),
     ListSort("list-sort"),
     LuminanceMember("luminance-member"),

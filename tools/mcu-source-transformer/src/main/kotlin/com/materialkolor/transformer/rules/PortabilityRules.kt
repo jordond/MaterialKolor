@@ -72,7 +72,7 @@ internal fun portability(
         }
     }
 
-    val suspicious = aliases.keys + setOf("Math", "String")
+    val suspicious = aliases.keys + setOf("Math", "String") + Mappings.jvmExceptions.keys
     val shadows = file.nodes<KtNamedDeclaration>().filter { it.name in suspicious }
     require(shadows.isEmpty()) {
         "$name:${shadows.firstOrNull()?.textOffset}: symbol-binding: potentially shadowed platform symbols " +
@@ -101,6 +101,12 @@ internal fun portability(
             text = "\n\nimport kotlin.jvm.JvmStatic",
             rule = Rule.JvmStaticImport,
         )
+    }
+
+    for (call in file.nodes<KtCallExpression>()) {
+        val callee = call.calleeExpression as? KtNameReferenceExpression ?: continue
+        val mapped = Mappings.jvmExceptions[callee.getReferencedName()] ?: continue
+        edits.replace(callee, mapped, Rule.JvmException)
     }
 
     for (qualified in file.nodes<KtDotQualifiedExpression>()) {
