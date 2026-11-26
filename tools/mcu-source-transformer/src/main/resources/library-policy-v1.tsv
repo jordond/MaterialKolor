@@ -20,13 +20,14 @@ hct/HctSolver.kt	implementation-visibility=1,import-package=2,math-max=1,package
 hct/ViewingConditions.kt	import-package=2,jvm-static-import=1,member-visibility=1,package=1,poko-class=3
 palettes/CorePalettes.kt	package=1,poko-class=2
 palettes/TonalPalette.kt	hide-palette-cache=1,import-package=1,jvm-static-import=1,package=1,value-equality=1
+quantize/PixelCounts.kt	package=1
 quantize/PointProvider.kt	implementation-visibility=1,package=1
 quantize/PointProviderLab.kt	implementation-visibility=1,import-package=1,package=1
 quantize/Quantizer.kt	package=1
 quantize/QuantizerCelebi.kt	package=1
 quantize/QuantizerMap.kt	collection-import=1,implementation-visibility=1,package=1
 quantize/QuantizerResult.kt	implementation-visibility=1,package=1
-quantize/QuantizerWsmeans.kt	array-sort=1,collection-import=1,implementation-visibility=1,package=1,remove-jvm-import=1,rng-alias=1,rng-import=1
+quantize/QuantizerWsmeans.kt	collection-import=1,implementation-visibility=1,import-package=1,jvm-exception=1,package=1,rng-alias=1,rng-import=1
 quantize/QuantizerWu.kt	collection-import=2,implementation-visibility=1,import-package=1,package=1
 scheme/SchemeCmf.kt	import-package=5,package=1,subclass-opt-in=2
 scheme/SchemeContent.kt	import-package=6,package=1,subclass-opt-in=2
