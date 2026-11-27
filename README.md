@@ -45,7 +45,7 @@ Pick the artifact for your UI toolkit. Each adapter brings in `material-kolor-co
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.materialkolor:material-kolor-material3:6.0.0")
+            implementation("com.materialkolor:material-kolor-material3:6.1.0")
         }
     }
 }
@@ -55,7 +55,7 @@ Or with a version catalog:
 
 ```toml
 [versions]
-materialKolor = "6.0.0"
+materialKolor = "6.1.0"
 
 [libraries]
 materialKolor-material3 = { module = "com.materialkolor:material-kolor-material3", version.ref = "materialKolor" }
